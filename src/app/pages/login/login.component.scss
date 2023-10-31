@@ -1,0 +1,128 @@
+#bg-login {
+    @apply 
+    bg-cover
+    bg-center 
+    w-screen 
+    h-screen 
+    flex
+    ;
+
+    background-image: url(../../../assets/Vertex-bg-login.jpg);
+}
+
+#left-div-login{
+    @apply
+    w-1/2
+    h-screen
+    flex
+    items-center
+    ;
+}
+
+#h1NameVertex{
+    @apply
+    text-3xl
+    h-[95%]
+    ml-5
+    text-[#092C4C]
+    ;
+    font-family: 'Manrope', sans-serif;
+}
+
+#div-img-login{
+    @apply
+    w-2/3
+    h-screen
+    flex
+    items-center
+    justify-center
+    ;
+}
+
+#img-login{
+    @apply
+    w-80
+    h-80
+    ;
+}
+
+
+// ==========================================================================================================================================================================
+
+
+#right-div-login{
+    @apply
+    w-1/2
+    h-screen
+    flex
+    flex-col
+    gap-20
+    items-center
+    justify-center
+    ;
+}
+
+#h1-access-account{
+    @apply
+    text-3xl
+    text-[#f3f3f3];
+    font-family: 'Manrope', sans-serif;
+}
+
+.labels{
+    @apply
+    text-[#f3f3f3]
+    text-sm;
+    font-family: 'Inter', sans-serif;
+}
+
+.inputs{
+    @apply block 
+    h-10 
+    w-full 
+    border-0 
+    py-1.5 
+    px-3 
+    text-black 
+    shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 
+    focus:ring-2 focus:ring-inset focus:ring-[#092c4c] sm:text-sm sm:leading-6;
+    font-family: "Inter", sans-serif;
+}
+
+#a-forget-password{
+    @apply
+    text-[#f3f3f3]
+    text-sm hover:text-blue-600
+    ;
+    font-family: 'Inter', sans-serif;
+}
+
+#enter-btn{
+    @apply
+    flex
+    w-44
+    h-10 
+    items-center 
+    justify-center 
+    rounded-md 
+    bg-[#2E5DA6]
+    text-sm 
+    font-semibold 
+    leading-6 
+    text-white shadow-sm
+    hover:bg-[#224680] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#224680];
+}
+
+#p-haveNot-account{
+    @apply
+    text-center text-sm text-white
+}
+
+#a-goTo-register{
+    @apply
+    font-semibold 
+    leading-6 
+    cursor-pointer
+    text-[#2E5DA6] 
+    hover:text-blue-600;
+}

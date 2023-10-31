@@ -1,0 +1,56 @@
+<a 
+[style.backgroundColor]="background" 
+[style.color]="textColor" 
+[style.width]="width" 
+[style.height]="height"
+[style.border]="'2px solid ' + border"
+style="cursor: pointer; transition: 0.3s ease-in;"
+(click)="eventEmitter()"
+(mouseover)="changeColor()"
+(mouseout)="changeColor()"
+[ngClass]="checkInput == true && checkText == true ? 'icon-button' : 'just-button'"
+>
+    <div class="default-div" *ngIf="checkInput">
+        <i [class]="icon" class="pi text-xl"></i>
+    </div>
+    <div class="default-div" *ngIf="checkText">
+        <button>
+            {{title}}
+        </button>
+    </div>
+</a>
+
+<!-- BOTÃO COM ICON -->
+
+<!-- <app-button 
+[title]="'Adicionar Tarefa'"
+[icon]="'pi-plus'" 
+[width]="'200px'" 
+[height]="'50px'"
+[textColor]="secondColor"
+[background]="primaryColor"
+(clickEvent)="teste()"
+/> -->
+
+<!-- BOTÃO SEM ICON -->
+
+<!-- <app-button 
+[title]="'Adicionar Tarefa'"
+[width]="'200px'" 
+[height]="'50px'"
+[textColor]="secondColor"
+[background]="primaryColor"
+(clickEvent)="teste()"
+/> -->
+
+
+<!-- BOTÃO APENAS COM ICON -->
+
+<!-- <app-button  
+[icon]="'pi-tag'" 
+[width]="'50px'" 
+[height]="'50px'"
+[textColor]="secondColor" 
+[background]="primaryColor" 
+(clickEvent)="teste()"
+/> -->

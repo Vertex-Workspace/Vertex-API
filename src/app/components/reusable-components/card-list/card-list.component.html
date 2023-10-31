@@ -1,0 +1,25 @@
+<div class="list">
+    <ng-container *ngFor="let team of teams">
+        <div class="card">
+            <div class="image">
+                <img src="{{team.image}}">
+            </div>
+            <div class="informations">
+                <div class="informations-text">
+                    <p>{{team.name}}</p>
+                    <div>
+                        <p>Data de criação: {{team.date}}</p>
+                        <p>{{team.leader}}</p>
+                    </div>
+                </div>
+                <div class="informations-input">
+                    <span class="text-sm">Visualizar Informações</span>
+                    <div>
+                        <i class="pi pi-comment"></i>
+                        <i class="pi pi-trash"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+</div>

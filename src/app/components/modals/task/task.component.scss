@@ -1,0 +1,122 @@
+@import '../../../../variables';
+
+.button {
+    @apply bg-transparent text-zinc-500 rounded-md;
+    button {
+        @apply cursor-pointer hover:bg-zinc-200 p-2;
+    }
+}
+
+.buttons button, .submit button {
+    border: 1px solid $primaryColor;
+    background-color: $primaryColor;
+    color: $secondColor;
+    @apply p-2;
+}
+
+    .base {
+        @apply flex p-5 rounded-md;
+    }
+
+    .location {
+        @apply flex gap-5 divide-x-2;
+        p:last-child {
+            @apply px-5;
+        }
+    }
+
+    .side {
+        @apply w-1/2 h-full flex flex-col gap-16;
+        &:last-child {
+            @apply gap-8 mt-10;
+        }
+        &:first-child {
+            @apply pl-6;
+        }
+    }
+
+    .title {
+        @apply w-[80%] text-justify flex flex-col gap-6;
+        p:first-child {
+            @apply w-full;
+        }
+        h3 {
+            @apply text-3xl;
+        }
+    }
+
+    .button {
+        @apply w-full flex justify-end;
+    }
+
+    .down {
+        @apply h-1/2 flex items-end;
+    }
+
+    .buttons {
+        @apply flex gap-2;
+    }
+
+    .buttons button:hover, .submit button:hover {
+        background-color: $secondColor;
+        color: $primaryColor;
+        border: 1px solid $primaryColor;
+        transition: 0.1s;
+    }
+
+    .right {
+        @apply flex flex-col items-center;
+        nav ul {
+            @apply flex gap-5 text-zinc-500 m-1;
+            a {
+                @apply hover:bg-zinc-200 p-1 rounded-md;
+            }
+        }
+        div:first-child {
+            @apply w-full flex justify-end;
+        }
+    }
+
+    .submit {
+        @apply w-full flex justify-end;
+    }
+
+    @media (max-width: 1420px) {
+        .base {
+            @apply w-[933px] h-[566px] bg-white;
+        }
+
+        .buttons button, .submit button {
+            @apply w-[160px];
+        }
+
+        .title p {
+            @apply text-base;
+        }
+
+        .components {
+            @apply w-full h-[55%];
+        }
+    }
+
+    @media (min-width: 1421px) {
+        .title p {
+            @apply text-xl;
+        }
+
+        .base {
+            @apply w-[1300px] h-[750px] bg-white;
+        }
+
+        .buttons button, .submit button {
+            @apply w-[220px] h-[50px];
+        }
+
+        .components {
+            @apply w-full h-[65%];
+        }
+    }
+
+@media (max-width: 899px) {
+
+}

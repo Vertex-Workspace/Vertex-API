@@ -1,0 +1,26 @@
+@import '../variables';
+.main-screen{
+    @apply flex w-screen h-screen ;
+}
+
+
+.side-bar{
+    @apply flex w-[4%] h-full flex-col items-center;
+    background-color: $primaryColor;
+}
+
+
+.main-div{
+    @apply flex w-[96%] h-full flex-col;
+    background-color: $secondColor;
+}
+
+.main-header{
+    @apply flex w-full h-[8%] items-center justify-between;
+}
+.main-content{
+    @apply flex w-full h-[92%];
+}
+
+
+

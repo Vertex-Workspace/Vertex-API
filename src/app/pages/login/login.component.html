@@ -1,0 +1,55 @@
+<div id="bg-login">
+    <!-- Div da esquerda da tela - Responsável pelo h1 do Vertex e da logo -->
+    <div id="left-div-login">
+        <!-- H1 que contém o nome do aplicativo - Fica localizado no canto superior esquerdo. -->
+        <h1 id="h1NameVertex">VERTEX</h1>
+
+        <!-- Div responsável pela imagem da logo - Fica localizada no meio da div da esquerda -->
+        <div id="div-img-login">
+            <img id="img-login" src="../../../assets/vertex-logo.png" alt="">
+        </div>
+    </div>
+
+    <!-- Div da direita da tela - Responsável pelos inputs de usuario e senha -->
+    <div id="right-div-login">
+        <h1 id="h1-access-account">Acesse sua Conta</h1>
+
+        <form class="space-y-7 w-1/2" action="#" method="POST">
+
+            <!-- Div Input Endereço de Email -->
+            <div class="w-full">
+                <label class="labels">Endereço de E-mail</label>
+                <input class="inputs" name="email" type="email" autocomplete="email" required>
+            </div>
+
+
+            <!-- Div input de Senha -->
+            <div>
+                <label class="labels">Senha</label>
+                <div class=" flex justify-center">
+                    <input class="inputs" name="password" type="password" autocomplete="current-password" required>
+                </div>
+
+                <div class="text-sm flex justify-end">
+                    <a href="#" id="a-forget-password">Esqueceu sua senha?</a>
+                </div>
+            </div>
+
+            <!-- Div do botão de Enviar -->
+            <div class="flex justify-center">
+                <button id="enter-btn" type="submit">Entrar</button>
+            </div>
+
+
+            <!-- Texto Não possui conta -->
+            <p id="p-haveNot-account">
+                Não possui uma conta?
+                <br>
+                <a [routerLink]="['/register']" id="a-goTo-register">Clique aqui</a>
+                e cadastre-se agora!
+            </p>
+
+        </form>
+    </div>
+
+</div>

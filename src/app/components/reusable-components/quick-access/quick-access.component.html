@@ -1,0 +1,84 @@
+<section>
+    <div class="card-workspace">
+        <div>
+            <p>Meu espaço de trabalho</p>
+        </div>
+        <div>
+            <div class="grid-card-workspace">
+                <div>
+                    <div class="card-workspace-label">
+                        <i class="pi pi-th-large" style="font-size: 1rem"></i>
+                        <p>Kanban</p>
+                    </div>
+                </div>
+                <div>
+                    <div class="card-workspace-label">
+                        <i class="pi pi-calendar" style="font-size: 1rem"></i>
+                        <p>Calendário</p>
+                    </div>
+
+                </div>
+            </div>
+            <div class="grid-card-workspace">
+                <div class="div-grid-space-work">
+                    <div class="card-workspace-label">
+                        <i class="pi pi-list" style="font-size: 1rem"></i>
+                        <p>Linhas</p>
+                    </div>
+                </div>
+                <div>
+                    <div class="card-workspace-label">
+                        <i class="pi pi-chart-bar" style="font-size: 1rem"></i>
+                        <p>Mural</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="charts">
+        <div class="card-spaces">
+            <label>Seu Desempenho Pessoal</label>
+            <div class="card-chart-background">
+                <div class="card-chart">
+                    <p-chart type="pie" [data]="basicData" style="width:70%"></p-chart>
+                </div>
+            </div>
+        </div>
+        <div class="card-spaces">
+            <label>Tarefas em Cada Equipe</label>
+            <div class="card-chart-background">
+                <div class="card-chart">
+                    <p-chart type="pie" [data]="basicData" style="width:70%"></p-chart>
+                </div>
+            </div>
+            <a>Visualizar todos os gráficos</a>
+        </div>
+    </div>
+    <div class="recently-teams">
+        <h2>Equipes Recentes</h2>
+        <div class="div-recently-teams">
+            <div class="recently-teams-team">
+                <div class="recently-team-image"><img src="../../../assets/teste/teste.jpg" alt=""></div>
+                <div class="recently-team-info">
+                    <h2 class="recently-team-name">AKMO</h2>
+                    <p>11/10/2023</p>
+                </div>
+            </div>
+            <div class="recently-teams-team">
+                <div class="recently-team-image"><img src="../../../assets/teste/teste.jpg" alt=""></div>
+                <div class="recently-team-info">
+                    <h2 class="recently-team-name">AKMO</h2>
+                    <p>11/10/2023</p>
+                </div>
+            </div>
+            <div class="recently-teams-team">
+                <div class="recently-team-image"><img src="../../../assets/teste/teste.jpg" alt=""></div>
+                <div class="recently-team-info">
+                    <h2 class="recently-team-name">AKMO</h2>
+                    <p>11/10/2023</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

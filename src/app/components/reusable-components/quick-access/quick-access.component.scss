@@ -1,0 +1,114 @@
+@import '../../../../variables';
+
+section{
+    @apply flex w-full h-full items-end gap-6 flex-col;
+}
+
+
+//CARDS
+.card-workspace{
+    @apply flex w-2/3 h-[25%] bg-white flex-col items-center rounded-md shadow-md;
+    color: $primaryColor;
+    font-family: $titleFont;
+}
+.card-workspace > :first-child{
+    @apply flex w-full h-[30%] bg-white flex-col items-center justify-center text-xl;
+    
+    p{
+        @apply flex h-full items-center;
+        border-bottom: $borderBottom;
+    }
+}
+.card-workspace > :last-child{
+    @apply grid w-full h-[70%] bg-white flex-col items-center justify-center grid-cols-2;
+
+    .grid-card-workspace {
+        @apply flex flex-col w-full h-full items-center justify-evenly;
+    }
+    .grid-card-workspace > div {
+        @apply flex w-2/4 text-lg;
+
+        .card-workspace-label{
+            @apply flex w-full justify-between items-center;
+
+            i{
+                @apply flex w-[30%];
+            }
+            p{
+                @apply flex w-[70%];
+            }
+
+        }
+    }
+    .grid-card-workspace > div:hover {
+        cursor: pointer;
+        @apply transition-colors shadow-xl;
+    }
+}
+
+@media only screen and (min-width: 1200px) and (min-height: 700px){
+    //CHARTS
+    .charts{
+        @apply flex w-2/3 h-[35%] justify-between;
+    }
+}
+
+@media only screen and (max-width: 1200px) and (max-height: 700px){
+    //CHARTS
+    .charts{
+        @apply flex w-2/3 h-[40%] justify-between;
+    }
+}
+
+.card-spaces{
+    @apply flex w-[48%] h-full flex-col;
+
+    a{
+        @apply flex self-end pt-1;
+        color: $primaryColor;
+    }
+}
+
+.card-chart{
+    @apply flex w-full h-full bg-white rounded-md items-center justify-center;
+    border-top: 10px solid $primaryColor;
+}
+
+
+.recently-teams{
+    @apply flex w-2/3 h-[25.5%] justify-between items-center flex-col;
+
+    h2{
+        @apply flex w-full h-[10%] text-xl;
+        color: $primaryColor;
+    }
+    .div-recently-teams{
+        @apply flex w-full flex-row h-[80%] justify-between;
+        color: $primaryColor;
+    }
+
+    .recently-teams-team {
+        @apply flex w-[32%] h-full rounded-md flex-col;
+        cursor: pointer
+    }
+    .recently-team-image{
+        @apply flex w-full h-1/2  items-center rounded-md;
+
+        img{
+            @apply flex w-full h-full rounded-md;
+            object-fit: cover;
+        }
+    }
+    .recently-team-info{
+        @apply flex w-full h-1/2 bg-white rounded-md justify-between p-2 flex-col;
+        color: $primaryColor;
+
+        .recently-team-name{
+            @apply text-xl;
+        }
+
+        p{
+            @apply text-sm;
+        }
+    }
+}

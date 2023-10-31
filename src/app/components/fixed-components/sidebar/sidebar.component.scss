@@ -1,0 +1,35 @@
+@import '../../../../variables';
+
+.section-aside{
+    @apply flex h-full w-full justify-between items-center flex-col;
+}
+
+.start-mid-items{
+    @apply flex h-[60%] flex-col items-center;
+}
+
+.top-logo{
+    @apply flex h-[25%] flex-col justify-center;
+}
+
+.center-items{
+    @apply flex h-[75%] flex-col justify-evenly;
+}
+
+
+.footer-items{
+    @apply flex h-[30%] flex-col items-end justify-evenly;
+}
+ul > li {
+    @apply flex justify-center items-center;
+}
+
+.logo{
+    display: flex;
+    width: 75%;
+    height: auto;
+    cursor: pointer;
+}
+.div-logo{
+    @apply flex justify-center;
+}
