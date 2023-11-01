@@ -1,21 +1,23 @@
-package com.vertex.vertex.permission.model.entity;
-
+package com.vertex.vertex.project.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.awt.*;
-
 @Entity
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+@Data
+public class Project {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Lob
-    private Image image;
+    private String name;
+    private String description;
+    private String image;
+    @ManyToOne
+    private Team team;
+
 }
