@@ -1,5 +1,6 @@
 package com.vertex.vertex.project.model.entity;
 
+import com.vertex.vertex.team.model.entity.Team;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,5 +20,4 @@ public class Project {
     private String image;
     @ManyToOne
     private Team team;
-
 }
