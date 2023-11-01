@@ -1,21 +1,13 @@
-package com.vertex.vertex.user.model.entity;
+package com.vertex.vertex.user.model.DTO;
 
-
-import com.vertex.vertex.permission.model.entity.PermissionUser;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
-@Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class UserEditionDTO {
     private Long id;
     private String user;
     private String email;
@@ -25,6 +17,6 @@ public class User {
     private String image;
     private Boolean publicProfile;
     private Boolean showCharts;
-    @OneToMany(mappedBy = "user")
-    private List<PermissionUser> permissionUsers;
+//    @OneToMany(mappedBy = "user")
+//    private List<User> permissions;
 }
