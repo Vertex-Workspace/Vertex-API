@@ -1,10 +1,13 @@
 package com.vertex.vertex.project.model.entity;
 
+import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.team.model.entity.Team;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -20,4 +23,7 @@ public class Project {
     private String image;
     @ManyToOne
     private Team team;
+
+    @OneToMany(mappedBy = "project")
+    private List<Property> properties;
 }

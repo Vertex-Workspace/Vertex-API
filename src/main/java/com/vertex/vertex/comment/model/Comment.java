@@ -4,20 +4,22 @@ import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import javax.xml.crypto.Data;
+
+import java.sql.Date;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@lombok.Data
+@Data
 public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String comment;
-    private Data date;
+    private Date date;
     @ManyToOne
     private User user;
     @ManyToOne

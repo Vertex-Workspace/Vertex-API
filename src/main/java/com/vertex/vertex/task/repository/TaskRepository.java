@@ -11,6 +11,6 @@ import java.util.List;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
-    @Query("SELECT TaskProperty FROM Task JOIN TaskProperty ON Task.id = TaskProperty.task.id")
-    List<TaskProperty> find();
+//    @Query("SELECT TaskProperty FROM Task JOIN TaskProperty ON Task.id = TaskProperty.task.id")
+//    List<TaskProperty> find();
 }

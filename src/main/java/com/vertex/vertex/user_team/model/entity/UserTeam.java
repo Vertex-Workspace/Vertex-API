@@ -1,7 +1,5 @@
-package com.vertex.vertex.permission.model.entity;
+package com.vertex.vertex.user_team.model.entity;
 
-
-import com.vertex.vertex.permission.model.enums.TypePermissions;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.*;
@@ -9,20 +7,18 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
 @Data
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class PermissionUser {
+public class UserTeam {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Enumerated(value = EnumType.STRING)
-    private TypePermissions name;
-    @ManyToOne
+    @OneToOne
+    private Team team;
+    @OneToOne
     private User user;
 
-    @ManyToOne
-    private Team team;
+    private String userFunction;
 }

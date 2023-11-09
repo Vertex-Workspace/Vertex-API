@@ -1,5 +1,6 @@
 package com.vertex.vertex.team.model.entity;
 
+import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -26,12 +27,12 @@ public class Team {
 
     private Long creatorId;
 
-    @OneToMany
+    @OneToMany(mappedBy = "team")
     private List<Project> projects;
 
-    @ManyToMany
-    //user -> map
-    private List<User> members;
+//    @ManyToMany
+//    //user -> map
+//    private List<User> members;
 
 //    private Image image;
 
