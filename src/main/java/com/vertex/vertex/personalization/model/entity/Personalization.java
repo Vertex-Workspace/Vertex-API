@@ -15,13 +15,9 @@ public class Personalization {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(columnDefinition = "#092C4C", nullable = false)
     private String primaryColor;
-    @Column(columnDefinition = "#F3F3F3", nullable = false)
     private String secondColor;
-    @Column(columnDefinition = "12", nullable = false)
     private Integer fontSize;
-    @Column(columnDefinition = "Inter", nullable = false)
     private String fontFamily;
     private Boolean voiceCommand;
     private Boolean listeningText;

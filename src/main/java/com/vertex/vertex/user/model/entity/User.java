@@ -4,6 +4,7 @@ package com.vertex.vertex.user.model.entity;
 import com.vertex.vertex.permission.model.entity.PermissionUser;
 import com.vertex.vertex.personalization.model.entity.Personalization;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,7 +34,7 @@ public class User {
     private String image;
     private Boolean publicProfile;
     private Boolean showCharts;
-    @OneToOne(mappedBy = "")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.PERSIST)
     private Personalization personalization;
     @OneToMany(mappedBy = "user")
     private List<PermissionUser> permissionUsers;
