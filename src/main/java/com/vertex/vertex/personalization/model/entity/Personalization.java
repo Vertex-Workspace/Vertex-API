@@ -23,5 +23,4 @@ public class Personalization {
     private Boolean listeningText;
     @OneToOne
     private User user;
-
 }

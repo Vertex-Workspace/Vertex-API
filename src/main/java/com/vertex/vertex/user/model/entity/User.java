@@ -36,7 +36,5 @@ public class User {
     private Boolean showCharts;
     @OneToOne(mappedBy = "user", cascade = CascadeType.PERSIST)
     private Personalization personalization;
-    @OneToMany(mappedBy = "user")
-    private List<PermissionUser> permissionUsers;
 
 }
