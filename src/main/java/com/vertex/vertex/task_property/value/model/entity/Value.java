@@ -1,7 +1,5 @@
 package com.vertex.vertex.task_property.value.model.entity;
 
-import com.vertex.vertex.property_list.model.entity.PropertyList;
-import com.vertex.vertex.task_property.model.entity.Value;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,9 +9,12 @@ import lombok.NoArgsConstructor;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class ValueList extends Value{
+@Inheritance(strategy = InheritanceType.JOINED)
+public class Value {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @OneToOne
-    private PropertyList propertyList;
-
+    private com.vertex.vertex.task_property.model.entity.Value taskProperty;
 }

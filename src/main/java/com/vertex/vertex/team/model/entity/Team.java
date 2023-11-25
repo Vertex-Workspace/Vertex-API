@@ -2,8 +2,6 @@ package com.vertex.vertex.team.model.entity;
 
 import com.vertex.vertex.group.model.entity.Group;
 import com.vertex.vertex.project.model.entity.Project;
-import com.vertex.vertex.user.model.entity.User;
-import com.vertex.vertex.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

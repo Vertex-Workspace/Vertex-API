@@ -1,7 +1,7 @@
 package com.vertex.vertex.project.model.entity;
 
 import com.vertex.vertex.property.model.entity.Property;
-import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.model.entity.TaskProperty;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
@@ -33,7 +33,7 @@ public class Project {
     private UserTeam creator;
 
     @OneToMany(mappedBy = "project")
-    private List<Task> tasks;
+    private List<TaskProperty> tasks;
 
     @OneToOne
     private Project projectDependency;

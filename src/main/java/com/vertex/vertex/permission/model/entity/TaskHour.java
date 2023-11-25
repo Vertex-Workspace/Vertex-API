@@ -2,9 +2,7 @@ package com.vertex.vertex.permission.model.entity;
 
 
 import com.vertex.vertex.permission.model.enums.TypePermissions;
-import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.user.model.entity.User;
-import com.vertex.vertex.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PermissionUser {
+public class TaskHour {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,5 +21,5 @@ public class PermissionUser {
     private TypePermissions name;
 
     @ManyToOne
-    private UserTeam userTeam;
+    private User userTeam;
 }

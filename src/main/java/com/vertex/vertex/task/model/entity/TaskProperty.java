@@ -3,7 +3,6 @@ package com.vertex.vertex.task.model.entity;
 import com.vertex.vertex.comment.model.Comment;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.review.model.entity.Review;
-import com.vertex.vertex.task_property.model.entity.TaskProperty;
 import com.vertex.vertex.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -16,7 +15,7 @@ import java.util.List;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Task {
+public class TaskProperty {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -36,10 +35,10 @@ public class Task {
     private Project project;
 
     @OneToOne
-    private Task taskDependency;
+    private TaskProperty taskDependency;
 
     @OneToMany
-    private List<Task> subTasks;
+    private List<TaskProperty> subTasks;
 
     @OneToMany(mappedBy = "task")
     private List<Review> reviews;

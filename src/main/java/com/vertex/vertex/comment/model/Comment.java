@@ -1,6 +1,6 @@
 package com.vertex.vertex.comment.model;
 
-import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.model.entity.TaskProperty;
 import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,5 +23,5 @@ public class Comment {
     @ManyToOne
     private User user;
     @ManyToOne
-    private Task task;
+    private TaskProperty task;
 }

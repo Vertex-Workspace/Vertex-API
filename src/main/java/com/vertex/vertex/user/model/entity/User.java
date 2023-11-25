@@ -1,17 +1,12 @@
 package com.vertex.vertex.user.model.entity;
 
 
-import com.vertex.vertex.permission.model.entity.PermissionUser;
 import com.vertex.vertex.personalization.model.entity.Personalization;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Type;
-
-import java.util.List;
 
 @Entity
 @Data

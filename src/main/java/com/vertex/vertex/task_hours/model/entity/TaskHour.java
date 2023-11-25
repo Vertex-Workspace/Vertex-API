@@ -1,6 +1,6 @@
 package com.vertex.vertex.task_hours.model.entity;
 
-import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.model.entity.TaskProperty;
 import com.vertex.vertex.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -13,7 +13,7 @@ import java.sql.Date;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Task_Hour {
+public class TaskHour {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,7 +23,7 @@ public class Task_Hour {
     private Date finalDate;
 
     @OneToOne
-    private Task task;
+    private TaskProperty task;
 
     @OneToOne
     private UserTeam userTeam;
