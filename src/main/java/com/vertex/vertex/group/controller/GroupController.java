@@ -69,9 +69,9 @@ public class GroupController {
                         HttpStatus.OK);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(
-            @RequestParam Long id) {
+            @PathVariable Long id) {
         try {
             groupService.deleteById(id);
             return new ResponseEntity<>
