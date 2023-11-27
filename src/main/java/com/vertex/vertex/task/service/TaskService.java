@@ -7,6 +7,7 @@ import lombok.Data;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -19,7 +20,7 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    public Collection<Task> findAll() {
+    public List<Task> findAll() {
         return taskRepository.findAll();
     }
 

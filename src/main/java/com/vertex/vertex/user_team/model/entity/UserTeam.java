@@ -2,6 +2,7 @@ package com.vertex.vertex.user_team.model.entity;
 
 import com.vertex.vertex.group.model.entity.Group;
 import com.vertex.vertex.permission.model.entity.Permission;
+import com.vertex.vertex.task_hours.model.entity.TaskHour;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.*;
@@ -19,6 +20,7 @@ public class UserTeam {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @OneToOne
     private Team team;
     @OneToOne
@@ -31,5 +33,8 @@ public class UserTeam {
 
     @OneToMany
     private List<Group> groups;
+
+    @OneToOne
+    private TaskHour workingOnTask;
 
 }
