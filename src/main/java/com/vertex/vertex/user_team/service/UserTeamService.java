@@ -68,6 +68,10 @@ public class UserTeamService {
         }
     }
 
+    public boolean existsById(Long id) {
+        return userTeamRepository.existsById(id);
+    }
+
     public UserTeam copyProps(
             UserTeamDTO utdto) {
         UserTeam ut = new UserTeam();

@@ -1,5 +1,6 @@
 package com.vertex.vertex.user_team.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.group.model.entity.Group;
 import com.vertex.vertex.permission.model.entity.Permission;
 import com.vertex.vertex.team.model.entity.Team;
@@ -28,6 +29,7 @@ public class UserTeam {
     private Boolean creator;
 
     @OneToMany(mappedBy = "userTeam")
+    @JsonIgnore
     private List<Permission> permissionUser;
 
     @OneToMany
