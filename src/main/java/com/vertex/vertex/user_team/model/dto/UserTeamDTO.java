@@ -1,4 +1,4 @@
-package com.vertex.vertex.user_team.model.entity;
+package com.vertex.vertex.user_team.model.dto;
 
 import com.vertex.vertex.group.model.entity.Group;
 import com.vertex.vertex.permission.model.entity.Permission;
@@ -12,25 +12,14 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Data
-@Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserTeam {
+public class UserTeamDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @ManyToOne
-    private Team team;
-    @ManyToOne
-    private User user;
-
+    private Long teamId;
+    private Long userId;
     private Boolean creator;
-
-    @OneToMany(mappedBy = "userTeam")
     private List<Permission> permissionUser;
-
-    @OneToMany
     private List<Group> groups;
 
 }
