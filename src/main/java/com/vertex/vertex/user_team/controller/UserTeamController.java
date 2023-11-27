@@ -1,5 +1,6 @@
 package com.vertex.vertex.user_team.controller;
 
+import com.vertex.vertex.group.model.entity.Group;
 import com.vertex.vertex.user.model.DTO.UserEditionDTO;
 import com.vertex.vertex.user_team.model.dto.UserTeamDTO;
 import com.vertex.vertex.user_team.model.dto.UserTeamEditionDTO;
@@ -73,9 +74,17 @@ public class UserTeamController {
     }
 
     @DeleteMapping
-    public void deleteById(
+    public ResponseEntity<?> deleteById(
             @RequestParam Long id){
-        userTeamService.deleteById(id);
+        try {
+            userTeamService.deleteById(id);
+            return new ResponseEntity<>
+                    (HttpStatus.OK);
+
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>
+                    (HttpStatus.NOT_FOUND);
+        }
     }
 
 }
