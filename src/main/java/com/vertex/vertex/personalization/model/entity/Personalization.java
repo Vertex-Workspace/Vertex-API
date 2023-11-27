@@ -1,6 +1,7 @@
 package com.vertex.vertex.personalization.model.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Personalization {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,6 +23,7 @@ public class Personalization {
     private String fontFamily;
     private Boolean voiceCommand;
     private Boolean listeningText;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.PERSIST)
+    @JsonIgnore
     private User user;
 }

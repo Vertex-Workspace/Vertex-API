@@ -10,6 +10,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.NoSuchElementException;
 
 @Data
 @AllArgsConstructor
@@ -21,12 +22,18 @@ public class UserService {
     public User save(UserDTO userDTO){
         User user = new User();
         BeanUtils.copyProperties(userDTO,user);
+        if (user.getId()!= null && getUserRepository().existsById(user.getId())){
+            throw new RuntimeException("Usuário já existente no banco. Tente novamente");
+        }
         return userRepository.save(user);
     }
 
     public User save(UserEditionDTO userEditionDTO){
         User user = new User();
         BeanUtils.copyProperties(userEditionDTO,user);
+        if (user.getId()!= null && !getUserRepository().existsById(user.getId())){
+            throw new RuntimeException("Usuário não existe.");
+        }
         return userRepository.save(user);
     }
 
@@ -35,10 +42,17 @@ public class UserService {
     }
 
     public User findById(Long id){
+        if (!getUserRepository().existsById(id)){
+            throw new NoSuchElementException("Usuário não existe.");
+        }
         return userRepository.findById(id).get();
     }
 
     public void deleteById(Long id){
-        userRepository.deleteById(id);
+        if (!getUserRepository().existsById(id)){
+            throw new NoSuchElementException("Usuário não existe.");
+        }else {
+            userRepository.deleteById(id);
+        }
     }
 }

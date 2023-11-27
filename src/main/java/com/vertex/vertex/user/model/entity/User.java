@@ -1,6 +1,7 @@
 package com.vertex.vertex.user.model.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.personalization.model.entity.Personalization;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;

@@ -24,6 +24,7 @@ public class UserController {
         try{
             return new ResponseEntity<>(userService.save(userDTO),HttpStatus.CREATED);
         }catch (Exception e){
+            System.out.println(e.getMessage());
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
@@ -52,8 +53,13 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteById(@PathVariable Long id){
-        userService.deleteById(id);
+    public ResponseEntity<User> deleteById(@PathVariable Long id){
+        try {
+            userService.deleteById(id);
+        }catch (NoSuchElementException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return null;
     }
 
 }
