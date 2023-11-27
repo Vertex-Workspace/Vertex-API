@@ -24,17 +24,19 @@ public class UserController {
         try{
             return new ResponseEntity<>(userService.save(userDTO),HttpStatus.CREATED);
         }catch (Exception e){
-            System.out.println(e.getMessage());
+//            System.out.println(e.getMessage());
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 
     @PutMapping
-    public ResponseEntity<User> save(@RequestBody UserEditionDTO userEditionDTO){
+    public ResponseEntity<User> edit(@RequestBody UserEditionDTO userEditionDTO){
         try{
-            return new ResponseEntity<>(userService.save(userEditionDTO),HttpStatus.OK);
+            System.out.println(userEditionDTO);
+            return new ResponseEntity<>(userService.edit(userEditionDTO),HttpStatus.OK);
         }catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            System.out.println(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 

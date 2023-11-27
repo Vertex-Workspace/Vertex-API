@@ -23,7 +23,8 @@ public class Personalization {
     private String fontFamily;
     private Boolean voiceCommand;
     private Boolean listeningText;
-    @OneToOne(cascade = CascadeType.PERSIST)
+    @OneToOne
     @JsonIgnore
     private User user;
+
 }

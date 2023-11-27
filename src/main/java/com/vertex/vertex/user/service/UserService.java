@@ -28,7 +28,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User save(UserEditionDTO userEditionDTO){
+    public User edit(UserEditionDTO userEditionDTO){
         User user = new User();
         BeanUtils.copyProperties(userEditionDTO,user);
         if (user.getId()!= null && !getUserRepository().existsById(user.getId())){

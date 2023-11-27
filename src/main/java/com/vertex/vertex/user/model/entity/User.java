@@ -30,7 +30,7 @@ public class User {
     private String image;
     private Boolean publicProfile;
     private Boolean showCharts;
-    @OneToOne(mappedBy = "user", cascade = CascadeType.PERSIST)
+    @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
     private Personalization personalization;
 
 }

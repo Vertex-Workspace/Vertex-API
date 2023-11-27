@@ -22,6 +22,7 @@ public class PersonalizationController {
         try {
             return new ResponseEntity<>(personalizationService.put(personalization), HttpStatus.OK);
         } catch (Exception e) {
+//            System.out.println(e.getMessage());
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
