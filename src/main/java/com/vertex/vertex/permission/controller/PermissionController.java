@@ -1,6 +1,6 @@
 package com.vertex.vertex.permission.controller;
 
-import com.vertex.vertex.permission.model.entity.TaskHour;
+import com.vertex.vertex.permission.model.entity.Permission;
 import com.vertex.vertex.permission.service.PermissionService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,7 +16,7 @@ public class PermissionController {
     private PermissionService permissionService;
 
     @PostMapping
-    public ResponseEntity<TaskHour> create(@RequestBody TaskHour permissionUser){
+    public ResponseEntity<Permission> create(@RequestBody Permission permissionUser){
         try{
             return new ResponseEntity<>(permissionService.save(permissionUser), HttpStatus.CREATED);
         }catch (Exception e){
@@ -25,7 +25,7 @@ public class PermissionController {
     }
 
     @PutMapping
-    public ResponseEntity<TaskHour> edit(@RequestBody TaskHour permissionUser){
+    public ResponseEntity<Permission> edit(@RequestBody Permission permissionUser){
         try{
             return new ResponseEntity<>(permissionService.save(permissionUser), HttpStatus.CREATED);
         }catch (Exception e){
@@ -34,12 +34,12 @@ public class PermissionController {
     }
 
     @GetMapping
-    public ResponseEntity<Collection<TaskHour>> findAll(){
+    public ResponseEntity<Collection<Permission>> findAll(){
         return new ResponseEntity<>(permissionService.findAll(),HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TaskHour> findById(@PathVariable Long id){
+    public ResponseEntity<Permission> findById(@PathVariable Long id){
         try{
             return new ResponseEntity<>(permissionService.findById(id), HttpStatus.OK);
         }catch (Exception e){

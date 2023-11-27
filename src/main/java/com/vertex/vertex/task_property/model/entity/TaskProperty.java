@@ -1,6 +1,7 @@
 package com.vertex.vertex.task_property.model.entity;
 
 import com.vertex.vertex.property.model.entity.Property;
+import com.vertex.vertex.task.model.entity.Task;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,13 +11,13 @@ import lombok.NoArgsConstructor;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Value {
+public class TaskProperty {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
-    private com.vertex.vertex.task.model.entity.TaskProperty task;
+    private Task task;
 
     @OneToOne
     private Property property;

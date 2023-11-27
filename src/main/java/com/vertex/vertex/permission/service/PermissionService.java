@@ -1,6 +1,6 @@
 package com.vertex.vertex.permission.service;
 
-import com.vertex.vertex.permission.model.entity.TaskHour;
+import com.vertex.vertex.permission.model.entity.Permission;
 import com.vertex.vertex.permission.repository.PermissionRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,15 +15,15 @@ public class PermissionService {
 
     private final PermissionRepository permissionRepository;
 
-    public TaskHour save(TaskHour permissionUser) {
+    public Permission save(Permission permissionUser) {
         return permissionRepository.save(permissionUser);
     }
 
-    public Collection<TaskHour> findAll() {
+    public Collection<Permission> findAll() {
         return permissionRepository.findAll();
     }
 
-    public TaskHour findById(Long id) {
+    public Permission findById(Long id) {
         return permissionRepository.findById(id).get();
     }
 

@@ -1,7 +1,7 @@
 package com.vertex.vertex.user_team.model.entity;
 
 import com.vertex.vertex.group.model.entity.Group;
-import com.vertex.vertex.permission.model.entity.TaskHour;
+import com.vertex.vertex.permission.model.entity.Permission;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.*;
@@ -27,7 +27,7 @@ public class UserTeam {
     private Boolean creator;
 
     @OneToMany(mappedBy = "userTeam")
-    private List<TaskHour> permissionUser;
+    private List<Permission> permissionUser;
 
     @OneToMany
     private List<Group> groups;

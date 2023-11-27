@@ -15,7 +15,7 @@ import java.util.NoSuchElementException;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/user")
+@RequestMapping("/user-team")
 public class UserTeamController {
 
     private UserTeamService userTeamService;

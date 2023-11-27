@@ -1,5 +1,6 @@
 package com.vertex.vertex.task_property.value.model.entity;
 
+import com.vertex.vertex.task_property.model.entity.TaskProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,5 +17,5 @@ public class Value {
     private Long id;
 
     @OneToOne
-    private com.vertex.vertex.task_property.model.entity.Value taskProperty;
+    private TaskProperty taskProperty;
 }

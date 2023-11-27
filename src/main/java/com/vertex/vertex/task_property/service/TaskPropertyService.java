@@ -1,7 +1,7 @@
 package com.vertex.vertex.task_property.service;
 
 
-import com.vertex.vertex.task_property.model.entity.Value;
+import com.vertex.vertex.task_property.model.entity.TaskProperty;
 import com.vertex.vertex.task_property.repository.TaskPropertyRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,15 +15,15 @@ import java.util.Collection;
 public class TaskPropertyService {
     private final TaskPropertyRepository taskPropertyRepository;
 
-    public Value save(Value task) {
+    public TaskProperty save(TaskProperty task) {
         return taskPropertyRepository.save(task);
     }
 
-    public Collection<Value> findAll() {
+    public Collection<TaskProperty> findAll() {
         return taskPropertyRepository.findAll();
     }
 
-    public Value findById(Long id) {
+    public TaskProperty findById(Long id) {
         return taskPropertyRepository.findById(id).get();
     }
 

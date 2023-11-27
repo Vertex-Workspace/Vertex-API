@@ -1,6 +1,6 @@
 package com.vertex.vertex.task_hours.model.entity;
 
-import com.vertex.vertex.task.model.entity.TaskProperty;
+import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,7 +23,7 @@ public class TaskHour {
     private Date finalDate;
 
     @OneToOne
-    private TaskProperty task;
+    private Task task;
 
     @OneToOne
     private UserTeam userTeam;

@@ -1,6 +1,6 @@
 package com.vertex.vertex.task_property.value.model.entity;
 
-import com.vertex.vertex.task_property.model.entity.Value;
+import com.vertex.vertex.task_property.model.entity.TaskProperty;
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class ValueNumber extends Value{
+public class ValueNumber extends Value {
 
     private Long number;
 

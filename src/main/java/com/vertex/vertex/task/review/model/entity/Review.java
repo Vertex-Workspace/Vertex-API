@@ -1,6 +1,6 @@
 package com.vertex.vertex.task.review.model.entity;
 
-import com.vertex.vertex.task.model.entity.TaskProperty;
+import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -26,7 +26,7 @@ public class Review {
     private UserTeam reviewer;
 
     @ManyToOne
-    private TaskProperty task;
+    private Task task;
 
     private Double grade;
 

@@ -15,7 +15,7 @@ import java.util.List;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class TaskProperty {
+public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -35,10 +35,10 @@ public class TaskProperty {
     private Project project;
 
     @OneToOne
-    private TaskProperty taskDependency;
+    private Task taskDependency;
 
     @OneToMany
-    private List<TaskProperty> subTasks;
+    private List<Task> subTasks;
 
     @OneToMany(mappedBy = "task")
     private List<Review> reviews;
