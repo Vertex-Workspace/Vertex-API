@@ -45,9 +45,15 @@ public class ProjectController {
         }
     }
 
-    @DeleteMapping
-    public void deleteById(@RequestParam Long id){
-        projectService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Project> deleteById(@PathVariable Long id){
+        try {
+            projectService.deleteById(id);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+
+        }
     }
 
     @PutMapping

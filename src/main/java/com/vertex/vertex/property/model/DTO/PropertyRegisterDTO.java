@@ -2,18 +2,18 @@ package com.vertex.vertex.property.model.DTO;
 
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.ManyToOne;
+import com.vertex.vertex.property.model.entity.PropertyList;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class PropertyRegisterDTO {
+
     private PropertyKind kind;
 
     private String name;
@@ -23,4 +23,6 @@ public class PropertyRegisterDTO {
     private String defaultValue;
 
     private Project project;
+
+    private List<PropertyList> propertyLists;
 }

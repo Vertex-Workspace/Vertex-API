@@ -1,24 +1,23 @@
 package com.vertex.vertex.property.controller;
 
+import com.vertex.vertex.property.model.DTO.PropertyListDTO;
 import com.vertex.vertex.property.model.DTO.PropertyRegisterDTO;
 import com.vertex.vertex.property.model.entity.Property;
+import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.property.service.PropertyService;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/property")
+@AllArgsConstructor
 public class PropertyController {
+
     private final PropertyService propertyService;
-
-
-    public PropertyController(PropertyService propertyService) {
-        this.propertyService = propertyService;
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<Property> findById(@PathVariable Long id){
@@ -38,13 +37,24 @@ public class PropertyController {
     }
 
     @PostMapping
-    public ResponseEntity<Property> save(PropertyRegisterDTO propertyRegisterDTO){
+    public ResponseEntity<Property> save(@RequestBody PropertyRegisterDTO propertyRegisterDTO){
         try{
             return new ResponseEntity<>(propertyService.save(propertyRegisterDTO), HttpStatus.OK);
+
         } catch (Exception e){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
+
+    @PatchMapping
+    public ResponseEntity<Property> save(@RequestBody PropertyListDTO propertyListDTO){
+        try{
+            return new ResponseEntity<>(propertyService.save(propertyListDTO), HttpStatus.OK);
+        } catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Property> delete(@PathVariable Long id){
