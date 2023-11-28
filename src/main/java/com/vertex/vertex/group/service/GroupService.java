@@ -1,6 +1,7 @@
 package com.vertex.vertex.group.service;
 
 import com.vertex.vertex.group.model.dto.GroupDTO;
+import com.vertex.vertex.group.model.dto.GroupEditionDTO;
 import com.vertex.vertex.group.model.entity.Group;
 import com.vertex.vertex.group.repository.GroupRepository;
 import com.vertex.vertex.team.model.entity.Team;
@@ -27,16 +28,33 @@ public class GroupService {
         throw new EntityNotFoundException();
     }
 
+    public Group save(Long teamId, GroupEditionDTO dto) {
+        if (teamService.existsById(teamId)
+                && groupRepository.existsById(dto.getId())) {
+            Group gr = copyProps(dto, teamId);
+            return groupRepository.save(gr);
+        }
+        throw new EntityNotFoundException();
+    }
+
     public List<Group> findAll(){
         return groupRepository.findAll();
     }
 
     public Group findById(Long id){
-        return groupRepository.findById(id).get();
+        if (groupRepository.existsById(id)) {
+            return groupRepository.findById(id).get();
+        }
+        throw new EntityNotFoundException();
     }
 
-    public void deleteById(Long id){
-        groupRepository.deleteById(id);
+    public void deleteById(Long id) {
+        if (groupRepository.existsById(id)) {
+            groupRepository.deleteById(id);
+
+        } else {
+            throw new EntityNotFoundException();
+        }
     }
 
     public Group copyProps(

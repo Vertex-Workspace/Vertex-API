@@ -2,11 +2,15 @@ package com.vertex.vertex.team.controller;
 
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.service.TeamService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/team")
 @AllArgsConstructor
@@ -15,34 +19,61 @@ public class TeamController {
     private final TeamService teamService;
 
     @PostMapping
-    public Team save(
+    public ResponseEntity<Team> save(
             @RequestBody Team team) {
-        return teamService.save(team);
+            return new ResponseEntity<>
+                    (teamService.save(team),
+                            HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    public Team findById(
+    public ResponseEntity<Team> findById(
             @PathVariable Long id) {
-        return teamService.findById(id);
+        try {
+            return new ResponseEntity<>
+                    (teamService.findById(id),
+                            HttpStatus.OK);
+
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>
+                    (HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping
-    public List<Team> findAll() {
-        return teamService.findAll();
+    public ResponseEntity<List<Team>> findAll() {
+            return new ResponseEntity<>
+                    (teamService.findAll(),
+                            HttpStatus.OK);
+
     }
 
     @PutMapping
-    public Team update(
+    public ResponseEntity<Team> update(
             @RequestBody Team team) {
-        return teamService.save(team);
+        try {
+            return new ResponseEntity<>
+                    (teamService.update(team),
+                            HttpStatus.OK);
+
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>
+                    (HttpStatus.NOT_FOUND);
+        }
     }
 
-    @DeleteMapping
-    public void delete(
-            @RequestParam Long id) {
-//        return
-        teamService.deleteById(id);
-        //retorna httpresponse
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(
+            @PathVariable Long id) {
+        try {
+            teamService.deleteById(id);
+            return new ResponseEntity<>
+                    (HttpStatus.OK);
+
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>
+                    (HttpStatus.NOT_FOUND);
+        }
     }
 
 }

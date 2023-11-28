@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 
+@CrossOrigin
 @RestController
 @AllArgsConstructor
 @RequestMapping("/user-team")
@@ -69,9 +70,9 @@ public class UserTeamController {
         }
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteById(
-            @RequestParam Long id){
+            @PathVariable Long id){
         try {
             userTeamService.deleteById(id);
             return new ResponseEntity<>

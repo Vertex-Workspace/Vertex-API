@@ -1,6 +1,7 @@
 package com.vertex.vertex.permission.model.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.permission.model.enums.TypePermissions;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user_team.model.entity.UserTeam;
@@ -14,6 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Permission {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,4 +25,5 @@ public class Permission {
 
     @ManyToOne
     private UserTeam userTeam;
+
 }

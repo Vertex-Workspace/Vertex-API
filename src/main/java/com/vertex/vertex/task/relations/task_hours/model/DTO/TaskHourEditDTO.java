@@ -1,4 +1,4 @@
-package com.vertex.vertex.task_hours.model.DTO;
+package com.vertex.vertex.task.relations.task_hours.model.DTO;
 
 
 import jakarta.persistence.PreUpdate;

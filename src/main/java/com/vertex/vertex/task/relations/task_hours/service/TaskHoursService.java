@@ -1,13 +1,12 @@
-package com.vertex.vertex.task_hours.service;
+package com.vertex.vertex.task.relations.task_hours.service;
 
+import com.vertex.vertex.task.relations.task_hours.repository.TaskHoursRepository;
 import com.vertex.vertex.task.service.TaskService;
-import com.vertex.vertex.task_hours.model.DTO.TaskHourEditDTO;
-import com.vertex.vertex.task_hours.model.entity.TaskHour;
-import com.vertex.vertex.task_hours.repository.TaskHoursRepository;
+import com.vertex.vertex.task.relations.task_hours.model.DTO.TaskHourEditDTO;
+import com.vertex.vertex.task.relations.task_hours.model.entity.TaskHour;
 import com.vertex.vertex.user_team.service.UserTeamService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

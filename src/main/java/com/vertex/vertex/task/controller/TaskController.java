@@ -26,7 +26,7 @@ public class TaskController {
         }
     }
     @GetMapping
-    public ResponseEntity<List<Task>> findAll(){
+    public ResponseEntity<List<Task>> findAllByProject(){
         try{
             return new ResponseEntity<>(taskService.findAll(), HttpStatus.OK);
         } catch (Exception e){

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/group")
 @AllArgsConstructor
@@ -26,7 +27,7 @@ public class GroupController {
         try {
             return new ResponseEntity<>
                     (groupService.save(teamId, dto),
-                            HttpStatus.OK);
+                            HttpStatus.CREATED);
 
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>
@@ -69,9 +70,9 @@ public class GroupController {
                         HttpStatus.OK);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(
-            @RequestParam Long id) {
+            @PathVariable Long id) {
         try {
             groupService.deleteById(id);
             return new ResponseEntity<>

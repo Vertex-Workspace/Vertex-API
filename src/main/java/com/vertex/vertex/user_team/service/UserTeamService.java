@@ -62,8 +62,13 @@ public class UserTeamService {
     public void deleteById(Long id){
         if (userTeamRepository.existsById(id)) {
             userTeamRepository.deleteById(id);
+        } else {
+            throw new EntityNotFoundException();
         }
-        throw new EntityNotFoundException();
+    }
+
+    public boolean existsById(Long id) {
+        return userTeamRepository.existsById(id);
     }
 
     public UserTeam copyProps(

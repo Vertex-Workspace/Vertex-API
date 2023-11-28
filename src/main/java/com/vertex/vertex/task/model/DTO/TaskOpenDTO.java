@@ -2,9 +2,7 @@ package com.vertex.vertex.task.model.DTO;
 
 import com.vertex.vertex.comment.model.Comment;
 import com.vertex.vertex.task.model.entity.Task;
-import com.vertex.vertex.task.review.model.entity.Review;
 import com.vertex.vertex.user_team.model.entity.UserTeam;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

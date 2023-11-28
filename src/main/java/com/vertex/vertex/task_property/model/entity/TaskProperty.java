@@ -1,5 +1,6 @@
 package com.vertex.vertex.task_property.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.entity.Task;
 import jakarta.persistence.*;
@@ -16,10 +17,11 @@ public class TaskProperty {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @ManyToOne
+    @JsonIgnore
     private Task task;
 
-    @OneToOne
+    @ManyToOne
     private Property property;
 
     private String value;

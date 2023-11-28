@@ -1,6 +1,6 @@
-package com.vertex.vertex.task.review.repository;
+package com.vertex.vertex.task.relations.review.repository;
 
-import com.vertex.vertex.task.review.model.entity.Review;
+import com.vertex.vertex.task.relations.review.model.entity.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

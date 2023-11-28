@@ -1,4 +1,4 @@
-package com.vertex.vertex.task_hours.model.entity;
+package com.vertex.vertex.task.relations.task_hours.model.entity;
 
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.user_team.model.entity.UserTeam;
