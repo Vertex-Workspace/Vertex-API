@@ -1,5 +1,6 @@
 package com.vertex.vertex.property.controller;
 
+import com.vertex.vertex.property.model.DTO.PropertyListDTO;
 import com.vertex.vertex.property.model.DTO.PropertyRegisterDTO;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.service.PropertyService;
@@ -43,6 +44,16 @@ public class PropertyController {
     public ResponseEntity<Property> save(PropertyRegisterDTO propertyRegisterDTO){
         try{
             return new ResponseEntity<>(propertyService.save(propertyRegisterDTO), HttpStatus.OK);
+
+        } catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
+
+    @PatchMapping
+    public ResponseEntity<Property> save(@RequestBody PropertyListDTO propertyListDTO){
+        try{
+            return new ResponseEntity<>(propertyService.save(propertyListDTO), HttpStatus.OK);
         } catch (Exception e){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }

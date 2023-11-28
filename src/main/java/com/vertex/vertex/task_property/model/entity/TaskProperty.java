@@ -1,8 +1,8 @@
 package com.vertex.vertex.task_property.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task_property.value.model.entity.Value;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,11 +18,11 @@ public class TaskProperty {
     private Long id;
 
     @ManyToOne
-    @JsonIgnore
     private Task task;
 
     @ManyToOne
     private Property property;
 
-    private String value;
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "taskProperty")
+    private Value value;
 }

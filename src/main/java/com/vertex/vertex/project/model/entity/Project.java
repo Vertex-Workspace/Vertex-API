@@ -1,5 +1,6 @@
 package com.vertex.vertex.project.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property_list.model.entity.PropertyList;
 import com.vertex.vertex.task.model.entity.Task;
@@ -24,6 +25,7 @@ public class Project {
     private String name;
     private String description;
     private String image;
+
     @ManyToOne
     private Team team;
 

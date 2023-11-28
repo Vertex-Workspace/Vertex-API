@@ -1,5 +1,6 @@
 package com.vertex.vertex.property.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
 import com.vertex.vertex.property_list.model.entity.PropertyList;
@@ -15,6 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Property {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,6 +33,9 @@ public class Property {
     private String defaultValue;
 
     @ManyToOne
+    @JsonIgnore
     private Project project;
 
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<PropertyList> propertyLists;
 }
