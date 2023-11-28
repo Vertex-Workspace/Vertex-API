@@ -26,7 +26,7 @@ public class GroupController {
         try {
             return new ResponseEntity<>
                     (groupService.save(teamId, dto),
-                            HttpStatus.OK);
+                            HttpStatus.CREATED);
 
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>
