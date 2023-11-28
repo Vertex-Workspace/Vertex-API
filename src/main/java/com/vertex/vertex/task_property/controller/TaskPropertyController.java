@@ -1,7 +1,6 @@
 package com.vertex.vertex.task_property.controller;
 
-import com.vertex.vertex.property.model.entity.Property;
-import com.vertex.vertex.task_property.model.entity.TaskProperty;
+import com.vertex.vertex.task.model.entity.TaskProperty;
 import com.vertex.vertex.task_property.service.TaskPropertyService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;

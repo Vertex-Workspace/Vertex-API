@@ -1,4 +1,4 @@
-package com.vertex.vertex.task_property.value.model.entity;
+package com.vertex.vertex.task.value.model.entity;
 
 import com.vertex.vertex.property.model.entity.PropertyList;
 import jakarta.persistence.*;

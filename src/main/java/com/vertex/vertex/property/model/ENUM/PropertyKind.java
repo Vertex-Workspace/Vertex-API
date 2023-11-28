@@ -1,7 +1,6 @@
 package com.vertex.vertex.property.model.ENUM;
 
-import com.vertex.vertex.property.model.entity.PropertyList;
-import com.vertex.vertex.task_property.value.model.entity.*;
+import com.vertex.vertex.task.value.model.entity.*;
 
 public enum PropertyKind {
     TEXT() {
@@ -34,6 +33,37 @@ public enum PropertyKind {
             return new ValueFile();
         }
     };
+
+//    TEXT() {
+//        public Value getValue(Object object) {
+//            return new ValueText((String) object);
+//        }
+//    },
+//    DATE() {
+//        public Value getValue(Object object) {
+//            return new ValueDate((Date) object);
+//        }
+//    },
+//    LIST() {
+//        public Value getValue(Object object) {
+//            return new ValueList((PropertyList) object);
+//        }
+//    },
+//    STATUS() {
+//        public Value getValue(Object object) {
+//            return new ValueList((PropertyList) object);
+//        }
+//    },
+//    NUMBER() {
+//        public Value getValue(Object object) {
+//            return new ValueNumber((Long) object);
+//        }
+//    },
+//    LINK() {
+//        public Value getValue(Object object) {
+//            return new ValueFile((File) object);
+//        }
+//    };
 
     public abstract Value getValue();
 }

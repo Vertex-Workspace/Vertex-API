@@ -1,8 +1,8 @@
-package com.vertex.vertex.task_property.value.service;
+package com.vertex.vertex.task.value.service;
 
 
-import com.vertex.vertex.task_property.value.model.entity.Value;
-import com.vertex.vertex.task_property.value.repository.ValueRepository;
+import com.vertex.vertex.task.value.model.entity.Value;
+import com.vertex.vertex.task.value.repository.ValueRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

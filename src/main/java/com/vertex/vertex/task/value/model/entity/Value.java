@@ -1,6 +1,6 @@
-package com.vertex.vertex.task_property.value.model.entity;
+package com.vertex.vertex.task.value.model.entity;
 
-import com.vertex.vertex.task_property.model.entity.TaskProperty;
+import com.vertex.vertex.task.model.entity.TaskProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

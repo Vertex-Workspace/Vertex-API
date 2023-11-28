@@ -1,6 +1,6 @@
-package com.vertex.vertex.task_property.value.repository;
+package com.vertex.vertex.task.value.repository;
 
-import com.vertex.vertex.task_property.value.model.entity.Value;
+import com.vertex.vertex.task.value.model.entity.Value;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
