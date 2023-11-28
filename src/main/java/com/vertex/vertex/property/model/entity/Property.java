@@ -3,7 +3,6 @@ package com.vertex.vertex.property.model.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
-import com.vertex.vertex.property_list.model.entity.PropertyList;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -44,7 +44,7 @@ public class Task {
     @OneToMany(mappedBy = "task")
     private List<Review> reviews;
 
-    @OneToMany(mappedBy = "task")
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
     private List<TaskProperty> taskProperties;
 
 }

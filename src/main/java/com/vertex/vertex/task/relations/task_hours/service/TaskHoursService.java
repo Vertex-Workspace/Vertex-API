@@ -56,6 +56,7 @@ public class TaskHoursService {
             userTeamService.findById(taskHourEditDTO.getUserTeam());
             taskService.findById(taskHourEditDTO.getTask());
 
+            //It understands that I'm editing
             TaskHour taskHour =
                     taskHoursRepository.
                             findByUserTeam_IdAndTask_IdAndFinalDateNull
