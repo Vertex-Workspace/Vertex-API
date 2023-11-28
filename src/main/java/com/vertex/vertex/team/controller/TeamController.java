@@ -20,15 +20,9 @@ public class TeamController {
     @PostMapping
     public ResponseEntity<Team> save(
             @RequestBody Team team) {
-        try {
             return new ResponseEntity<>
                     (teamService.save(team),
                             HttpStatus.CREATED);
-
-        } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>
-                    (HttpStatus.CONFLICT);
-        }
     }
 
     @GetMapping("/{id}")
