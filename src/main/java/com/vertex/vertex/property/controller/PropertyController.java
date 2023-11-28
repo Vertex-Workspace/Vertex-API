@@ -10,9 +10,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/property")
 public class PropertyController {
+
     private final PropertyService propertyService;
 
 

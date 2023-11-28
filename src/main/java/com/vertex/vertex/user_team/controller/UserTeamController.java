@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+@CrossOrigin
 @RestController
 @AllArgsConstructor
 @RequestMapping("/user-team")
