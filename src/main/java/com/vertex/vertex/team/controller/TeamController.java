@@ -6,14 +6,13 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/team")
 @AllArgsConstructor
 public class TeamController {
 
-    private TeamService teamService;
+    private final TeamService teamService;
 
     @PostMapping
     public Team save(
@@ -22,7 +21,7 @@ public class TeamController {
     }
 
     @GetMapping("/{id}")
-    public Optional<Team> findById(
+    public Team findById(
             @PathVariable Long id) {
         return teamService.findById(id);
     }

@@ -14,4 +14,9 @@ public interface TaskHoursRepository extends JpaRepository<TaskHour, Long> {
 
     List<TaskHour> findAllByTask_Id(Long taskId);
 
+    //Boolean to verify if there is a final date open
+    Boolean existsTaskHourByFinalDateNullAndUserTeam_IdAndTask_Id(Long userTeamId, Long taskId);
+
+    TaskHour findByUserTeam_IdAndTask_IdAndFinalDateNull(Long userTeamId, Long taskId);
+
 }

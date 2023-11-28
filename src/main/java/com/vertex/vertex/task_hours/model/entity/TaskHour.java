@@ -19,7 +19,6 @@ public class TaskHour {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
     private Date initialDate;
 
     private Date finalDate;

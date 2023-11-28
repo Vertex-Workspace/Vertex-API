@@ -1,5 +1,6 @@
 package com.vertex.vertex.task_hours.controller;
 
+import com.vertex.vertex.task_hours.model.DTO.TaskHourEditDTO;
 import com.vertex.vertex.task_hours.model.entity.TaskHour;
 import com.vertex.vertex.task_hours.service.TaskHoursService;
 import lombok.AllArgsConstructor;
@@ -41,10 +42,10 @@ public class TaskHoursController {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
-    @PutMapping
-    public ResponseEntity<HttpStatus> update(@RequestBody TaskHour taskHour){
+    @PatchMapping
+    public ResponseEntity<HttpStatus> update(@RequestBody TaskHourEditDTO taskHourEditDTO){
         try{
-            taskHoursService.save(taskHour);
+            taskHoursService.save(taskHourEditDTO);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e){
             return new ResponseEntity<>(HttpStatus.CONFLICT);

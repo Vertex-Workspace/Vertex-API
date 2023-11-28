@@ -12,14 +12,14 @@ import java.util.Optional;
 @AllArgsConstructor
 public class TeamService {
 
-    private TeamRepository teamRepository;
+    private final TeamRepository teamRepository;
 
     public Team save(Team team) {
         return teamRepository.save(team);
     }
 
-    public Optional<Team> findById(Long id) {
-        return teamRepository.findById(id);
+    public Team findById(Long id) {
+        return teamRepository.findById(id).get();
     }
 
     public List<Team> findAll() {
@@ -29,6 +29,10 @@ public class TeamService {
     //Retornar httpresponse
     public void deleteById(Long id) {
         teamRepository.deleteById(id);
+    }
+
+    public boolean existsById(Long id) {
+        return teamRepository.existsById(id);
     }
 
 }
