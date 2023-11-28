@@ -1,4 +1,4 @@
-package com.vertex.vertex.task.review.model.entity;
+package com.vertex.vertex.task.relations.review.model.entity;
 
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.user_team.model.entity.UserTeam;

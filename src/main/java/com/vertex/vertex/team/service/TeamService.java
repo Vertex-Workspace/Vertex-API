@@ -2,6 +2,7 @@ package com.vertex.vertex.team.service;
 
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.repository.TeamRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,23 +13,39 @@ import java.util.Optional;
 @AllArgsConstructor
 public class TeamService {
 
-    private TeamRepository teamRepository;
+    private final TeamRepository teamRepository;
 
     public Team save(Team team) {
         return teamRepository.save(team);
     }
 
-    public Optional<Team> findById(Long id) {
-        return teamRepository.findById(id);
+    public Team update(Team team) {
+        if (teamRepository.existsById(team.getId())) {
+            return teamRepository.save(team);
+        }
+        throw new EntityNotFoundException();
+    }
+
+    public Team findById(Long id) {
+        if (teamRepository.existsById(id)) {
+            return teamRepository.findById(id).get();
+        }
+        throw new EntityNotFoundException();
     }
 
     public List<Team> findAll() {
         return teamRepository.findAll();
     }
 
-    //Retornar httpresponse
     public void deleteById(Long id) {
-        teamRepository.deleteById(id);
+        if (teamRepository.existsById(id)) {
+            teamRepository.deleteById(id);
+        }
+        throw new EntityNotFoundException();
+    }
+
+    public boolean existsById(Long id) {
+        return teamRepository.existsById(id);
     }
 
 }

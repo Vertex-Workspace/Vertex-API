@@ -2,7 +2,8 @@ package com.vertex.vertex.task.model.entity;
 
 import com.vertex.vertex.comment.model.Comment;
 import com.vertex.vertex.project.model.entity.Project;
-import com.vertex.vertex.task.review.model.entity.Review;
+import com.vertex.vertex.task.relations.review.model.entity.Review;
+import com.vertex.vertex.task_property.model.entity.TaskProperty;
 import com.vertex.vertex.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -42,5 +43,8 @@ public class Task {
 
     @OneToMany(mappedBy = "task")
     private List<Review> reviews;
+
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    private List<TaskProperty> taskProperties;
 
 }

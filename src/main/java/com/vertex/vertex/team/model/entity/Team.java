@@ -1,5 +1,6 @@
 package com.vertex.vertex.team.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.group.model.entity.Group;
 import com.vertex.vertex.project.model.entity.Project;
 import jakarta.persistence.*;
@@ -25,10 +26,12 @@ public class Team {
     private String description;
     private Date creationDate;
 
-    @OneToMany(mappedBy = "team")
+    @OneToMany(mappedBy = "team",
+            fetch = FetchType.EAGER)
     private List<Project> projects;
 
     @OneToMany(mappedBy = "team")
+    @JsonIgnore
     private List<Group> groups;
 
 //    private Image image;
