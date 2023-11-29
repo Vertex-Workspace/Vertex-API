@@ -3,6 +3,9 @@ package com.vertex.vertex.user.controller;
 import com.vertex.vertex.user.model.DTO.UserDTO;
 import com.vertex.vertex.user.model.DTO.UserEditionDTO;
 import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user.model.exception.EmailAlreadyExistsException;
+import com.vertex.vertex.user.model.exception.InvalidPasswordException;
+import com.vertex.vertex.user.model.exception.UnsafePasswordException;
 import com.vertex.vertex.user.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,8 +27,8 @@ public class UserController {
     public ResponseEntity<?> save(@RequestBody UserDTO userDTO){
         try{
             return new ResponseEntity<>(userService.save(userDTO),HttpStatus.CREATED);
-        }catch (Exception e){
-            return new ResponseEntity<>(new RuntimeException("E-mail inválido!").getMessage(), HttpStatus.CONFLICT);
+        } catch (EmailAlreadyExistsException | InvalidPasswordException | UnsafePasswordException e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
