@@ -1,4 +1,4 @@
-package com.vertex.vertex.user_team.model.DTO;
+package com.vertex.vertex.user_team.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

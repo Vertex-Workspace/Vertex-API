@@ -4,8 +4,8 @@ import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.service.UserService;
-import com.vertex.vertex.user_team.model.DTO.UserTeamDTO;
-import com.vertex.vertex.user_team.model.DTO.UserTeamEditionDTO;
+import com.vertex.vertex.user_team.model.dto.UserTeamDTO;
+import com.vertex.vertex.user_team.model.dto.UserTeamEditionDTO;
 import com.vertex.vertex.user_team.model.entity.UserTeam;
 import com.vertex.vertex.user_team.repository.UserTeamRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -37,8 +37,8 @@ public class UserTeamService {
 
     public UserTeam save(UserTeamEditionDTO utdto) {
 
-        if (teamService.existsById(utdto.getTeamId())
-                && userService.existsById(utdto.getUserId())) {
+        if (teamService.existsById(utdto.getId())
+                && userService.existsById(utdto.getId())) {
             return userTeamRepository.save(copyProps(utdto));
         }
         throw new EntityNotFoundException();

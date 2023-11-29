@@ -1,4 +1,4 @@
-package com.vertex.vertex.user_team.model.DTO;
+package com.vertex.vertex.user_team.model.dto;
 
 import com.vertex.vertex.group.model.entity.Group;
 import com.vertex.vertex.permission.model.entity.Permission;

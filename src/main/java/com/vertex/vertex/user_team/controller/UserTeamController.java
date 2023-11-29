@@ -1,7 +1,7 @@
 package com.vertex.vertex.user_team.controller;
 
-import com.vertex.vertex.user_team.model.DTO.UserTeamDTO;
-import com.vertex.vertex.user_team.model.DTO.UserTeamEditionDTO;
+import com.vertex.vertex.user_team.model.dto.UserTeamDTO;
+import com.vertex.vertex.user_team.model.dto.UserTeamEditionDTO;
 import com.vertex.vertex.user_team.model.entity.UserTeam;
 import com.vertex.vertex.user_team.service.UserTeamService;
 import jakarta.persistence.EntityNotFoundException;
