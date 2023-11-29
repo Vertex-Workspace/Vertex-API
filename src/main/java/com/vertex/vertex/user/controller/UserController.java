@@ -32,7 +32,7 @@ public class UserController {
     @PutMapping
     public ResponseEntity<User> edit(@RequestBody UserEditionDTO userEditionDTO){
         try{
-            System.out.println(userEditionDTO);
+//            System.out.println(userEditionDTO);
             return new ResponseEntity<>(userService.edit(userEditionDTO),HttpStatus.OK);
         }catch (Exception e){
             System.out.println(e.getMessage());
@@ -48,7 +48,7 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<User> findById(@PathVariable Long id){
         try{
-            return new ResponseEntity<>(userService.findById(id),HttpStatus.OK);
+            return new ResponseEntity<>(userService.findById(id),HttpStatus.FOUND);
         }catch (NoSuchElementException e){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -58,10 +58,10 @@ public class UserController {
     public ResponseEntity<User> deleteById(@PathVariable Long id){
         try {
             userService.deleteById(id);
+            return new ResponseEntity<>(HttpStatus.OK);
         }catch (NoSuchElementException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return null;
     }
 
 }

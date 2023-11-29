@@ -24,10 +24,10 @@ public class UserService {
         User user = new User();
         BeanUtils.copyProperties(userDTO, user);
 
-        boolean securePassword = Pattern
-                .compile("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$")
-                .matcher(user.getPassword())
-                .find();
+        boolean securePassword =
+                Pattern.compile("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$")
+                        .matcher(user.getPassword())
+                        .find();
 
         if (user.getId() != null && getUserRepository().existsById(user.getId())) {
             throw new RuntimeException("Usuário já existente no banco. Tente novamente");
@@ -37,7 +37,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User edit(UserEditionDTO userEditionDTO) {
+    public User edit(UserEditionDTO userEditionDTO) throws Exception {
         User user = new User();
         BeanUtils.copyProperties(userEditionDTO, user);
         if (user.getId() != null && !getUserRepository().existsById(user.getId())) {
@@ -47,8 +47,15 @@ public class UserService {
 
         if (userEmailWithNoEdition != null && user.getEmail().equals(userEmailWithNoEdition.getEmail())) {
             user.setEmail(userEmailWithNoEdition.getEmail());
-            if (userRepository.findByEmail(userEmailWithNoEdition.getEmail()) != null) {
-                throw new RuntimeException("Já existe um usuário com esse email no sistema.");
+
+            User userFind = userRepository.findByEmail(userEmailWithNoEdition.getEmail());
+
+            System.out.println(user);
+            System.out.println(userFind);
+
+            if (userFind != null && user.getEmail().equals(userFind.getEmail())
+                    && !user.getId().equals(userFind.getId())) {
+                throw new Exception("Já existe um usuário com esse email no sistema.");
             }
         }
 

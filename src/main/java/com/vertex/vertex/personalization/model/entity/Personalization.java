@@ -24,6 +24,7 @@ public class Personalization {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @OneToOne(cascade = CascadeType.ALL)
     private PrimaryColor primaryColor;
 
@@ -39,7 +40,6 @@ public class Personalization {
     private Boolean voiceCommand;
     private Boolean listeningText;
     @OneToOne
-    @JsonIgnore
     private User user;
 
 }

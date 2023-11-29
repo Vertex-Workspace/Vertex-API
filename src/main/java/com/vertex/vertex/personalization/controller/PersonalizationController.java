@@ -17,20 +17,20 @@ import java.util.NoSuchElementException;
 public class PersonalizationController {
     private final PersonalizationService personalizationService;
 
-    @PutMapping
-    public ResponseEntity<Personalization> put(@RequestBody Personalization personalization) {
-        try {
-            return new ResponseEntity<>(personalizationService.put(personalization), HttpStatus.OK);
-        } catch (Exception e) {
-//            System.out.println(e.getMessage());
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-    }
-
-    @PostMapping
-    public ResponseEntity<Personalization> save(@RequestBody Personalization personalization) {
-        return new ResponseEntity<>(personalizationService.save(personalization), HttpStatus.OK);
-    }
+//    @PutMapping
+//    public ResponseEntity<Personalization> put(@RequestBody Personalization personalization) {
+//        try {
+//            return new ResponseEntity<>(personalizationService.put(personalization), HttpStatus.OK);
+//        } catch (Exception e) {
+////            System.out.println(e.getMessage());
+//            return new ResponseEntity<>(HttpStatus.CONFLICT);
+//        }
+//    }
+//
+//    @PostMapping
+//    public ResponseEntity<Personalization> save(@RequestBody Personalization personalization) {
+//        return new ResponseEntity<>(personalizationService.save(personalization), HttpStatus.OK);
+//    }
 
     @GetMapping("/{id}")
     public ResponseEntity<Personalization> findById(@PathVariable Long id) {

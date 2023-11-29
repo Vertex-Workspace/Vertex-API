@@ -16,16 +16,16 @@ public class PersonalizationService {
 
     private final PersonalizationRepository personalizationRepository;
 
-    public Personalization save(Personalization personalization) {
-        return personalizationRepository.save(personalization);
-    }
-
-    public Personalization put(Personalization personalization) {
-        if (personalization.getId()!= null && !personalizationRepository.existsById(personalization.getId())) {
-            throw new RuntimeException("A personalização não existe.");
-        }
-        return personalizationRepository.save(personalization);
-    }
+//    public Personalization save(Personalization personalization) {
+//        return personalizationRepository.save(personalization);
+//    }
+//
+//    public Personalization put(Personalization personalization) {
+//        if (personalization.getId()!= null && !personalizationRepository.existsById(personalization.getId())) {
+//            throw new RuntimeException("A personalização não existe.");
+//        }
+//        return personalizationRepository.save(personalization);
+//    }
 
     public List<Personalization> findAll() {
         return personalizationRepository.findAll();
