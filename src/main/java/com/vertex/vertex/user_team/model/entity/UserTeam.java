@@ -29,8 +29,6 @@ public class UserTeam {
     @ManyToOne
     private User user;
 
-    private Boolean creator;
-
     @OneToMany(mappedBy = "userTeam")
     @JsonIgnore
     private List<Permission> permissionUser;

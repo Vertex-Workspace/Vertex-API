@@ -3,6 +3,7 @@ package com.vertex.vertex.team.model.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.group.model.entity.Group;
 import com.vertex.vertex.project.model.entity.Project;
+import com.vertex.vertex.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,7 +24,12 @@ public class Team {
 
     @Column(nullable = false)
     private String name;
+
+    @OneToOne
+    private UserTeam creator;
+
     private String description;
+
     private Date creationDate;
 
     @OneToMany(mappedBy = "team",
