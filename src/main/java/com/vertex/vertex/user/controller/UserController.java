@@ -24,7 +24,7 @@ public class UserController {
         try{
             return new ResponseEntity<>(userService.save(userDTO),HttpStatus.CREATED);
         }catch (Exception e){
-//            System.out.println(e.getMessage());
+            System.out.println(e.getMessage());
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
