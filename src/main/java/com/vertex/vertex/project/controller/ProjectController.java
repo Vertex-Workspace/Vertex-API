@@ -19,10 +19,10 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-    @PostMapping
-    public ResponseEntity<Project> save(@RequestBody ProjectDTO projectDTO){
+    @PostMapping("/{teamId}")
+    public ResponseEntity<Project> save(@RequestBody ProjectDTO projectDTO , @PathVariable Long teamId){
         try {
-            return new ResponseEntity<>(projectService.save(projectDTO), HttpStatus.CREATED);
+            return new ResponseEntity<>(projectService.save(projectDTO, teamId), HttpStatus.CREATED);
         }catch(Exception e){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
@@ -47,6 +47,7 @@ public class ProjectController {
     }
 
     @DeleteMapping("/{id}")
+<<<<<<< HEAD
     public ResponseEntity<Project> deleteById(@PathVariable Long id){
         try {
             projectService.deleteById(id);
@@ -55,6 +56,10 @@ public class ProjectController {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
 
         }
+=======
+    public void deleteById(@PathVariable Long id){
+        projectService.deleteById(id);
+>>>>>>> 26523a993084336bb4fcc3889d3cc3e2fbd27026
     }
 
     @PutMapping

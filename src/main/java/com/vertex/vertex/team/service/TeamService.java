@@ -40,7 +40,11 @@ public class TeamService {
     public void deleteById(Long id) {
         if (teamRepository.existsById(id)) {
             teamRepository.deleteById(id);
+<<<<<<< HEAD
         } else{
+=======
+        } else {
+>>>>>>> 26523a993084336bb4fcc3889d3cc3e2fbd27026
             throw new EntityNotFoundException();
         }
     }

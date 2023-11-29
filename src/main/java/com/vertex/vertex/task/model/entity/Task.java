@@ -29,7 +29,7 @@ public class Task {
 
     private String description;
 
-    @OneToMany(mappedBy = "task")
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
     private List<Comment> comments;
 
     @ManyToOne
@@ -41,7 +41,7 @@ public class Task {
     @OneToMany
     private List<Task> subTasks;
 
-    @OneToMany(mappedBy = "task")
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
     private List<Review> reviews;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
