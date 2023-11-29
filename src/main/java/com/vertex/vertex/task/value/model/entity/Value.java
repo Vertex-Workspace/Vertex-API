@@ -19,7 +19,8 @@ public abstract class Value{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    private TaskProperty taskProperty;
+    public abstract Object getValue();
+    public abstract void setValue(Object object);
+
 
 }

@@ -15,4 +15,8 @@ public class ValueList extends Value {
     @OneToOne
     private PropertyList value;
 
+    @Override
+    public void setValue(Object object) {
+        this.value = (PropertyList) object;
+    }
 }

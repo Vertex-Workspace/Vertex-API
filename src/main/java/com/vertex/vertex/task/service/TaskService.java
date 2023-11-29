@@ -27,16 +27,9 @@ public class TaskService {
     private final PropertyService propertyService;
 
     public Task save(TaskCreateDTO taskCreateDTO) {
-//        System.out.println(task);
+        System.out.println("entrou");
         Task task = new Task();
         BeanUtils.copyProperties(taskCreateDTO, task);
-
-        for (TaskProperty taskProperty : task.getTaskProperties()) {
-            Property property = propertyService.findById(taskProperty.getProperty().getId());
-            Value value = property.getKind().getValue();
-            BeanUtils.copyProperties(taskCreateDTO, value);
-            taskProperty.setValue(value);
-        }
         return taskRepository.save(task);
     }
 
