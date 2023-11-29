@@ -21,11 +21,11 @@ public class UserController {
     private UserService userService;
 
     @PostMapping
-    public ResponseEntity<User> save(@RequestBody UserDTO userDTO){
+    public ResponseEntity<?> save(@RequestBody UserDTO userDTO){
         try{
             return new ResponseEntity<>(userService.save(userDTO),HttpStatus.CREATED);
         }catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(new RuntimeException("E-mail inválido!").getMessage(), HttpStatus.CONFLICT);
         }
     }
 
