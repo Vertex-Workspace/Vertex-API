@@ -3,6 +3,10 @@ package com.vertex.vertex.user.service;
 import com.vertex.vertex.user.model.DTO.UserDTO;
 import com.vertex.vertex.user.model.DTO.UserEditionDTO;
 import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user.model.exception.EmailAlreadyExistsException;
+import com.vertex.vertex.user.model.exception.InvalidPasswordException;
+import com.vertex.vertex.user.model.exception.UnsafePasswordException;
+import com.vertex.vertex.user.model.exception.UserNotFoundException;
 import com.vertex.vertex.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,11 +33,29 @@ public class UserService {
                         .matcher(user.getPassword())
                         .find();
 
-        if (user.getId() != null && getUserRepository().existsById(user.getId())) {
-            throw new RuntimeException("Usuário já existente no banco. Tente novamente");
-        } else if (user.getPassword() != null && !securePassword) {
-            throw new RuntimeException("Senha Insegura!!! Insira outra senha com base nos nossos requisitos.");
+        if (user.getPassword() != null && !securePassword) {
+            throw new UnsafePasswordException();
         }
+
+        if (!userDTO.getPassword().equals(userDTO.getPasswordConf())) {
+            throw new InvalidPasswordException();
+        }
+
+        User userEmailWithNoEdition = userRepository.findByEmail(user.getEmail());
+
+        if (userEmailWithNoEdition != null && user.getEmail().equals(userEmailWithNoEdition.getEmail())) {
+            user.setEmail(userEmailWithNoEdition.getEmail());
+
+            User userFind = userRepository.findByEmail(userEmailWithNoEdition.getEmail());
+
+            System.out.println(user);
+            System.out.println(userFind);
+
+            if (userFind != null && user.getEmail().equals(userFind.getEmail())) {
+                throw new EmailAlreadyExistsException();
+            }
+        }
+
         return userRepository.save(user);
     }
 
@@ -55,7 +77,7 @@ public class UserService {
 
             if (userFind != null && user.getEmail().equals(userFind.getEmail())
                     && !user.getId().equals(userFind.getId())) {
-                throw new Exception("Já existe um usuário com esse email no sistema.");
+                throw new EmailAlreadyExistsException();
             }
         }
 
@@ -68,14 +90,14 @@ public class UserService {
 
     public User findById(Long id) {
         if (!getUserRepository().existsById(id)) {
-            throw new NoSuchElementException("Usuário não existe.");
+            throw new UserNotFoundException();
         }
         return userRepository.findById(id).get();
     }
 
     public void deleteById(Long id) {
         if (!getUserRepository().existsById(id)) {
-            throw new NoSuchElementException("Usuário não existe.");
+            throw new UserNotFoundException();
         } else {
             userRepository.deleteById(id);
         }
