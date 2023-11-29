@@ -30,11 +30,13 @@ public class UserController {
     }
 
     @PutMapping
-    public ResponseEntity<User> save(@RequestBody UserEditionDTO userEditionDTO){
+    public ResponseEntity<User> edit(@RequestBody UserEditionDTO userEditionDTO){
         try{
-            return new ResponseEntity<>(userService.save(userEditionDTO),HttpStatus.OK);
+//            System.out.println(userEditionDTO);
+            return new ResponseEntity<>(userService.edit(userEditionDTO),HttpStatus.OK);
         }catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            System.out.println(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 
@@ -46,15 +48,20 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<User> findById(@PathVariable Long id){
         try{
-            return new ResponseEntity<>(userService.findById(id),HttpStatus.OK);
+            return new ResponseEntity<>(userService.findById(id),HttpStatus.FOUND);
         }catch (NoSuchElementException e){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @DeleteMapping("/{id}")
-    public void deleteById(@PathVariable Long id){
-        userService.deleteById(id);
+    public ResponseEntity<User> deleteById(@PathVariable Long id){
+        try {
+            userService.deleteById(id);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch (NoSuchElementException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
 }
