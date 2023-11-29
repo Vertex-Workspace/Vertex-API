@@ -17,11 +17,9 @@ public class TaskProperty {
     private Long id;
 
     @ManyToOne
-    private Task task;
-
-    @ManyToOne
     private Property property;
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "taskProperty")
     private Value value;
+
 }

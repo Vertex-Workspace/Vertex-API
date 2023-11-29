@@ -2,8 +2,11 @@ package com.vertex.vertex.property.model.ENUM;
 
 import com.vertex.vertex.task.value.model.entity.*;
 
-public enum PropertyKind {
-    TEXT() {
+import java.util.Optional;
+
+public enum PropertyKind  {
+
+    TEXT(){
         public Value getValue() {
             return new ValueText();
         }
@@ -34,6 +37,7 @@ public enum PropertyKind {
         }
     };
 
+//
 //    TEXT() {
 //        public Value getValue(Object object) {
 //            return new ValueText((String) object);

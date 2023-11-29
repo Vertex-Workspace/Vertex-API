@@ -13,6 +13,6 @@ import java.io.File;
 @NoArgsConstructor
 public class ValueFile extends Value {
 
-    private File file;
+    private File value;
 
 }

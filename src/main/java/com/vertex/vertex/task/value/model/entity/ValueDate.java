@@ -13,6 +13,6 @@ import java.util.Date;
 @NoArgsConstructor
 public class ValueDate extends Value {
 
-    private Date date;
+    private Date value;
 
 }

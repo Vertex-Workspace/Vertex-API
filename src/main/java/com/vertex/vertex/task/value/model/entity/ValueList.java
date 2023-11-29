@@ -13,6 +13,6 @@ import lombok.NoArgsConstructor;
 public class ValueList extends Value {
 
     @OneToOne
-    private PropertyList propertyList;
+    private PropertyList value;
 
 }

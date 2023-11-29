@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class ValueText extends Value {
 
 
-    private String text;
+    private String value;
 
 }

@@ -16,14 +16,14 @@ public class TaskPropertyController {
 
     private final TaskPropertyService taskPropertyService;
 
-    @PostMapping
-    public ResponseEntity<TaskProperty> save(@RequestBody TaskProperty taskProperty){
-        try{
-            return new ResponseEntity<>(taskPropertyService.save(taskProperty), HttpStatus.CREATED);
-        }catch(Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-    }
+//    @PostMapping
+//    public ResponseEntity<TaskProperty> save(@RequestBody TaskProperty taskProperty){
+//        try{
+//            return new ResponseEntity<>(taskPropertyService.save(taskProperty), HttpStatus.CREATED);
+//        }catch(Exception e){
+//            return new ResponseEntity<>(HttpStatus.CONFLICT);
+//        }
+//    }
 
     @GetMapping
     public ResponseEntity<List<TaskProperty>> findAll(){
