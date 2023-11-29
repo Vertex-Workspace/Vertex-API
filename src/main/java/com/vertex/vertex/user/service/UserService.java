@@ -80,4 +80,9 @@ public class UserService {
             userRepository.deleteById(id);
         }
     }
+
+    public boolean existsById(Long id) {
+        return userRepository.existsById(id);
+    }
+
 }

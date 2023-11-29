@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+@CrossOrigin
 @RestController
 @AllArgsConstructor
 @RequestMapping("/personalization")
 public class PersonalizationController {
+
     private final PersonalizationService personalizationService;
 
 //    @PutMapping
