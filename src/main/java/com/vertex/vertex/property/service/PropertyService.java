@@ -1,5 +1,6 @@
 package com.vertex.vertex.property.service;
 
+import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.property.model.DTO.PropertyListDTO;
 import com.vertex.vertex.property.model.DTO.PropertyRegisterDTO;
 import com.vertex.vertex.property.model.entity.Property;
