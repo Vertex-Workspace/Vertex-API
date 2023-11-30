@@ -4,7 +4,6 @@ import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.DTO.TaskPropertyDTO;
 import com.vertex.vertex.task.model.entity.Task;
-import com.vertex.vertex.task.model.entity.TaskProperty;
 import com.vertex.vertex.task.service.TaskService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
