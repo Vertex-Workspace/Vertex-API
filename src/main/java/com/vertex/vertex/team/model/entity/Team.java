@@ -5,6 +5,8 @@ import com.vertex.vertex.group.model.entity.Group;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,10 +24,12 @@ public class Team {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @NotNull
+    @NotEmpty
     private String name;
 
     @OneToOne
+    @NotNull
     private UserTeam creator;
 
     private String description;
@@ -36,7 +40,7 @@ public class Team {
             fetch = FetchType.EAGER)
     private List<Project> projects;
 
-    @OneToMany(mappedBy = "team")
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Group> groups;
 
@@ -44,6 +48,5 @@ public class Team {
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
     private List<UserTeam> userTeams;
 
-//    private Image image;
 
 }
