@@ -40,6 +40,10 @@ public class Team {
     @JsonIgnore
     private List<Group> groups;
 
+
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
+    private List<UserTeam> userTeams;
+
 //    private Image image;
 
 }

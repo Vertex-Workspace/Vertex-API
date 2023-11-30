@@ -3,11 +3,14 @@ package com.vertex.vertex.user.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.personalization.model.entity.Personalization;
+import com.vertex.vertex.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Data
@@ -32,7 +35,7 @@ public class User {
     private String image;
     private Boolean publicProfile;
     private Boolean showCharts;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     private Personalization personalization;
 
 }

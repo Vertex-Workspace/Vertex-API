@@ -2,6 +2,7 @@ package com.vertex.vertex.task.relations.comment.model;
 
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,7 +22,7 @@ public class Comment {
     private String comment;
     private Date date;
     @ManyToOne
-    private User user;
+    private UserTeam userTeam;
     @ManyToOne
     private Task task;
 }

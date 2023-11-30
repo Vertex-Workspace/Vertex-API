@@ -21,38 +21,10 @@ public class UserTeamController {
 
     private UserTeamService userTeamService;
 
-    @PostMapping
-    public ResponseEntity<UserTeam> save(
-            @RequestBody UserTeamDTO utc){
-        try{
-            return new ResponseEntity<>
-                    (userTeamService.save(utc),
-                            HttpStatus.CREATED);
-
-        } catch (EntityNotFoundException e){
-            return new ResponseEntity<>
-                    (HttpStatus.CONFLICT);
-        }
-    }
-
-    @PutMapping
-    public ResponseEntity<UserTeam> save(
-            @RequestBody UserTeamEditionDTO utdto){
-        try{
-            return new ResponseEntity<>
-                    (userTeamService.save(utdto),
-                            HttpStatus.OK);
-
-        }catch (EntityNotFoundException e){
-            return new ResponseEntity<>
-                    (HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @GetMapping
-    public ResponseEntity<List<UserTeam>> findAll(){
+    @GetMapping("{/get-team-users/{teamId}")
+    public ResponseEntity<List<UserTeam>> findAllByTeam(@PathVariable Long teamId){
         return new ResponseEntity<>
-                (userTeamService.findAll(),
+                (userTeamService.findAllByTeamId(teamId),
                         HttpStatus.OK);
     }
 
@@ -65,20 +37,6 @@ public class UserTeamController {
                             HttpStatus.OK);
 
         }catch (EntityNotFoundException e){
-            return new ResponseEntity<>
-                    (HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteById(
-            @PathVariable Long id){
-        try {
-            userTeamService.deleteById(id);
-            return new ResponseEntity<>
-                    (HttpStatus.OK);
-
-        } catch (EntityNotFoundException e) {
             return new ResponseEntity<>
                     (HttpStatus.NOT_FOUND);
         }

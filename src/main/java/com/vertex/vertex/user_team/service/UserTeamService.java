@@ -48,6 +48,10 @@ public class UserTeamService {
         userTeamRepository.save(userTeam);
     }
 
+    public List<UserTeam> findAllByTeamId(Long teamId){
+        return userTeamRepository.findAllByTeam_Id(teamId);
+    }
+
     public List<UserTeam> findAll(){
         return userTeamRepository.findAll();
     }
