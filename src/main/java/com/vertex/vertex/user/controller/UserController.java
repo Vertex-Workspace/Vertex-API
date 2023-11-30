@@ -2,11 +2,11 @@ package com.vertex.vertex.user.controller;
 
 import com.vertex.vertex.user.model.DTO.UserDTO;
 import com.vertex.vertex.user.model.DTO.UserEditionDTO;
+import com.vertex.vertex.user.model.DTO.UserLoginDTO;
 import com.vertex.vertex.user.model.entity.User;
-import com.vertex.vertex.user.model.exception.EmailAlreadyExistsException;
-import com.vertex.vertex.user.model.exception.InvalidPasswordException;
-import com.vertex.vertex.user.model.exception.UnsafePasswordException;
+import com.vertex.vertex.user.model.exception.*;
 import com.vertex.vertex.user.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +27,13 @@ public class UserController {
     public ResponseEntity<?> save(@RequestBody UserDTO userDTO){
         try{
             return new ResponseEntity<>(userService.save(userDTO),HttpStatus.CREATED);
-        } catch (EmailAlreadyExistsException | InvalidPasswordException | UnsafePasswordException e){
+        } catch (EmailAlreadyExistsException
+                | InvalidEmailException
+                | InvalidPasswordException
+                | UnsafePasswordException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Preencha todos os campos!", HttpStatus.CONFLICT);
         }
     }
 
@@ -65,6 +70,27 @@ public class UserController {
         }catch (NoSuchElementException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @PostMapping("/authenticate")
+    public ResponseEntity<?> authenticate(
+            @RequestBody UserLoginDTO dto) {
+
+        try {
+            return new ResponseEntity<>(userService.authenticate(dto),
+                    HttpStatus.ACCEPTED);
+
+        } catch (UserNotFoundException | IncorrectPasswordException e) {
+            return new ResponseEntity<>
+                    ("E-mail ou senha inválidos!",
+                            HttpStatus.UNAUTHORIZED);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>
+                    ("Outro erro!",
+                            HttpStatus.CONFLICT);
+        }
+
     }
 
 }
