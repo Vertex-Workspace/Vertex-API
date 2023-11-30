@@ -1,6 +1,6 @@
 package com.vertex.vertex.task.model.DTO;
 
-import com.vertex.vertex.task.value.model.entity.Value;
+import com.vertex.vertex.task.relations.value.model.entity.Value;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

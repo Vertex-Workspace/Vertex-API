@@ -1,4 +1,4 @@
-package com.vertex.vertex.task.value.model.entity;
+package com.vertex.vertex.task.relations.value.model.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -6,12 +6,6 @@ import jakarta.persistence.Lob;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.sql.Array;
-import java.sql.Blob;
 
 @Data
 @Entity

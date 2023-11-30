@@ -1,4 +1,4 @@
-package com.vertex.vertex.comment.model;
+package com.vertex.vertex.task.relations.comment.model;
 
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.user.model.entity.User;

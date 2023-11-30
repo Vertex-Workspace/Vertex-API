@@ -1,10 +1,10 @@
 package com.vertex.vertex.task.model.DTO;
 
-import com.vertex.vertex.comment.model.Comment;
+import com.vertex.vertex.task.relations.comment.model.Comment;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
-import com.vertex.vertex.task.value.model.entity.Value;
+import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
 import lombok.Data;

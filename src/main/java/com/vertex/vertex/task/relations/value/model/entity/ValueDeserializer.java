@@ -1,11 +1,10 @@
-package com.vertex.vertex.task.value.model.entity;
+package com.vertex.vertex.task.relations.value.model.entity;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.vertex.vertex.property.model.ENUM.PropertyKind;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.property.service.PropertyService;

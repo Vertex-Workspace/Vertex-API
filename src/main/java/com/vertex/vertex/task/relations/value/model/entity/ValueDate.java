@@ -1,13 +1,11 @@
-package com.vertex.vertex.task.value.model.entity;
+package com.vertex.vertex.task.relations.value.model.entity;
 
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Data
 @Entity

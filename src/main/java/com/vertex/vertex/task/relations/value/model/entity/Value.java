@@ -1,4 +1,4 @@
-package com.vertex.vertex.task.value.model.entity;
+package com.vertex.vertex.task.relations.value.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;

@@ -6,7 +6,7 @@ import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.DTO.TaskPropertyDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.repository.TaskRepository;
-import com.vertex.vertex.task.value.model.entity.Value;
+import com.vertex.vertex.task.relations.value.model.entity.Value;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;

@@ -1,4 +1,4 @@
-package com.vertex.vertex.task.value.model.entity;
+package com.vertex.vertex.task.relations.value.model.entity;
 
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
@@ -9,13 +9,13 @@ import lombok.NoArgsConstructor;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class ValueNumber extends Value {
+public class ValueText extends Value {
 
-    private Long value;
+    private String value;
 
     @Override
     public void setValue(Object object) {
-        String objectS = (String) object;
-        this.value = Long.parseLong(objectS);
+        this.value = (String) object;
     }
+
 }

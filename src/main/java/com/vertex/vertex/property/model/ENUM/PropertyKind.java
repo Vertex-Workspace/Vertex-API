@@ -1,10 +1,6 @@
 package com.vertex.vertex.property.model.ENUM;
 
-import com.vertex.vertex.property.model.entity.PropertyList;
-import com.vertex.vertex.task.value.model.entity.*;
-
-import java.io.File;
-import java.sql.Date;
+import com.vertex.vertex.task.relations.value.model.entity.*;
 
 public enum PropertyKind  {
 
