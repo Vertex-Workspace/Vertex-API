@@ -12,13 +12,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ValueList extends Value {
 
-    @OneToOne
+    @ManyToOne
     private PropertyList value;
 
     @Override
     public void setValue(Object object) {
-        String objectS = (String) object;
-        PropertyList propertyList = new PropertyList();
         this.value = (PropertyList) object;
     }
 }

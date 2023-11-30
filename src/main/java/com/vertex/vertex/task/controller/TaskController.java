@@ -54,12 +54,12 @@ public class TaskController {
         }
     }
 
-    @PatchMapping
-    public ResponseEntity<?> save(@RequestBody TaskPropertyDTO taskPropertyDTO){
-        try{
-            return new ResponseEntity<>(taskService.save(taskPropertyDTO), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-    }
+//    @PatchMapping
+//    public ResponseEntity<Task> save(@RequestBody TaskPropertyDTO taskPropertyDTO){
+//        try{
+//            taskService.save(taskPropertyDTO), HttpStatus.OK;
+//        }catch(Exception e){
+//            return new ResponseEntity<>(HttpStatus.CONFLICT);
+//        }
+//    }
 }

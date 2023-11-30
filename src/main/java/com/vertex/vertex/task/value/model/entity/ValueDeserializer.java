@@ -5,7 +5,9 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.vertex.vertex.property.model.ENUM.PropertyKind;
 import com.vertex.vertex.property.model.entity.Property;
+import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.property.service.PropertyService;
 import org.springframework.stereotype.Component;
 
@@ -40,8 +42,18 @@ public class ValueDeserializer extends StdDeserializer<Value> {
             }
 
             if(nodeV.get("value") != null) {
-                String value = nodeV.get("value").asText();
-                valueKind.setValue(value);
+                if(property.getPropertyLists() != null){
+                    String value = nodeV.get("value").asText();
+                    Long idList = Long.parseLong(value);
+                    for(PropertyList propertyList : property.getPropertyLists()){
+                        if(idList.equals(propertyList.getId())){
+                            valueKind.setValue(propertyList);
+                        }
+                    }
+                }else {
+                    String value = nodeV.get("value").asText();
+                    valueKind.setValue(value);
+                }
             }
 
 

@@ -10,4 +10,5 @@ public class TaskPropertyDTO {
 
     private Long id;
     private Value value;
+
 }
