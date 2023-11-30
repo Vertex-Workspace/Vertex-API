@@ -48,6 +48,7 @@ public class PropertyService {
                     if ((property.getKind() == STATUS) ||
                             (property.getKind() == LIST)) {
                         property.getPropertyLists().add(list);
+                        list.setProperty(property);
                     } else {
                         throw new RuntimeException("To add a list, it must be a status or a list");
                     }
