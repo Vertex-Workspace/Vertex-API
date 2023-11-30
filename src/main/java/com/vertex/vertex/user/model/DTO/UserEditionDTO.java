@@ -15,6 +15,7 @@ public class UserEditionDTO {
     private String lastName;
     private String email;
     private String password;
+    private String passwordConf;
     private String description;
     private String location;
     private String image;

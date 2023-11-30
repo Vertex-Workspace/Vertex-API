@@ -26,6 +26,7 @@ public class UserService {
         User user = new User();
         BeanUtils.copyProperties(userDTO, user);
         User userEmailWithNoEdition = userRepository.findByEmail(user.getEmail());
+
         boolean validEmail = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
                 .matcher(user.getEmail())
                 .find();
@@ -85,6 +86,10 @@ public class UserService {
                     && !user.getId().equals(userFind.getId())) {
                 throw new EmailAlreadyExistsException();
             }
+        }
+
+        if (!userEditionDTO.getPassword().equals(userEditionDTO.getPasswordConf())) {
+            throw new InvalidPasswordException();
         }
 
         return userRepository.save(user);
