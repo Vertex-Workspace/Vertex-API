@@ -21,7 +21,7 @@ public class UserTeamController {
 
     private UserTeamService userTeamService;
 
-    @GetMapping("{/get-team-users/{teamId}")
+    @GetMapping("/{get-team-users}/{teamId}")
     public ResponseEntity<List<UserTeam>> findAllByTeam(@PathVariable Long teamId){
         return new ResponseEntity<>
                 (userTeamService.findAllByTeamId(teamId),
