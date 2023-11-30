@@ -13,6 +13,7 @@ import java.util.NoSuchElementException;
 
 @RestController
 @AllArgsConstructor
+@CrossOrigin
 @RequestMapping("/personalization")
 public class PersonalizationController {
     private final PersonalizationService personalizationService;

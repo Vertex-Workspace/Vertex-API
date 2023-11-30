@@ -14,6 +14,7 @@ import java.util.NoSuchElementException;
 
 @RestController
 @AllArgsConstructor
+@CrossOrigin
 @RequestMapping("/user")
 public class UserController {
 
