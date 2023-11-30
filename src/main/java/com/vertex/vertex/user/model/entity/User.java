@@ -22,7 +22,6 @@ public class User {
     @Column(nullable = false)
     private String lastName;
     @Column(unique = true, nullable = false)
-    @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
     private String email;
     @Column(nullable = false)
     private String password;

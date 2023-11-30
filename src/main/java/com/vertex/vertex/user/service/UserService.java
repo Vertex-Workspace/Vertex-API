@@ -2,11 +2,9 @@ package com.vertex.vertex.user.service;
 
 import com.vertex.vertex.user.model.DTO.UserDTO;
 import com.vertex.vertex.user.model.DTO.UserEditionDTO;
+import com.vertex.vertex.user.model.DTO.UserLoginDTO;
 import com.vertex.vertex.user.model.entity.User;
-import com.vertex.vertex.user.model.exception.EmailAlreadyExistsException;
-import com.vertex.vertex.user.model.exception.InvalidPasswordException;
-import com.vertex.vertex.user.model.exception.UnsafePasswordException;
-import com.vertex.vertex.user.model.exception.UserNotFoundException;
+import com.vertex.vertex.user.model.exception.*;
 import com.vertex.vertex.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,21 +25,14 @@ public class UserService {
     public User save(UserDTO userDTO) {
         User user = new User();
         BeanUtils.copyProperties(userDTO, user);
-
-        boolean securePassword =
-                Pattern.compile("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$")
-                        .matcher(user.getPassword())
-                        .find();
-
-        if (user.getPassword() != null && !securePassword) {
-            throw new UnsafePasswordException();
-        }
-
-        if (!userDTO.getPassword().equals(userDTO.getPasswordConf())) {
-            throw new InvalidPasswordException();
-        }
-
         User userEmailWithNoEdition = userRepository.findByEmail(user.getEmail());
+        boolean validEmail = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+                .matcher(user.getEmail())
+                .find();
+
+        if (!validEmail) {
+            throw new InvalidEmailException();
+        }
 
         if (userEmailWithNoEdition != null && user.getEmail().equals(userEmailWithNoEdition.getEmail())) {
             user.setEmail(userEmailWithNoEdition.getEmail());
@@ -54,6 +45,21 @@ public class UserService {
             if (userFind != null && user.getEmail().equals(userFind.getEmail())) {
                 throw new EmailAlreadyExistsException();
             }
+        }
+
+
+
+        boolean securePassword =
+                Pattern.compile("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$")
+                        .matcher(user.getPassword())
+                        .find();
+
+        if (user.getPassword() != null && !securePassword) {
+            throw new UnsafePasswordException();
+        }
+
+        if (!userDTO.getPassword().equals(userDTO.getPasswordConf())) {
+            throw new InvalidPasswordException();
         }
 
         return userRepository.save(user);
@@ -105,6 +111,23 @@ public class UserService {
 
     public boolean existsById(Long id) {
         return userRepository.existsById(id);
+    }
+
+    public User authenticate(UserLoginDTO dto) {
+        if (userRepository.existsByEmail
+                (dto.getEmail())) {
+            User user =
+                    userRepository.findByEmail(dto.getEmail());
+
+            if (user.getPassword()
+                    .equals(dto.getPassword())) {
+                return user;
+            }
+
+            throw new IncorrectPasswordException();
+        }
+
+        throw new UserNotFoundException();
     }
 
 }
