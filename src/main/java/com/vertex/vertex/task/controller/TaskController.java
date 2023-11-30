@@ -38,10 +38,12 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<Task> save(@RequestBody TaskCreateDTO taskCreateDTO){
-        System.out.println("entrou");
-        System.out.println(taskCreateDTO);
+    public ResponseEntity<?> save(@RequestBody TaskCreateDTO taskCreateDTO){
+        try{
             return new ResponseEntity<>(taskService.save(taskCreateDTO), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -55,11 +57,11 @@ public class TaskController {
     }
 
     @PatchMapping
-    public ResponseEntity<Task> save(@RequestBody EditValueDTO editValueDTO){
+    public ResponseEntity<?> save(@RequestBody EditValueDTO editValueDTO){
         try{
             return new ResponseEntity<>(taskService.save(editValueDTO), HttpStatus.OK);
         }catch(Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 }

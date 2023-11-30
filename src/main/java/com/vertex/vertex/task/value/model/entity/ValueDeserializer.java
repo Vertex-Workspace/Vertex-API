@@ -35,7 +35,6 @@ public class ValueDeserializer extends StdDeserializer<Value> {
         valueKind.setProperty(property);
         if(node.get("value") != null) {
             JsonNode nodeV = node.get("value");
-            System.out.println(nodeV.get("id"));
             if(nodeV.get("id") != null){
                 valueKind.setId(nodeV.get("id").asLong());
             }
