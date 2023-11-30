@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -33,8 +34,9 @@ public class Property {
 
     @ManyToOne
     @JsonIgnore
+    @ToString.Exclude
     private Project project;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "property")
     private List<PropertyList> propertyLists;
 }

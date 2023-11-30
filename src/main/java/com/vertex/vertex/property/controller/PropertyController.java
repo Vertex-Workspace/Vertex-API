@@ -26,24 +26,24 @@ public class PropertyController {
     @GetMapping("/{id}")
     public ResponseEntity<Property> findById(@PathVariable Long id){
         try{
-            return new ResponseEntity<>(propertyService.findById(id), HttpStatus.OK);
+            return new ResponseEntity<>(propertyService.findById(id), HttpStatus.FOUND);
         } catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
     @GetMapping
     public ResponseEntity<List<Property>> findAll(){
         try{
-            return new ResponseEntity<>(propertyService.findAll(), HttpStatus.OK);
+            return new ResponseEntity<>(propertyService.findAll(), HttpStatus.FOUND);
         } catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @PostMapping
-    public ResponseEntity<Property> save(PropertyRegisterDTO propertyRegisterDTO){
+    public ResponseEntity<Property> save(@RequestBody PropertyRegisterDTO propertyRegisterDTO){
         try{
-            return new ResponseEntity<>(propertyService.save(propertyRegisterDTO), HttpStatus.OK);
+            return new ResponseEntity<>(propertyService.save(propertyRegisterDTO), HttpStatus.CREATED);
 
         } catch (Exception e){
             return new ResponseEntity<>(HttpStatus.CONFLICT);

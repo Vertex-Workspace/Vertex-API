@@ -1,4 +1,4 @@
-package com.vertex.vertex.task_property.value.model.entity;
+package com.vertex.vertex.task.value.model.entity;
 
 import com.vertex.vertex.property.model.entity.PropertyList;
 import jakarta.persistence.*;
@@ -12,7 +12,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ValueList extends Value {
 
-    @OneToOne
-    private PropertyList propertyList;
+    @ManyToOne
+    private PropertyList value;
 
+    @Override
+    public void setValue(Object object) {
+        this.value = (PropertyList) object;
+    }
 }

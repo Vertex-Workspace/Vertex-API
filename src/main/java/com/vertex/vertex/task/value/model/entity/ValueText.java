@@ -1,6 +1,5 @@
-package com.vertex.vertex.task_property.value.model.entity;
+package com.vertex.vertex.task.value.model.entity;
 
-import com.vertex.vertex.task_property.model.entity.TaskProperty;
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,7 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ValueText extends Value {
 
+    private String value;
 
-    private String text;
+    @Override
+    public void setValue(Object object) {
+        this.value = (String) object;
+    }
 
 }
