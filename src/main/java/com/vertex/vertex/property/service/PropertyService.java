@@ -21,46 +21,46 @@ public class PropertyService {
 
     private final PropertyRepository propertyRepository;
 
-    public Property save(PropertyRegisterDTO propertyRegisterDTO){
+    public Property save(PropertyRegisterDTO propertyRegisterDTO) {
         Property property = new Property();
         BeanUtils.copyProperties(propertyRegisterDTO, property);
         return propertyRepository.save(property);
     }
 
-    public void delete(Long id){
+    public void delete(Long id) {
         propertyRepository.deleteById(id);
     }
 
-    public Property findById(Long id){
+    public Property findById(Long id) {
         return propertyRepository.findById(id).get();
     }
 
-    public List<Property> findAll(){
+    public List<Property> findAll() {
         return propertyRepository.findAll();
     }
 
-    public Property save(PropertyListDTO propertyListDTO){
+    public Property save(PropertyListDTO propertyListDTO) {
         Property property;
         try {
             property = propertyRepository.findById(propertyListDTO.getId()).get();
-            for (PropertyList list: propertyListDTO.getPropertyLists()) {
-                if(list.getId() == null){
-                    if((property.getKind() == STATUS ) ||
-                            (property.getKind() == LIST )) {
+            for (PropertyList list : propertyListDTO.getPropertyLists()) {
+                if (list.getId() == null) {
+                    if ((property.getKind() == STATUS) ||
+                            (property.getKind() == LIST)) {
                         property.getPropertyLists().add(list);
-                    }else{
+                    } else {
                         throw new RuntimeException("To add a list, it must be a status or a list");
                     }
-                }else{
-                for (int cont =0; cont< property.getPropertyLists().size(); cont ++) {
-                    if (property.getPropertyLists().get(cont).getId().equals(list.getId())) {
-                        property.getPropertyLists().set(cont, list);
-                        break;
+                } else {
+                    for (int cont = 0; cont < property.getPropertyLists().size(); cont++) {
+                        if (property.getPropertyLists().get(cont).getId().equals(list.getId())) {
+                            property.getPropertyLists().set(cont, list);
+                            break;
+                        }
                     }
                 }
-                }
             }
-        }catch(NoSuchElementException e){
+        } catch (NoSuchElementException e) {
             throw e;
         }
         return propertyRepository.save(property);

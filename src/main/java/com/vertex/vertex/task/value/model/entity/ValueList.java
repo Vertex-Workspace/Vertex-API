@@ -17,6 +17,8 @@ public class ValueList extends Value {
 
     @Override
     public void setValue(Object object) {
+        String objectS = (String) object;
+        PropertyList propertyList = new PropertyList();
         this.value = (PropertyList) object;
     }
 }

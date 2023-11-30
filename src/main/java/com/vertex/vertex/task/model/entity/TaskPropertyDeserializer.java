@@ -18,7 +18,7 @@ import java.io.IOException;
 @Component
 public class TaskPropertyDeserializer extends StdDeserializer<TaskProperty> {
 
-    private PropertyService propertyService;
+    private final PropertyService propertyService;
 
     protected TaskPropertyDeserializer(PropertyService propertyService) {
         super(TaskProperty.class);
@@ -27,31 +27,36 @@ public class TaskPropertyDeserializer extends StdDeserializer<TaskProperty> {
 
     @Override
     public TaskProperty deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JacksonException {
+        System.out.println("deserializer");
         JsonNode node = jsonParser.getCodec().readTree(jsonParser);
+
         TaskProperty taskProperty = new TaskProperty();
-        JsonNode nodeV = node.get("value");
+
         Property property = jsonParser.getCodec().treeToValue(node.get("property"), Property.class);
+
         property = propertyService.findById(property.getId());
-        Value valueKind = property.getKind().getValue();
 
-        try {
-            Long id = nodeV.get("id").asLong();
-            Long idTP = node.get("id").asLong();
-            valueKind.setId(id);
-            taskProperty.setId(idTP);
-        }catch(Exception ignore){
+        if(node.get("value") != null) {
+            JsonNode nodeV = node.get("value");
 
+            Value valueKind = property.getKind().getValue();
+
+            if(nodeV.get("id") != null){
+                Long id = nodeV.get("id").asLong();
+                valueKind.setId(id);
+            }
+
+//        Long idTP = node.get("id").asLong();
+//        taskProperty.setId(idTP);
+
+            if(nodeV.get("value") != null) {
+                String value = nodeV.get("value").asText();
+                valueKind.setValue(value);
+            }
+
+            taskProperty.setValue(valueKind);
         }
-
-        String value = nodeV.get("value").asText();
-        System.out.println(value);
-        System.out.println(valueKind);
-        valueKind.setValue(value);
-
-        System.out.println(valueKind);
-
         taskProperty.setProperty(property);
-        taskProperty.setValue(valueKind);
         return taskProperty;
     }
 }

@@ -10,15 +10,18 @@ import java.util.Optional;
 
 @Data
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Value{
+
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    @OneToOne
+    private TaskProperty taskProperty;
     public abstract Object getValue();
     public abstract void setValue(Object object);
 

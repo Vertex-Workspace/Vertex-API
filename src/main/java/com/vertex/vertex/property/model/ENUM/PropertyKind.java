@@ -42,37 +42,5 @@ public enum PropertyKind  {
         }
     };
 
-//
-//    TEXT() {
-//        public Value getValue(Object object) {
-//            return new ValueText((String) object);
-//        }
-//    },
-//    DATE() {
-//        public Value getValue(Object object) {
-//            return new ValueDate((Date) object);
-//        }
-//    },
-//    LIST() {
-//        public Value getValue(Object object) {
-//            return new ValueList((PropertyList) object);
-//        }
-//    },
-//    STATUS() {
-//        public Value getValue(Object object) {
-//            return new ValueList((PropertyList) object);
-//        }
-//    },
-//    NUMBER() {
-//        public Value getValue(Object object) {
-//            return new ValueNumber((Long) object);
-//        }
-//    },
-//    LINK() {
-//        public Value getValue(Object object) {
-//            return new ValueFile((File) object);
-//        }
-//    };
-
     public abstract Value getValue();
 }

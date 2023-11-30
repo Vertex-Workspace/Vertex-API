@@ -46,7 +46,7 @@ public class Task {
     @OneToMany(mappedBy = "task")
     private List<Review> reviews;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "task")
     private List<TaskProperty> taskProperties;
 
 }
