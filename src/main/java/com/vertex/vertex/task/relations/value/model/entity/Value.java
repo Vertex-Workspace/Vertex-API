@@ -33,5 +33,4 @@ public abstract class Value{
     public abstract Object getValue();
     public abstract void setValue(Object object);
 
-
 }

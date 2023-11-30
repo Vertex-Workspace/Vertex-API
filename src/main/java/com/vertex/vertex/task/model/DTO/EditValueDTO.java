@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class TaskPropertyDTO {
+public class EditValueDTO {
 
     private Long id;
     private Value value;
