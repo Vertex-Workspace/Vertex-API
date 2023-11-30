@@ -1,8 +1,8 @@
 package com.vertex.vertex.task.controller;
 
 import com.vertex.vertex.property.model.entity.Property;
+import com.vertex.vertex.task.model.DTO.EditValueDTO;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
-import com.vertex.vertex.task.model.DTO.TaskPropertyDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.service.TaskService;
 import lombok.AllArgsConstructor;
@@ -54,12 +54,12 @@ public class TaskController {
         }
     }
 
-//    @PatchMapping
-//    public ResponseEntity<Task> save(@RequestBody TaskPropertyDTO taskPropertyDTO){
-//        try{
-//            taskService.save(taskPropertyDTO), HttpStatus.OK;
-//        }catch(Exception e){
-//            return new ResponseEntity<>(HttpStatus.CONFLICT);
-//        }
-//    }
+    @PatchMapping
+    public ResponseEntity<Task> save(@RequestBody EditValueDTO editValueDTO){
+        try{
+            return new ResponseEntity<>(taskService.save(editValueDTO), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
 }

@@ -1,9 +1,10 @@
 package com.vertex.vertex.task.service;
 
 import com.vertex.vertex.project.service.ProjectService;
+import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.service.PropertyService;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
-import com.vertex.vertex.task.model.DTO.TaskPropertyDTO;
+import com.vertex.vertex.task.model.DTO.EditValueDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.value.model.entity.Value;
@@ -28,7 +29,7 @@ public class TaskService {
         System.out.println("entrou");
         Task task = new Task();
         BeanUtils.copyProperties(taskCreateDTO, task);
-        for(Value list : task.getValues()){
+        for (Value list : task.getValues()) {
             list.setTask(task);
         }
         System.out.println(task.getValues());
@@ -47,28 +48,21 @@ public class TaskService {
         taskRepository.deleteById(id);
     }
 
-    public TaskPropertyDTO save(TaskPropertyDTO taskPropertyDTO) {
-        Task task;
-        try {
-            task = taskRepository.findById(taskPropertyDTO.getId()).get();
-            for (Value list : task.getValues()) {
-                if (list.getId() == null) {
-                    task.getValues().add(list);
-                } else {
-                    for (int cont = 0; cont < task.getValues().size(); cont++) {
-                        if (task.getValues().get(cont).getId().equals(list.getId())) {
-                            task.getValues().set(cont, list);
-                            break;
-                        }
-                    }
-                }
+    public Task save(EditValueDTO editValueDTO) {
+        Task task = taskRepository.findById(editValueDTO.getId()).get();
+        //pass throughout the list
+        //it is a for i and not a for each because if we have a null value, the foreach doesn't identify and don't run
+        for (int i = 0; i < task.getValues().size(); i++) {
+            if (task.getValues().get(i).getId().equals(editValueDTO.getId())) {
+                Property property = propertyService.findById(editValueDTO.getValue().getProperty().getId());
+                Value currentValue = property.getKind().getValue();
+                currentValue.setId(editValueDTO.getId());
+                currentValue.setTask(task);
+                currentValue.setProperty(property);
+                currentValue.setValue(editValueDTO.getValue().getValue());
+                task.getValues().set(i, currentValue);
             }
-        } catch (NoSuchElementException e) {
-            throw e;
         }
-        return taskPropertyDTO;
-
+        return taskRepository.save(task);
     }
-
-
 }

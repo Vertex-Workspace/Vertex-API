@@ -35,14 +35,14 @@ public class ValueDeserializer extends StdDeserializer<Value> {
         valueKind.setProperty(property);
         if(node.get("value") != null) {
             JsonNode nodeV = node.get("value");
-
+            System.out.println(nodeV.get("id"));
             if(nodeV.get("id") != null){
-                Long id = nodeV.get("id").asLong();
-                valueKind.setId(id);
+                valueKind.setId(nodeV.get("id").asLong());
             }
 
             if(nodeV.get("value") != null) {
-                if(property.getPropertyLists() != null){
+                if(property.getKind() == PropertyKind.LIST ||
+                property.getKind() == PropertyKind.STATUS){
                     String value = nodeV.get("value").asText();
                     Long idList = Long.parseLong(value);
                     for(PropertyList propertyList : property.getPropertyLists()){
@@ -58,6 +58,7 @@ public class ValueDeserializer extends StdDeserializer<Value> {
 
 
         }
+        System.out.println(valueKind);
         return valueKind;
     }
 }
