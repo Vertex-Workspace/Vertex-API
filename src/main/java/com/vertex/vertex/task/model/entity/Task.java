@@ -32,6 +32,7 @@ public class Task {
     private String description;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Comment> comments;
 
     @ManyToOne
@@ -46,6 +47,7 @@ public class Task {
     private List<Task> subTasks;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Review> reviews;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "task")

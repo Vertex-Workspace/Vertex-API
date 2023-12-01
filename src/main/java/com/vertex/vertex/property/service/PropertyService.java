@@ -6,7 +6,11 @@ import com.vertex.vertex.property.model.DTO.PropertyListDTO;
 import com.vertex.vertex.property.model.DTO.PropertyRegisterDTO;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
+import com.vertex.vertex.property.model.exceptions.ProjectDoesNotExistException;
+import com.vertex.vertex.property.model.exceptions.PropertyIsNotAListException;
 import com.vertex.vertex.property.repository.PropertyRepository;
+import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.relations.value.model.entity.Value;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -33,10 +37,17 @@ public class PropertyService {
         try {
             Project project = projectService.findById(property.getProject().getId());
             project.getProperties().add(property);
+            //in this for i, the property is being added in the tasks that already exists in the project
+            for (int i = 0; i < project.getTasks().size(); i++) {
+                Value newValue = property.getKind().getValue();
+                Task task = project.getTasks().get(i);
+                newValue.setProperty(property);
+                newValue.setTask(task);
+                project.getTasks().get(i).getValues().add(newValue);
+            }
         } catch (Exception e) {
-            throw new RuntimeException("There isn't a project with the id " + property.getProject().getId());
+            throw new ProjectDoesNotExistException();
         }
-
 
         return propertyRepository.save(property);
     }
@@ -59,14 +70,17 @@ public class PropertyService {
             property = propertyRepository.findById(propertyListDTO.getId()).get();
             for (PropertyList list : propertyListDTO.getPropertyLists()) {
                 if (list.getId() == null) {
+                    //verify if the property is a list or status
                     if ((property.getKind() == STATUS) ||
                             (property.getKind() == LIST)) {
+                        //if the id doesn't exists, it means that this elements will be saved with a new id
                         property.getPropertyLists().add(list);
                         list.setProperty(property);
                     } else {
-                        throw new RuntimeException("To add a list, it must be a status or a list");
+                        throw new PropertyIsNotAListException();
                     }
                 } else {
+                    //if the id already exists, it'll be edited
                     for (int cont = 0; cont < property.getPropertyLists().size(); cont++) {
                         if (property.getPropertyLists().get(cont).getId().equals(list.getId())) {
                             property.getPropertyLists().set(cont, list);

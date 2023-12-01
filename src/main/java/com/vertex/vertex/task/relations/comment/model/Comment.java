@@ -1,11 +1,13 @@
 package com.vertex.vertex.task.relations.comment.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.sql.Date;
 
@@ -23,5 +25,6 @@ public class Comment {
     @ManyToOne
     private UserTeam userTeam;
     @ManyToOne
+    @ToString.Exclude
     private Task task;
 }

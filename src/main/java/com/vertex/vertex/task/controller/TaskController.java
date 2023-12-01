@@ -4,6 +4,8 @@ import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.DTO.EditValueDTO;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.relations.comment.model.Comment;
+import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.service.TaskService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -56,7 +58,7 @@ public class TaskController {
         }
     }
 
-    @PatchMapping
+    @PatchMapping("/value")
     public ResponseEntity<?> save(@RequestBody EditValueDTO editValueDTO){
         try{
             return new ResponseEntity<>(taskService.save(editValueDTO), HttpStatus.OK);
@@ -64,4 +66,23 @@ public class TaskController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
+
+    @PatchMapping("/comment")
+    public ResponseEntity<?> saveComment (@RequestBody Comment comment){
+        try{
+            return new ResponseEntity<>(taskService.saveComment(comment), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @PatchMapping("/review")
+    public ResponseEntity<?> saveReview (@RequestBody Review review){
+        try{
+            return new ResponseEntity<>(taskService.saveReview(review), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
 }

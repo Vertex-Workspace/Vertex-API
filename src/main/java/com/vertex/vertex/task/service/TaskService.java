@@ -9,8 +9,12 @@ import com.vertex.vertex.task.model.DTO.EditValueDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.model.exceptions.NotFoundPropertyInTaskException;
 import com.vertex.vertex.task.model.exceptions.NotFoundValueInListException;
+import com.vertex.vertex.task.relations.comment.model.Comment;
+import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
+import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
+import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
@@ -26,6 +30,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final ProjectService projectService;
     private final PropertyService propertyService;
+    private final UserTeamService userTeamService;
 
     public Task save(TaskCreateDTO taskCreateDTO) {
         Task task = new Task();
@@ -81,5 +86,28 @@ public class TaskService {
             }
         }
         return taskRepository.save(task);
+    }
+
+    public Task saveComment(Comment comment) {
+        Task task;
+        try {
+            task = findById(comment.getTask().getId());
+        }catch(Exception e){
+            throw new RuntimeException("Não existe uma tarefa com esse id para postar um comentário");
+        }
+        task.getComments().add(comment);
+        return taskRepository.save(task);
+    }
+
+    public Task saveReview(Review review) {
+        Task task = findById(review.getTask().getId());
+        UserTeam userTeam = userTeamService.findById(review.getReviewer().getId());
+        for (int i = 0; i < task.getResponsables().size(); i++) {
+            if(task.getResponsables().get(i).getId().equals(userTeam.getId())){
+                task.getReviews().add(review);
+                return taskRepository.save(task);
+            }
+        }
+        throw new RuntimeException("Quem revisou a tarefa não faz parte da mesma equipe");
     }
 }

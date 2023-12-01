@@ -1,6 +1,7 @@
 package com.vertex.vertex.team.relations.user_team.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.permission.model.entity.Permission;
 import com.vertex.vertex.task.relations.task_hours.model.entity.TaskHour;
@@ -49,5 +50,8 @@ public class UserTeam {
     @OneToOne
     @JsonIgnore
     private TaskHour workingOnTaskHour;
+
+    @ManyToOne
+    private List<Task> tasks;
 
 }
