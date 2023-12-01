@@ -1,7 +1,6 @@
 package com.vertex.vertex.user.model.DTO;
 
-import com.vertex.vertex.personalization.model.entity.Personalization;
-import jakarta.persistence.Column;
+import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

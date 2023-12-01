@@ -4,7 +4,7 @@ import com.vertex.vertex.task.relations.task_hours.repository.TaskHoursRepositor
 import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.task.relations.task_hours.model.DTO.TaskHourEditDTO;
 import com.vertex.vertex.task.relations.task_hours.model.entity.TaskHour;
-import com.vertex.vertex.user_team.service.UserTeamService;
+import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.stereotype.Service;

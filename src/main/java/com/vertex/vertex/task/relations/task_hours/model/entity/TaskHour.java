@@ -1,7 +1,7 @@
 package com.vertex.vertex.task.relations.task_hours.model.entity;
 
 import com.vertex.vertex.task.model.entity.Task;
-import com.vertex.vertex.user_team.model.entity.UserTeam;
+import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

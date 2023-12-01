@@ -5,7 +5,7 @@ import com.vertex.vertex.task.relations.comment.model.Comment;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
-import com.vertex.vertex.user_team.model.entity.UserTeam;
+import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

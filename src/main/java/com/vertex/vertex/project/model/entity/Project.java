@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.team.model.entity.Team;
-import com.vertex.vertex.user_team.model.entity.UserTeam;
+import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

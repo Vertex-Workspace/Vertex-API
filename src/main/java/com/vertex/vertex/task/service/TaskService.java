@@ -58,36 +58,28 @@ public class TaskService {
         taskRepository.deleteById(id);
     }
 
-    public Task save(EditValueDTO editValueDTO) {
-        Task task = null;
+    public Task save(EditValueDTO editValueDTO) throws Exception {
+        Task task;
         try {
             task = findById(editValueDTO.getId());
         } catch (Exception e) {
             throw new RuntimeException("There isn't a task with this id!");
         }
-
-//        Property property = task.getProject().get
-        //pass throughout the list
-        //it is a for i and not a for each because if we have a null value, the foreach doesn't identify and don't run
-        System.out.println(editValueDTO.getValue().getId());
+        Property property = propertyService.findById(editValueDTO.getValue().getProperty().getId());
+        if (!task.getProject().getProperties().contains(property)) {
+            throw new RuntimeException("There isn't a property with this id on the project : " + task.getProject().getName());
+        }
         for (int i = 0; i < task.getValues().size(); i++) {
-            if (task.getValues().get(i).getId().equals(editValueDTO.getId())) {
-                Property property = propertyService.findById(editValueDTO.getValue().getProperty().getId());
+            if (task.getValues().get(i).getId().equals(editValueDTO.getValue().getId())) {
 
                 Value currentValue = property.getKind().getValue();
-
-                currentValue.setId(editValueDTO.getId());
-
+                currentValue.setId(editValueDTO.getValue().getId());
                 currentValue.setTask(task);
-
                 currentValue.setProperty(property);
-
                 currentValue.setValue(editValueDTO.getValue().getValue());
-
                 task.getValues().set(i, currentValue);
             }
         }
-        System.out.println(task);
         return taskRepository.save(task);
     }
 }

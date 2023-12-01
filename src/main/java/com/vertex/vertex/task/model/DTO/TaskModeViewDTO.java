@@ -1,7 +1,7 @@
 package com.vertex.vertex.task.model.DTO;
 
 import com.vertex.vertex.property.model.entity.PropertyList;
-import com.vertex.vertex.user_team.model.entity.UserTeam;
+import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

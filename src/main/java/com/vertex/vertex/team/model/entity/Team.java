@@ -1,9 +1,9 @@
 package com.vertex.vertex.team.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.vertex.vertex.group.model.entity.Group;
+import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.project.model.entity.Project;
-import com.vertex.vertex.user_team.model.entity.UserTeam;
+import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;

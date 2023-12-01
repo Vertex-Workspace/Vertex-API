@@ -2,17 +2,13 @@ package com.vertex.vertex.team.service;
 
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.repository.TeamRepository;
-import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.service.UserService;
-import com.vertex.vertex.user_team.model.entity.UserTeam;
-import com.vertex.vertex.user_team.service.UserTeamService;
+import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -28,6 +24,7 @@ public class TeamService {
         UserTeam userTeam = new UserTeam(userService.findById(team.getCreator().getId()), team);
         team.setUserTeams(List.of(userTeam));
         team.setCreator(userTeam);
+
         return teamRepository.save(team);
     }
 
