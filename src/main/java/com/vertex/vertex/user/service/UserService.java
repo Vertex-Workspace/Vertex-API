@@ -69,9 +69,8 @@ public class UserService {
     public User edit(UserEditionDTO userEditionDTO) throws Exception {
         User user = userRepository.findById(userEditionDTO.getId()).get();
 
-        userEditionDTO.setPassword(user.getPassword());
         BeanUtils.copyProperties(userEditionDTO, user);
-        
+
         return userRepository.save(user);
     }
 
