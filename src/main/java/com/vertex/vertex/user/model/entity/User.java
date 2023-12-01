@@ -23,7 +23,6 @@ public class User {
     private String email;
     @Column(nullable = false)
     private String password;
-
     private String description;
     private String location;
     private String image;

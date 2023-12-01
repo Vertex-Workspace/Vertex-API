@@ -1,5 +1,7 @@
 package com.vertex.vertex.team.relations.user_team.controller;
 
+import com.vertex.vertex.team.model.DTO.TeamHomeDTO;
+import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.EntityNotFoundException;
@@ -19,25 +21,8 @@ public class UserTeamController {
 
     private UserTeamService userTeamService;
 
-    @GetMapping("/{get-team-users}/{teamId}")
-    public ResponseEntity<List<UserTeam>> findAllByTeam(@PathVariable Long teamId){
-        return new ResponseEntity<>
-                (userTeamService.findAllByTeamId(teamId),
-                        HttpStatus.OK);
+    @GetMapping("/teams/{userId}")
+    public ResponseEntity<List<TeamHomeDTO>> findTeamsByUserTeamHome(@PathVariable Long userId) {
+        return new ResponseEntity<>(userTeamService.findTeamsByUser(userId), HttpStatus.OK);
     }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<UserTeam> findById(
-            @PathVariable Long id){
-        try{
-            return new ResponseEntity<>
-                    (userTeamService.findById(id),
-                            HttpStatus.OK);
-
-        }catch (EntityNotFoundException e){
-            return new ResponseEntity<>
-                    (HttpStatus.NOT_FOUND);
-        }
-    }
-
 }

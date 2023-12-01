@@ -5,6 +5,7 @@ import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.permission.model.entity.Permission;
 import com.vertex.vertex.task.relations.task_hours.model.entity.TaskHour;
 import com.vertex.vertex.team.model.entity.Team;
+import com.vertex.vertex.team.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -29,7 +30,6 @@ public class UserTeam {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @ManyToOne
     @JsonIgnore
     @ToString.Exclude
@@ -46,8 +46,8 @@ public class UserTeam {
     @OneToMany
     private List<Group> groups;
 
-    @OneToOne
-    @JsonIgnore
-    private TaskHour workingOnTaskHour;
+
+    @OneToMany(mappedBy = "userTeam")
+    private List<TaskResponsable> taskResponsables;
 
 }

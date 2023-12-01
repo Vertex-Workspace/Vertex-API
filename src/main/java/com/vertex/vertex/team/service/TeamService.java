@@ -1,6 +1,8 @@
 package com.vertex.vertex.team.service;
 
+import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.team.model.entity.Team;
+import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
 import com.vertex.vertex.team.repository.TeamRepository;
 import com.vertex.vertex.user.service.UserService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
@@ -8,6 +10,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -16,30 +19,34 @@ public class TeamService {
 
     private final TeamRepository teamRepository;
 
-
     //Services
     private final UserService userService;
-    public Team save(Team team) {
-        //Create a new row at table User_Team based on the user that has been created the team
-        UserTeam userTeam = new UserTeam(userService.findById(team.getCreator().getId()), team);
-        team.setUserTeams(List.of(userTeam));
-        team.setCreator(userTeam);
 
-        return teamRepository.save(team);
+    public Team save(Team team) {
+        try {
+            //Create a new row at table User_Team based on the user that has been created the team
+            UserTeam userTeam = new UserTeam(userService.findById(team.getCreator().getId()), team);
+            team.setUserTeams(List.of(userTeam));
+            team.setCreator(userTeam);
+
+            //After the Romas explanation about Date
+//            team.setCreationDate();
+
+            return teamRepository.save(team);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Team update(Team team) {
-        if (teamRepository.existsById(team.getId())) {
-            return teamRepository.save(team);
-        }
-        throw new EntityNotFoundException();
+        return teamRepository.save(team);
     }
 
     public Team findById(Long id) {
         if (teamRepository.existsById(id)) {
             return teamRepository.findById(id).get();
         }
-        throw new EntityNotFoundException();
+        throw new TeamNotFoundException(id);
     }
 
     public List<Team> findAll() {
@@ -47,10 +54,11 @@ public class TeamService {
     }
 
     public void deleteById(Long id) {
-        if (teamRepository.existsById(id)) {
-            teamRepository.deleteById(id);
-        } else {
-            throw new EntityNotFoundException();
+        try {
+            Team team = findById(id);
+            teamRepository.delete(team);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

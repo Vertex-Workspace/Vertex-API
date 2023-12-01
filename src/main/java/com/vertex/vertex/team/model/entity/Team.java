@@ -5,12 +5,11 @@ import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -24,28 +23,26 @@ public class Team {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    @NotEmpty
+    @Column(nullable = false)
     private String name;
 
+
     @OneToOne
-    @NotNull
     private UserTeam creator;
 
     private String description;
 
-    private Date creationDate;
+    private LocalDateTime creationDate;
 
-    @OneToMany(mappedBy = "team",
-            fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "team", fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Project> projects;
 
-    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL , orphanRemoval = true)
     @JsonIgnore
     private List<Group> groups;
 
 
-    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserTeam> userTeams;
 
 
