@@ -30,18 +30,20 @@ public class TaskService {
     public Task save(TaskCreateDTO taskCreateDTO) {
         Task task = new Task();
         BeanUtils.copyProperties(taskCreateDTO, task);
-        Project project = projectService.findById(taskCreateDTO.getProject().getId());
-
-        //verify if the property of the task that's being created exists in the project
-        for (Value list : task.getValues()) {
-            for (int i = 0; i < project.getProperties().size(); i++) {
-                if (list.getProperty().getId().equals(project.getProperties().get(i).getId())) {
-                    list.setTask(task);
-                    return taskRepository.save(task);
-                }
-            }
+        Project project;
+        try {
+            project = projectService.findById(taskCreateDTO.getProject().getId());
+        } catch (Exception e) {
+            throw new RuntimeException("There isn't a project with this id is not linked with the current team!");
         }
-        throw new NotFoundPropertyInTaskException();
+        //When the task is created, every property is associated with a null value, unless it has a default value
+        for (Property property : project.getProperties()) {
+            Value currentValue = property.getKind().getValue();
+            currentValue.setProperty(property);
+            currentValue.setTask(task);
+            task.getValues().add(currentValue);
+        }
+        return taskRepository.save(task);
     }
 
     public List<Task> findAll() {
@@ -57,24 +59,35 @@ public class TaskService {
     }
 
     public Task save(EditValueDTO editValueDTO) {
-        Task task = findById(editValueDTO.getId());
+        Task task = null;
+        try {
+            task = findById(editValueDTO.getId());
+        } catch (Exception e) {
+            throw new RuntimeException("There isn't a task with this id!");
+        }
+
+//        Property property = task.getProject().get
         //pass throughout the list
         //it is a for i and not a for each because if we have a null value, the foreach doesn't identify and don't run
+        System.out.println(editValueDTO.getValue().getId());
         for (int i = 0; i < task.getValues().size(); i++) {
             if (task.getValues().get(i).getId().equals(editValueDTO.getId())) {
                 Property property = propertyService.findById(editValueDTO.getValue().getProperty().getId());
+
                 Value currentValue = property.getKind().getValue();
+
                 currentValue.setId(editValueDTO.getId());
+
                 currentValue.setTask(task);
+
                 currentValue.setProperty(property);
+
                 currentValue.setValue(editValueDTO.getValue().getValue());
+
                 task.getValues().set(i, currentValue);
-                //verify if the value setted of the list as a value exists
-                if(currentValue.getValue() != null) {
-                    return taskRepository.save(task);
-                }
             }
         }
-        throw new NotFoundValueInListException();
+        System.out.println(task);
+        return taskRepository.save(task);
     }
 }

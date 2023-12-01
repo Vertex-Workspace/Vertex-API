@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -27,12 +28,13 @@ public class Project {
 
     @ManyToOne
     @JsonIgnore
+    @ToString.Exclude
     private Team team;
 
     @OneToMany(mappedBy = "project")
     private List<Property> properties;
 
-    @OneToOne
+    @ManyToOne
     private UserTeam creator;
 
     @OneToMany(mappedBy = "project")

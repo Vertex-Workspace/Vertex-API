@@ -52,6 +52,10 @@ public class UserTeamService {
         return userTeamRepository.findAllByTeam_Id(teamId);
     }
 
+    public UserTeam findUserTeamByComposeId(Long teamId, Long userId){
+        return userTeamRepository.findByTeam_IdAndUser_Id(teamId, userId);
+    }
+
     public List<UserTeam> findAll(){
         return userTeamRepository.findAll();
     }

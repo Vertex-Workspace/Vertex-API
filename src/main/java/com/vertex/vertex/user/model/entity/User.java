@@ -34,7 +34,8 @@ public class User {
     private String image;
     private Boolean publicProfile;
     private Boolean showCharts;
-    @OneToOne(cascade = CascadeType.ALL)
+
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
     private Personalization personalization;
 
 }

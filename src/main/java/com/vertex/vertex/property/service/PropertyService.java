@@ -1,6 +1,7 @@
 package com.vertex.vertex.property.service;
 
 import com.vertex.vertex.project.model.entity.Project;
+import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.property.model.DTO.PropertyListDTO;
 import com.vertex.vertex.property.model.DTO.PropertyRegisterDTO;
 import com.vertex.vertex.property.model.entity.Property;
@@ -22,9 +23,21 @@ public class PropertyService {
 
     private final PropertyRepository propertyRepository;
 
+    private final ProjectService projectService;
+
     public Property save(PropertyRegisterDTO propertyRegisterDTO) {
         Property property = new Property();
         BeanUtils.copyProperties(propertyRegisterDTO, property);
+
+        //When a property is registered, it must be added into property list in Project
+        try {
+            Project project = projectService.findById(property.getProject().getId());
+            project.getProperties().add(property);
+        } catch (Exception e) {
+            throw new RuntimeException("There isn't a project with the id " + property.getProject().getId());
+        }
+
+
         return propertyRepository.save(property);
     }
 

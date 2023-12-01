@@ -10,6 +10,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -19,14 +20,23 @@ import java.util.List;
 @NoArgsConstructor
 public class UserTeam {
 
+    public UserTeam(User user, Team team){
+        this.user = user;
+        this.team = team;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
 
     @ManyToOne
+    @JsonIgnore
+    @ToString.Exclude
     private Team team;
+
     @ManyToOne
+    @JsonIgnore
     private User user;
 
     @OneToMany(mappedBy = "userTeam")

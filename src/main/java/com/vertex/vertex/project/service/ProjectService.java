@@ -1,14 +1,13 @@
 package com.vertex.vertex.project.service;
 
-import com.vertex.vertex.project.model.DTO.ProjectDTO;
-import com.vertex.vertex.project.model.DTO.ProjectEditionDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.service.TeamService;
+import com.vertex.vertex.user_team.model.entity.UserTeam;
+import com.vertex.vertex.user_team.service.UserTeamService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,20 +17,27 @@ import java.util.List;
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
+
+
     private final TeamService teamService;
+    private final UserTeamService userTeamService;
 
-    public Project save(ProjectDTO projectDTO, Long teamId) {
-        Team team;
-        Project project = new Project();
-
-        if (teamService.existsById(teamId)) {
+    public Project save(Project project, Long teamId) {
+        Team team = null;
+        try {
             team = teamService.findById(teamId);
-            BeanUtils.copyProperties(projectDTO, project);
-            project.setTeam(team);
-            team.getProjects().add(project);
-            return projectRepository.save(project);
+        } catch (Exception e) {
+            throw new EntityNotFoundException("There isn't a team with this id!");
         }
-        throw new EntityNotFoundException();
+        UserTeam userTeam = userTeamService.findUserTeamByComposeId(teamId, project.getCreator().getId());
+        if(userTeam == null){
+            //after we have to create the exception
+            throw new RuntimeException("The user isn't in the team!");
+        }
+        project.setCreator(userTeam);
+        project.setTeam(team);
+        team.getProjects().add(project);
+        return projectRepository.save(project);
     }
 
     public List<Project> findAll(){
@@ -46,10 +52,7 @@ public class ProjectService {
         projectRepository.deleteById(id);
     }
 
-    public Project save(ProjectEditionDTO projectEditionDTO){
-        Project project = new Project();
-
-        BeanUtils.copyProperties(projectEditionDTO, project);
+    public Project save(Project project){
         return projectRepository.save(project);
     }
 }

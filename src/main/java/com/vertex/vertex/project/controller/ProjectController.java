@@ -1,7 +1,5 @@
 package com.vertex.vertex.project.controller;
 
-import com.vertex.vertex.project.model.DTO.ProjectDTO;
-import com.vertex.vertex.project.model.DTO.ProjectEditionDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import lombok.AllArgsConstructor;
@@ -20,11 +18,11 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @PostMapping("/{teamId}")
-    public ResponseEntity<Project> save(@RequestBody ProjectDTO projectDTO , @PathVariable Long teamId){
+    public ResponseEntity<?> save(@RequestBody Project project , @PathVariable Long teamId){
         try {
-            return new ResponseEntity<>(projectService.save(projectDTO, teamId), HttpStatus.CREATED);
+            return new ResponseEntity<>(projectService.save(project, teamId), HttpStatus.CREATED);
         }catch(Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
@@ -58,9 +56,9 @@ public class ProjectController {
     }
 
     @PutMapping
-    public ResponseEntity<Project> save(@RequestBody ProjectEditionDTO projectEditionDTO){
+    public ResponseEntity<Project> save(@RequestBody Project project){
         try {
-            return new ResponseEntity<>(projectService.save(projectEditionDTO), HttpStatus.CREATED);
+            return new ResponseEntity<>(projectService.save(project), HttpStatus.CREATED);
         }catch(Exception e){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

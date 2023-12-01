@@ -14,7 +14,6 @@ import java.util.NoSuchElementException;
 @CrossOrigin
 @RestController
 @AllArgsConstructor
-@CrossOrigin
 @RequestMapping("/personalization")
 public class PersonalizationController {
 

@@ -24,7 +24,7 @@ public class ValueDeserializer extends StdDeserializer<Value> {
     }
 
     @Override
-    public Value deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JacksonException {
+    public Value deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         JsonNode node = jsonParser.getCodec().readTree(jsonParser);
 
         Property property = jsonParser.getCodec().treeToValue(node.get("property"), Property.class);
@@ -33,23 +33,23 @@ public class ValueDeserializer extends StdDeserializer<Value> {
 
         Value valueKind = property.getKind().getValue();
         valueKind.setProperty(property);
-        if(node.get("value") != null) {
+        if (node.get("value") != null) {
             JsonNode nodeV = node.get("value");
-            if(nodeV.get("id") != null){
+            if (nodeV.get("id") != null) {
                 valueKind.setId(nodeV.get("id").asLong());
             }
 
-            if(nodeV.get("value") != null) {
-                if(property.getKind() == PropertyKind.LIST ||
-                property.getKind() == PropertyKind.STATUS){
+            if (nodeV.get("value") != null) {
+                if (property.getKind() == PropertyKind.LIST ||
+                        property.getKind() == PropertyKind.STATUS) {
                     String value = nodeV.get("value").asText();
                     Long idList = Long.parseLong(value);
-                    for(PropertyList propertyList : property.getPropertyLists()){
-                        if(idList.equals(propertyList.getId())){
+                    for (PropertyList propertyList : property.getPropertyLists()) {
+                        if (idList.equals(propertyList.getId())) {
                             valueKind.setValue(propertyList);
                         }
                     }
-                }else {
+                } else {
                     String value = nodeV.get("value").asText();
                     valueKind.setValue(value);
                 }
@@ -57,7 +57,6 @@ public class ValueDeserializer extends StdDeserializer<Value> {
 
 
         }
-        System.out.println(valueKind);
         return valueKind;
     }
 }

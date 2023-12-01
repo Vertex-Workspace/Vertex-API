@@ -60,12 +60,12 @@ public class PropertyController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Property> delete(@PathVariable Long id){
+    public ResponseEntity<?> delete(@PathVariable Long id){
         try{
             propertyService.delete(id);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 }

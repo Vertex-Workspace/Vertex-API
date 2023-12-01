@@ -2,10 +2,15 @@ package com.vertex.vertex.team.service;
 
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.repository.TeamRepository;
+import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user.service.UserService;
+import com.vertex.vertex.user_team.model.entity.UserTeam;
+import com.vertex.vertex.user_team.service.UserTeamService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,7 +20,14 @@ public class TeamService {
 
     private final TeamRepository teamRepository;
 
+
+    //Services
+    private final UserService userService;
     public Team save(Team team) {
+        //Create a new row at table User_Team based on the user that has been created the team
+        UserTeam userTeam = new UserTeam(userService.findById(team.getCreator().getId()), team);
+        team.setUserTeams(List.of(userTeam));
+        team.setCreator(userTeam);
         return teamRepository.save(team);
     }
 
