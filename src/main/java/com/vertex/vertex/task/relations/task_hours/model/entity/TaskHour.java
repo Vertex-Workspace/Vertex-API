@@ -1,6 +1,7 @@
 package com.vertex.vertex.task.relations.task_hours.model.entity;
 
 import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.team.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -24,11 +25,6 @@ public class TaskHour {
     private Date finalDate;
 
     @ManyToOne
-    @NotNull
-    private Task task;
-
-    @ManyToOne
-    @NotNull
-    private UserTeam userTeam;
+    private TaskResponsable taskResponsable;
 
 }

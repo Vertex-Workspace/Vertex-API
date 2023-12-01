@@ -20,13 +20,13 @@ public class PermissionService {
     private final UserTeamService userTeamService;
 
     public Permission save(Permission permissionUser, Long userTeamId) {
-        if (userTeamService.existsById(userTeamId)) {
-            UserTeam ut = userTeamService.findById(userTeamId);
-            ut.getPermissionUser().add(permissionUser);
-            permissionUser.setUserTeam(ut);
-
-            return permissionRepository.save(permissionUser);
-        }
+//        if (userTeamService.existsById(userTeamId)) {
+//            UserTeam ut = userTeamService.findById(userTeamId);
+//            ut.getPermissionUser().add(permissionUser);
+//            permissionUser.setUserTeam(ut);
+//
+//            return permissionRepository.save(permissionUser);
+//        }
         throw new EntityNotFoundException();
     }
 

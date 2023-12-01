@@ -28,24 +28,24 @@ public class TaskHoursService {
     public void save(TaskHour taskHour) {
         //It receives just the initial date, beyond the user and task ID's
         try {
-            taskHour.setUserTeam(userTeamService.findById(taskHour.getUserTeam().getId()));
-
-            taskHour.setTask(taskService.findById(taskHour.getTask().getId()));
-
-            if(taskHoursRepository.
-                    existsTaskHourByFinalDateNullAndUserTeam_IdAndTask_Id(
-                            taskHour.getUserTeam().getId(), taskHour.getTask().getId())){
-                throw new RuntimeException("O usuário já está trabalhando em cima da tarefa!");
-            }
-
-            //Save or update a row on table task_hours
-            taskHoursRepository.save(taskHour);
-
-            //set the new state of working in this task
-            //The column working_on_task must be referenced when a new row is inserted here
-            taskHour.getUserTeam().setWorkingOnTaskHour(taskHour);
-
-            userTeamService.updateWorkingOnTask(taskHour.getUserTeam());
+//            taskHour.setUserTeam(userTeamService.findById(taskHour.getUserTeam().getId()));
+//
+//            taskHour.setTask(taskService.findById(taskHour.getTask().getId()));
+//
+//            if(taskHoursRepository.
+//                    existsTaskHourByFinalDateNullAndUserTeam_IdAndTask_Id(
+//                            taskHour.getUserTeam().getId(), taskHour.getTask().getId())){
+//                throw new RuntimeException("O usuário já está trabalhando em cima da tarefa!");
+//            }
+//
+//            //Save or update a row on table task_hours
+//            taskHoursRepository.save(taskHour);
+//
+//            //set the new state of working in this task
+//            //The column working_on_task must be referenced when a new row is inserted here
+//            taskHour.getUserTeam().setWorkingOnTaskHour(taskHour);
+//
+//            userTeamService.updateWorkingOnTask(taskHour.getUserTeam());
         } catch (Exception e){
             e.printStackTrace();
             throw e;
@@ -53,26 +53,26 @@ public class TaskHoursService {
     }
     public void save(TaskHourEditDTO taskHourEditDTO){
         try {
-            userTeamService.findById(taskHourEditDTO.getUserTeam());
-            taskService.findById(taskHourEditDTO.getTask());
-
-            //It understands that I'm editing
-            TaskHour taskHour =
-                    taskHoursRepository.
-                            findByUserTeam_IdAndTask_IdAndFinalDateNull
-                                    (taskHourEditDTO.getUserTeam(), taskHourEditDTO.getTask());
-
-            if(taskHour == null){
-                throw new RuntimeException("A tarefa já foi encerrada");
-            }
-            taskHour.setFinalDate(taskHourEditDTO.getFinalDate());
-
-            //Save or update a row on table task_hours
-            taskHoursRepository.save(taskHour);
-            //set the new state of working in this task
-            //The column working_on_task must be referenced when a new row is inserted here
-            taskHour.getUserTeam().setWorkingOnTaskHour(null);
-            userTeamService.updateWorkingOnTask(taskHour.getUserTeam());
+//            userTeamService.findById(taskHourEditDTO.getUserTeam());
+//            taskService.findById(taskHourEditDTO.getTask());
+//
+//            //It understands that I'm editing
+//            TaskHour taskHour =
+//                    taskHoursRepository.
+//                            findByUserTeam_IdAndTask_IdAndFinalDateNull
+//                                    (taskHourEditDTO.getUserTeam(), taskHourEditDTO.getTask());
+//
+//            if(taskHour == null){
+//                throw new RuntimeException("A tarefa já foi encerrada");
+//            }
+//            taskHour.setFinalDate(taskHourEditDTO.getFinalDate());
+//
+//            //Save or update a row on table task_hours
+//            taskHoursRepository.save(taskHour);
+//            //set the new state of working in this task
+//            //The column working_on_task must be referenced when a new row is inserted here
+//            taskHour.getUserTeam().setWorkingOnTaskHour(null);
+//            userTeamService.updateWorkingOnTask(taskHour.getUserTeam());
         } catch (Exception e){
             e.printStackTrace();
             throw e;
@@ -81,11 +81,13 @@ public class TaskHoursService {
 
 
     public List<TaskHour> findTaskHoursByUserTeamId(Long taskId, Long userId){
-        return taskHoursRepository.getTaskHoursByTask_IdAndUserTeam_Id(taskId, userId);
+//        return taskHoursRepository.getTaskHoursByTask_IdAndUserTeam_Id(taskId, userId);
+        return null;
     }
 
     public List<TaskHour> findAllByTask(Long taskId){
-        return taskHoursRepository.findAllByTask_Id(taskId);
+//        return taskHoursRepository.findAllByTask_Id(taskId);
+        return null;
     }
 
 }
