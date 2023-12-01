@@ -4,7 +4,7 @@ import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.DTO.EditValueDTO;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.entity.Task;
-import com.vertex.vertex.task.relations.comment.model.Comment;
+import com.vertex.vertex.task.relations.comment.model.entity.Comment;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.service.TaskService;
 import lombok.AllArgsConstructor;

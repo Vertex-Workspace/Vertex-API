@@ -1,7 +1,7 @@
 package com.vertex.vertex.task.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.vertex.vertex.task.relations.comment.model.Comment;
+import com.vertex.vertex.task.relations.comment.model.entity.Comment;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.value.model.entity.Value;

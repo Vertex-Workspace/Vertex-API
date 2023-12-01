@@ -1,4 +1,4 @@
-package com.vertex.vertex.task.relations.comment.model;
+package com.vertex.vertex.task.relations.comment.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.task.model.entity.Task;

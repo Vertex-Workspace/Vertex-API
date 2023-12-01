@@ -23,7 +23,7 @@ public class ProjectService {
     private final UserTeamService userTeamService;
 
     public Project save(Project project, Long teamId) {
-        Team team = null;
+        Team team;
         try {
             team = teamService.findById(teamId);
         } catch (Exception e) {
