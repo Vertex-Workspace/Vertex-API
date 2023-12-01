@@ -48,6 +48,13 @@ public class UserController {
         }
     }
 
+    @GetMapping("/email/{email}")
+    public ResponseEntity<User> findByEmail(@PathVariable String email) {
+        return new ResponseEntity<>
+                (userService.findByEmail(email),
+                        HttpStatus.OK);
+    }
+
     @GetMapping
     public ResponseEntity<Collection<User>> findAll(){
         return new ResponseEntity<>(userService.findAll(),HttpStatus.OK);
@@ -77,7 +84,8 @@ public class UserController {
             @RequestBody UserLoginDTO dto) {
 
         try {
-            return new ResponseEntity<>(userService.authenticate(dto),
+            return new ResponseEntity<>
+                    (userService.authenticate(dto),
                     HttpStatus.ACCEPTED);
 
         } catch (UserNotFoundException | IncorrectPasswordException e) {
