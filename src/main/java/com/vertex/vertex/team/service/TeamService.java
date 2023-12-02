@@ -4,6 +4,7 @@ import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
 import com.vertex.vertex.team.repository.TeamRepository;
+import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.service.UserService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.EntityNotFoundException;
@@ -40,6 +41,25 @@ public class TeamService {
 
     public Team update(Team team) {
         return teamRepository.save(team);
+    }
+
+    public Team updateUserTeam(UserTeam userTeam) {
+        try {
+            return teamRepository.save(findUserAndTeam(userTeam));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Team findUserAndTeam(UserTeam userTeam){
+        try {
+            User user = userService.findById(userTeam.getUser().getId());
+            Team team = findById(userTeam.getTeam().getId());
+            team.getUserTeams().add(new UserTeam(user, team))
+            return team;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Team findById(Long id) {

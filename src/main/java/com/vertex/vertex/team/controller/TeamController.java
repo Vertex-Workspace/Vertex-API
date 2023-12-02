@@ -2,6 +2,7 @@ package com.vertex.vertex.team.controller;
 
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
+import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.user.model.exception.UserNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
@@ -46,13 +47,24 @@ public class TeamController {
     }
 
     @PatchMapping("/user")
-    public ResponseEntity<?> update(@RequestBody Team team) {
+    public ResponseEntity<?> insertUserTeam(@RequestBody UserTeam userTeam) {
         try {
-            return new ResponseEntity<>(teamService.update(team), HttpStatus.OK);
+            return new ResponseEntity<>(teamService.updateUserTeam(userTeam), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
+    @DeleteMapping("/user")
+    public ResponseEntity<?> deleteUserTeam(@RequestBody UserTeam userTeam) {
+        try {
+            return new ResponseEntity<>(teamService.updateUserTeam(userTeam), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
