@@ -19,7 +19,7 @@ import java.util.List;
 @RequestMapping("/user-team")
 public class UserTeamController {
 
-    private UserTeamService userTeamService;
+    private final UserTeamService userTeamService;
 
     @GetMapping("/teams/{userId}")
     public ResponseEntity<List<TeamHomeDTO>> findTeamsByUserTeamHome(@PathVariable Long userId) {

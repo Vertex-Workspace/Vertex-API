@@ -28,15 +28,16 @@ public class Task {
     private String name;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<TaskResponsable> taskResponsables;
 
     private String description;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JsonIgnore
     private TaskResponsable creator;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
-    @JsonIgnore
     private List<Comment> comments;
 
     @ManyToOne
@@ -51,7 +52,6 @@ public class Task {
     private List<Task> subTasks;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
-    @JsonIgnore
     private List<Review> reviews;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "task")

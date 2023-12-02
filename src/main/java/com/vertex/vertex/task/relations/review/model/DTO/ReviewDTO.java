@@ -1,36 +1,22 @@
-package com.vertex.vertex.task.relations.review.model.entity;
+package com.vertex.vertex.task.relations.review.model.DTO;
 
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.team.relations.task_responsables.model.entity.TaskResponsable;
-import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
-import jakarta.persistence.*;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 
 @Data
-@Entity
 @AllArgsConstructor
-@NoArgsConstructor
-public class Review {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class ReviewDTO {
+
+    //task id
     private Long id;
-
     private String description;
-
     private Date date;
-
-    @ManyToOne
     private TaskResponsable reviewer;
-
-    @ManyToOne
-    private Task task;
-
     private Double grade;
-
     private Boolean approved;
-
 }

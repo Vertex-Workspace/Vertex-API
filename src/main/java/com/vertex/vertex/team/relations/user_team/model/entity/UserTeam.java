@@ -49,9 +49,7 @@ public class UserTeam {
 
 
     @OneToMany(mappedBy = "userTeam")
+    @JsonIgnore
     private List<TaskResponsable> taskResponsables;
-
-    @ManyToOne
-    private List<Task> tasks;
 
 }

@@ -16,6 +16,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TaskResponsable {
+
+    public TaskResponsable(UserTeam userTeam, Task task) {
+        this.userTeam = userTeam;
+        this.task = task;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,7 +31,6 @@ public class TaskResponsable {
 
     @ManyToOne
     private Task task;
-
 
     @OneToMany(mappedBy = "taskResponsable")
     private List<TaskHour> taskHours;

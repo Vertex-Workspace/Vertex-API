@@ -3,10 +3,14 @@ package com.vertex.vertex.task.controller;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.DTO.EditValueDTO;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
+import com.vertex.vertex.task.model.DTO.TaskResponsablesDTO;
 import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
+import com.vertex.vertex.task.relations.review.model.DTO.ReviewDTO;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.service.TaskService;
+import com.vertex.vertex.team.relations.task_responsables.model.entity.TaskResponsable;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +46,8 @@ public class TaskController {
     @PostMapping
     public ResponseEntity<?> save(@RequestBody TaskCreateDTO taskCreateDTO){
         try{
-            return new ResponseEntity<>(taskService.save(taskCreateDTO), HttpStatus.OK);
+            taskService.save(taskCreateDTO);
+            return new ResponseEntity<>(HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
         }
@@ -68,18 +73,27 @@ public class TaskController {
     }
 
     @PatchMapping("/comment")
-    public ResponseEntity<?> saveComment (@RequestBody Comment comment){
+    public ResponseEntity<?> saveComment (@RequestBody CommentDTO commentDTO){
         try{
-            return new ResponseEntity<>(taskService.saveComment(comment), HttpStatus.OK);
+            return new ResponseEntity<>(taskService.saveComment(commentDTO), HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
     @PatchMapping("/review")
-    public ResponseEntity<?> saveReview (@RequestBody Review review){
+    public ResponseEntity<?> saveReview (@RequestBody ReviewDTO reviewDTO){
         try{
-            return new ResponseEntity<>(taskService.saveReview(review), HttpStatus.OK);
+            return new ResponseEntity<>(taskService.saveReview(reviewDTO), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @PatchMapping("/responsables")
+    public ResponseEntity<?> saveResponsables (@RequestBody TaskResponsable taskResponsable){
+        try{
+            return new ResponseEntity<>(taskService.saveResponsables(taskResponsable), HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }

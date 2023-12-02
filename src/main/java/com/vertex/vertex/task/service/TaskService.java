@@ -6,11 +6,15 @@ import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.service.PropertyService;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.DTO.EditValueDTO;
+import com.vertex.vertex.task.model.DTO.TaskResponsablesDTO;
 import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
+import com.vertex.vertex.task.relations.review.model.DTO.ReviewDTO;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
+import com.vertex.vertex.team.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import lombok.AllArgsConstructor;
@@ -30,10 +34,11 @@ public class TaskService {
     private final PropertyService propertyService;
     private final UserTeamService userTeamService;
 
-    public Task save(TaskCreateDTO taskCreateDTO) {
+    public void save(TaskCreateDTO taskCreateDTO) {
         Task task = new Task();
         BeanUtils.copyProperties(taskCreateDTO, task);
         Project project;
+        TaskResponsable taskResponsable = new TaskResponsable();
         try {
             project = projectService.findById(taskCreateDTO.getProject().getId());
         } catch (Exception e) {
@@ -46,7 +51,15 @@ public class TaskService {
             currentValue.setTask(task);
             task.getValues().add(currentValue);
         }
-        return taskRepository.save(task);
+        //set the creator of the task
+        try {
+            taskResponsable.setUserTeam(userTeamService.findById(taskCreateDTO.getCreator().getUserTeam().getId()));
+            taskResponsable.setTask(task);
+            task.setCreator(taskResponsable);
+        }catch(Exception e){
+            throw new RuntimeException("Não foi encontrado o usuário para ele ser o criador da tarefa");
+        }
+        taskRepository.save(task);
     }
 
     public List<Task> findAll() {
@@ -86,26 +99,42 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    public Task saveComment(Comment comment) {
+    public Task saveComment(CommentDTO commentDTO) {
         Task task;
+        Comment comment = new Comment();
         try {
-            task = findById(comment.getTask().getId());
+            task = findById(commentDTO.getId());
         }catch(Exception e){
             throw new RuntimeException("Não existe uma tarefa com esse id para postar um comentário");
         }
+        BeanUtils.copyProperties(commentDTO, comment);
         task.getComments().add(comment);
         return taskRepository.save(task);
     }
 
-    public Task saveReview(Review review) {
-        Task task = findById(review.getTask().getId());
-        UserTeam userTeam = userTeamService.findById(review.getReviewer().getId());
-        for (int i = 0; i < task.getResponsables().size(); i++) {
-            if(task.getResponsables().get(i).getId().equals(userTeam.getId())){
+    public Task saveReview(ReviewDTO reviewDTO) {
+        Task task = findById(reviewDTO.getId());
+        Review review = new Review();
+        TaskResponsable taskResponsable = task.getCreator();
+            if(reviewDTO.getReviewer().getId().equals(taskResponsable.getId())){
+                BeanUtils.copyProperties(reviewDTO, review);
                 task.getReviews().add(review);
                 return taskRepository.save(task);
             }
+        throw new RuntimeException("O avaliador não é o criador da tarefa");
+
+    }
+
+    public Task saveResponsables(TaskResponsable taskResponsable){
+        Task task;
+        try {
+            task = findById(taskResponsable.getTask().getId());
+        }catch(Exception e){
+            throw new RuntimeException("Não há uma tarefa com esse id");
         }
-        throw new RuntimeException("Quem revisou a tarefa não faz parte da mesma equipe");
+        taskResponsable.setTask(task);
+        taskResponsable.setUserTeam(userTeamService.findById(taskResponsable.getUserTeam().getId()));
+        task.getTaskResponsables().add(taskResponsable);
+        return taskRepository.save(task);
     }
 }
