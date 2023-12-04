@@ -24,10 +24,6 @@ public class UserTeamService {
     private final UserService userService;
 
 
-    public void updateWorkingOnTask(UserTeam userTeam){
-        userTeamRepository.save(userTeam);
-    }
-
 
     public UserTeam findUserTeamByComposeId(Long teamId, Long userId){
         return userTeamRepository.findByTeam_IdAndUser_Id(teamId, userId);

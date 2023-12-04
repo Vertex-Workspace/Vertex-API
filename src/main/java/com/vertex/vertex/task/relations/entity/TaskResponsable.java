@@ -1,4 +1,4 @@
-package com.vertex.vertex.team.relations.task_responsables.model.entity;
+package com.vertex.vertex.task.relations.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.task.model.entity.Task;
