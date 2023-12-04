@@ -4,7 +4,9 @@ import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.team.model.DTO.TeamHomeDTO;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
+import com.vertex.vertex.team.relations.group.model.DTO.GroupDTO;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
+import com.vertex.vertex.team.relations.group.service.GroupService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.repository.TeamRepository;
@@ -29,6 +31,8 @@ public class TeamService {
     //Services
     private final UserService userService;
 
+    private final GroupService groupService;
+
     public Team save(Team team) {
         try {
             //Create a new row at table User_Team based on the user that has been created the team
@@ -38,24 +42,31 @@ public class TeamService {
 
             //After the Romas explanation about Date
 //            team.setCreationDate();
-
             return teamRepository.save(team);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public Team update(Team team) {
-        return teamRepository.save(team);
-    }
-
-    public Team updateGroup(Group group){
+    public Team editGroup(GroupDTO groupDTO) {
         try {
-            Team team = findById(group.getTeam().getId());
+            Group group = new Group();
+            Team team = findById(groupDTO.getTeam().getId());
+            group.setName(groupDTO.getName());
             group.setTeam(team);
+
+            //It verifies if the new group is a subgroup
+            if (groupDTO.getGroup()!= null){
+                System.out.println("Possui Pai");
+                Group fatherGroup = groupService.isSubGroup(team.getId(), groupDTO.getGroup().getId());
+                team.getGroups().get(team.getGroups().indexOf(fatherGroup)).getGroups().add(group);
+            } else{
+                System.out.println("Não Possui Pai");
+                group.setGroups(new ArrayList<>());
+                team.getGroups().add(group);
+            }
             System.out.println(group);
-            team.getGroups().add(group);
-            return team;
+            return teamRepository.save(team);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -69,20 +80,15 @@ public class TeamService {
 
             boolean userRemoved = false;
             for (UserTeam userTeamFor : team.getUserTeams()) {
-                if(userTeamFor.getUser().equals(user)) {
-                    System.out.println("Entrei no if e já existe");
+                if (userTeamFor.getUser().equals(user)) {
                     team.getUserTeams().remove(userTeamFor);
                     userRemoved = true;
-                    System.out.println("Exclui");
                     break;
                 }
             }
-            System.out.println("Working galera");
-            if(!userRemoved){
-                System.out.println("Validou nada e adicionei denovo");
+            if (!userRemoved) {
                 team.getUserTeams().add(new UserTeam(user, team));
             }
-            System.out.println(team);
             return teamRepository.save(team);
         } catch (Exception e) {
             throw new RuntimeException(e);

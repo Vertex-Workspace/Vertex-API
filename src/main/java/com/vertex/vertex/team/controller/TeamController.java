@@ -3,6 +3,7 @@ package com.vertex.vertex.team.controller;
 import com.vertex.vertex.team.model.DTO.TeamHomeDTO;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
+import com.vertex.vertex.team.relations.group.model.DTO.GroupDTO;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
@@ -50,7 +51,7 @@ public class TeamController {
     }
 
     @PatchMapping("/user")
-    public ResponseEntity<?> insertUserTeam(@RequestBody UserTeamAssociateDTO userTeam) {
+    public ResponseEntity<?> editUserTeam(@RequestBody UserTeamAssociateDTO userTeam) {
         try {
             return new ResponseEntity<>(teamService.editUserTeam(userTeam), HttpStatus.OK);
         } catch (Exception e) {
@@ -59,9 +60,9 @@ public class TeamController {
     }
 
     @PatchMapping("/group")
-    public ResponseEntity<?> insertNewGroup(@RequestBody Group group) {
+    public ResponseEntity<?> editGroup(@RequestBody GroupDTO group) {
         try {
-            return new ResponseEntity<>(teamService.updateGroup(group), HttpStatus.OK);
+            return new ResponseEntity<>(teamService.editGroup(group), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }

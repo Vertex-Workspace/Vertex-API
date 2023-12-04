@@ -38,7 +38,6 @@ public class Team {
     private List<Project> projects;
 
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL , orphanRemoval = true)
-    @JsonIgnore
     private List<Group> groups;
 
 
