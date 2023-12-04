@@ -14,19 +14,12 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
 @AllArgsConstructor
 @Service
 public class UserTeamService {
 
     private final UserTeamRepository userTeamRepository;
-    private final TeamService teamService;
-    private final UserService userService;
 
-
-    public void updateWorkingOnTask(UserTeam userTeam){
-        userTeamRepository.save(userTeam);
-    }
 
 
     public UserTeam findUserTeamByComposeId(Long teamId, Long userId){

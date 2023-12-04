@@ -1,7 +1,12 @@
 package com.vertex.vertex.team.controller;
 
+import com.vertex.vertex.team.model.DTO.TeamHomeDTO;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
+import com.vertex.vertex.team.relations.group.model.DTO.GroupDTO;
+import com.vertex.vertex.team.relations.group.model.entity.Group;
+import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
+import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.user.model.exception.UserNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
@@ -40,19 +45,32 @@ public class TeamController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Team>> findAll() {
+    public ResponseEntity<List<TeamHomeDTO>> findAll() {
         return new ResponseEntity<>(teamService.findAll(), HttpStatus.OK);
 
     }
 
     @PatchMapping("/user")
-    public ResponseEntity<?> update(@RequestBody Team team) {
+    public ResponseEntity<?> editUserTeam(@RequestBody UserTeamAssociateDTO userTeam) {
         try {
-            return new ResponseEntity<>(teamService.update(team), HttpStatus.OK);
+            return new ResponseEntity<>(teamService.editUserTeam(userTeam), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
+
+    @PatchMapping("/group")
+    public ResponseEntity<?> editGroup(@RequestBody GroupDTO group) {
+        try {
+            return new ResponseEntity<>(teamService.editGroup(group), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+
+
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
