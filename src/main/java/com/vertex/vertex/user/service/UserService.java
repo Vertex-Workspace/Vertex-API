@@ -5,6 +5,8 @@ import com.vertex.vertex.user.model.DTO.UserEditionDTO;
 import com.vertex.vertex.user.model.DTO.UserLoginDTO;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.exception.*;
+import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
+import com.vertex.vertex.user.relations.personalization.service.PersonalizationService;
 import com.vertex.vertex.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,6 +23,7 @@ import java.util.regex.Pattern;
 public class UserService {
 
     private UserRepository userRepository;
+    private PersonalizationService personalizationService;
 
     public User save(UserDTO userDTO) {
         User user = new User();
@@ -48,8 +51,6 @@ public class UserService {
             }
         }
 
-
-
         boolean securePassword =
                 Pattern.compile("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$")
                         .matcher(user.getPassword())
@@ -62,6 +63,9 @@ public class UserService {
         if (!userDTO.getPassword().equals(userDTO.getPasswordConf())) {
             throw new InvalidPasswordException();
         }
+
+        user.setPersonalization(personalizationService.defaultSave(user));
+
 
         return userRepository.save(user);
     }
@@ -117,5 +121,15 @@ public class UserService {
 
         throw new UserNotFoundException();
     }
+
+    public User patchUserPersonalization(Long id, Personalization personalization){
+        User user = findById(id);
+        System.out.println(user);
+        Personalization p = personalizationService.patchUserPersonalization(user,personalization);
+        user.setPersonalization(p);
+        return userRepository.save(user);
+    }
+
+
 
 }

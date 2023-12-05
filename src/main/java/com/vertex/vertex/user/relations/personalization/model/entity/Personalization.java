@@ -1,6 +1,7 @@
 package com.vertex.vertex.user.relations.personalization.model.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.user.relations.personalization.relations.fontFamily.model.entity.FontFamily;
 import com.vertex.vertex.user.relations.personalization.relations.fontSize.model.entity.FontSize;
 import com.vertex.vertex.user.relations.personalization.relations.primaryColor.model.entity.PrimaryColor;
@@ -10,6 +11,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Data
@@ -22,21 +24,23 @@ public class Personalization {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private PrimaryColor primaryColor;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private SecondColor secondColor;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private FontSize fontSize;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private FontFamily fontFamily;
 
     private Boolean voiceCommand;
     private Boolean listeningText;
     @OneToOne
+    @JsonIgnore
+    @ToString.Exclude
     private User user;
 
 }
