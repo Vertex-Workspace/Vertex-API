@@ -1,12 +1,11 @@
 package com.vertex.vertex.team.relations.user_team.service;
 
-import com.vertex.vertex.team.model.DTO.TeamHomeDTO;
+import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
+import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.service.TeamService;
-import com.vertex.vertex.user.service.UserService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +18,7 @@ import java.util.List;
 public class UserTeamService {
 
     private final UserTeamRepository userTeamRepository;
+    private final TeamService teamService;
 
 
 
@@ -26,12 +26,14 @@ public class UserTeamService {
         return userTeamRepository.findByTeam_IdAndUser_Id(teamId, userId);
     }
 
-    public List<TeamHomeDTO> findTeamsByUser(Long userID){
-        List<TeamHomeDTO> teams = new ArrayList<>();
+    public List<TeamInfoDTO> findTeamsByUser(Long userID){
+        List<TeamInfoDTO> teams = new ArrayList<>();
         for (UserTeam userTeam : userTeamRepository.findAllByUser_Id(userID)) {
-            TeamHomeDTO teamHomeDTO = new TeamHomeDTO();
-            BeanUtils.copyProperties(userTeam.getTeam(), teamHomeDTO);
-            teams.add(teamHomeDTO);
+            TeamInfoDTO dto = new TeamInfoDTO();
+            Team team = userTeam.getTeam();
+            BeanUtils.copyProperties(team, dto);
+            teamService.addUsers(dto, team);
+            teams.add(dto);
         }
         return teams;
     }

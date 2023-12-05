@@ -1,14 +1,12 @@
 package com.vertex.vertex.team.service;
 
-import com.vertex.vertex.project.model.entity.Project;
-import com.vertex.vertex.team.model.DTO.TeamHomeDTO;
+import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupDTO;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.group.service.GroupService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
-import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.repository.TeamRepository;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.service.UserService;
@@ -19,7 +17,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -39,6 +36,7 @@ public class TeamService {
             UserTeam userTeam = new UserTeam(userService.findById(team.getCreator().getId()), team);
             team.setUserTeams(List.of(userTeam));
             team.setCreator(userTeam);
+            System.out.println(team);
 
             //After the Romas explanation about Date
 //            team.setCreationDate();
@@ -51,7 +49,7 @@ public class TeamService {
     public Team editGroup(GroupDTO groupDTO) {
         try {
             Group group = new Group();
-            Team team = findById(groupDTO.getTeam().getId());
+            Team team = teamRepository.findById(groupDTO.getTeam().getId()).get();
             group.setName(groupDTO.getName());
             group.setTeam(team);
 
@@ -76,7 +74,7 @@ public class TeamService {
         try {
 
             User user = userService.findById(userTeam.getUser().getId());
-            Team team = findById(userTeam.getTeam().getId());
+            Team team = teamRepository.findById(userTeam.getTeam().getId()).get();
 
             boolean userRemoved = false;
             for (UserTeam userTeamFor : team.getUserTeams()) {
@@ -95,28 +93,36 @@ public class TeamService {
         }
     }
 
-    public Team findById(Long id) {
+    public TeamInfoDTO findById(Long id) {
+        TeamInfoDTO dto = new TeamInfoDTO(); //retorna as informações necessárias para a tela de equipe
+        Team team;
+
         if (teamRepository.existsById(id)) {
-            return teamRepository.findById(id).get();
+            team = teamRepository.findById(id).get();
+           BeanUtils.copyProperties(team, dto);
+           addUsers(dto, team); //adiciona os usuários ao grupo com base no userTeam, para utilização no fe
+           return dto;
         }
         throw new TeamNotFoundException(id);
     }
 
-    public List<TeamHomeDTO> findAll() {
-        List<TeamHomeDTO> teamHomeDTOS = new ArrayList<>();
+    public List<TeamInfoDTO> findAll() {
+        List<TeamInfoDTO> teamHomeDTOS = new ArrayList<>();
 
         for (Team team : teamRepository.findAll()) {
-            TeamHomeDTO teamHomeDTO = new TeamHomeDTO();
-            BeanUtils.copyProperties(team, teamHomeDTO);
-            teamHomeDTOS.add(teamHomeDTO);
+            TeamInfoDTO dto = new TeamInfoDTO();
+            BeanUtils.copyProperties(team, dto);
+            teamHomeDTOS.add(dto);
         }
         return teamHomeDTOS;
     }
 
     public void deleteById(Long id) {
         try {
-            Team team = findById(id);
-            teamRepository.delete(team);
+            if (teamRepository.existsById(id)) {
+                Team team = teamRepository.findById(id).get();
+                teamRepository.delete(team);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -124,6 +130,24 @@ public class TeamService {
 
     public boolean existsById(Long id) {
         return teamRepository.existsById(id);
+    }
+
+    public Team findTeamById(Long id) {
+        if (teamRepository.existsById(id)) {
+            return teamRepository.findById(id).get();
+        }
+        throw new EntityNotFoundException();
+    }
+
+    public void addUsers(TeamInfoDTO dto, Team team) {
+        List<User> users = new ArrayList<>();
+
+        team.getUserTeams()
+                .forEach(ut -> {
+                    users.add(ut.getUser());
+                });
+
+        dto.setUsers(users);
     }
 
 }

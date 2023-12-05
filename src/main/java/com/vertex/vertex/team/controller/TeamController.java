@@ -1,14 +1,10 @@
 package com.vertex.vertex.team.controller;
 
-import com.vertex.vertex.team.model.DTO.TeamHomeDTO;
+import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.entity.Team;
-import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupDTO;
-import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
-import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.service.TeamService;
-import com.vertex.vertex.user.model.exception.UserNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -35,7 +31,7 @@ public class TeamController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Team> findById(@PathVariable Long id) {
+    public ResponseEntity<TeamInfoDTO> findById(@PathVariable Long id) {
         try {
             return new ResponseEntity<>(teamService.findById(id), HttpStatus.OK);
 
@@ -45,7 +41,7 @@ public class TeamController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TeamHomeDTO>> findAll() {
+    public ResponseEntity<List<TeamInfoDTO>> findAll() {
         return new ResponseEntity<>(teamService.findAll(), HttpStatus.OK);
 
     }
