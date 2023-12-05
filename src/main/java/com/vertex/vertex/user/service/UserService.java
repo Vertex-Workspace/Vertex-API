@@ -100,10 +100,11 @@ public class UserService {
     }
 
     public User findById(Long id) {
-        if (!getUserRepository().existsById(id)) {
-            throw new UserNotFoundException();
+        try {
+            return userRepository.findById(id).get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return userRepository.findById(id).get();
     }
 
     public void deleteById(Long id) {

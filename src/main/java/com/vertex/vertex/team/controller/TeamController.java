@@ -26,13 +26,22 @@ public class TeamController {
     private final TeamService teamService;
 
     @PostMapping
-    public ResponseEntity<?> save(@RequestBody Team team) {
+    public ResponseEntity<?> save(@RequestBody TeamHomeDTO team) {
         try {
             return new ResponseEntity<>(teamService.save(team), HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
+    @PutMapping
+    public ResponseEntity<?> update(@RequestBody TeamHomeDTO team) {
+        try {
+            return new ResponseEntity<>(teamService.save(team), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Team> findById(@PathVariable Long id) {
@@ -44,12 +53,18 @@ public class TeamController {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<List<TeamHomeDTO>> findAll() {
-        return new ResponseEntity<>(teamService.findAll(), HttpStatus.OK);
-
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        try {
+            teamService.deleteById(id);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
     }
 
+
+    //EDIT CASCADE TYPE ALL OBJECTS
     @PatchMapping("/user")
     public ResponseEntity<?> editUserTeam(@RequestBody UserTeamAssociateDTO userTeam) {
         try {
@@ -67,19 +82,6 @@ public class TeamController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
-
-
-
-
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        try {
-            teamService.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        }
-    }
+    //
 
 }

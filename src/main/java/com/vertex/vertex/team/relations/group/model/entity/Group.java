@@ -2,6 +2,7 @@ package com.vertex.vertex.team.relations.group.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.team.model.entity.Team;
+import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,7 +29,17 @@ public class Group {
     @ToString.Exclude
     private Team team;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Group> groups;
+//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "group")
+//    private List<Group> subgroups;
+
+    @ManyToOne
+//    @JsonIgnore
+//    @ToString.Exclude
+    private Group group;
+
+    @ManyToMany(mappedBy = "groups")
+    private List<UserTeam> userTeams;
+
+
 
 }

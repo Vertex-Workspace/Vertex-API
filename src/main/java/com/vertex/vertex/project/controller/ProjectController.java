@@ -27,7 +27,7 @@ public class ProjectController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Project>> findAll(){
+    public ResponseEntity<List<Project>> findAllByTeam(){
         try{
             return new ResponseEntity<>(projectService.findAll(), HttpStatus.OK);
         }catch(Exception e){
@@ -36,11 +36,11 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Project> findById(@PathVariable Long id){
+    public ResponseEntity<?> findById(@PathVariable Long id){
         try{
             return new ResponseEntity<>(projectService.findById(id), HttpStatus.OK);
         }catch(Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
@@ -56,7 +56,7 @@ public class ProjectController {
     }
 
     @PutMapping
-    public ResponseEntity<Project> save(@RequestBody Project project){
+    public ResponseEntity<Project> update(@RequestBody Project project){
         try {
             return new ResponseEntity<>(projectService.save(project), HttpStatus.CREATED);
         }catch(Exception e){

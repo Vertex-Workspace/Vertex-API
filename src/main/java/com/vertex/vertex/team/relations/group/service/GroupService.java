@@ -18,6 +18,10 @@ public class GroupService {
     private final GroupRepository groupRepository;
 
 
+    public Group save(Group group){
+        return groupRepository.save(group);
+    }
+
     public Group isSubGroup(Long teamId, Long groupId){
         return groupRepository.findByTeam_IdAndId(teamId, groupId);
     }
