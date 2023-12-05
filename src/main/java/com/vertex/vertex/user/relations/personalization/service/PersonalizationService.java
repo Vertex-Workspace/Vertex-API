@@ -1,6 +1,7 @@
 package com.vertex.vertex.user.relations.personalization.service;
 
 import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user.relations.personalization.model.dto.PersonalizationDTO;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import com.vertex.vertex.user.relations.personalization.relations.fontFamily.repository.FontFamilyRepository;
 import com.vertex.vertex.user.relations.personalization.relations.fontSize.repository.FontSizeRepository;
@@ -48,16 +49,16 @@ public class PersonalizationService {
         return personalization;
     }
 
-    public Personalization patchUserPersonalization(User user,Personalization personalization){
-        personalization.setPrimaryColor(primaryColorRepository.findById(personalization.getPrimaryColor().getId()).get());
-        personalization.setSecondColor(secondColorRepository.findById(personalization.getSecondColor().getId()).get());
-        personalization.setFontFamily(fontFamilyRepository.findById(personalization.getFontFamily().getId()).get());
-        personalization.setFontSize(fontSizeRepository.findById(personalization.getFontSize().getId()).get());
-        personalization.setVoiceCommand(personalization.getVoiceCommand());
-        personalization.setListeningText(personalization.getListeningText());
+    public Personalization patchUserPersonalization(User user, PersonalizationDTO dto){
+        Personalization personalization = new Personalization();
+        personalization.setId(user.getId());
+        personalization.setPrimaryColor(primaryColorRepository.findById(dto.getPrimaryColor()).get());
+        personalization.setSecondColor(secondColorRepository.findById(dto.getSecondColor()).get());
+        personalization.setFontFamily(fontFamilyRepository.findById(dto.getFontFamily()).get());
+        personalization.setFontSize(fontSizeRepository.findById(dto.getFontSize()).get());
+        personalization.setVoiceCommand(dto.getVoiceCommand());
+        personalization.setListeningText(dto.getListeningText());
         personalization.setUser(user);
-
-        System.out.println(personalization);
 
         return personalization;
     }

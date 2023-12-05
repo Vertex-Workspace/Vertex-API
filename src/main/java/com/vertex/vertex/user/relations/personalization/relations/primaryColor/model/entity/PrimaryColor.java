@@ -16,5 +16,7 @@ public class PrimaryColor {
 
     private String primaryColor;
 
-
+    public PrimaryColor(String primaryColor) {
+        this.primaryColor = primaryColor;
+    }
 }

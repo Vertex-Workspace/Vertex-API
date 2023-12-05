@@ -1,7 +1,9 @@
 package com.vertex.vertex.user.relations.personalization.model.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vertex.vertex.user.relations.personalization.relations.fontFamily.model.entity.FontFamily;
 import com.vertex.vertex.user.relations.personalization.relations.fontSize.model.entity.FontSize;
 import com.vertex.vertex.user.relations.personalization.relations.primaryColor.model.entity.PrimaryColor;
@@ -17,7 +19,6 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Inheritance(strategy = InheritanceType.JOINED)
 public class Personalization {
 
     @Id
@@ -38,9 +39,9 @@ public class Personalization {
 
     private Boolean voiceCommand;
     private Boolean listeningText;
+
     @OneToOne
     @JsonIgnore
     @ToString.Exclude
     private User user;
-
 }

@@ -5,6 +5,7 @@ import com.vertex.vertex.user.model.DTO.UserEditionDTO;
 import com.vertex.vertex.user.model.DTO.UserLoginDTO;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.exception.*;
+import com.vertex.vertex.user.relations.personalization.model.dto.PersonalizationDTO;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import com.vertex.vertex.user.relations.personalization.service.PersonalizationService;
 import com.vertex.vertex.user.service.UserService;
@@ -35,8 +36,6 @@ public class UserController {
                 | InvalidPasswordException
                 | UnsafePasswordException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        } catch (Exception e) {
-            return new ResponseEntity<>("Preencha todos os campos!", HttpStatus.CONFLICT);
         }
     }
 
@@ -104,10 +103,11 @@ public class UserController {
     }
 
     @PatchMapping("/{id}/personalization")
-    public ResponseEntity<?> patchControllerUser(@PathVariable Long id, @RequestBody Personalization personalization) {
+    public ResponseEntity<?> patchControllerUser(@PathVariable Long id, @RequestBody PersonalizationDTO personalization) {
         try {
             return new ResponseEntity<>(this.userService.patchUserPersonalization(id,personalization),HttpStatus.OK);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
         }
     }
