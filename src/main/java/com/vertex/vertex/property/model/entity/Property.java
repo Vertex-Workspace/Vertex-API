@@ -37,6 +37,6 @@ public class Property {
     @ToString.Exclude
     private Project project;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "property")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "property", orphanRemoval = true)
     private List<PropertyList> propertyLists;
 }

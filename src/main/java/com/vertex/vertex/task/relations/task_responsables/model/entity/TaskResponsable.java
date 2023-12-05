@@ -1,4 +1,4 @@
-package com.vertex.vertex.team.relations.task_responsables.model.entity;
+package com.vertex.vertex.task.relations.task_responsables.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.task.model.entity.Task;
@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -27,12 +28,16 @@ public class TaskResponsable {
     private Long id;
 
     @ManyToOne
+    @JsonIgnore
+    @ToString.Exclude
     private UserTeam userTeam;
 
     @ManyToOne
+    @JsonIgnore
+    @ToString.Exclude
     private Task task;
 
-    @OneToMany(mappedBy = "taskResponsable")
+    @OneToMany(mappedBy = "taskResponsable", orphanRemoval = true)
     private List<TaskHour> taskHours;
 
 }

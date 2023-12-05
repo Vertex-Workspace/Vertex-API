@@ -14,7 +14,6 @@ import com.vertex.vertex.task.relations.value.model.entity.Value;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -26,7 +25,6 @@ import static com.vertex.vertex.property.model.ENUM.PropertyKind.STATUS;
 public class PropertyService {
 
     private final PropertyRepository propertyRepository;
-
     private final ProjectService projectService;
 
     public Property save(PropertyRegisterDTO propertyRegisterDTO) {
@@ -52,7 +50,15 @@ public class PropertyService {
         return propertyRepository.save(property);
     }
 
+    //in this method, we need, firstly, remove the value, and then remove the property
     public void delete(Long id) {
+        Property property = findById(id);
+        Project project = projectService.findById(property.getProject().getId());
+        for (Task task : project.getTasks()) {
+            for (int i = 0; i < task.getValues().size(); i++) {
+                task.getValues().remove(i);
+            }
+        }
         propertyRepository.deleteById(id);
     }
 

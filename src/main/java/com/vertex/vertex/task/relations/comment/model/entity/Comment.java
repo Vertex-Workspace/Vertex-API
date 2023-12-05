@@ -2,8 +2,7 @@ package com.vertex.vertex.task.relations.comment.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.task.model.entity.Task;
-import com.vertex.vertex.team.relations.task_responsables.model.entity.TaskResponsable;
-import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
+import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,8 +23,11 @@ public class Comment {
     private String comment;
     private Date date;
     @ManyToOne
+    @JsonIgnore
+    @ToString.Exclude
     private TaskResponsable taskResponsable;
     @ManyToOne
+    @JsonIgnore
     @ToString.Exclude
     private Task task;
 }
