@@ -25,7 +25,7 @@ public class ProjectService {
     public Project save(Project project, Long teamId) {
         Team team = null;
         try {
-            team = teamService.findById(teamId);
+            team = teamService.findTeamById(teamId);
         } catch (Exception e) {
             throw new EntityNotFoundException("There isn't a team with this id!");
         }

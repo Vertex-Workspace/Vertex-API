@@ -1,27 +1,28 @@
 package com.vertex.vertex.team.model.DTO;
 
+import com.vertex.vertex.project.model.entity.Project;
+import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
-import jakarta.persistence.Column;
-import jakarta.persistence.OneToOne;
+import com.vertex.vertex.user.model.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TeamHomeDTO {
+public class TeamInfoDTO {
 
     private Long id;
-
     private String name;
-
     private UserTeam creator;
-
     private String description;
-
     private LocalDateTime creationDate;
+    private List<User> users;
+    private List<Project> projects;
+    private List<Group> groups;
 
 }
