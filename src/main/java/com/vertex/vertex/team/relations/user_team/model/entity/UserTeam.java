@@ -42,7 +42,8 @@ public class UserTeam {
     @JsonIgnore
     private List<Permission> permissionUser;
 
-    @OneToMany
+    @ManyToMany
+    @JsonIgnore
     private List<Group> groups;
 
 

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @CrossOrigin
 @RestController
@@ -26,21 +27,21 @@ public class ProjectController {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<List<Project>> findAll(){
+    @GetMapping("/team/{teamId}")
+    public ResponseEntity<?> findAllByTeam(@PathVariable Long teamId){
         try{
-            return new ResponseEntity<>(projectService.findAll(), HttpStatus.OK);
+            return new ResponseEntity<>(projectService.findAll(teamId), HttpStatus.OK);
         }catch(Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Project> findById(@PathVariable Long id){
+    public ResponseEntity<?> findById(@PathVariable Long id){
         try{
             return new ResponseEntity<>(projectService.findById(id), HttpStatus.OK);
         }catch(Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
@@ -56,7 +57,7 @@ public class ProjectController {
     }
 
     @PutMapping
-    public ResponseEntity<Project> save(@RequestBody Project project){
+    public ResponseEntity<Project> update(@RequestBody Project project){
         try {
             return new ResponseEntity<>(projectService.save(project), HttpStatus.CREATED);
         }catch(Exception e){
