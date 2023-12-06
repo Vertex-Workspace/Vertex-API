@@ -41,7 +41,4 @@ public class Review {
     @Enumerated(value = EnumType.STRING)
     private ApproveStatus approveStatus;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    private Review review;
-
 }

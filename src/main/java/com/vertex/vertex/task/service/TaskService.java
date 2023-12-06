@@ -2,11 +2,11 @@ package com.vertex.vertex.task.service;
 
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
-import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.service.PropertyService;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
-import com.vertex.vertex.task.relations.review.model.DTO.SendReview;
+import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
+import com.vertex.vertex.task.relations.review.model.DTO.SetFinishedTask;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.relations.task_responsables.model.DTOs.TaskResponsablesDTO;
@@ -14,7 +14,6 @@ import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.model.exceptions.TaskDoesNotExistException;
 import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
-import com.vertex.vertex.task.relations.review.model.DTO.ReviewDTO;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
@@ -99,6 +98,7 @@ public class TaskService {
                 currentValue.setProperty(property);
                 currentValue.setValue(editValueDTO.getValue().getValue());
                 task.getValues().set(i, currentValue);
+                task.setApproveStatus(ApproveStatus.INPROGRESS);
             }
         }
         return taskRepository.save(task);
@@ -133,39 +133,7 @@ public class TaskService {
             }
         }
         return taskRepository.save(task);
-    }
 
-    //verify if the reviewer is the creator of the task
-    public Task saveReview(ReviewDTO reviewDTO) {
-        Task task = findById(reviewDTO.getTask().getId());
-        Review review;
-        TaskResponsable taskResponsable = taskResponsablesRepository.findById(reviewDTO.getReviewer().getId()).get();
-
-        if (reviewDTO.getId() != null) {
-            for (Review reviewFor : task.getReviews()) {
-                if (reviewFor.getId().equals(reviewDTO.getId())) {
-                    review = reviewFor;
-                    task.getReviews().remove(review);
-                    return taskRepository.save(task);
-                }
-            }
-        } else {
-            review = new Review();
-            if (task.getCreator().getId().equals(taskResponsable.getId())) {
-                BeanUtils.copyProperties(reviewDTO, review);
-                review.setReview(reviewDTO.getReview());
-                for(Review reviewFor : task.getReviews()){
-                    if(reviewFor.getId().equals(reviewDTO.getReview().getId())){
-                        System.out.println(reviewFor);
-                        reviewFor.setApproveStatus(reviewDTO.getApproveStatus());
-                    }
-                }
-                task.getReviews().add(review);
-            } else {
-                throw new RuntimeException("O usuário não é o criador da tarefa");
-            }
-        }
-        return taskRepository.save(task);
     }
 
     //add responsables to the task
@@ -201,24 +169,45 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    public Task sendReview(SendReview sendReview) {
-        Task task = findById(sendReview.getTask().getId());
-        Review review;
+    public Task save(Task task) {
+        return taskRepository.save(task);
+    }
 
-        if (sendReview.getId() != null) {
+    public Task saveReview(ReviewCheck reviewCheck) {
+        Task task = findById(reviewCheck.getTask().getId());
+        Review review;
+        TaskResponsable taskResponsable = taskResponsablesRepository.findById(reviewCheck.getReviewer().getId()).get();
+
+        if (reviewCheck.getId() != null) {
             for (Review reviewFor : task.getReviews()) {
-                if (reviewFor.getId().equals(sendReview.getId())) {
+                if (reviewFor.getId().equals(reviewCheck.getId())) {
                     review = reviewFor;
                     task.getReviews().remove(review);
-                    return taskRepository.save(task);
+                    return save(task);
                 }
             }
         } else {
             review = new Review();
-            BeanUtils.copyProperties(sendReview, review);
-            review.setApproveStatus(ApproveStatus.UNDERANALYSIS);
-            task.getReviews().add(review);
+            if (task.getCreator().getId().equals(taskResponsable.getId())) {
+                BeanUtils.copyProperties(reviewCheck, review);
+                task.getReviews().add(review);
+                task.setApproveStatus(reviewCheck.getApproveStatus());
+            } else {
+                throw new RuntimeException("O usuário não é o criador da tarefa");
+            }
         }
-        return taskRepository.save(task);
+        return save(task);
+    }
+
+    public Task taskUnderAnalysis(SetFinishedTask setFinishedTask) {
+        Task task = findById(setFinishedTask.getTask().getId());
+        if (task.getApproveStatus() == ApproveStatus.DISAPPROVED ||
+                task.getApproveStatus() == ApproveStatus.INPROGRESS) {
+            task.setApproveStatus(ApproveStatus.UNDERANALYSIS);
+            task.setFinishDescription(setFinishedTask.getFinishDescription());
+        }else if(task.getApproveStatus() == ApproveStatus.APPROVED){
+            throw new RuntimeException("A tarefa já foi aprovada. Ela não pode voltar para análise");
+        }
+        return save(task);
     }
 }

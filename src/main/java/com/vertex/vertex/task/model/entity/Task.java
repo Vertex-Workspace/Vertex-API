@@ -60,5 +60,8 @@ public class Task {
     @Enumerated(value = EnumType.STRING)
     private ApproveStatus approveStatus;
 
+    private String finishDescription;
+
+
 
 }

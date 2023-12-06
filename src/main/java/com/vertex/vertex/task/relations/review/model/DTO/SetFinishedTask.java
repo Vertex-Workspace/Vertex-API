@@ -8,10 +8,8 @@ import java.sql.Date;
 
 @AllArgsConstructor
 @Data
-public class SendReview {
+public class SetFinishedTask {
 
-    private Long id;
     private Task task;
-    private String description;
-    private Date date;
+    private String finishDescription;
 }

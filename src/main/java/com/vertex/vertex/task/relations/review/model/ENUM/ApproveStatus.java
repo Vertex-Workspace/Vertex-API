@@ -4,5 +4,6 @@ public enum ApproveStatus {
 
     APPROVED(),
     DISAPPROVED(),
-    UNDERANALYSIS();
+    UNDERANALYSIS(),
+    INPROGRESS();
 }

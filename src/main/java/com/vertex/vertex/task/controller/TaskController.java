@@ -1,18 +1,15 @@
 package com.vertex.vertex.task.controller;
 
 import com.vertex.vertex.property.model.entity.Property;
-import com.vertex.vertex.task.relations.comment.model.entity.Comment;
-import com.vertex.vertex.task.relations.review.model.DTO.SendReview;
-import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
+import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
+import com.vertex.vertex.task.relations.review.model.DTO.SetFinishedTask;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.relations.task_responsables.model.DTOs.TaskResponsablesDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
-import com.vertex.vertex.task.relations.review.model.DTO.ReviewDTO;
 import com.vertex.vertex.task.service.TaskService;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -83,18 +80,18 @@ public class TaskController {
     }
 
     @PatchMapping("/review")
-    public ResponseEntity<?> saveReview (@RequestBody ReviewDTO reviewDTO){
+    public ResponseEntity<?> saveReview (@RequestBody ReviewCheck reviewCheck){
         try{
-            return new ResponseEntity<>(taskService.saveReview(reviewDTO), HttpStatus.OK);
+            return new ResponseEntity<>(taskService.saveReview(reviewCheck), HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
-    @PatchMapping("/send-review")
-    public ResponseEntity<?> saveToReview (@RequestBody SendReview sendReview){
+    @PatchMapping("/send-to-review")
+    public ResponseEntity<?> saveToReview (@RequestBody SetFinishedTask setFinishedTask){
         try{
-            return new ResponseEntity<>(taskService.sendReview(sendReview), HttpStatus.OK);
+            return new ResponseEntity<>(taskService.taskUnderAnalysis(setFinishedTask), HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }

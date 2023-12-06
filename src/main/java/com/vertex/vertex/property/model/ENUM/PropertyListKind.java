@@ -4,7 +4,6 @@ public enum PropertyListKind {
 
     TODO(),
     DOING(),
-    DONE(),
-    UNDERANALYSIS()
+    DONE();
 
 }

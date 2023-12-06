@@ -112,7 +112,6 @@ public class PropertyService {
         propertiesList.add(new PropertyList("to-do default", Color.RED, property, PropertyListKind.TODO));
         propertiesList.add(new PropertyList("doing default", Color.YELLOW, property, PropertyListKind.DOING));
         propertiesList.add(new PropertyList("done default", Color.GREEN, property, PropertyListKind.DONE));
-        propertiesList.add(new PropertyList("analysis", Color.PURPLE, property, PropertyListKind.UNDERANALYSIS));
         return propertiesList;
     }
 }
