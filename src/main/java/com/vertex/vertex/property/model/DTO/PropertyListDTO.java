@@ -12,6 +12,7 @@ import java.util.List;
 @Data
 public class PropertyListDTO {
 
+    //property Id
     private Long id;
     private List<PropertyList> propertyLists;
 

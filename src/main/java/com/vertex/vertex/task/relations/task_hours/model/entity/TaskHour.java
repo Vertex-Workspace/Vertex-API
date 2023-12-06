@@ -1,6 +1,7 @@
 package com.vertex.vertex.task.relations.task_hours.model.entity;
 
-import com.vertex.vertex.task.relations.entity.TaskResponsable;
+
+import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

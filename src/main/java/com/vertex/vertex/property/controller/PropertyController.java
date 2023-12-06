@@ -32,12 +32,12 @@ public class PropertyController {
         }
     }
     @PostMapping
-    public ResponseEntity<Property> save(@RequestBody PropertyRegisterDTO propertyRegisterDTO){
+    public ResponseEntity<?> save(@RequestBody PropertyRegisterDTO propertyRegisterDTO){
         try{
             return new ResponseEntity<>(propertyService.save(propertyRegisterDTO), HttpStatus.CREATED);
 
         } catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
