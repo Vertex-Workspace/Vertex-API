@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -43,8 +44,8 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
-    public List<Project> findAll(){
-        return projectRepository.findAll();
+    public Set<Project> findAll(Long teamID){
+        return projectRepository.findAllByTeam_Id(teamID);
     }
 
     public Project findById(Long id){

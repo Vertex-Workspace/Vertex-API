@@ -1,11 +1,13 @@
 package com.vertex.vertex.team.service;
 
-import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.team.model.DTO.TeamHomeDTO;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
-import com.vertex.vertex.team.relations.group.model.DTO.GroupDTO;
+import com.vertex.vertex.team.relations.group.model.DTO.GroupEditUserDTO;
+import com.vertex.vertex.team.relations.group.model.DTO.GroupRegisterDTO;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
+import com.vertex.vertex.team.relations.group.model.exception.GroupNameInvalidException;
+import com.vertex.vertex.team.relations.group.model.exception.GroupNotFoundException;
 import com.vertex.vertex.team.relations.group.service.GroupService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
@@ -13,13 +15,11 @@ import com.vertex.vertex.team.repository.TeamRepository;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.service.UserService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -31,8 +31,9 @@ public class TeamService {
 
     //Services
     private final UserService userService;
-
+    private final UserTeamService userTeamService;
     private final GroupService groupService;
+
 
     public Team save(TeamHomeDTO teamHomeDTO) {
         try {
@@ -88,41 +89,50 @@ public class TeamService {
     }
 
 
-
-    //Ajuda Romas Estrutura
-    // One to Many or Many to One
-    // Veracidade da usabilidade de listas no front-end
-    public Team editGroup(GroupDTO groupDTO) {
+    public Team editGroup(GroupRegisterDTO groupRegisterDTO) {
         try {
             Group group = new Group();
-            Team team = findById(groupDTO.getTeam().getId());
-            group.setName(groupDTO.getName());
+            Team team = findById(groupRegisterDTO.getTeam().getId());
 
+            if (groupRegisterDTO.getName().length() < 1) {
+                throw new GroupNameInvalidException();
+            }
 
-//            //It verifies if the new group is a subgroup
-//            if (groupDTO.getGroup() != null) {
-//
-//                System.out.println("Possui Pai");
-//                Group fatherGroup = groupService.isSubGroup(team.getId(), groupDTO.getGroup().getId());
-//                System.out.println(fatherGroup);
-//                group.setGroup(fatherGroup);
-//                groupService.save(group);
-//                //team.getGroups().get(team.getGroups().indexOf(fatherGroup)).getSubgroups().add(group);
-//            } else {
-//                System.out.println("Não Possui Pai");
-//                group.setSubgroups(new ArrayList<>());
-//                group.setTeam(team);
-//                team.getGroups().add(group);
-//            }
-            System.out.println(group);
+            group.setName(groupRegisterDTO.getName());
+            team.getGroups().add(group);
+            group.setTeam(team);
             return teamRepository.save(team);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    public Group editUserIntoGroup(GroupEditUserDTO groupEditUserDTO) {
+        try {
+            Group group = groupService.findById(groupEditUserDTO.getGroupId());
+            UserTeam userTeam = userTeamService.findById(groupEditUserDTO.getUserTeam().getId());
 
+            if (userTeam.getTeam().getGroups().contains(group)) {
 
+                //This logic makes a validation to verify if the user is already associated with this group
+                //If it is, then the associated will be removed.
+                if (userTeam.getGroups().contains(group) || group.getUserTeams().contains(userTeam)) {
+                    userTeam.getGroups().remove(group);
+                    group.getUserTeams().remove(userTeam);
+                }
+                //Else, it will be associated and the user will be on the group.
+                else {
+                    userTeam.getGroups().add(group);
+                    group.getUserTeams().add(userTeam);
+                }
+                return groupService.edit(group);
+            } else {
+                throw new GroupNotFoundException(group.getId());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 
     public Team editUserTeam(UserTeamAssociateDTO userTeam) {
@@ -143,6 +153,14 @@ public class TeamService {
                 team.getUserTeams().add(new UserTeam(user, team));
             }
             return teamRepository.save(team);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Group> findGroupsByTeamId(Long idTeam) {
+        try {
+            return findById(idTeam).getGroups();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

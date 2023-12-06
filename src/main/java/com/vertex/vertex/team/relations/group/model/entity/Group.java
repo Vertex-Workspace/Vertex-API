@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,13 +32,6 @@ public class Group {
     @ToString.Exclude
     private Team team;
 
-//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "group")
-//    private List<Group> subgroups;
-
-    @ManyToOne
-//    @JsonIgnore
-//    @ToString.Exclude
-    private Group group;
 
     @ManyToMany(mappedBy = "groups")
     private List<UserTeam> userTeams;

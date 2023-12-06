@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @CrossOrigin
 @RestController
@@ -26,12 +27,12 @@ public class ProjectController {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<List<Project>> findAllByTeam(){
+    @GetMapping("/team/{teamId}")
+    public ResponseEntity<?> findAllByTeam(@PathVariable Long teamId){
         try{
-            return new ResponseEntity<>(projectService.findAll(), HttpStatus.OK);
+            return new ResponseEntity<>(projectService.findAll(teamId), HttpStatus.OK);
         }catch(Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 

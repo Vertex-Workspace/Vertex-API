@@ -2,20 +2,15 @@ package com.vertex.vertex.team.controller;
 
 import com.vertex.vertex.team.model.DTO.TeamHomeDTO;
 import com.vertex.vertex.team.model.entity.Team;
-import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
-import com.vertex.vertex.team.relations.group.model.DTO.GroupDTO;
-import com.vertex.vertex.team.relations.group.model.entity.Group;
+import com.vertex.vertex.team.relations.group.model.DTO.GroupEditUserDTO;
+import com.vertex.vertex.team.relations.group.model.DTO.GroupRegisterDTO;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
-import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.service.TeamService;
-import com.vertex.vertex.user.model.exception.UserNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @CrossOrigin
 @RestController
@@ -63,6 +58,15 @@ public class TeamController {
         }
     }
 
+    @GetMapping("/{idTeam}/groups")
+    public ResponseEntity<?> findGroupsByTeamId(@PathVariable Long idTeam) {
+        try {
+            return new ResponseEntity<>(teamService.findGroupsByTeamId(idTeam), HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
 
     //EDIT CASCADE TYPE ALL OBJECTS
     @PatchMapping("/user")
@@ -75,13 +79,22 @@ public class TeamController {
     }
 
     @PatchMapping("/group")
-    public ResponseEntity<?> editGroup(@RequestBody GroupDTO group) {
+    public ResponseEntity<?> editGroup(@RequestBody GroupRegisterDTO groupRegisterDTO) {
         try {
-            return new ResponseEntity<>(teamService.editGroup(group), HttpStatus.OK);
+            return new ResponseEntity<>(teamService.editGroup(groupRegisterDTO), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
     //
+
+    @PatchMapping("/group/user")
+    public ResponseEntity<?> editUserIntoGroup(@RequestBody GroupEditUserDTO groupEditUserDTO) {
+        try {
+            return new ResponseEntity<>(teamService.editUserIntoGroup(groupEditUserDTO), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
 
 }

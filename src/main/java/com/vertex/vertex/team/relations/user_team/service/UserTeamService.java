@@ -35,4 +35,9 @@ public class UserTeamService {
         }
         return teams;
     }
+
+    public UserTeam findById(Long userTeamId){
+        return userTeamRepository.findById(userTeamId).get();
+    }
+
 }

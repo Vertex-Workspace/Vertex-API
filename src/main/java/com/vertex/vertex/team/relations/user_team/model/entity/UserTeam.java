@@ -43,6 +43,7 @@ public class UserTeam {
     private List<Permission> permissionUser;
 
     @ManyToMany
+    @JsonIgnore
     private List<Group> groups;
 
 
