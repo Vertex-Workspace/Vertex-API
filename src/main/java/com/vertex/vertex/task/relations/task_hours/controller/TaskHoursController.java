@@ -16,6 +16,7 @@ import java.util.List;
 @RequestMapping("/task-hours")
 public class TaskHoursController {
     private final TaskHoursService taskHoursService;
+
     @GetMapping("/{taskId}/user/{userId}")
     public ResponseEntity<List<TaskHour>> findHoursByUserId(@PathVariable Long taskId, @PathVariable Long userId){
         try{
@@ -35,14 +36,15 @@ public class TaskHoursController {
     }
 
     @PostMapping
-    public ResponseEntity<HttpStatus> save(@RequestBody TaskHour taskHour){
+    public ResponseEntity<?> save(@RequestBody TaskHour taskHour){
         try{
             taskHoursService.save(taskHour);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
+
     @PatchMapping
     public ResponseEntity<HttpStatus> update(@RequestBody TaskHourEditDTO taskHourEditDTO){
         try{

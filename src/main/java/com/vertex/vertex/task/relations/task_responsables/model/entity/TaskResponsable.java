@@ -38,6 +38,7 @@ public class TaskResponsable {
     private Task task;
 
     @OneToMany(mappedBy = "taskResponsable", orphanRemoval = true)
+    @JsonIgnore
+    @ToString.Exclude
     private List<TaskHour> taskHours;
-
 }

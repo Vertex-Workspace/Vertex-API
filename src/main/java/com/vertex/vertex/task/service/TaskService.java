@@ -2,7 +2,9 @@ package com.vertex.vertex.task.service;
 
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
+import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.Property;
+import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.property.service.PropertyService;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
@@ -54,6 +56,14 @@ public class TaskService {
             currentValue.setProperty(property);
             currentValue.setTask(task);
             task.getValues().add(currentValue);
+
+            for (int i = 0; i < task.getValues().size(); i++) {
+                for (PropertyList propertyList : task.getValues().get(i).getProperty().getPropertyLists()) {
+                    if(propertyList.getPropertyListKind() == PropertyListKind.TODO) {
+                        currentValue.setValue(propertyList);
+                    }
+                }
+            }
         }
         //set the creator of the task
         try {
