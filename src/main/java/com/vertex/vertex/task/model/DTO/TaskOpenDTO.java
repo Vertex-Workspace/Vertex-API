@@ -17,16 +17,10 @@ import java.util.List;
 public class TaskOpenDTO {
 
     private String name;
-
     private String description;
-
     private List<TaskResponsable> responsables;
-
     private List<Comment> comments;
-
     private Task taskDependency;
-
-
     //future implementation
     private List<Task> subTasks;
 

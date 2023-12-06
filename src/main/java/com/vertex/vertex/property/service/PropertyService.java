@@ -4,6 +4,8 @@ import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.property.model.DTO.PropertyListDTO;
 import com.vertex.vertex.property.model.DTO.PropertyRegisterDTO;
+import com.vertex.vertex.property.model.ENUM.Color;
+import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.property.model.exceptions.ProjectDoesNotExistException;
@@ -14,6 +16,8 @@ import com.vertex.vertex.task.relations.value.model.entity.Value;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -43,10 +47,11 @@ public class PropertyService {
                 newValue.setTask(task);
                 project.getTasks().get(i).getValues().add(newValue);
             }
+            property.setPropertyLists(defaultStatus(property));
+            propertyRepository.save(property);
         } catch (Exception e) {
             throw new ProjectDoesNotExistException();
         }
-
         return propertyRepository.save(property);
     }
 
@@ -82,6 +87,7 @@ public class PropertyService {
                         //if the id doesn't exists, it means that this elements will be saved with a new id
                         property.getPropertyLists().add(list);
                         list.setProperty(property);
+                        System.out.println("e");
                     } else {
                         throw new PropertyIsNotAListException();
                     }
@@ -101,4 +107,12 @@ public class PropertyService {
         return propertyRepository.save(property);
     }
 
+    public List<PropertyList> defaultStatus(Property property){
+        List<PropertyList> propertiesList = new ArrayList<>();
+        propertiesList.add(new PropertyList("to-do default", Color.RED, property, PropertyListKind.TODO));
+        propertiesList.add(new PropertyList("doing default", Color.YELLOW, property, PropertyListKind.DOING));
+        propertiesList.add(new PropertyList("done default", Color.GREEN, property, PropertyListKind.DONE));
+        propertiesList.add(new PropertyList("analysis", Color.PURPLE, property, PropertyListKind.UNDERANALYSIS));
+        return propertiesList;
+    }
 }

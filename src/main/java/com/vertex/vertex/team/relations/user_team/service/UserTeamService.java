@@ -8,6 +8,7 @@ import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.stereotype.Service;
 
 
@@ -45,5 +46,9 @@ public class UserTeamService {
 
     public UserTeam findById(Long id){
         return userTeamRepository.findById(id).get();
+    }
+
+    public List<UserTeam> findAll(){
+        return userTeamRepository.findAll();
     }
 }

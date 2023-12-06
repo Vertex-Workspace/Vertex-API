@@ -2,6 +2,7 @@ package com.vertex.vertex.task.controller;
 
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
+import com.vertex.vertex.task.relations.review.model.DTO.SendReview;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
@@ -85,6 +86,15 @@ public class TaskController {
     public ResponseEntity<?> saveReview (@RequestBody ReviewDTO reviewDTO){
         try{
             return new ResponseEntity<>(taskService.saveReview(reviewDTO), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @PatchMapping("/send-review")
+    public ResponseEntity<?> saveToReview (@RequestBody SendReview sendReview){
+        try{
+            return new ResponseEntity<>(taskService.sendReview(sendReview), HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }

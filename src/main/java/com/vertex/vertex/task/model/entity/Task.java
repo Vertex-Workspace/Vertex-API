@@ -3,6 +3,7 @@ package com.vertex.vertex.task.model.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
 import com.vertex.vertex.project.model.entity.Project;
+import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
@@ -55,5 +56,9 @@ public class Task {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "task", orphanRemoval = true)
     private List<Value> values;
+
+    @Enumerated(value = EnumType.STRING)
+    private ApproveStatus approveStatus;
+
 
 }

@@ -2,10 +2,12 @@ package com.vertex.vertex.task.service;
 
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
-import com.vertex.vertex.property.model.ENUM.PropertyKind;
+import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.service.PropertyService;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
+import com.vertex.vertex.task.relations.review.model.DTO.SendReview;
+import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.relations.task_responsables.model.DTOs.TaskResponsablesDTO;
 import com.vertex.vertex.task.model.entity.Task;
@@ -14,7 +16,6 @@ import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
 import com.vertex.vertex.task.relations.review.model.DTO.ReviewDTO;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
-import com.vertex.vertex.task.relations.value.model.entity.ValueList;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
@@ -57,7 +58,7 @@ public class TaskService {
         }
         //set the creator of the task
         try {
-            taskResponsable.setUserTeam(userTeamService.findById(taskCreateDTO.getCreator().getUserTeam().getId()));
+            taskResponsable.setUserTeam(userTeamService.findById(taskCreateDTO.getCreator().getId()));
             taskResponsable.setTask(task);
             task.setCreator(taskResponsable);
         } catch (Exception e) {
@@ -152,7 +153,13 @@ public class TaskService {
             review = new Review();
             if (task.getCreator().getId().equals(taskResponsable.getId())) {
                 BeanUtils.copyProperties(reviewDTO, review);
-                approveReview(review);
+                review.setReview(reviewDTO.getReview());
+                for(Review reviewFor : task.getReviews()){
+                    if(reviewFor.getId().equals(reviewDTO.getReview().getId())){
+                        System.out.println(reviewFor);
+                        reviewFor.setApproveStatus(reviewDTO.getApproveStatus());
+                    }
+                }
                 task.getReviews().add(review);
             } else {
                 throw new RuntimeException("O usuário não é o criador da tarefa");
@@ -176,11 +183,10 @@ public class TaskService {
             throw new RuntimeException("Não há um usuário com esse id");
         }
 
-        for (TaskResponsable taskResponsable1 : task.getTaskResponsables()) {
-            if (taskResponsable1.getId().equals(taskResponsableDTO.getId())) {
-                taskResponsable = taskResponsable1;
+        for (TaskResponsable taskResponsableFor : task.getTaskResponsables()) {
+            if (taskResponsableFor.getId().equals(taskResponsableDTO.getId())) {
+                taskResponsable = taskResponsableFor;
                 task.getTaskResponsables().remove(taskResponsable);
-                System.out.println(taskResponsable);
                 return taskRepository.save(task);
             }
         }
@@ -195,20 +201,24 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    //method to change the status of the task that was revised
-    public void approveReview(Review review) {
-        Task task = findById(review.getTask().getId());
-        System.out.println(task);
-        for (int i = 0; i < task.getValues().size(); i++) {
-            PropertyKind propertyKind = task.getValues().get(i).getProperty().getKind();
-            if (propertyKind == PropertyKind.STATUS) {
-                if (review.getApproved()) {
-                    System.out.println(task.getValues());
-                    task.getValues();
-                }else{
-                    propertyKind.getValue().setValue("UNDER ANALYSIS");
+    public Task sendReview(SendReview sendReview) {
+        Task task = findById(sendReview.getTask().getId());
+        Review review;
+
+        if (sendReview.getId() != null) {
+            for (Review reviewFor : task.getReviews()) {
+                if (reviewFor.getId().equals(sendReview.getId())) {
+                    review = reviewFor;
+                    task.getReviews().remove(review);
+                    return taskRepository.save(task);
                 }
             }
+        } else {
+            review = new Review();
+            BeanUtils.copyProperties(sendReview, review);
+            review.setApproveStatus(ApproveStatus.UNDERANALYSIS);
+            task.getReviews().add(review);
         }
+        return taskRepository.save(task);
     }
 }
