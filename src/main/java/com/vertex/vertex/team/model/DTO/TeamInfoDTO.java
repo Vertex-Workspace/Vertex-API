@@ -14,13 +14,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TeamInfoDTO {
-
-    private Long id;
-    private String name;
-    private UserTeam creator;
-    private String description;
-    private LocalDateTime creationDate;
+public class TeamInfoDTO extends TeamViewListDTO{
     private List<User> users;
     private List<Project> projects;
     private List<Group> groups;

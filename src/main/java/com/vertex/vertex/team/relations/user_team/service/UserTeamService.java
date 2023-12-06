@@ -1,6 +1,7 @@
 package com.vertex.vertex.team.relations.user_team.service;
 
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
+import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.service.TeamService;
@@ -18,7 +19,6 @@ import java.util.List;
 public class UserTeamService {
 
     private final UserTeamRepository userTeamRepository;
-    private final TeamService teamService;
 
 
 
@@ -26,15 +26,19 @@ public class UserTeamService {
         return userTeamRepository.findByTeam_IdAndUser_Id(teamId, userId);
     }
 
-    public List<TeamInfoDTO> findTeamsByUser(Long userID){
-        List<TeamInfoDTO> teams = new ArrayList<>();
+    public List<TeamViewListDTO> findTeamsByUser(Long userID){
+        List<TeamViewListDTO> teams = new ArrayList<>();
         for (UserTeam userTeam : userTeamRepository.findAllByUser_Id(userID)) {
-            TeamInfoDTO dto = new TeamInfoDTO();
+            TeamViewListDTO dto = new TeamViewListDTO();
             Team team = userTeam.getTeam();
             BeanUtils.copyProperties(team, dto);
-            teamService.addUsers(dto, team);
             teams.add(dto);
         }
         return teams;
     }
+
+    public UserTeam findById(Long userTeamId){
+        return userTeamRepository.findById(userTeamId).get();
+    }
+
 }
