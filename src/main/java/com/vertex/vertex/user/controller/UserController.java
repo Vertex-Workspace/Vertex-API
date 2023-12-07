@@ -5,7 +5,6 @@ import com.vertex.vertex.user.model.DTO.UserEditionDTO;
 import com.vertex.vertex.user.model.DTO.UserLoginDTO;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.exception.*;
-import com.vertex.vertex.user.relations.personalization.model.dto.PersonalizationDTO;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import com.vertex.vertex.user.relations.personalization.service.PersonalizationService;
 import com.vertex.vertex.user.service.UserService;
@@ -65,7 +64,7 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<?> findById(@PathVariable Long id) {
         try {
-            return new ResponseEntity<>(userService.findById(id), HttpStatus.FOUND);
+            return new ResponseEntity<>(userService.findById(id), HttpStatus.OK);
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
         }
@@ -103,7 +102,7 @@ public class UserController {
     }
 
     @PatchMapping("/{id}/personalization")
-    public ResponseEntity<?> patchControllerUser(@PathVariable Long id, @RequestBody PersonalizationDTO personalization) {
+    public ResponseEntity<?> patchControllerUser(@PathVariable Long id, @RequestBody Personalization personalization) {
         try {
             return new ResponseEntity<>(this.userService.patchUserPersonalization(id,personalization),HttpStatus.OK);
         } catch (Exception e) {

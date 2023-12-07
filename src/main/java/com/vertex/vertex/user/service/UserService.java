@@ -5,9 +5,7 @@ import com.vertex.vertex.user.model.DTO.UserEditionDTO;
 import com.vertex.vertex.user.model.DTO.UserLoginDTO;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.exception.*;
-import com.vertex.vertex.user.relations.personalization.model.dto.PersonalizationDTO;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
-import com.vertex.vertex.user.relations.personalization.relations.fontSize.repository.FontSizeRepository;
 import com.vertex.vertex.user.relations.personalization.service.PersonalizationService;
 import com.vertex.vertex.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -25,9 +23,8 @@ import java.util.regex.Pattern;
 @Service
 public class UserService {
 
-    private UserRepository userRepository;
-    private PersonalizationService personalizationService;
-    private FontSizeRepository fontSizeRepository;
+    private final UserRepository userRepository;
+    private final PersonalizationService personalizationService;
 
     public User save(UserDTO userDTO) {
         User user = new User();
@@ -105,10 +102,6 @@ public class UserService {
         }
     }
 
-    public boolean existsById(Long id) {
-        return userRepository.existsById(id);
-    }
-
     public User authenticate(UserLoginDTO dto) {
         if (userRepository.existsByEmail
                 (dto.getEmail())) {
@@ -126,12 +119,16 @@ public class UserService {
         throw new UserNotFoundException();
     }
 
-    public User patchUserPersonalization(Long id, PersonalizationDTO dto){
+    public User patchUserPersonalization(Long id, Personalization personalization){
         User user = findById(id);
-        Personalization p = personalizationService.patchUserPersonalization(user,dto);
-        user.setPersonalization(p);
+
+        personalization.setId(user.getPersonalization().getId());
+        personalization.setUser(user);
+        user.setPersonalization(personalization);
+
         return userRepository.save(user);
     }
+
 
 
 
