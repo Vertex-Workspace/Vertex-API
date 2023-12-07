@@ -13,7 +13,6 @@ import java.sql.Date;
 @AllArgsConstructor
 public class TaskHourEditDTO {
 
-    private Date finalDate;
     private Task task;
     private TaskResponsable taskResponsable;
 

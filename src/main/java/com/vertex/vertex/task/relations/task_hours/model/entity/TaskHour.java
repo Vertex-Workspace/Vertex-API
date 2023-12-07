@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Data
 @Entity
@@ -17,11 +19,13 @@ public class TaskHour {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Date initialDate;
+    private LocalDateTime initialDate;
 
-    private Date finalDate;
+    private LocalDateTime finalDate;
 
     @ManyToOne
     private TaskResponsable taskResponsable;
+
+    private LocalTime timeSpent;
 
 }

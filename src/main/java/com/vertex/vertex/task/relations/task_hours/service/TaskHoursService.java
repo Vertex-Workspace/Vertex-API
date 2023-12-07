@@ -13,7 +13,10 @@ import lombok.Data;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -31,54 +34,81 @@ public class TaskHoursService {
 
     public void save(TaskHour taskHour) {
         int cont = 0;
-        System.out.println(LocalDateTime.now());
-            TaskResponsable taskResponsable = taskResponsablesService.findById(taskHour.getTaskResponsable().getId());
-            taskHour.setTaskResponsable(taskResponsable);
-            taskResponsable.getTaskHours().add(taskHour);
+        TaskResponsable taskResponsable = taskResponsablesService.findById(taskHour.getTaskResponsable().getId());
+        taskHour.setTaskResponsable(taskResponsable);
+        taskResponsable.getTaskHours().add(taskHour);
 
-            for (int i = 0; i < taskResponsable.getTaskHours().size(); i++) {
-                if (taskResponsable.getTaskHours().get(i).getFinalDate() == null) {
-                    cont = cont + 1;
-                }
+        for (int i = 0; i < taskResponsable.getTaskHours().size(); i++) {
+            if (taskResponsable.getTaskHours().get(i).getFinalDate() == null) {
+                cont = cont + 1;
             }
+        }
         //we gotta set less one because it is taking the last row with no attributes in database
         cont = cont - 1;
         for (int i = 0; i < taskResponsable.getTaskHours().size(); i++) {
-            if(cont == 0){
+            if (cont == 0) {
+                taskHour.setInitialDate(LocalDateTime.now());
                 taskHoursRepository.save(taskHour);
-            }else {
+            } else {
                 throw new TaskIsNotFinishedException();
             }
         }
     }
-    public void save(TaskHourEditDTO taskHourEditDTO){
+
+    public void save(TaskHourEditDTO taskHourEditDTO) {
         try {
             int cont = 0;
             TaskResponsable taskResponsable = taskResponsablesService.findById(taskHourEditDTO.getTaskResponsable().getId());
 
             for (int i = 0; i < taskResponsable.getTaskHours().size(); i++) {
-                if(taskResponsable.getTaskHours().get(i).getFinalDate() == null) {
+                if (taskResponsable.getTaskHours().get(i).getFinalDate() == null) {
                     TaskHour taskHour = taskResponsable.getTaskHours().get(i);
                     BeanUtils.copyProperties(taskHourEditDTO, taskHour);
 
-                    taskResponsable.getTaskHours().get(i).setFinalDate(taskHourEditDTO.getFinalDate());
+                    taskResponsable.getTaskHours().get(i).setFinalDate(LocalDateTime.now());
                     taskHoursRepository.save(taskHour);
 
                 }
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             throw e;
         }
     }
 
+    public List<LocalTime> timeInTask(TaskHourEditDTO taskHourEditDTO) {
+        List<LocalTime> localTimes = new ArrayList<>();
+        LocalTime resultado = LocalTime.of(0, 0);
+        TaskResponsable taskResponsable = taskResponsablesService.findById(taskHourEditDTO.getTaskResponsable().getId());
+        for (int i = 0; i < taskResponsable.getTaskHours().size(); i++) {
+            TaskHour taskHour = taskResponsable.getTaskHours().get(i);
+            BeanUtils.copyProperties(taskHourEditDTO, taskHour);
+            Duration timeSpentInTask = Duration.between(taskResponsable.getTaskHours().get(i).getInitialDate(),
+                    taskResponsable.getTaskHours().get(i).getFinalDate());
+            LocalTime lt = LocalTime.ofNanoOfDay(timeSpentInTask.toNanos());
+            taskResponsable.getTaskHours().get(i).setTimeSpent(lt);
+            taskHoursRepository.save(taskHour);
 
-    public List<TaskHour> findTaskHoursByUserTeamId(Long taskId, Long userId){
+            LocalTime time1 = LocalTime.of(lt.getHour(), lt.getMinute(), lt.getSecond());
+            localTimes.add(time1);
+            System.out.println(localTimes);
+
+            for (LocalTime tempo : localTimes) {
+                resultado = resultado.plusHours(tempo.getHour()).plusMinutes(tempo.getMinute()).plusSeconds(tempo.getSecond());
+            }
+
+        }
+        System.out.println(resultado);
+        return localTimes;
+    }
+
+
+    public List<TaskHour> findTaskHoursByUserTeamId(Long taskId, Long userId) {
 //        return taskHoursRepository.getTaskHoursByTask_IdAndUserTeam_Id(taskId, userId);
         return null;
     }
 
-    public List<TaskHour> findAllByTask(Long taskId){
+    public List<TaskHour> findAllByTask(Long taskId) {
 //        return taskHoursRepository.findAllByTask_Id(taskId);
         return null;
     }

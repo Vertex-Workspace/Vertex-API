@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -33,6 +34,11 @@ public class TaskHoursController {
         } catch (Exception e){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
+    }
+
+    @GetMapping("/time-in-task")
+    public List<LocalTime> timeInTask(@RequestBody TaskHourEditDTO taskHourEditDTO){
+        return taskHoursService.timeInTask(taskHourEditDTO);
     }
 
     @PostMapping
