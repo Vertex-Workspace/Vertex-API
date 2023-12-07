@@ -37,7 +37,7 @@ public class TaskHoursController {
     }
 
     @GetMapping("/time-in-task")
-    public List<LocalTime> timeInTask(@RequestBody TaskHourEditDTO taskHourEditDTO){
+    public LocalTime timeInTask(@RequestBody TaskHourEditDTO taskHourEditDTO){
         return taskHoursService.timeInTask(taskHourEditDTO);
     }
 
@@ -52,12 +52,12 @@ public class TaskHoursController {
     }
 
     @PatchMapping
-    public ResponseEntity<HttpStatus> update(@RequestBody TaskHourEditDTO taskHourEditDTO){
+    public ResponseEntity<?> update(@RequestBody TaskHourEditDTO taskHourEditDTO){
         try{
             taskHoursService.save(taskHourEditDTO);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 }

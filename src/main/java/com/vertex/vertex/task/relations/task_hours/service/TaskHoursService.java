@@ -19,8 +19,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.time.LocalTime.MIDNIGHT;
-
 @Service
 @AllArgsConstructor
 @Data
@@ -58,52 +56,38 @@ public class TaskHoursService {
     }
 
     public void save(TaskHourEditDTO taskHourEditDTO) {
-        try {
-            int cont = 0;
-            TaskResponsable taskResponsable = taskResponsablesService.findById(taskHourEditDTO.getTaskResponsable().getId());
+        int cont = 0;
+        TaskResponsable taskResponsable = taskResponsablesService.findById(taskHourEditDTO.getTaskResponsable().getId());
 
-            for (int i = 0; i < taskResponsable.getTaskHours().size(); i++) {
-                if (taskResponsable.getTaskHours().get(i).getFinalDate() == null) {
-                    TaskHour taskHour = taskResponsable.getTaskHours().get(i);
-                    BeanUtils.copyProperties(taskHourEditDTO, taskHour);
+        for (int i = 0; i < taskResponsable.getTaskHours().size(); i++) {
+            if (taskResponsable.getTaskHours().get(i).getFinalDate() == null) {
+                TaskHour taskHour = taskResponsable.getTaskHours().get(i);
+                BeanUtils.copyProperties(taskHourEditDTO, taskHour);
 
-                    taskResponsable.getTaskHours().get(i).setFinalDate(LocalDateTime.now());
-                    taskHoursRepository.save(taskHour);
+                taskResponsable.getTaskHours().get(i).setFinalDate(LocalDateTime.now());
+                BeanUtils.copyProperties(taskHourEditDTO, taskHour);
+                //calculate the difference between the initial and final date and set as timeSpent;
+                Duration timeSpentInTask = Duration.between(taskResponsable.getTaskHours().get(i).getInitialDate(),
+                        taskResponsable.getTaskHours().get(i).getFinalDate());
+                taskResponsable.getTaskHours().get(i).setTimeSpent(LocalTime.ofNanoOfDay(timeSpentInTask.toNanos()));
 
-                }
+                taskHoursRepository.save(taskHour);
+
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
         }
     }
 
-    public List<LocalTime> timeInTask(TaskHourEditDTO taskHourEditDTO) {
-        List<LocalTime> localTimes = new ArrayList<>();
-        LocalTime resultado = MIDNIGHT;
+    public LocalTime timeInTask(TaskHourEditDTO taskHourEditDTO) {
         TaskResponsable taskResponsable = taskResponsablesService.findById(taskHourEditDTO.getTaskResponsable().getId());
+
+        Duration duracaoTotal = Duration.ZERO;
+        //sum all the time spent of one taskResponsable
         for (int i = 0; i < taskResponsable.getTaskHours().size(); i++) {
-            TaskHour taskHour = taskResponsable.getTaskHours().get(i);
-            BeanUtils.copyProperties(taskHourEditDTO, taskHour);
-            Duration timeSpentInTask = Duration.between(taskResponsable.getTaskHours().get(i).getInitialDate(),
-                    taskResponsable.getTaskHours().get(i).getFinalDate());
-            LocalTime lt = LocalTime.ofNanoOfDay(timeSpentInTask.toNanos());
-            taskResponsable.getTaskHours().get(i).setTimeSpent(lt);
-            taskHoursRepository.save(taskHour);
-
-            LocalTime time1 = LocalTime.of(lt.getHour(), lt.getMinute(), lt.getSecond());
-            localTimes.add(time1);
-            System.out.println(localTimes);
-
-            for (LocalTime tempo : localTimes) {
-//                LocalTime tempoLocal = LocalTime.parse(tempo);
-                System.out.println(tempo.getSecond());
-                resultado = resultado.plusHours(tempo.getHour()).plusMinutes(tempo.getMinute()).plusSeconds(tempo.getSecond());
-            }
-
+            duracaoTotal = duracaoTotal.plusHours(taskResponsable.getTaskHours().get(i).getTimeSpent().getHour())
+                    .plusMinutes(taskResponsable.getTaskHours().get(i).getTimeSpent().getMinute())
+                    .plusSeconds(taskResponsable.getTaskHours().get(i).getTimeSpent().getSecond());
         }
-        System.out.println(resultado);
-        return localTimes;
+        return LocalTime.MIDNIGHT.plus(duracaoTotal);
     }
 
 
