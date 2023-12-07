@@ -44,6 +44,7 @@ public class Project {
     @OneToOne
     private Project projectDependency;
 
+    //create a list of properties if it doesn't exist
     public void addProperty(Property property) {
         if(properties != null){
             properties.add(property);

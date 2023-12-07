@@ -47,7 +47,6 @@ public class ProjectService {
         project.setCreator(userTeam);
         project.setTeam(team);
         property.setPropertyLists(defaultStatus(property));
-        System.out.println(property);
         project.addProperty(property);
         property.setProject(project);
         team.getProjects().add(project);

@@ -47,7 +47,6 @@ public class PropertyService {
                 newValue.setTask(task);
                 project.getTasks().get(i).getValues().add(newValue);
             }
-            property.setPropertyLists(defaultStatus(property));
             propertyRepository.save(property);
         } catch (Exception e) {
             throw new ProjectDoesNotExistException();
@@ -105,13 +104,5 @@ public class PropertyService {
             throw e;
         }
         return propertyRepository.save(property);
-    }
-
-    public List<PropertyList> defaultStatus(Property property){
-        List<PropertyList> propertiesList = new ArrayList<>();
-        propertiesList.add(new PropertyList("to-do default", Color.RED, property, PropertyListKind.TODO));
-        propertiesList.add(new PropertyList("doing default", Color.YELLOW, property, PropertyListKind.DOING));
-        propertiesList.add(new PropertyList("done default", Color.GREEN, property, PropertyListKind.DONE));
-        return propertiesList;
     }
 }
