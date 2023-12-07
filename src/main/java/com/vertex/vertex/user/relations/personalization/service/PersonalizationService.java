@@ -32,6 +32,7 @@ public class PersonalizationService {
         personalization.setSecondColor("#F3F3F3");
         personalization.setFontFamily("arial");
         personalization.setFontSize(14);
+        personalization.setTheme(0);
         personalization.setVoiceCommand(false);
         personalization.setListeningText(false);
         personalization.setUser(user);

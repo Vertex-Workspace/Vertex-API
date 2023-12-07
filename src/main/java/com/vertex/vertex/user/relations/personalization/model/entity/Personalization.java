@@ -21,7 +21,7 @@ public class Personalization {
     private String secondColor;
     private Integer fontSize;
     private String fontFamily;
-    private String theme;
+    private Integer theme;
     private Boolean voiceCommand;
     private Boolean listeningText;
 
