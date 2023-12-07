@@ -39,4 +39,11 @@ public class Property {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "property", orphanRemoval = true)
     private List<PropertyList> propertyLists;
+
+    public Property(PropertyKind kind, String name, Boolean isObligate, String defaultValue) {
+        this.kind = kind;
+        this.name = name;
+        this.isObligate = isObligate;
+        this.defaultValue = defaultValue;
+    }
 }

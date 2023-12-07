@@ -19,6 +19,8 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.time.LocalTime.MIDNIGHT;
+
 @Service
 @AllArgsConstructor
 @Data
@@ -78,7 +80,7 @@ public class TaskHoursService {
 
     public List<LocalTime> timeInTask(TaskHourEditDTO taskHourEditDTO) {
         List<LocalTime> localTimes = new ArrayList<>();
-        LocalTime resultado = LocalTime.of(0, 0);
+        LocalTime resultado = MIDNIGHT;
         TaskResponsable taskResponsable = taskResponsablesService.findById(taskHourEditDTO.getTaskResponsable().getId());
         for (int i = 0; i < taskResponsable.getTaskHours().size(); i++) {
             TaskHour taskHour = taskResponsable.getTaskHours().get(i);
@@ -94,6 +96,8 @@ public class TaskHoursService {
             System.out.println(localTimes);
 
             for (LocalTime tempo : localTimes) {
+//                LocalTime tempoLocal = LocalTime.parse(tempo);
+                System.out.println(tempo.getSecond());
                 resultado = resultado.plusHours(tempo.getHour()).plusMinutes(tempo.getMinute()).plusSeconds(tempo.getSecond());
             }
 

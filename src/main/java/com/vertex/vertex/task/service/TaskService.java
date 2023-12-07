@@ -56,15 +56,8 @@ public class TaskService {
             currentValue.setProperty(property);
             currentValue.setTask(task);
             task.getValues().add(currentValue);
-
-            for (int i = 0; i < task.getValues().size(); i++) {
-                for (PropertyList propertyList : task.getValues().get(i).getProperty().getPropertyLists()) {
-                    if(propertyList.getPropertyListKind() == PropertyListKind.TODO) {
-                        currentValue.setValue(propertyList);
-                    }
-                }
-            }
         }
+
         //set the creator of the task
         try {
             taskResponsable.setUserTeam(userTeamService.findById(taskCreateDTO.getCreator().getId()));
