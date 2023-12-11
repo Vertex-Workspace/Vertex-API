@@ -63,4 +63,18 @@ public class ProjectService {
     public Project save(Project project){
         return projectRepository.save(project);
     }
+
+    public List<Project> findAllByTeam(Long teamId) {
+        try {
+            Team team = teamService.findTeamById(teamId);
+            return team.getProjects();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Time não encontrado");
+        }
+    }
+
+    public Boolean existsById(Long id) {
+        return projectRepository.existsById(id);
+    }
 }
