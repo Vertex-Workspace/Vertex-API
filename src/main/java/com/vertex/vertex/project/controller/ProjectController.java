@@ -27,15 +27,6 @@ public class ProjectController {
         }
     }
 
-    @GetMapping("/team/{teamId}")
-    public ResponseEntity<?> findAllByTeam(@PathVariable Long teamId){
-        try{
-            return new ResponseEntity<>(projectService.findAll(teamId), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        }
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<?> findById(@PathVariable Long id){
         try{

@@ -4,7 +4,6 @@ import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
-import com.vertex.vertex.team.relations.group.model.DTO.GroupDTO;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupEditUserDTO;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupRegisterDTO;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
@@ -100,9 +99,6 @@ public class TeamController {
                         HttpStatus.OK);
     }
 
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {}
   
     @PatchMapping("/group/user")
     public ResponseEntity<?> editUserIntoGroup(@RequestBody GroupEditUserDTO groupEditUserDTO) {
