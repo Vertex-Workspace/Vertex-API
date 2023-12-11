@@ -17,8 +17,10 @@ public class Personalization {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String primaryColor;
-    private String secondColor;
+    private String primaryColorLight;
+    private String secondColorLight;
+    private String primaryColorDark;
+    private String secondColorDark;
     private Integer fontSize;
     private String fontFamily;
     private Integer theme;
