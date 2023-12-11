@@ -44,6 +44,20 @@ public class ProjectController {
         }
     }
 
+    @GetMapping("/team/{teamId}")
+    public ResponseEntity<?> findAllByTeam(
+            @PathVariable Long teamId) {
+        try {
+            return new ResponseEntity<>
+                    (projectService.findAllByTeam(teamId),
+                            HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>
+                    (e.getMessage(),
+                                HttpStatus.CONFLICT);
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Project> deleteById(@PathVariable Long id) {
         try {
@@ -61,6 +75,18 @@ public class ProjectController {
             return new ResponseEntity<>(projectService.save(project), HttpStatus.CREATED);
         }catch(Exception e){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/exists/{id}")
+    public ResponseEntity<?> existsById(@PathVariable Long id) {
+        if (projectService.existsById(id)) {
+            return new ResponseEntity<>
+                    (true, HttpStatus.FOUND);
+        } else {
+            return new ResponseEntity<>
+                    (false,
+                            HttpStatus.NOT_FOUND);
         }
     }
 }

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -131,6 +132,20 @@ public class TeamService {
     public boolean existsById(Long id) {
         return teamRepository.existsById(id);
     }
+
+    public Boolean existsByIdAndUserBelongs(Long teamId, Long userId) {
+        if (teamRepository.existsById(teamId)) {
+            Team team = findTeamById(teamId);
+            return findUserInTeam(team, userId);
+        }
+        return false;
+    }
+
+    public Boolean findUserInTeam(Team team, Long userId) {
+        return team.getUserTeams().stream()
+                .anyMatch(ut -> Objects.equals(ut.getUser().getId(), userId));
+    }
+
 
     public Team findTeamById(Long id) {
         if (teamRepository.existsById(id)) {

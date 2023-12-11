@@ -2,6 +2,7 @@ package com.vertex.vertex.team.controller;
 
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.entity.Team;
+import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupDTO;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
 import com.vertex.vertex.team.service.TeamService;
@@ -64,8 +65,14 @@ public class TeamController {
         }
     }
 
-
-
+    @GetMapping("/exists/{teamId}/{userId}")
+    public ResponseEntity<?> existsByIdAndUserBelongs(
+            @PathVariable Long teamId,
+            @PathVariable Long userId) {
+        return new ResponseEntity<>
+                (teamService.existsByIdAndUserBelongs(teamId, userId),
+                        HttpStatus.OK);
+    }
 
 
     @DeleteMapping("/{id}")
