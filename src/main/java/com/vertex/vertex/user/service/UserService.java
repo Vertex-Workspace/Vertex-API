@@ -67,30 +67,9 @@ public class UserService {
     }
 
     public User edit(UserEditionDTO userEditionDTO) throws Exception {
-        User user = new User();
+        User user = userRepository.findById(userEditionDTO.getId()).get();
+
         BeanUtils.copyProperties(userEditionDTO, user);
-        if (user.getId() != null && !getUserRepository().existsById(user.getId())) {
-            throw new RuntimeException("Usuário não existe.");
-        }
-        User userEmailWithNoEdition = userRepository.findByEmail(user.getEmail());
-
-        if (userEmailWithNoEdition != null && user.getEmail().equals(userEmailWithNoEdition.getEmail())) {
-            user.setEmail(userEmailWithNoEdition.getEmail());
-
-            User userFind = userRepository.findByEmail(userEmailWithNoEdition.getEmail());
-
-            System.out.println(user);
-            System.out.println(userFind);
-
-            if (userFind != null && user.getEmail().equals(userFind.getEmail())
-                    && !user.getId().equals(userFind.getId())) {
-                throw new EmailAlreadyExistsException();
-            }
-        }
-
-        if (!userEditionDTO.getPassword().equals(userEditionDTO.getPasswordConf())) {
-            throw new InvalidPasswordException();
-        }
 
         return userRepository.save(user);
     }
@@ -100,10 +79,15 @@ public class UserService {
     }
 
     public User findById(Long id) {
-        if (!getUserRepository().existsById(id)) {
-            throw new UserNotFoundException();
+        try {
+            return userRepository.findById(id).get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return userRepository.findById(id).get();
+    }
+
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
     public void deleteById(Long id) {

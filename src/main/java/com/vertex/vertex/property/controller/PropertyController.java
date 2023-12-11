@@ -31,15 +31,6 @@ public class PropertyController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-    @GetMapping
-    public ResponseEntity<List<Property>> findAll(){
-        try{
-            return new ResponseEntity<>(propertyService.findAll(), HttpStatus.FOUND);
-        } catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
     @PostMapping
     public ResponseEntity<?> save(@RequestBody PropertyRegisterDTO propertyRegisterDTO){
         try{

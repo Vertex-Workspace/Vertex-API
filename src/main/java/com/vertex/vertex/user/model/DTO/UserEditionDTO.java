@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserEditionDTO {
+
     private Long id;
     private String firstName;
     private String lastName;
