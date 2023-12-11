@@ -51,4 +51,8 @@ public class UserTeamService {
     public List<UserTeam> findAll(){
         return userTeamRepository.findAll();
     }
+
+    public List<UserTeam> findAll(Long id){
+        return userTeamRepository.findAllByUser_Id(id);
+    }
 }

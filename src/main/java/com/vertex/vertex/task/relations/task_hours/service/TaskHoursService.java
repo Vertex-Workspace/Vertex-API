@@ -1,5 +1,6 @@
 package com.vertex.vertex.task.relations.task_hours.service;
 
+import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_hours.model.exceptions.TaskIsNotFinishedException;
 import com.vertex.vertex.task.relations.task_hours.repository.TaskHoursRepository;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
@@ -7,6 +8,7 @@ import com.vertex.vertex.task.relations.task_responsables.service.TaskResponsabl
 import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.task.relations.task_hours.model.DTO.TaskHourEditDTO;
 import com.vertex.vertex.task.relations.task_hours.model.entity.TaskHour;
+import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -38,9 +40,13 @@ public class TaskHoursService {
         taskHour.setTaskResponsable(taskResponsable);
         taskResponsable.getTaskHours().add(taskHour);
 
-        for (int i = 0; i < taskResponsable.getTaskHours().size(); i++) {
-            if (taskResponsable.getTaskHours().get(i).getFinalDate() == null) {
-                cont = cont + 1;
+        for (UserTeam userTeam : userTeamService.findAll(taskResponsable.getUserTeam().getUser().getId())) {
+            for (int i = 0; i < userTeam.getTaskResponsables().size(); i++) {
+                for (int j = 0; j < userTeam.getTaskResponsables().get(i).getTaskHours().size(); j++) {
+                    if (userTeam.getTaskResponsables().get(i).getTaskHours().get(j).getFinalDate() == null) {
+                        cont = cont + 1;
+                    }
+                }
             }
         }
         //we gotta set less one because it is taking the last row with no attributes in database
@@ -56,7 +62,6 @@ public class TaskHoursService {
     }
 
     public void save(TaskHourEditDTO taskHourEditDTO) {
-        int cont = 0;
         TaskResponsable taskResponsable = taskResponsablesService.findById(taskHourEditDTO.getTaskResponsable().getId());
 
         for (int i = 0; i < taskResponsable.getTaskHours().size(); i++) {
@@ -91,9 +96,15 @@ public class TaskHoursService {
     }
 
 
-    public List<TaskHour> findTaskHoursByUserTeamId(Long taskId, Long userId) {
-//        return taskHoursRepository.getTaskHoursByTask_IdAndUserTeam_Id(taskId, userId);
-        return null;
+    public List<TaskHour> findTaskHoursByTask(Long taskId) {
+        Task task = taskService.findById(taskId);
+        List<TaskHour> taskHours = new ArrayList<>();
+        for (int i = 0; i <task.getTaskResponsables().size(); i++) {
+            for (TaskHour taskHour : task.getTaskResponsables().get(i).getTaskHours()) {
+                taskHours.add(taskHour);
+            }
+        }
+        return taskHours;
     }
 
     public List<TaskHour> findAllByTask(Long taskId) {

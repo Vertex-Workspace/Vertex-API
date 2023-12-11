@@ -1,11 +1,15 @@
 package com.vertex.vertex.user.model.entity;
 
 
+import com.vertex.vertex.task.relations.task_hours.model.entity.TaskHour;
+import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Data
@@ -31,5 +35,6 @@ public class User {
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
     private Personalization personalization;
+
 
 }
