@@ -100,16 +100,19 @@ public class TaskHoursService {
         Task task = taskService.findById(taskId);
         List<TaskHour> taskHours = new ArrayList<>();
         for (int i = 0; i <task.getTaskResponsables().size(); i++) {
-            for (TaskHour taskHour : task.getTaskResponsables().get(i).getTaskHours()) {
-                taskHours.add(taskHour);
-            }
+            taskHours.addAll(task.getTaskResponsables().get(i).getTaskHours());
         }
         return taskHours;
     }
 
-    public List<TaskHour> findAllByTask(Long taskId) {
-//        return taskHoursRepository.findAllByTask_Id(taskId);
-        return null;
+    public List<TaskHour> findTaskHoursUser(Long userId){
+        UserTeam userTeam = userTeamService.findById(userId);
+        List<TaskHour> taskHours = new ArrayList<>();
+        for (int i = 0; i <userTeam.getTaskResponsables().size(); i++) {
+            taskHours.addAll(userTeam.getTaskResponsables().get(i).getTaskHours());
+        }
+        return taskHours;
     }
+
 
 }

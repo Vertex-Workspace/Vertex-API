@@ -18,19 +18,19 @@ import java.util.List;
 public class TaskHoursController {
     private final TaskHoursService taskHoursService;
 
-    @GetMapping("/{taskId}/user/{userId}")
-    public ResponseEntity<List<TaskHour>> findHoursByUserId(@PathVariable Long taskId, @PathVariable Long userId){
+    @GetMapping("/task/{taskId}")
+    public ResponseEntity<List<TaskHour>> findTaskHoursByTask(@PathVariable Long taskId){
         try{
-            return new ResponseEntity<>(taskHoursService.findTaskHoursByUserTeamId(taskId, userId), HttpStatus.OK);
+            return new ResponseEntity<>(taskHoursService.findTaskHoursByTask(taskId), HttpStatus.OK);
         } catch (Exception e){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 
-    @GetMapping("/{taskId}")
-    public ResponseEntity<List<TaskHour>> findAllByTask(@PathVariable Long taskId){
+    @GetMapping("/user-team/{userTeamId}")
+    public ResponseEntity<List<TaskHour>> findTaskHoursByUserTeam(@PathVariable Long userTeamId){
         try{
-            return new ResponseEntity<>(taskHoursService.findAllByTask(taskId), HttpStatus.OK);
+            return new ResponseEntity<>(taskHoursService.findTaskHoursUser(userTeamId), HttpStatus.OK);
         } catch (Exception e){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
