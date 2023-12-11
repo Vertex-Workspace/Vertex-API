@@ -1,9 +1,12 @@
 package com.vertex.vertex.team.controller;
 
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
+import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupDTO;
+import com.vertex.vertex.team.relations.group.model.DTO.GroupEditUserDTO;
+import com.vertex.vertex.team.relations.group.model.DTO.GroupRegisterDTO;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
 import com.vertex.vertex.team.service.TeamService;
 import jakarta.persistence.EntityNotFoundException;
@@ -23,30 +26,52 @@ public class TeamController {
     private final TeamService teamService;
 
     @PostMapping
-    public ResponseEntity<?> save(@RequestBody Team team) {
+    public ResponseEntity<?> save(@RequestBody TeamViewListDTO team) {
         try {
             return new ResponseEntity<>(teamService.save(team), HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
+    @PutMapping
+    public ResponseEntity<?> update(@RequestBody TeamViewListDTO team) {
+        try {
+            return new ResponseEntity<>(teamService.save(team), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<TeamInfoDTO> findById(@PathVariable Long id) {
         try {
             return new ResponseEntity<>(teamService.findById(id), HttpStatus.OK);
-
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
-    @GetMapping
-    public ResponseEntity<List<TeamInfoDTO>> findAll() {
-        return new ResponseEntity<>(teamService.findAll(), HttpStatus.OK);
-
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        try {
+            teamService.deleteById(id);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
     }
 
+    @GetMapping("/{idTeam}/groups")
+    public ResponseEntity<?> findGroupsByTeamId(@PathVariable Long idTeam) {
+        try {
+            return new ResponseEntity<>(teamService.findGroupsByTeamId(idTeam), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    //EDIT CASCADE TYPE ALL OBJECTS
     @PatchMapping("/user")
     public ResponseEntity<?> editUserTeam(@RequestBody UserTeamAssociateDTO userTeam) {
         try {
@@ -57,13 +82,14 @@ public class TeamController {
     }
 
     @PatchMapping("/group")
-    public ResponseEntity<?> editGroup(@RequestBody GroupDTO group) {
+    public ResponseEntity<?> editGroup(@RequestBody GroupRegisterDTO groupRegisterDTO) {
         try {
-            return new ResponseEntity<>(teamService.editGroup(group), HttpStatus.OK);
+            return new ResponseEntity<>(teamService.editGroup(groupRegisterDTO), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
+    //
 
     @GetMapping("/exists/{teamId}/{userId}")
     public ResponseEntity<?> existsByIdAndUserBelongs(
@@ -76,10 +102,12 @@ public class TeamController {
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
+    public ResponseEntity<?> delete(@PathVariable Long id) {}
+  
+    @PatchMapping("/group/user")
+    public ResponseEntity<?> editUserIntoGroup(@RequestBody GroupEditUserDTO groupEditUserDTO) {
         try {
-            teamService.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(teamService.editUserIntoGroup(groupEditUserDTO), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }

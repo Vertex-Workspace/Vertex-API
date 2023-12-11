@@ -31,22 +31,13 @@ public class PropertyController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-    @GetMapping
-    public ResponseEntity<List<Property>> findAll(){
-        try{
-            return new ResponseEntity<>(propertyService.findAll(), HttpStatus.FOUND);
-        } catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
     @PostMapping
-    public ResponseEntity<Property> save(@RequestBody PropertyRegisterDTO propertyRegisterDTO){
+    public ResponseEntity<?> save(@RequestBody PropertyRegisterDTO propertyRegisterDTO){
         try{
             return new ResponseEntity<>(propertyService.save(propertyRegisterDTO), HttpStatus.CREATED);
 
         } catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 

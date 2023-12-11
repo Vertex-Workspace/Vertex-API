@@ -1,33 +1,33 @@
-package com.vertex.vertex.task.relations.entity;
+package com.vertex.vertex.task.relations.comment.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.task.model.entity.Task;
-import com.vertex.vertex.task.relations.task_hours.model.entity.TaskHour;
-import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
+import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-import java.util.List;
+import java.sql.Date;
 
-@Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class TaskResponsable {
+@Data
+public class Comment {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    private String comment;
+    private Date date;
     @ManyToOne
-    private UserTeam userTeam;
-
+    @JsonIgnore
+    @ToString.Exclude
+    private TaskResponsable taskResponsable;
     @ManyToOne
+    @JsonIgnore
+    @ToString.Exclude
     private Task task;
-
-
-    @OneToMany(mappedBy = "taskResponsable")
-    private List<TaskHour> taskHours;
-
 }
