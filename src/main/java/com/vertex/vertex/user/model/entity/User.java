@@ -1,11 +1,14 @@
 package com.vertex.vertex.user.model.entity;
 
 
+import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Data
@@ -28,6 +31,9 @@ public class User {
     private String image;
     private Boolean publicProfile;
     private Boolean showCharts;
+
+    @OneToMany(cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Notification> notificationList;
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
     private Personalization personalization;
