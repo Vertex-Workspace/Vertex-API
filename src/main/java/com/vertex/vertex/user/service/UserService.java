@@ -11,10 +11,12 @@ import com.vertex.vertex.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.parsing.Location;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 
@@ -65,6 +67,7 @@ public class UserService {
             throw new InvalidPasswordException();
         }
 
+        user.setLocation("Jaraguá do Sul - SC");
         user.setPersonalization(personalizationService.defaultSave(user));
 
 
@@ -121,11 +124,9 @@ public class UserService {
 
     public User patchUserPersonalization(Long id, Personalization personalization){
         User user = findById(id);
-
         personalization.setId(user.getPersonalization().getId());
         personalization.setUser(user);
         user.setPersonalization(personalization);
-
         return userRepository.save(user);
     }
 
