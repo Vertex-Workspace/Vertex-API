@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -77,4 +78,15 @@ public class ProjectService {
     public Boolean existsById(Long id) {
         return projectRepository.existsById(id);
     }
+
+    public Boolean existsByIdAndUserBelongs(Long projectId, Long userId) {
+        if (projectRepository.existsById(projectId)) {
+            Project project = findById(projectId);
+            Team team = project.getTeam();
+
+            return teamService.findUserInTeam(team, userId);
+        }
+        return false;
+    }
+
 }
