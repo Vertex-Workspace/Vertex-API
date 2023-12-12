@@ -4,11 +4,8 @@ import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.property.model.DTO.PropertyListDTO;
 import com.vertex.vertex.property.model.DTO.PropertyRegisterDTO;
-import com.vertex.vertex.property.model.ENUM.Color;
-import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
-import com.vertex.vertex.property.model.exceptions.ProjectDoesNotExistException;
 import com.vertex.vertex.property.model.exceptions.PropertyIsNotAListException;
 import com.vertex.vertex.property.repository.PropertyRepository;
 import com.vertex.vertex.task.model.entity.Task;
@@ -16,8 +13,6 @@ import com.vertex.vertex.task.relations.value.model.entity.Value;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -49,7 +44,7 @@ public class PropertyService {
             }
             propertyRepository.save(property);
         } catch (Exception e) {
-            throw new ProjectDoesNotExistException();
+            e.printStackTrace();
         }
         return propertyRepository.save(property);
     }
@@ -101,7 +96,7 @@ public class PropertyService {
                 }
             }
         } catch (NoSuchElementException e) {
-            throw e;
+            throw new RuntimeException();
         }
         return propertyRepository.save(property);
     }
