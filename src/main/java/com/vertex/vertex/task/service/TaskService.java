@@ -8,6 +8,7 @@ import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.property.service.PropertyService;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
+import com.vertex.vertex.task.model.DTO.TaskEditDTO;
 import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
 import com.vertex.vertex.task.relations.review.model.DTO.SetFinishedTask;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
@@ -26,6 +27,7 @@ import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -79,6 +81,17 @@ public class TaskService {
             throw new RuntimeException("Não foi encontrado o usuário para ele ser o criador da tarefa");
         }
         return taskRepository.save(task);
+    }
+
+    public Task edit(TaskEditDTO taskEditDTO){
+        try {
+            Task task = findById(taskEditDTO.getId());
+            BeanUtils.copyProperties(taskEditDTO, task);
+            return taskRepository.save(task);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public List<Task> findAll() {
