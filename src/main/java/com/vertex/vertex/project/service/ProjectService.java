@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -41,6 +42,29 @@ public class ProjectService {
 
     public List<Project> findAll(){
         return projectRepository.findAll();
+    }
+
+    public Set<Project> findAllByTeam(Long teamId){
+        return projectRepository.findAllByTeam_Id(teamId);
+    }
+
+    public boolean existsById(Long projectId){
+        try{
+            findById(projectId);
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
+
+    public Boolean existsByIdAndUserBelongs(Long projectId, Long userId) {
+        if (projectRepository.existsById(projectId)) {
+            Project project = findById(projectId);
+            Team team = project.getTeam();
+
+            return teamService.findUserInTeam(team, userId);
+        }
+        return false;
     }
 
     public Project findById(Long id){
