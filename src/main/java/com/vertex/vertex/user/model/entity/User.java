@@ -1,8 +1,7 @@
 package com.vertex.vertex.user.model.entity;
 
 
-import com.vertex.vertex.task.relations.task_hours.model.entity.TaskHour;
-import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
+import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -33,8 +32,10 @@ public class User {
     private Boolean publicProfile;
     private Boolean showCharts;
 
+    @OneToMany(cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Notification> notificationList;
+
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
     private Personalization personalization;
-
 
 }
