@@ -17,4 +17,5 @@ public class ValueNumber extends Value {
     public void setValue(Object object) {
         this.value = Long.valueOf((String) object);
     }
+
 }

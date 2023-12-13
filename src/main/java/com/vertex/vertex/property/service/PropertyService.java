@@ -6,6 +6,8 @@ import com.vertex.vertex.property.model.DTO.PropertyListDTO;
 import com.vertex.vertex.property.model.DTO.PropertyRegisterDTO;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
+import com.vertex.vertex.property.model.exceptions.CantCreateOtherStatusException;
+import com.vertex.vertex.property.model.exceptions.CantDeleteStatusException;
 import com.vertex.vertex.property.model.exceptions.PropertyIsNotAListException;
 import com.vertex.vertex.property.repository.PropertyRepository;
 import com.vertex.vertex.task.model.entity.Task;
@@ -13,6 +15,7 @@ import com.vertex.vertex.task.relations.value.model.entity.Value;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -29,11 +32,11 @@ public class PropertyService {
     public Property save(PropertyRegisterDTO propertyRegisterDTO) {
         Property property = new Property();
         BeanUtils.copyProperties(propertyRegisterDTO, property);
-
         //When a property is registered, it must be added into property list in Project
-        try {
-            Project project = projectService.findById(property.getProject().getId());
+        Project project = projectService.findById(property.getProject().getId());
+        if (property.getKind() != STATUS) {
             project.getProperties().add(property);
+
             //in this for i, the property is being added in the tasks that already exists in the project
             for (int i = 0; i < project.getTasks().size(); i++) {
                 Value newValue = property.getKind().getValue();
@@ -42,9 +45,8 @@ public class PropertyService {
                 newValue.setTask(task);
                 project.getTasks().get(i).getValues().add(newValue);
             }
-            propertyRepository.save(property);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } else {
+            throw new CantCreateOtherStatusException();
         }
         return propertyRepository.save(property);
     }
@@ -54,11 +56,12 @@ public class PropertyService {
         Property property = findById(id);
         Project project = projectService.findById(property.getProject().getId());
         for (Task task : project.getTasks()) {
-            for (int i = 0; i < task.getValues().size(); i++) {
-                task.getValues().remove(i);
+            if (property.getKind() != STATUS) {
+                propertyRepository.deleteById(id);
+            } else {
+                throw new CantDeleteStatusException();
             }
         }
-        propertyRepository.deleteById(id);
     }
 
     public Property findById(Long id) {
@@ -81,7 +84,6 @@ public class PropertyService {
                         //if the id doesn't exists, it means that this elements will be saved with a new id
                         property.getPropertyLists().add(list);
                         list.setProperty(property);
-                        System.out.println("e");
                     } else {
                         throw new PropertyIsNotAListException();
                     }

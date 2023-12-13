@@ -18,6 +18,7 @@ import com.vertex.vertex.task.model.exceptions.TaskDoesNotExistException;
 import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
+import com.vertex.vertex.task.relations.value.model.entity.ValueDate;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
@@ -28,6 +29,7 @@ import lombok.Data;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -41,7 +43,7 @@ public class TaskService {
     private final PropertyService propertyService;
     private final UserTeamService userTeamService;
 
-    public void save(TaskCreateDTO taskCreateDTO) {
+    public Task save(TaskCreateDTO taskCreateDTO) {
         Task task = new Task();
         BeanUtils.copyProperties(taskCreateDTO, task);
         Project project;
@@ -62,11 +64,18 @@ public class TaskService {
                     || property.getKind() == PropertyKind.STATUS) {
                 for (int i = 0; i < task.getValues().size(); i++) {
                     for (PropertyList propertyList : task.getValues().get(i).getProperty().getPropertyLists()) {
-                        if (propertyList.getPropertyListKind() == PropertyListKind.TODO) {
-                            currentValue.setValue(propertyList);
+                        if (taskCreateDTO.getValues().get(i).getValue() != null) {
+                            currentValue.setValue(taskCreateDTO.getValues().get(i).getValue());
+                        } else {
+                            if (propertyList.getPropertyListKind() == PropertyListKind.TODO) {
+                                currentValue.setValue(propertyList);
+                            }
                         }
                     }
                 }
+            }
+            if (property.getKind() == PropertyKind.DATE) {
+                ((ValueDate) currentValue).setValue();
             }
         }
         //set the creator of the task
@@ -77,7 +86,8 @@ public class TaskService {
         } catch (Exception e) {
             throw new RuntimeException("Não foi encontrado o usuário para ele ser o criador da tarefa");
         }
-        taskRepository.save(task);
+        task.setApproveStatus(ApproveStatus.INPROGRESS);
+        return taskRepository.save(task);
     }
 
     public List<Task> findAll() {
@@ -110,6 +120,7 @@ public class TaskService {
                 currentValue.setId(editValueDTO.getValue().getId());
                 currentValue.setTask(task);
                 currentValue.setProperty(property);
+                System.out.println(editValueDTO.getValue().getValue());
                 currentValue.setValue(editValueDTO.getValue().getValue());
                 task.getValues().set(i, currentValue);
                 task.setApproveStatus(ApproveStatus.INPROGRESS);

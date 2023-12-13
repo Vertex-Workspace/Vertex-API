@@ -44,8 +44,7 @@ public class TaskController {
     @PostMapping
     public ResponseEntity<?> save(@RequestBody TaskCreateDTO taskCreateDTO){
         try{
-            taskService.save(taskCreateDTO);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(taskService.save(taskCreateDTO), HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
         }

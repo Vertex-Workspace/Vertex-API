@@ -33,6 +33,7 @@ public class ProjectService {
     public Project save(Project project, Long teamId) {
         Team team;
         Property property = new Property(PropertyKind.STATUS, "STATUS", true, "STATUS");
+        Property propertyDate = new Property(PropertyKind.DATE, "DATE", true, "DATE");
         try {
             team = teamService.findById(teamId);
         } catch (Exception e) {
@@ -48,8 +49,11 @@ public class ProjectService {
         project.setTeam(team);
         property.setPropertyLists(defaultStatus(property));
         project.addProperty(property);
+        project.addProperty(propertyDate);
         property.setProject(project);
+        propertyDate.setProject(project);
         team.getProjects().add(project);
+
         return projectRepository.save(project);
     }
 
