@@ -24,7 +24,6 @@ import java.util.NoSuchElementException;
 public class UserController {
 
     private UserService userService;
-    private PersonalizationService personalizationService;
 
     @PostMapping
     public ResponseEntity<?> save(@RequestBody UserDTO userDTO) {
@@ -106,7 +105,6 @@ public class UserController {
         try {
             return new ResponseEntity<>(this.userService.patchUserPersonalization(id,personalization),HttpStatus.OK);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
         }
     }
