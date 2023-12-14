@@ -81,4 +81,15 @@ public class ProjectController {
                             HttpStatus.NOT_FOUND);
         }
     }
+
+    @GetMapping("/exists/{projectId}/{userId}")
+    public ResponseEntity<?> existsByIdAndUserBelongs(
+            @PathVariable Long projectId,
+            @PathVariable Long userId) {
+        return new ResponseEntity<>
+                (projectService.existsByIdAndUserBelongs
+                        (projectId, userId),
+                        HttpStatus.OK);
+    }
+
 }

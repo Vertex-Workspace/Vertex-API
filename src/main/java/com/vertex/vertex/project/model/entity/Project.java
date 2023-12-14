@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -32,16 +33,25 @@ public class Project {
     @ToString.Exclude
     private Team team;
 
-    @OneToMany(mappedBy = "project")
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Property> properties;
 
     @ManyToOne
     private UserTeam creator;
 
-    @OneToMany(mappedBy = "project")
+    @OneToMany(mappedBy = "project", orphanRemoval = true)
     private List<Task> tasks;
 
     @OneToOne
     private Project projectDependency;
 
+    //create a list of properties if it doesn't exist
+    public void addProperty(Property property) {
+        if(properties != null){
+            properties.add(property);
+        }else {
+            properties = new ArrayList<>();
+            properties.add(property);
+        }
+    }
 }

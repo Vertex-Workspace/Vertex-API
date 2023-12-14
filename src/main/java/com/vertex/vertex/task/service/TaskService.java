@@ -2,9 +2,13 @@ package com.vertex.vertex.task.service;
 
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
+import com.vertex.vertex.property.model.ENUM.PropertyKind;
+import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.Property;
+import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.property.service.PropertyService;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
+import com.vertex.vertex.task.model.DTO.TaskEditDTO;
 import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
 import com.vertex.vertex.task.relations.review.model.DTO.SetFinishedTask;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
@@ -15,6 +19,7 @@ import com.vertex.vertex.task.model.exceptions.TaskDoesNotExistException;
 import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
+import com.vertex.vertex.task.relations.value.model.entity.ValueDate;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
@@ -23,8 +28,10 @@ import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -38,7 +45,7 @@ public class TaskService {
     private final PropertyService propertyService;
     private final UserTeamService userTeamService;
 
-    public void save(TaskCreateDTO taskCreateDTO) {
+    public Task save(TaskCreateDTO taskCreateDTO) {
         Task task = new Task();
         BeanUtils.copyProperties(taskCreateDTO, task);
         Project project;
@@ -54,6 +61,24 @@ public class TaskService {
             currentValue.setProperty(property);
             currentValue.setTask(task);
             task.getValues().add(currentValue);
+
+            if (property.getKind() == PropertyKind.LIST
+                    || property.getKind() == PropertyKind.STATUS) {
+                for (int i = 0; i < task.getValues().size(); i++) {
+                    for (PropertyList propertyList : task.getValues().get(i).getProperty().getPropertyLists()) {
+                        if (taskCreateDTO.getValues().get(i).getValue() != null) {
+                            currentValue.setValue(taskCreateDTO.getValues().get(i).getValue());
+                        } else {
+                            if (propertyList.getPropertyListKind() == PropertyListKind.TODO) {
+                                currentValue.setValue(propertyList);
+                            }
+                        }
+                    }
+                }
+            }
+            if (property.getKind() == PropertyKind.DATE) {
+                ((ValueDate) currentValue).setValue();
+            }
         }
         //set the creator of the task
         try {
@@ -63,7 +88,20 @@ public class TaskService {
         } catch (Exception e) {
             throw new RuntimeException("Não foi encontrado o usuário para ele ser o criador da tarefa");
         }
-        taskRepository.save(task);
+
+        task.setApproveStatus(ApproveStatus.INPROGRESS);
+        return taskRepository.save(task);
+    }
+
+    public Task edit(TaskEditDTO taskEditDTO){
+        try {
+            Task task = findById(taskEditDTO.getId());
+            BeanUtils.copyProperties(taskEditDTO, task);
+            return taskRepository.save(task);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public List<Task> findAll() {
@@ -96,6 +134,7 @@ public class TaskService {
                 currentValue.setId(editValueDTO.getValue().getId());
                 currentValue.setTask(task);
                 currentValue.setProperty(property);
+                System.out.println(editValueDTO.getValue().getValue());
                 currentValue.setValue(editValueDTO.getValue().getValue());
                 task.getValues().set(i, currentValue);
                 task.setApproveStatus(ApproveStatus.INPROGRESS);
@@ -205,7 +244,7 @@ public class TaskService {
                 task.getApproveStatus() == ApproveStatus.INPROGRESS) {
             task.setApproveStatus(ApproveStatus.UNDERANALYSIS);
             task.setFinishDescription(setFinishedTask.getFinishDescription());
-        }else if(task.getApproveStatus() == ApproveStatus.APPROVED){
+        } else if (task.getApproveStatus() == ApproveStatus.APPROVED) {
             throw new RuntimeException("A tarefa já foi aprovada. Ela não pode voltar para análise");
         }
         return save(task);

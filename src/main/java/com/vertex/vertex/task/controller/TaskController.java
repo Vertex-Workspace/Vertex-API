@@ -1,6 +1,7 @@
 package com.vertex.vertex.task.controller;
 
 import com.vertex.vertex.property.model.entity.Property;
+import com.vertex.vertex.task.model.DTO.TaskEditDTO;
 import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
 import com.vertex.vertex.task.relations.review.model.DTO.SetFinishedTask;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
@@ -44,8 +45,7 @@ public class TaskController {
     @PostMapping
     public ResponseEntity<?> save(@RequestBody TaskCreateDTO taskCreateDTO){
         try{
-            taskService.save(taskCreateDTO);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(taskService.save(taskCreateDTO), HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
         }
@@ -58,6 +58,15 @@ public class TaskController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
+
+    @PatchMapping
+    public ResponseEntity<?> edit(@RequestBody TaskEditDTO taskEditDTO){
+        try{
+            return new ResponseEntity<>(taskService.edit(taskEditDTO), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 

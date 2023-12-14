@@ -22,4 +22,5 @@ public class ValueFile extends Value {
         String objectM = (String) object;
         this.value = objectM.getBytes();
     }
+
 }

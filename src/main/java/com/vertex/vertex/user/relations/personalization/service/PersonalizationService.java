@@ -1,5 +1,6 @@
 package com.vertex.vertex.user.relations.personalization.service;
 
+import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import com.vertex.vertex.user.relations.personalization.repository.PersonalizationRepository;
 import lombok.AllArgsConstructor;
@@ -25,9 +26,35 @@ public class PersonalizationService {
 //        return personalizationRepository.save(personalization);
 //    }
 
-    public List<Personalization> findAll() {
-        return personalizationRepository.findAll();
+    public Personalization defaultSave(User user){
+        Personalization personalization = new Personalization();
+        personalization.setPrimaryColorLight("#092C4C");
+        personalization.setSecondColorLight("#F3F3F3");
+        personalization.setPrimaryColorDark("#F3F3F3");
+        personalization.setSecondColorDark("#574444");
+        personalization.setFontFamily("arial");
+        personalization.setFontSize(14);
+        personalization.setTheme(0);
+        personalization.setVoiceCommand(false);
+        personalization.setListeningText(false);
+        personalization.setUser(user);
+
+        return personalization;
     }
+
+//    public User patchUserPersonalization(User user, Personalization personalization){
+//
+////        user.getPersonalization().setPrimaryColor(personalization.getPrimaryColor());
+////        user.getPersonalization().setSecondColor(personalization.getSecondColor());
+////        user.getPersonalization().setFontFamily(personalization.getFontFamily());
+////        user.getPersonalization().setFontSize(personalization.getFontSize());
+////        user.getPersonalization().setVoiceCommand(personalization.getVoiceCommand());
+////        user.getPersonalization().setListeningText(personalization.getListeningText());
+////        user.getPersonalization().setUser(personalization.getUser());
+//
+//
+//        return personalization;
+//    }
 
     public Personalization findById(Long id) {
         if (!personalizationRepository.existsById(id)) {
@@ -43,5 +70,11 @@ public class PersonalizationService {
             personalizationRepository.deleteById(id);
         }
     }
+
+    public Personalization findByUserId(Long id){
+        return personalizationRepository.findByUser_Id(id);
+    }
+
+
 
 }
