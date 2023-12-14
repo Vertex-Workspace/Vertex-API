@@ -72,7 +72,6 @@ public class TaskService {
                     }
                 }
             }
-        }
 
             if (property.getKind() == PropertyKind.LIST
                     || property.getKind() == PropertyKind.STATUS) {
