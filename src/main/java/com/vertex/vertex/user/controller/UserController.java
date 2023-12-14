@@ -11,7 +11,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
@@ -100,5 +102,17 @@ public class UserController {
         }
 
     }
+
+        @PatchMapping("upload/{userId}")
+        public String uploadImage(
+                @PathVariable Long userId,
+                @RequestParam MultipartFile imageFile) throws IOException {
+            String returnValue = "start";
+
+            userService.saveImage(imageFile);
+
+            return returnValue;
+        }
+
 
 }

@@ -10,7 +10,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
@@ -117,6 +121,10 @@ public class UserService {
         }
 
         throw new UserNotFoundException();
+    }
+
+    public void saveImage(MultipartFile imageFile) throws IOException {
+
     }
 
 }
