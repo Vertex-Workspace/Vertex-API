@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collection;
 import java.util.NoSuchElementException;
@@ -107,6 +108,27 @@ public class UserController {
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
         }
+    }
+
+    @PostMapping("/{id}/image")
+    public ResponseEntity<Boolean> uploadImage(
+            @PathVariable Long id,
+            @RequestParam MultipartFile file) {
+        try {
+            return new ResponseEntity<>
+                    (userService.imageUpload(id, file),
+                            HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>
+                    (false,
+                            HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping("/{id}/image")
+    public byte[] getImage(@PathVariable Long id) {
+        User user = userService.findById(id);
+        return user.getImage();
     }
 
 }

@@ -14,7 +14,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.NoSuchElementException;
@@ -129,6 +131,23 @@ public class UserService {
         personalization.setUser(user);
         user.setPersonalization(personalization);
         return userRepository.save(user);
+    }
+
+    public Boolean imageUpload(Long id, MultipartFile file){
+        User user;
+
+        try {
+            if (userRepository.existsById(id)) {
+                user = findById(id);
+                user.setImage(file.getBytes());
+                userRepository.save(user);
+                return true;
+            }
+        } catch (Exception ignored) {
+            throw new RuntimeException("Erro");
+        }
+
+        return false;
     }
 
 
