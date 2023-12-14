@@ -23,7 +23,9 @@ public class ProjectService {
     private final UserTeamService userTeamService;
 
     public Project save(Project project, Long teamId) {
-        Team team = null;
+        Team team;
+        Property property = new Property(PropertyKind.STATUS, "STATUS", true, "STATUS");
+        Property propertyDate = new Property(PropertyKind.DATE, "DATE", true, "DATE");
         try {
             team = teamService.findTeamById(teamId);
         } catch (Exception e) {
@@ -36,7 +38,13 @@ public class ProjectService {
         }
         project.setCreator(userTeam);
         project.setTeam(team);
+        property.setPropertyLists(defaultStatus(property));
+        project.addProperty(property);
+        project.addProperty(propertyDate);
+        property.setProject(project);
+        propertyDate.setProject(project);
         team.getProjects().add(project);
+
         return projectRepository.save(project);
     }
 
