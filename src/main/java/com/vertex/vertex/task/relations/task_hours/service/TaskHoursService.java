@@ -84,14 +84,14 @@ public class TaskHoursService {
     public LocalTime timeInTask(TaskHourEditDTO taskHourEditDTO) {
         TaskResponsable taskResponsable = taskResponsablesService.findById(taskHourEditDTO.getTaskResponsable().getId());
 
-        Duration duracaoTotal = Duration.ZERO;
+        Duration allTimeSpent = Duration.ZERO;
         //sum all the time spent of one taskResponsable
         for (int i = 0; i < taskResponsable.getTaskHours().size(); i++) {
-            duracaoTotal = duracaoTotal.plusHours(taskResponsable.getTaskHours().get(i).getTimeSpent().getHour())
+            allTimeSpent = allTimeSpent.plusHours(taskResponsable.getTaskHours().get(i).getTimeSpent().getHour())
                     .plusMinutes(taskResponsable.getTaskHours().get(i).getTimeSpent().getMinute())
                     .plusSeconds(taskResponsable.getTaskHours().get(i).getTimeSpent().getSecond());
         }
-        return LocalTime.MIDNIGHT.plus(duracaoTotal);
+        return LocalTime.MIDNIGHT.plus(allTimeSpent);
     }
 
 
