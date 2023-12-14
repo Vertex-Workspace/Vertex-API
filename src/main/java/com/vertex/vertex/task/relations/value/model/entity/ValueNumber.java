@@ -15,7 +15,8 @@ public class ValueNumber extends Value {
 
     @Override
     public void setValue(Object object) {
-        this.value = Long.valueOf((String) object);
+        String objectS = String.valueOf(object);
+        this.value = Long.parseLong(objectS);
     }
 
 }
