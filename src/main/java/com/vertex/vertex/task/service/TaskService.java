@@ -24,6 +24,7 @@ import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
+import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -82,7 +83,7 @@ public class TaskService {
         }
         //set the creator of the task
         try {
-            taskResponsable.setUserTeam(userTeamService.findById(taskCreateDTO.getCreator().getId()));
+            taskResponsable.setUserTeam(userTeamService.findUserTeamByComposeId(taskCreateDTO.getTeamId(), project.getCreator().getId()));
             taskResponsable.setTask(task);
             task.setCreator(taskResponsable);
         } catch (Exception e) {
@@ -90,6 +91,7 @@ public class TaskService {
         }
 
         task.setApproveStatus(ApproveStatus.INPROGRESS);
+        System.out.println(task);
         return taskRepository.save(task);
     }
 

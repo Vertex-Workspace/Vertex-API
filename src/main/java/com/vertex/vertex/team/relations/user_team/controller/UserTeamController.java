@@ -24,4 +24,5 @@ public class UserTeamController {
         return new ResponseEntity<>(userTeamService.findTeamsByUser(userId), HttpStatus.OK);
     }
 
+
 }
