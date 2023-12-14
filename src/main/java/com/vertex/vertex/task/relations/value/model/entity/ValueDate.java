@@ -18,8 +18,9 @@ public class ValueDate extends Value {
 
     @Override
     public void setValue(Object object) {
-        String objectS = (String) object;
-        this.value = LocalDateTime.parse(objectS);
+//        String objectS = (String) object;
+//        this.value = LocalDateTime.parse(objectS);
+        this.value = (LocalDateTime) object;
     }
 
     public void setValue(){

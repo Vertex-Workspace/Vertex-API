@@ -66,17 +66,6 @@ public class TaskService {
                     || property.getKind() == PropertyKind.STATUS) {
                 for (int i = 0; i < task.getValues().size(); i++) {
                     for (PropertyList propertyList : task.getValues().get(i).getProperty().getPropertyLists()) {
-                        if (propertyList.getPropertyListKind() == PropertyListKind.TODO) {
-                            currentValue.setValue(propertyList);
-                        }
-                    }
-                }
-            }
-
-            if (property.getKind() == PropertyKind.LIST
-                    || property.getKind() == PropertyKind.STATUS) {
-                for (int i = 0; i < task.getValues().size(); i++) {
-                    for (PropertyList propertyList : task.getValues().get(i).getProperty().getPropertyLists()) {
                         if (taskCreateDTO.getValues().get(i).getValue() != null) {
                             currentValue.setValue(taskCreateDTO.getValues().get(i).getValue());
                         } else {

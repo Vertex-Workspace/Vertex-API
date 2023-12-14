@@ -2,6 +2,11 @@ package com.vertex.vertex.project.service;
 
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
+import com.vertex.vertex.property.model.ENUM.Color;
+import com.vertex.vertex.property.model.ENUM.PropertyKind;
+import com.vertex.vertex.property.model.ENUM.PropertyListKind;
+import com.vertex.vertex.property.model.entity.Property;
+import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
@@ -10,6 +15,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -85,5 +91,13 @@ public class ProjectService {
 
     public Project save(Project project){
         return projectRepository.save(project);
+    }
+
+    public List<PropertyList> defaultStatus(Property property){
+        List<PropertyList> propertiesList = new ArrayList<>();
+        propertiesList.add(new PropertyList("to-do default", Color.RED, property, PropertyListKind.TODO));
+        propertiesList.add(new PropertyList("doing default", Color.YELLOW, property, PropertyListKind.DOING));
+        propertiesList.add(new PropertyList("done default", Color.GREEN, property, PropertyListKind.DONE));
+        return propertiesList;
     }
 }
