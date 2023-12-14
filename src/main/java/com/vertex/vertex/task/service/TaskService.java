@@ -8,6 +8,7 @@ import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.property.service.PropertyService;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
+import com.vertex.vertex.task.model.DTO.TaskEditDTO;
 import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
 import com.vertex.vertex.task.relations.review.model.DTO.SetFinishedTask;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
@@ -27,6 +28,7 @@ import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -64,6 +66,18 @@ public class TaskService {
                     || property.getKind() == PropertyKind.STATUS) {
                 for (int i = 0; i < task.getValues().size(); i++) {
                     for (PropertyList propertyList : task.getValues().get(i).getProperty().getPropertyLists()) {
+                        if (propertyList.getPropertyListKind() == PropertyListKind.TODO) {
+                            currentValue.setValue(propertyList);
+                        }
+                    }
+                }
+            }
+        }
+
+            if (property.getKind() == PropertyKind.LIST
+                    || property.getKind() == PropertyKind.STATUS) {
+                for (int i = 0; i < task.getValues().size(); i++) {
+                    for (PropertyList propertyList : task.getValues().get(i).getProperty().getPropertyLists()) {
                         if (taskCreateDTO.getValues().get(i).getValue() != null) {
                             currentValue.setValue(taskCreateDTO.getValues().get(i).getValue());
                         } else {
@@ -86,8 +100,20 @@ public class TaskService {
         } catch (Exception e) {
             throw new RuntimeException("Não foi encontrado o usuário para ele ser o criador da tarefa");
         }
+
         task.setApproveStatus(ApproveStatus.INPROGRESS);
         return taskRepository.save(task);
+    }
+
+    public Task edit(TaskEditDTO taskEditDTO){
+        try {
+            Task task = findById(taskEditDTO.getId());
+            BeanUtils.copyProperties(taskEditDTO, task);
+            return taskRepository.save(task);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public List<Task> findAll() {

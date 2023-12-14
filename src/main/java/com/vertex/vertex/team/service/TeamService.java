@@ -189,7 +189,9 @@ public class TeamService {
 
     public Boolean findUserInTeam(Team team, Long userId) {
         return team.getUserTeams().stream()
-                .anyMatch(ut -> Objects.equals(ut.getUser().getId(), userId));
+                .anyMatch(ut ->
+                        Objects.equals(ut.getUser().getId(), userId)
+                );
     }
 
     public Team findTeamById(Long id) {

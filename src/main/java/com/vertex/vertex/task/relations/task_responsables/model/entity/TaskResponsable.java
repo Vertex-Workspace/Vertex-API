@@ -45,12 +45,4 @@ public class TaskResponsable {
     @ToString.Exclude
     private List<TaskHour> taskHours;
 
-    public void addTaskHour(TaskHour taskHour) {
-        if(taskHours != null){
-            taskHours.add(taskHour);
-        }else {
-            taskHours = new ArrayList<>();
-            taskHours.add(taskHour);
-        }
-    }
 }
