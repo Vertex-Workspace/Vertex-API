@@ -1,6 +1,7 @@
 package com.vertex.vertex.project.service;
 
 import com.vertex.vertex.project.model.entity.Project;
+import com.vertex.vertex.project.model.exception.ProjectDoesNotExistException;
 import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.property.model.ENUM.Color;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
@@ -11,6 +12,8 @@ import com.vertex.vertex.property.repository.PropertyRepository;
 import com.vertex.vertex.property.service.PropertyService;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.team.model.entity.Team;
+import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
+import com.vertex.vertex.team.model.exceptions.UserNotFoundInTeamException;
 import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
@@ -20,6 +23,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -35,14 +40,13 @@ public class ProjectService {
         Property property = new Property(PropertyKind.STATUS, "STATUS", true, "STATUS");
         Property propertyDate = new Property(PropertyKind.DATE, "DATE", true, "DATE");
         try {
-            team = teamService.findById(teamId);
+            team = teamService.findTeamById(teamId);
         } catch (Exception e) {
-            throw new EntityNotFoundException("There isn't a team with this id!");
+            throw new TeamNotFoundException(teamId);
         }
         UserTeam userTeam = userTeamService.findUserTeamByComposeId(teamId, project.getCreator().getId());
         if(userTeam == null){
-            //after we have to create the exception
-            throw new RuntimeException("The user isn't in the team!");
+            throw new UserNotFoundInTeamException();
         }
 
         project.setCreator(userTeam);
@@ -57,12 +61,16 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
-    public List<Project> findAll(){
-        return projectRepository.findAll();
+    public Set<Project> findAll(Long teamID){
+        return projectRepository.findAllByTeam_Id(teamID);
     }
 
     public Project findById(Long id){
-        return projectRepository.findById(id).get();
+        try {
+            return projectRepository.findById(id).get();
+        } catch (NoSuchElementException e) {
+            throw new ProjectDoesNotExistException(id);
+        }
     }
 
     public void deleteById(Long id){
@@ -81,4 +89,17 @@ public class ProjectService {
         return propertiesList;
     }
 
+    public List<Project> findAllByTeam(Long teamId) {
+        try {
+            Team team = teamService.findTeamById(teamId);
+            return team.getProjects();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Time não encontrado");
+        }
+    }
+
+    public Boolean existsById(Long id) {
+        return projectRepository.existsById(id);
+    }
 }
