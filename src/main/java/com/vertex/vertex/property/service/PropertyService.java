@@ -12,6 +12,7 @@ import com.vertex.vertex.property.model.exceptions.PropertyIsNotAListException;
 import com.vertex.vertex.property.repository.PropertyRepository;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
+import com.vertex.vertex.task.relations.value.service.ValueService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -19,8 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static com.vertex.vertex.property.model.ENUM.PropertyKind.LIST;
-import static com.vertex.vertex.property.model.ENUM.PropertyKind.STATUS;
+import static com.vertex.vertex.property.model.ENUM.PropertyKind.*;
 
 @Service
 @AllArgsConstructor
@@ -28,6 +28,7 @@ public class PropertyService {
 
     private final PropertyRepository propertyRepository;
     private final ProjectService projectService;
+    private final ValueService valueService;
 
     public Property save(PropertyRegisterDTO propertyRegisterDTO) {
         Property property = new Property();
@@ -53,14 +54,23 @@ public class PropertyService {
 
     //in this method, we need, firstly, remove the value, and then remove the property
     public void delete(Long id) {
+        Value valueToDelete;
         Property property = findById(id);
         Project project = projectService.findById(property.getProject().getId());
-        for (Task task : project.getTasks()) {
-            if (property.getKind() != STATUS) {
-                propertyRepository.deleteById(id);
-            } else {
-                throw new CantDeleteStatusException();
+        if (property.getKind() != STATUS &&
+                property.getKind() != DATE) {
+            for (Task task : project.getTasks()) {
+                for (int i = 0; i < task.getValues().size(); i++) {
+                    if (task.getValues().get(i).getProperty().getId().equals(id)) {
+                        valueToDelete = task.getValues().get(i);
+                        task.getValues().remove(valueToDelete);
+                        valueService.delete(valueToDelete);
+                        propertyRepository.deleteById(id);
+                    }
+                }
             }
+        } else {
+            throw new CantDeleteStatusException();
         }
     }
 
