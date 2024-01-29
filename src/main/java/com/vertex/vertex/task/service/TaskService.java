@@ -20,6 +20,7 @@ import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.value.model.entity.ValueDate;
+import com.vertex.vertex.task.relations.value.model.entity.ValueNumber;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
@@ -132,14 +133,13 @@ public class TaskService {
         for (int i = 0; i < task.getValues().size(); i++) {
             if (task.getValues().get(i).getId().equals(editValueDTO.getValue().getId())) {
 
-                Value currentValue = property.getKind().getValue();
-                currentValue.setId(editValueDTO.getValue().getId());
-                currentValue.setTask(task);
-                currentValue.setProperty(property);
-                System.out.println(editValueDTO.getValue().getValue());
-                currentValue.setValue(editValueDTO.getValue().getValue());
-                task.getValues().set(i, currentValue);
-                task.setApproveStatus(ApproveStatus.INPROGRESS);
+                    Value currentValue = property.getKind().getValue();
+                    currentValue.setId(editValueDTO.getValue().getId());
+                    currentValue.setTask(task);
+                    currentValue.setProperty(property);
+                    currentValue.setValue(editValueDTO.getValue().getValue());
+                    task.getValues().set(i, currentValue);
+                    task.setApproveStatus(ApproveStatus.INPROGRESS);
             }
         }
         return taskRepository.save(task);
