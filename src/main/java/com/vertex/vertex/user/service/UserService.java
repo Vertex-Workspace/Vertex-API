@@ -135,18 +135,22 @@ public class UserService {
 
     public Boolean imageUpload(Long id, MultipartFile file){
         User user;
+        System.out.println("aaaaaaaaaa");
 
         try {
             if (userRepository.existsById(id)) {
                 user = findById(id);
                 user.setImage(file.getBytes());
                 userRepository.save(user);
+                System.out.println("true");
                 return true;
             }
         } catch (Exception ignored) {
+            System.out.println("erro");
             throw new RuntimeException("Erro");
         }
 
+        System.out.println("false");
         return false;
     }
 

@@ -114,6 +114,7 @@ public class UserController {
     public ResponseEntity<Boolean> uploadImage(
             @PathVariable Long id,
             @RequestParam MultipartFile file) {
+
         try {
             return new ResponseEntity<>
                     (userService.imageUpload(id, file),
@@ -123,12 +124,6 @@ public class UserController {
                     (false,
                             HttpStatus.CONFLICT);
         }
-    }
-
-    @GetMapping("/{id}/image")
-    public byte[] getImage(@PathVariable Long id) {
-        User user = userService.findById(id);
-        return user.getImage();
     }
 
 }
