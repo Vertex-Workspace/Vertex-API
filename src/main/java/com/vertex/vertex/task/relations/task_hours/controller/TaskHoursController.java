@@ -51,7 +51,7 @@ public class TaskHoursController {
         }
     }
 
-    @PatchMapping
+    @PatchMapping("/edit")
     public ResponseEntity<?> update(@RequestBody TaskHourEditDTO taskHourEditDTO){
         try{
             taskHoursService.save(taskHourEditDTO);
