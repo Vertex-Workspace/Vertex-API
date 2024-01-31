@@ -16,10 +16,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Locale;
-import java.util.NoSuchElementException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @Data
@@ -48,8 +49,6 @@ public class UserService {
 
             User userFind = userRepository.findByEmail(userEmailWithNoEdition.getEmail());
 
-            System.out.println(user);
-            System.out.println(userFind);
 
             if (userFind != null && user.getEmail().equals(userFind.getEmail())) {
                 throw new EmailAlreadyExistsException();
@@ -72,7 +71,8 @@ public class UserService {
         user.setLocation("Jaraguá do Sul - SC");
         user.setPersonalization(personalizationService.defaultSave(user));
 
-
+        byte[] data = Base64.getDecoder().decode(userDTO.getImage());
+        user.setImage(data);
         return userRepository.save(user);
     }
 
@@ -135,26 +135,20 @@ public class UserService {
 
     public Boolean imageUpload(Long id, MultipartFile file){
         User user;
-        System.out.println("aaaaaaaaaa");
 
         try {
             if (userRepository.existsById(id)) {
                 user = findById(id);
                 user.setImage(file.getBytes());
                 userRepository.save(user);
-                System.out.println("true");
                 return true;
             }
         } catch (Exception ignored) {
-            System.out.println("erro");
             throw new RuntimeException("Erro");
         }
 
-        System.out.println("false");
-        return false;
+        throw new RuntimeException();
     }
-
-
 
 
 }
