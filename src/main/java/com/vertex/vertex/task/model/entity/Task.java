@@ -31,6 +31,7 @@ public class Task {
     @ToString.Exclude
     private List<TaskResponsable> taskResponsables;
 
+    @Column(length = 1000)
     private String description;
 
     @ManyToOne(cascade = CascadeType.ALL)
