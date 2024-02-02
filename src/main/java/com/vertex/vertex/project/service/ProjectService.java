@@ -6,6 +6,7 @@ import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.property.model.ENUM.Color;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
 import com.vertex.vertex.property.model.ENUM.PropertyListKind;
+import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.team.model.entity.Team;
@@ -14,7 +15,10 @@ import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.service.TeamService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -30,10 +34,12 @@ public class ProjectService {
     private final TeamService teamService;
     private final UserTeamService userTeamService;
 
+    private final ModelMapper mapper = new ModelMapper();
+
     public Project save(Project project, Long teamId) {
         Team team;
-        Property property = new Property(PropertyKind.STATUS, "STATUS", true, "STATUS");
-        Property propertyDate = new Property(PropertyKind.DATE, "DATE", true, "DATE");
+        Property property = new Property(PropertyKind.STATUS, "Status", true, "", PropertyStatus.FIXED);
+        Property propertyDate = new Property(PropertyKind.DATE, "Data", true, "", PropertyStatus.FIXED);
         try {
             team = teamService.findTeamById(teamId);
         } catch (Exception e) {
@@ -106,5 +112,53 @@ public class ProjectService {
         propertiesList.add(new PropertyList("doing default", Color.YELLOW, property, PropertyListKind.DOING));
         propertiesList.add(new PropertyList("done default", Color.GREEN, property, PropertyListKind.DONE));
         return propertiesList;
+    }
+
+
+    public Property saveProperty(Long projectID, Property property){
+        Project project = findById(projectID);
+
+        Property finalProperty = new Property();
+
+        if(property.getId() != 0){
+            mapper.map(property, finalProperty);
+            finalProperty.setProject(project);
+            for ( Property propertyFor : project.getProperties()) {
+                if(propertyFor.getId().equals(property.getId())){
+                    project.getProperties().set(project.getProperties().indexOf(propertyFor), finalProperty);
+                    break;
+                }
+            }
+        } else {
+            finalProperty  = new Property(PropertyKind.TEXT,
+                    "Nova Propriedade", false, "", PropertyStatus.VISIBLE);
+            finalProperty.setProject(project);
+            project.getProperties().add(finalProperty);
+        }
+
+        try{
+            projectRepository.save(project);
+            return finalProperty;
+        } catch(Exception e){
+            throw new RuntimeException(e.getMessage());
+        }
+
+    }
+
+    public Project deleteProperty(Long projectId, Long propertyId){
+        Project project = findById(projectId);
+
+        boolean isRemoved = false;
+        for ( Property property : project.getProperties()) {
+            if(property.getId().equals(propertyId)){
+                project.getProperties().remove(property);
+                isRemoved = true;
+                break;
+            }
+        }
+        if(!isRemoved){
+            throw new RuntimeException("There isn't a project with this property id or there isn't a property with this project id");
+        }
+        return projectRepository.save(project);
     }
 }

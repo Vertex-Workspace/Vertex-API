@@ -120,6 +120,7 @@ public class TaskService {
     }
 
     public Task save(EditValueDTO editValueDTO) throws Exception {
+        System.out.println("ENtrei no patch");
         Task task;
         try {
             task = findById(editValueDTO.getId());
@@ -132,7 +133,7 @@ public class TaskService {
         }
         for (int i = 0; i < task.getValues().size(); i++) {
             if (task.getValues().get(i).getId().equals(editValueDTO.getValue().getId())) {
-
+                System.out.println("Entrei e o ID é o mesmo " + editValueDTO.getValue().getId());
                     Value currentValue = property.getKind().getValue();
                     currentValue.setId(editValueDTO.getValue().getId());
                     currentValue.setTask(task);

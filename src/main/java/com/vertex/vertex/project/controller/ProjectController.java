@@ -2,6 +2,7 @@ package com.vertex.vertex.project.controller;
 
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
+import com.vertex.vertex.property.model.entity.Property;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -92,4 +93,26 @@ public class ProjectController {
                         HttpStatus.OK);
     }
 
+
+    //Properties
+    @PatchMapping("/{projectID}/property")
+    public ResponseEntity<?> saveProperty(@PathVariable Long projectID, @RequestBody Property property) {
+        try {
+            return new ResponseEntity<>(projectService.saveProperty(projectID, property), HttpStatus.OK);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+
+    }
+
+    @DeleteMapping("/{projectID}/{propertyID}")
+    public ResponseEntity<?> deleteProperty(@PathVariable Long projectID, @PathVariable Long propertyID) {
+        try {
+            return new ResponseEntity<>(projectService.deleteProperty(projectID, propertyID), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+
+    }
 }

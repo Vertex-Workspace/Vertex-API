@@ -12,6 +12,7 @@ import com.vertex.vertex.property.service.PropertyService;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 @Component
 public class ValueDeserializer extends StdDeserializer<Value> {
@@ -40,9 +41,9 @@ public class ValueDeserializer extends StdDeserializer<Value> {
             }
 
             if (nodeV.get("value") != null) {
+                String value = nodeV.get("value").asText();
                 if (property.getKind() == PropertyKind.LIST ||
                         property.getKind() == PropertyKind.STATUS) {
-                    String value = nodeV.get("value").asText();
                     Long idList = Long.parseLong(value);
                     for (PropertyList propertyList : property.getPropertyLists()) {
                         if (idList.equals(propertyList.getId())) {
@@ -50,7 +51,6 @@ public class ValueDeserializer extends StdDeserializer<Value> {
                         }
                     }
                 } else {
-                    String value = nodeV.get("value").asText();
                     valueKind.setValue(value);
                 }
             }
