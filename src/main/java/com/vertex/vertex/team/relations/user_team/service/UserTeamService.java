@@ -21,8 +21,6 @@ public class UserTeamService {
 
     private final UserTeamRepository userTeamRepository;
 
-
-
     public UserTeam findUserTeamByComposeId(Long teamId, Long userId){
         return userTeamRepository.findByTeam_IdAndUser_Id(teamId, userId);
     }

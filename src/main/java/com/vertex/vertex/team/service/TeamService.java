@@ -85,10 +85,12 @@ public class TeamService {
 
 
     public Team editGroup(GroupRegisterDTO groupRegisterDTO) {
+        List<UserTeam> userTeams = new ArrayList<>();
         try {
             Group group = new Group();
 
             Team team = findTeamById(groupRegisterDTO.getTeam().getId());
+
             if (groupRegisterDTO.getName().length() < 1) {
                 throw new GroupNameInvalidException();
             }
@@ -96,6 +98,19 @@ public class TeamService {
             group.setName(groupRegisterDTO.getName());
             team.getGroups().add(group);
             group.setTeam(team);
+
+            for (int i = 0; i < groupRegisterDTO.getUsers().size(); i++) {
+                User user = userService.findById(groupRegisterDTO.getUsers().get(i).getId());
+
+                for(UserTeam userTeam : team.getUserTeams()){
+                    if(userTeam.getUser().equals(user)){
+                        userTeams.add(userTeam);
+                        userTeam.getGroups().add(group);
+                        group.setUserTeams(userTeams);
+                    }
+                }
+            }
+
             return teamRepository.save(team);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -211,6 +226,16 @@ public class TeamService {
                 });
 
         dto.setUsers(users);
+    }
+
+    public List<User> getUsersByTeam(Long teamId){
+        List<User> users = new ArrayList<>();
+        Team team = findTeamById(teamId);
+
+        for (int i = 0; i < team.getUserTeams().size(); i++) {
+            users.add(team.getUserTeams().get(i).getUser());
+        }
+        return users;
     }
 
 }

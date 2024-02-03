@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserTeamAssociateDTO {
+
     private Long id;
     private Team team;
     private User user;

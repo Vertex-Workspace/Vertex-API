@@ -6,6 +6,7 @@ import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupEditUserDTO;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupRegisterDTO;
+import com.vertex.vertex.team.relations.group.service.GroupService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
 import com.vertex.vertex.team.service.TeamService;
 import jakarta.persistence.EntityNotFoundException;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @CrossOrigin
 @RestController
@@ -23,6 +25,7 @@ import java.util.List;
 public class TeamController {
 
     private final TeamService teamService;
+    private final GroupService groupService;
 
     @PostMapping
     public ResponseEntity<?> save(@RequestBody TeamViewListDTO team) {
@@ -88,7 +91,6 @@ public class TeamController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
-    //
 
     @GetMapping("/exists/{teamId}/{userId}")
     public ResponseEntity<?> existsByIdAndUserBelongs(
@@ -106,6 +108,26 @@ public class TeamController {
             return new ResponseEntity<>(teamService.editUserIntoGroup(groupEditUserDTO), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/group/{groupId}")
+    public ResponseEntity<?> deleteGroup(@PathVariable Long groupId){
+        try{
+            groupService.delete(groupId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch(Exception e){
+            e.printStackTrace();
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping("/usersByTeam/{teamId}")
+    public ResponseEntity<?> findByTeam(@PathVariable Long teamId) {
+        try {
+            return new ResponseEntity<>(teamService.getUsersByTeam(teamId), HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
         }
     }
 

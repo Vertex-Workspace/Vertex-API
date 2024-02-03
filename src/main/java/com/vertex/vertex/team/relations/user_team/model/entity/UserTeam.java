@@ -43,7 +43,7 @@ public class UserTeam {
     @JsonIgnore
     private List<Permission> permissionUser;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonIgnore
     private List<Group> groups;
 

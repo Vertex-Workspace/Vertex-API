@@ -1,5 +1,10 @@
 package com.vertex.vertex.user.service;
 
+import com.vertex.vertex.team.model.entity.Team;
+import com.vertex.vertex.team.relations.group.model.entity.Group;
+import com.vertex.vertex.team.relations.group.service.GroupService;
+import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
+import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.user.model.DTO.UserDTO;
 import com.vertex.vertex.user.model.DTO.UserEditionDTO;
 import com.vertex.vertex.user.model.DTO.UserLoginDTO;
@@ -15,9 +20,7 @@ import org.springframework.beans.factory.parsing.Location;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @Data
@@ -27,6 +30,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PersonalizationService personalizationService;
+    private final GroupService groupService;
 
     public User save(UserDTO userDTO) {
         User user = new User();
@@ -131,7 +135,9 @@ public class UserService {
         return userRepository.save(user);
     }
 
-
-
+    public List<UserTeam> getUsersByGroup(Long groupId){
+        Group group = groupService.findById(groupId);
+        return group.getUserTeams();
+    }
 
 }

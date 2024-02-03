@@ -109,4 +109,13 @@ public class UserController {
         }
     }
 
+    @GetMapping("/usersByGroup/{groupId}")
+    public ResponseEntity<?> findByGroup(@PathVariable Long groupId) {
+        try {
+            return new ResponseEntity<>(userService.getUsersByGroup(groupId), HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        }
+    }
+
 }

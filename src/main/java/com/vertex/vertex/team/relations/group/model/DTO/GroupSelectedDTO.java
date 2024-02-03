@@ -11,5 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GroupSelectedDTO extends GroupRegisterDTO{
-    private List<UserBasicInformationsDTO> users;
+
+    private List<UserBasicInformationsDTO> userInfos;
 }
