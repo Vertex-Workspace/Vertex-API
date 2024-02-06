@@ -10,6 +10,7 @@ import com.vertex.vertex.task.relations.task_responsables.model.DTOs.TaskRespons
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.service.TaskService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -112,6 +113,22 @@ public class TaskController {
             return new ResponseEntity<>(taskService.saveResponsables(taskResponsable), HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping("/project/{id}")
+    public ResponseEntity<?> findAllByProject(
+            @PathVariable Long id) {
+        try {
+            return new ResponseEntity<>(
+                    taskService.getAllByProject(id),
+                        HttpStatus.OK);
+
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(
+                    "Projeto não encontrado!",
+                        HttpStatus.NOT_FOUND
+            );
         }
     }
 
