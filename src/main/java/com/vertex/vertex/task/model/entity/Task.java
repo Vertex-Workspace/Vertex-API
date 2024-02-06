@@ -28,7 +28,6 @@ public class Task {
     private String name;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
     private List<TaskResponsable> taskResponsables;
 
     @Column(length = 1000)

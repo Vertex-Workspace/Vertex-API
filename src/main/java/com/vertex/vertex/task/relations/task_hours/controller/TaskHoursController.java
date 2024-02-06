@@ -37,9 +37,9 @@ public class TaskHoursController {
         }
     }
 
-    @GetMapping("/time-in-task/{id}")
-    public TimeInTaskDto timeInTask(@PathVariable Long id){
-        return taskHoursService.timeInTask(id);
+    @GetMapping("/time-in-task/{idResponsable}")
+    public TimeInTaskDto timeInTask(@PathVariable Long idResponsable){
+        return taskHoursService.timeInTask(idResponsable);
     }
 
     @PostMapping("/{idTask}/{idResponsable}")

@@ -20,10 +20,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -54,6 +51,19 @@ public class TeamService {
             team.setDescription(teamViewListDTO.getDescription());
             //After the Romas explanation about Date
 //            team.setCreationDate();
+
+
+            String caracteres = "abcdefghijklmnopqrstuvwxyz1234567890";
+            StringBuilder token= new StringBuilder();
+            Random random = new Random();
+            for (int i = 0; i < caracteres.length(); i++) {
+                char a  = caracteres.charAt(random.nextInt(0,34));
+                token.append(a);
+            }
+
+            team.setInvitationCode(token.toString());
+
+
             return teamRepository.save(team);
 
         } catch (Exception e) {
