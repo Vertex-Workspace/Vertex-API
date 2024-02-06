@@ -26,6 +26,8 @@ public class Team {
     @Column(nullable = false)
     private String name;
 
+    private String invitationCode;
+
     @OneToOne
     private UserTeam creator;
 

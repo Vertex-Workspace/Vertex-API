@@ -89,15 +89,25 @@ public class TaskService {
             taskResponsable.setTask(task);
             task.setCreator(taskResponsable);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             throw new RuntimeException("Não foi encontrado o usuário para ele ser o criador da tarefa");
         }
 
+        //Add the taskResponsables on task list of taskResponsables
+        for (UserTeam userTeam : project.getTeam().getUserTeams()) {
+//            if (!task.getCreator().getUserTeam().equals(userTeam)) {
+            TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
+            if (task.getTaskResponsables() == null) {
+                task.setTaskResponsables(List.of(taskResponsable1));
+            } else task.getTaskResponsables().add(taskResponsable1);
+        }
+
         task.setApproveStatus(ApproveStatus.INPROGRESS);
-        System.out.println(task);
         return taskRepository.save(task);
+
     }
 
-    public Task edit(TaskEditDTO taskEditDTO){
+    public Task edit(TaskEditDTO taskEditDTO) {
         try {
             Task task = findById(taskEditDTO.getId());
             BeanUtils.copyProperties(taskEditDTO, task);
@@ -134,13 +144,13 @@ public class TaskService {
         for (int i = 0; i < task.getValues().size(); i++) {
             if (task.getValues().get(i).getId().equals(editValueDTO.getValue().getId())) {
 
-                    Value currentValue = property.getKind().getValue();
-                    currentValue.setId(editValueDTO.getValue().getId());
-                    currentValue.setTask(task);
-                    currentValue.setProperty(property);
-                    currentValue.setValue(editValueDTO.getValue().getValue());
-                    task.getValues().set(i, currentValue);
-                    task.setApproveStatus(ApproveStatus.INPROGRESS);
+                Value currentValue = property.getKind().getValue();
+                currentValue.setId(editValueDTO.getValue().getId());
+                currentValue.setTask(task);
+                currentValue.setProperty(property);
+                currentValue.setValue(editValueDTO.getValue().getValue());
+                task.getValues().set(i, currentValue);
+                task.setApproveStatus(ApproveStatus.INPROGRESS);
             }
         }
         return taskRepository.save(task);

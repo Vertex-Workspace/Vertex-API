@@ -55,6 +55,16 @@ public class TeamService {
             byte[] data = Base64.getDecoder().decode(teamViewListDTO.getImage());
             team.setImage(data);
 
+            String caracteres = "abcdefghijklmnopqrstuvwxyz1234567890";
+            StringBuilder token= new StringBuilder();
+            Random random = new Random();
+            for (int i = 0; i < caracteres.length(); i++) {
+                char a  = caracteres.charAt(random.nextInt(0,34));
+                token.append(a);
+            }
+
+            team.setInvitationCode(token.toString());
+
             return teamRepository.save(team);
 
         } catch (Exception e) {

@@ -1,6 +1,7 @@
 package com.vertex.vertex.task.relations.task_hours.controller;
 
 import com.vertex.vertex.task.relations.task_hours.model.DTO.TaskHourEditDTO;
+import com.vertex.vertex.task.relations.task_hours.model.DTO.TimeInTaskDto;
 import com.vertex.vertex.task.relations.task_hours.model.entity.TaskHour;
 import com.vertex.vertex.task.relations.task_hours.service.TaskHoursService;
 import lombok.AllArgsConstructor;
@@ -36,15 +37,15 @@ public class TaskHoursController {
         }
     }
 
-    @GetMapping("/time-in-task")
-    public LocalTime timeInTask(@RequestBody TaskHourEditDTO taskHourEditDTO){
-        return taskHoursService.timeInTask(taskHourEditDTO);
+    @GetMapping("/time-in-task/{idResponsable}")
+    public TimeInTaskDto timeInTask(@PathVariable Long idResponsable){
+        return taskHoursService.timeInTask(idResponsable);
     }
 
-    @PostMapping
-    public ResponseEntity<?> save(@RequestBody TaskHour taskHour){
+    @PostMapping("/{idTask}/{idResponsable}")
+    public ResponseEntity<?> save(@PathVariable Long idTask, @PathVariable Long idResponsable){
         try{
-            taskHoursService.save(taskHour);
+            taskHoursService.save(idTask,idResponsable);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
