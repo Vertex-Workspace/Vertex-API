@@ -35,6 +35,11 @@ public class Team {
 
     private LocalDateTime creationDate;
 
+    @Lob
+    @Column(name = "image",
+            columnDefinition = "BLOB")
+    private byte[] image;
+
     @OneToMany(mappedBy = "team", fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Project> projects;
 

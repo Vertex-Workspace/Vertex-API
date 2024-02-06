@@ -52,6 +52,8 @@ public class TeamService {
             //After the Romas explanation about Date
 //            team.setCreationDate();
 
+            byte[] data = Base64.getDecoder().decode(teamViewListDTO.getImage());
+            team.setImage(data);
 
             String caracteres = "abcdefghijklmnopqrstuvwxyz1234567890";
             StringBuilder token= new StringBuilder();
@@ -62,7 +64,6 @@ public class TeamService {
             }
 
             team.setInvitationCode(token.toString());
-
 
             return teamRepository.save(team);
 

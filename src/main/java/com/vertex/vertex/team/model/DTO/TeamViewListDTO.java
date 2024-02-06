@@ -16,4 +16,5 @@ public class TeamViewListDTO {
     private UserTeam creator;
     private String description;
     private LocalDateTime creationDate;
+    private String image;
 }
