@@ -131,4 +131,15 @@ public class TeamController {
         }
     }
 
+    @DeleteMapping("/{teamId}/group/{groupId}/user/{userId}")
+    public ResponseEntity<?> deleteUserFromGroup(@PathVariable Long userId, @PathVariable Long teamId, @PathVariable  Long groupId){
+        try{
+            groupService.deleteUserFromGroup(userId, teamId, groupId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch(Exception e){
+            e.printStackTrace();
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
 }

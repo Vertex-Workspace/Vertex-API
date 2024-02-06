@@ -135,9 +135,14 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public List<UserTeam> getUsersByGroup(Long groupId){
+    public List<User> getUsersByGroup(Long groupId){
+        List<User> users = new ArrayList<>();
         Group group = groupService.findById(groupId);
-        return group.getUserTeams();
+
+        for (int i = 0; i < group.getUserTeams().size(); i++) {
+                users.add(group.getUserTeams().get(i).getUser());
+        }
+       return users;
     }
 
 }

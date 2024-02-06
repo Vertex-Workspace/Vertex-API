@@ -44,4 +44,14 @@ public class GroupService {
         teamRepository.save(team);
         groupRepository.delete(group);
     }
+
+    public void deleteUserFromGroup(Long userId, Long teamId, Long groupId){
+        Group group = findById(groupId);
+        for(UserTeam userTeam : group.getUserTeams()) {
+            if ((userTeam.getUser().getId().equals(userId)) && (userTeam.getTeam().getId().equals(teamId))) {
+                userTeam.getGroups().remove(group);
+                userTeamService.save(userTeam);
+            }
+        }
+    }
 }
