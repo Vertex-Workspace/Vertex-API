@@ -27,6 +27,9 @@ import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskRespo
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
+import com.vertex.vertex.team.service.TeamService;
+import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -47,6 +50,8 @@ public class TaskService {
     private final ProjectService projectService;
     private final PropertyService propertyService;
     private final UserTeamService userTeamService;
+    private final UserService userService;
+    private final TeamService teamService;
 
     public Task save(TaskCreateDTO taskCreateDTO) {
         Task task = new Task();

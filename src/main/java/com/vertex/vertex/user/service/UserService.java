@@ -11,15 +11,9 @@ import com.vertex.vertex.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.parsing.Location;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -71,6 +65,7 @@ public class UserService {
         user.setLocation("Jaraguá do Sul - SC");
         user.setPersonalization(personalizationService.defaultSave(user));
 
+        System.out.println(userDTO.getImage());
         byte[] data = Base64.getDecoder().decode(userDTO.getImage());
         user.setImage(data);
         return userRepository.save(user);
