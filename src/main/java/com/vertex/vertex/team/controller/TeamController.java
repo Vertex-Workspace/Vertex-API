@@ -51,6 +51,17 @@ public class TeamController {
         }
     }
 
+    @GetMapping("/invitation/{id}")
+    public ResponseEntity<?> findInvitationCodeById(@PathVariable Long id) {
+
+        try {
+            return new ResponseEntity<>(teamService.findInvitationCodeById(id), HttpStatus.OK);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         try {

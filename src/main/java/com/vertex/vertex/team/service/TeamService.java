@@ -1,6 +1,7 @@
 package com.vertex.vertex.team.service;
 
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
+import com.vertex.vertex.team.model.DTO.TeamLinkDTO;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
@@ -61,8 +62,9 @@ public class TeamService {
                 token.append(a);
             }
 
-            team.setInvitationCode(token.toString());
 
+            team.setInvitationCode(token.toString());
+            System.out.println(team);
 
             return teamRepository.save(team);
 
@@ -83,6 +85,15 @@ public class TeamService {
             return dto;
         }
         throw new TeamNotFoundException(id);
+    }
+
+    public TeamLinkDTO findInvitationCodeById(Long id) {
+
+        try {
+            return new TeamLinkDTO(teamRepository.findById(id).get().getInvitationCode());
+        }catch (Exception e){
+            throw new TeamNotFoundException(id);
+        }
     }
 
     public void deleteById(Long id) {
