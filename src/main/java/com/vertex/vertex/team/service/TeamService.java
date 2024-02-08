@@ -20,6 +20,7 @@ import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.*;
 
@@ -55,10 +56,10 @@ public class TeamService {
 
 
             String caracteres = "abcdefghijklmnopqrstuvwxyz1234567890";
-            StringBuilder token= new StringBuilder();
+            StringBuilder token = new StringBuilder();
             Random random = new Random();
             for (int i = 0; i < caracteres.length(); i++) {
-                char a  = caracteres.charAt(random.nextInt(0,34));
+                char a = caracteres.charAt(random.nextInt(0, 34));
                 token.append(a);
             }
 
@@ -91,7 +92,7 @@ public class TeamService {
 
         try {
             return new TeamLinkDTO(teamRepository.findById(id).get().getInvitationCode());
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new TeamNotFoundException(id);
         }
     }
@@ -153,27 +154,28 @@ public class TeamService {
 
     public Team editUserTeam(UserTeamAssociateDTO userTeam) {
         try {
-
             User user = userService.findById(userTeam.getUser().getId());
             Team team = teamRepository.findById(userTeam.getTeam().getId()).get();
-
-            boolean userRemoved = false;
-            for (UserTeam userTeamFor : team.getUserTeams()) {
-                if (userTeamFor.getUser().equals(user)) {
-                    team.getUserTeams().remove(userTeamFor);
-                    userRemoved = true;
-                    break;
-                }
-            }
-            if (!userRemoved) {
-                team.getUserTeams().add(new UserTeam(user, team));
-            }
+            team.getUserTeams().add(new UserTeam(user, team));
             return teamRepository.save(team);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    public boolean userIsOnTeam(Long idUser, Long idTeam) {
+
+        User user = userService.findById(idUser);
+        Team team = teamRepository.findById(idTeam).get();
+
+        for (UserTeam userTeamFor : team.getUserTeams()) {
+            if (userTeamFor.getUser().equals(user)) {
+                return true;
+            }
+        }
+        return false;
+
+    }
 
 
     public List<TeamInfoDTO> findAll() {
@@ -216,9 +218,9 @@ public class TeamService {
     }
 
     public Team findTeamById(Long id) {
-        try{
+        try {
             return teamRepository.findById(id).get();
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
     }

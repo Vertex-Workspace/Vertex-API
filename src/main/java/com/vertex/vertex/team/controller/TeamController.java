@@ -82,6 +82,7 @@ public class TeamController {
     }
 
     //EDIT CASCADE TYPE ALL OBJECTS
+    //ADD USER IN THE TEAM
     @PatchMapping("/user")
     public ResponseEntity<?> editUserTeam(@RequestBody UserTeamAssociateDTO userTeam) {
         try {
@@ -99,6 +100,12 @@ public class TeamController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
+
+    @GetMapping("/userIsOnTeam/{idUser}/{idTeam}")
+    public boolean userIsOnTeam(@PathVariable Long idUser, @PathVariable Long idTeam){
+        return teamService.userIsOnTeam(idUser,idTeam);
+    }
+
     //
 
     @GetMapping("/exists/{teamId}/{userId}")
