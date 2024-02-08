@@ -10,6 +10,8 @@ import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.group.model.exception.GroupNameInvalidException;
 import com.vertex.vertex.team.relations.group.model.exception.GroupNotFoundException;
 import com.vertex.vertex.team.relations.group.service.GroupService;
+import com.vertex.vertex.team.relations.permission.model.entity.Permission;
+import com.vertex.vertex.team.relations.permission.model.enums.TypePermissions;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.repository.TeamRepository;
@@ -160,7 +162,16 @@ public class TeamService {
                 }
             }
             if (!userRemoved) {
-                team.getUserTeams().add(new UserTeam(user, team));
+                UserTeam newUserTeam = new UserTeam(user, team);
+                team.getUserTeams().add(newUserTeam);
+
+                //set the default permission when creating a userTeam that is the preview
+                List<Permission> defaultPermissions = new ArrayList<>();
+                Permission preview = new Permission();
+                preview.setName(TypePermissions.VIEW);
+                defaultPermissions.add(preview);
+                newUserTeam.setPermissionUser(defaultPermissions);
+                preview.setUserTeam(newUserTeam);
             }
             return teamRepository.save(team);
         } catch (Exception e) {

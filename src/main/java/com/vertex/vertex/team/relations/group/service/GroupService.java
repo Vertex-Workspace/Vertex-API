@@ -31,6 +31,10 @@ public class GroupService {
         return groupRepository.findById(groupId).get();
     }
 
+    public List<Group> findAll(){
+        return groupRepository.findAll();
+    }
+
     public void delete(Long id) {
         Group group = findById(id);
 

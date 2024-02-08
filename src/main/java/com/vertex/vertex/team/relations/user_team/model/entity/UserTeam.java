@@ -39,8 +39,9 @@ public class UserTeam {
     @JsonIgnore
     private User user;
 
-    @OneToMany(mappedBy = "userTeam", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "userTeam", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
+    @ToString.Exclude
     private List<Permission> permissionUser;
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)

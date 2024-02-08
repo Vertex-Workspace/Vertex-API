@@ -7,6 +7,9 @@ import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupEditUserDTO;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupRegisterDTO;
 import com.vertex.vertex.team.relations.group.service.GroupService;
+import com.vertex.vertex.team.relations.permission.model.DTOs.PermissionCreateDTO;
+import com.vertex.vertex.team.relations.permission.model.entity.Permission;
+import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
 import com.vertex.vertex.team.service.TeamService;
 import jakarta.persistence.EntityNotFoundException;
@@ -26,6 +29,7 @@ public class TeamController {
 
     private final TeamService teamService;
     private final GroupService groupService;
+    private final PermissionService permissionService;
 
     @PostMapping
     public ResponseEntity<?> save(@RequestBody TeamViewListDTO team) {
@@ -137,9 +141,19 @@ public class TeamController {
             groupService.deleteUserFromGroup(userId, teamId, groupId);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch(Exception e){
-            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
+
+    @PatchMapping("/permission")
+    public ResponseEntity<?> giveAPermission(@RequestBody PermissionCreateDTO permissionCreateDTO){
+
+        try{
+            return new ResponseEntity<>(permissionService.save(permissionCreateDTO), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
 
 }
