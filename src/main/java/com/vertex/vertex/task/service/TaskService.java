@@ -120,7 +120,6 @@ public class TaskService {
     }
 
     public Task save(EditValueDTO editValueDTO) throws Exception {
-        System.out.println("ENtrei no patch");
         Task task;
         try {
             task = findById(editValueDTO.getId());

@@ -137,6 +137,7 @@ public class TeamService {
             Team team = teamRepository.findById(userTeam.getTeam().getId()).get();
 
             boolean userRemoved = false;
+            //Percorre a lista e se já existir um usuário, ele exclui ao invés de adicioanr
             for (UserTeam userTeamFor : team.getUserTeams()) {
                 if (userTeamFor.getUser().equals(user)) {
                     team.getUserTeams().remove(userTeamFor);
@@ -144,7 +145,10 @@ public class TeamService {
                     break;
                 }
             }
+
+            //Se não existir ele adiciona..
             if (!userRemoved) {
+                //Aqui vai código de permissão
                 team.getUserTeams().add(new UserTeam(user, team));
             }
             return teamRepository.save(team);

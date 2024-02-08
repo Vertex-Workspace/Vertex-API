@@ -35,15 +35,20 @@ public class PropertyService {
     private final ValueService valueService;
     private final ProjectRepository projectRepository;
 
-    private final ModelMapper mapper = new ModelMapper();
+    private final ModelMapper mapper;
+
 
     public Property save(Long projectID, Property property) {
+//        System.out.println(mapper.getConfiguration().setSkipNullEnabled(true));
         Project project = projectService.findById(projectID);
         Property finalProperty = new Property();
 
         if(property.getId() != 0){
             mapper.map(property, finalProperty);
             finalProperty.setProject(project);
+            //Property Lists
+            savePropertyList(property);
+
             for ( Property propertyFor : project.getProperties()) {
                 if(propertyFor.getId().equals(property.getId())){
                     project.getProperties().set(project.getProperties().indexOf(propertyFor), finalProperty);
@@ -108,17 +113,15 @@ public class PropertyService {
         return propertyRepository.findAll();
     }
 
-    public Property save(PropertyListDTO propertyListDTO) {
-        Property property;
+    private void savePropertyList(Property property) {
         try {
-            property = propertyRepository.findById(propertyListDTO.getId()).get();
-            for (PropertyList list : propertyListDTO.getPropertyLists()) {
-                if (list.getId() == null) {
+            for (PropertyList list : property.getPropertyLists()) {
+                // 0 is the sent value from front-end
+                if (list.getId() == 0) {
                     //verify if the property is a list or status
                     if ((property.getKind() == STATUS) ||
                             (property.getKind() == LIST)) {
                         //if the id doesn't exists, it means that this elements will be saved with a new id
-                        property.getPropertyLists().add(list);
                         list.setProperty(property);
                     } else {
                         throw new PropertyIsNotAListException();
@@ -136,6 +139,5 @@ public class PropertyService {
         } catch (NoSuchElementException e) {
             throw new RuntimeException();
         }
-        return propertyRepository.save(property);
     }
 }

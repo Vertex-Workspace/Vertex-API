@@ -116,6 +116,5 @@ public class ProjectController {
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
-
     }
 }
