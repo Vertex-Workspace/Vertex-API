@@ -155,5 +155,14 @@ public class TeamController {
         }
     }
 
+    @GetMapping("/permission/{userId}/{teamId}")
+    public ResponseEntity<?> getAllPermissions(@PathVariable Long userId, @PathVariable Long teamId) {
+        try {
+            return new ResponseEntity<>(permissionService.getAllPermissionOfAUserTeam(userId, teamId), HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
 
 }

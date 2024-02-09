@@ -6,6 +6,7 @@ import com.vertex.vertex.team.relations.permission.model.entity.Permission;
 import com.vertex.vertex.team.relations.permission.model.enums.TypePermissions;
 import com.vertex.vertex.team.relations.permission.repository.PermissionRepository;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
+import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.user.model.entity.User;
@@ -37,12 +38,12 @@ public class PermissionService {
         User user = userService.findById(permissionCreateDTO.getUserId());
 
         permissionRepository.save(permissionUser);
-        List<Permission> permissions = new ArrayList<>();
-        permissions.add(permissionUser);
         UserTeam userTeam = getOneUserByTeam(user.getId(),
                 team.getId());
-        userTeam.setPermissionUser(permissions);
+        userTeam.getPermissionUser().add(permissionUser);
         permissionUser.setUserTeam(userTeam);
+        userTeamService.save(userTeam);
+
         return permissionUser;
     }
 
@@ -73,6 +74,11 @@ public class PermissionService {
             }
         }
         return null;
+    }
+
+    public List<Permission> getAllPermissionOfAUserTeam(Long userId, Long teamId) {
+        UserTeam userTeam = getOneUserByTeam(userId, teamId);
+        return userTeam.getPermissionUser();
     }
 
 }
