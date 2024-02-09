@@ -116,17 +116,8 @@ public class PropertyService {
     private void savePropertyList(Property property) {
         try {
             for (PropertyList list : property.getPropertyLists()) {
-                // 0 is the sent value from front-end
-                if (list.getId() == 0) {
-                    //verify if the property is a list or status
-                    if ((property.getKind() == STATUS) ||
-                            (property.getKind() == LIST)) {
-                        //if the id doesn't exists, it means that this elements will be saved with a new id
-                        list.setProperty(property);
-                    } else {
-                        throw new PropertyIsNotAListException();
-                    }
-                } else {
+                list.setProperty(property);
+                if(list.getId() != 0) {
                     //if the id already exists, it'll be edited
                     for (int cont = 0; cont < property.getPropertyLists().size(); cont++) {
                         if (property.getPropertyLists().get(cont).getId().equals(list.getId())) {
