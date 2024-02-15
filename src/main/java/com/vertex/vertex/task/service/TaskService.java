@@ -85,42 +85,24 @@ public class TaskService {
                 ((ValueDate) currentValue).setValue();
             }
         }
-        //set the creator of the task
-//        try {
-//            taskResponsable.setUserTeam(userTeamService.findUserTeamByComposeId(taskCreateDTO.getTeamId(), project.getCreator().getId()));
-//            taskResponsable.setTask(task);
-//        } catch (Exception e) {
-//            System.out.println(e.getMessage());
-//            throw new RuntimeException("Não foi encontrado o usuário para ele ser o criador da tarefa");
-//        }
 
-        System.out.println("CRASHOU AQUI 1");
         //Add the taskResponsables on task list of taskResponsables
         task.setCreator(userTeamService.findById(taskCreateDTO.getCreator().getId()));
         try{
-            System.out.println(project.getTeam().getUserTeams());
             for (UserTeam userTeam : project.getTeam().getUserTeams()) {
-                System.out.println(userTeam);
                 TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
                 if (task.getTaskResponsables() == null) {
-
                     ArrayList<TaskResponsable> listaParaFuncionarEstaCoisaBemLegal = new ArrayList<>();
                     listaParaFuncionarEstaCoisaBemLegal.add(taskResponsable1);
-
-
                     task.setTaskResponsables(listaParaFuncionarEstaCoisaBemLegal);
                 } else {
                     task.getTaskResponsables().add(taskResponsable1);
                 }
-                System.out.println(task.getTaskResponsables());
             }
         }catch (Exception e){
             e.printStackTrace();
         }
 
-        System.out.println(task);
-
-        System.out.println("CRASHOU AQUI 2");
         task.setApproveStatus(ApproveStatus.INPROGRESS);
         return taskRepository.save(task);
 
