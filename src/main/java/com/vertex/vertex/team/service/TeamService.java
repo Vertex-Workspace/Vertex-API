@@ -1,5 +1,10 @@
 package com.vertex.vertex.team.service;
 
+import com.vertex.vertex.project.model.entity.Project;
+import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
+import com.vertex.vertex.task.repository.TaskRepository;
+import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.DTO.TeamLinkDTO;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
@@ -32,6 +37,7 @@ public class TeamService {
 
     //Services
     private final UserService userService;
+    private final TaskRepository taskRepository;
     private final UserTeamService userTeamService;
     private final GroupService groupService;
 
@@ -54,7 +60,6 @@ public class TeamService {
             //After the Romas explanation about Date
 //            team.setCreationDate();
 
-
             String caracteres = "abcdefghijklmnopqrstuvwxyz1234567890";
             StringBuilder token = new StringBuilder();
             Random random = new Random();
@@ -62,8 +67,6 @@ public class TeamService {
                 char a = caracteres.charAt(random.nextInt(0, 34));
                 token.append(a);
             }
-
-
             team.setInvitationCode(token.toString());
             System.out.println(team);
 
@@ -89,7 +92,6 @@ public class TeamService {
     }
 
     public TeamLinkDTO findInvitationCodeById(Long id) {
-
         try {
             return new TeamLinkDTO(teamRepository.findById(id).get().getInvitationCode());
         } catch (Exception e) {
@@ -130,7 +132,6 @@ public class TeamService {
             UserTeam userTeam = userTeamService.findById(groupEditUserDTO.getUserTeam().getId());
 
             if (userTeam.getTeam().getGroups().contains(group)) {
-
                 //This logic makes a validation to verify if the user is already associated with this group
                 //If it is, then the associated will be removed.
                 if (userTeam.getGroups().contains(group) || group.getUserTeams().contains(userTeam)) {
@@ -157,7 +158,18 @@ public class TeamService {
             User user = userService.findById(userTeam.getUser().getId());
             Team team = teamRepository.findById(userTeam.getTeam().getId()).get();
             team.getUserTeams().add(new UserTeam(user, team));
-            return teamRepository.save(team);
+
+            teamRepository.save(team);
+
+            UserTeam userTeam1 =userTeamService.findUserTeamByComposeId(team.getId(),user.getId());
+            for (Project project : team.getProjects()) {
+                for (Task task : project.getTasks()) {
+                    task.getTaskResponsables().add(new TaskResponsable(userTeam1,task));
+                    taskRepository.save(task);
+                }
+            }
+
+            return team;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
