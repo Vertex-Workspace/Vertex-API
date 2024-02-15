@@ -33,8 +33,12 @@ import lombok.Data;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
+import javax.mail.*;
+import javax.mail.internet.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Data
@@ -52,7 +56,6 @@ public class TaskService {
         Task task = new Task();
         BeanUtils.copyProperties(taskCreateDTO, task);
         Project project;
-        TaskResponsable taskResponsable = new TaskResponsable();
         try {
             project = projectService.findById(taskCreateDTO.getProject().getId());
         } catch (Exception e) {
@@ -83,23 +86,22 @@ public class TaskService {
                 ((ValueDate) currentValue).setValue();
             }
         }
-        //set the creator of the task
-        try {
-            taskResponsable.setUserTeam(userTeamService.findUserTeamByComposeId(taskCreateDTO.getTeamId(), project.getCreator().getId()));
-            taskResponsable.setTask(task);
-            task.setCreator(taskResponsable);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            throw new RuntimeException("Não foi encontrado o usuário para ele ser o criador da tarefa");
-        }
 
         //Add the taskResponsables on task list of taskResponsables
-        for (UserTeam userTeam : project.getTeam().getUserTeams()) {
-//            if (!task.getCreator().getUserTeam().equals(userTeam)) {
-            TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
-            if (task.getTaskResponsables() == null) {
-                task.setTaskResponsables(List.of(taskResponsable1));
-            } else task.getTaskResponsables().add(taskResponsable1);
+        task.setCreator(userTeamService.findById(taskCreateDTO.getCreator().getId()));
+        try{
+            for (UserTeam userTeam : project.getTeam().getUserTeams()) {
+                TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
+                if (task.getTaskResponsables() == null) {
+                    ArrayList<TaskResponsable> listaParaFuncionarEstaCoisaBemLegal = new ArrayList<>();
+                    listaParaFuncionarEstaCoisaBemLegal.add(taskResponsable1);
+                    task.setTaskResponsables(listaParaFuncionarEstaCoisaBemLegal);
+                } else {
+                    task.getTaskResponsables().add(taskResponsable1);
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
 
         task.setApproveStatus(ApproveStatus.INPROGRESS);
