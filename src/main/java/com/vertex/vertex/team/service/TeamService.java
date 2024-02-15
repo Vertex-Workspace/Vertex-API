@@ -60,6 +60,10 @@ public class TeamService {
             //After the Romas explanation about Date
 //            team.setCreationDate();
 
+
+            byte[] data = Base64.getDecoder().decode(teamViewListDTO.getImage());
+            team.setImage(data);
+
             String caracteres = "abcdefghijklmnopqrstuvwxyz1234567890";
             StringBuilder token = new StringBuilder();
             Random random = new Random();
@@ -68,7 +72,6 @@ public class TeamService {
                 token.append(a);
             }
             team.setInvitationCode(token.toString());
-            System.out.println(team);
 
             return teamRepository.save(team);
 

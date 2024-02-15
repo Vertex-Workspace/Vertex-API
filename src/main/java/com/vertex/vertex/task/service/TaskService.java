@@ -27,6 +27,7 @@ import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskRespo
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
@@ -262,5 +263,17 @@ public class TaskService {
             throw new RuntimeException("A tarefa já foi aprovada. Ela não pode voltar para análise");
         }
         return save(task);
+    }
+
+    public List<Task> getAllByProject(Long id) {
+        try {
+            Project project = projectService.findById(id);
+            return project.getTasks();
+
+        } catch (Exception e) {
+            throw new EntityNotFoundException();
+        }
+
+
     }
 }
