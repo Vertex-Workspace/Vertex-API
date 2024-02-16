@@ -116,6 +116,20 @@ public class TaskController {
         }
     }
 
+    @GetMapping("/user/{id}")
+    public ResponseEntity<?> findAllByUser(
+            @PathVariable Long id) {
+        try {
+            return new ResponseEntity<>(
+                    taskService.getAllByUser(id),
+                        HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(
+                    "Usuário não encontrado!",
+                        HttpStatus.NOT_FOUND);
+        }
+    }
+
     @GetMapping("/project/{id}")
     public ResponseEntity<?> findAllByProject(
             @PathVariable Long id) {
@@ -129,6 +143,20 @@ public class TaskController {
                     "Projeto não encontrado!",
                         HttpStatus.NOT_FOUND
             );
+        }
+    }
+
+    @GetMapping("/team/{id}")
+    public ResponseEntity<?> findAllByTeam(
+            @PathVariable Long id) {
+        try {
+            return new ResponseEntity<>(
+                    taskService.getAllByTeam(id),
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(
+                    "Equipe não encontrada!",
+                    HttpStatus.NOT_FOUND);
         }
     }
 
