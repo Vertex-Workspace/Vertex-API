@@ -24,4 +24,6 @@ public class Permission {
     @ManyToOne
     private UserTeam userTeam;
 
+    private boolean enabled;
+
 }

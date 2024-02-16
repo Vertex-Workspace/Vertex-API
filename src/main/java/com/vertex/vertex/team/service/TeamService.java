@@ -1,5 +1,6 @@
 package com.vertex.vertex.team.service;
 
+import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.model.entity.Team;
@@ -12,6 +13,7 @@ import com.vertex.vertex.team.relations.group.model.exception.GroupNotFoundExcep
 import com.vertex.vertex.team.relations.group.service.GroupService;
 import com.vertex.vertex.team.relations.permission.model.entity.Permission;
 import com.vertex.vertex.team.relations.permission.model.enums.TypePermissions;
+import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.repository.TeamRepository;
@@ -37,9 +39,9 @@ public class TeamService {
     private final UserService userService;
     private final UserTeamService userTeamService;
     private final GroupService groupService;
+    private final PermissionService permissionService;
 
-
-    public Team save(TeamViewListDTO teamViewListDTO) {
+    public void save(TeamViewListDTO teamViewListDTO) {
         try {
             Team team = new Team();
             if (teamViewListDTO.getId() == null) {
@@ -56,8 +58,9 @@ public class TeamService {
             team.setDescription(teamViewListDTO.getDescription());
             //After the Romas explanation about Date
 //            team.setCreationDate();
-            return teamRepository.save(team);
-
+            teamRepository.save(team);
+            System.out.println(team.getId());
+            permissionService.save(teamViewListDTO.getCreator().getId(), team.getId());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -165,13 +168,8 @@ public class TeamService {
                 UserTeam newUserTeam = new UserTeam(user, team);
                 team.getUserTeams().add(newUserTeam);
 
-                //set the default permission when creating a userTeam that is the preview
-                List<Permission> defaultPermissions = new ArrayList<>();
-                Permission preview = new Permission();
-                preview.setName(TypePermissions.VIEW);
-                defaultPermissions.add(preview);
-                newUserTeam.setPermissionUser(defaultPermissions);
-                preview.setUserTeam(newUserTeam);
+                //set the default permissions
+                permissionService.save(user.getId(), team.getId());
             }
             return teamRepository.save(team);
         } catch (Exception e) {

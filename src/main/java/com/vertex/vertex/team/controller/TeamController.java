@@ -2,13 +2,9 @@ package com.vertex.vertex.team.controller;
 
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
-import com.vertex.vertex.team.model.entity.Team;
-import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupEditUserDTO;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupRegisterDTO;
 import com.vertex.vertex.team.relations.group.service.GroupService;
-import com.vertex.vertex.team.relations.permission.model.DTOs.PermissionCreateDTO;
-import com.vertex.vertex.team.relations.permission.model.entity.Permission;
 import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
 import com.vertex.vertex.team.service.TeamService;
@@ -18,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 
 @CrossOrigin
@@ -34,7 +29,8 @@ public class TeamController {
     @PostMapping
     public ResponseEntity<?> save(@RequestBody TeamViewListDTO team) {
         try {
-            return new ResponseEntity<>(teamService.save(team), HttpStatus.CREATED);
+            teamService.save(team);
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
@@ -42,7 +38,8 @@ public class TeamController {
     @PutMapping
     public ResponseEntity<?> update(@RequestBody TeamViewListDTO team) {
         try {
-            return new ResponseEntity<>(teamService.save(team), HttpStatus.OK);
+            teamService.save(team);
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
@@ -145,11 +142,11 @@ public class TeamController {
         }
     }
 
-    @PatchMapping("/permission")
-    public ResponseEntity<?> giveAPermission(@RequestBody PermissionCreateDTO permissionCreateDTO){
-
+    @PatchMapping("/permission/{permissionId}/{userId}/{teamId}")
+    public ResponseEntity<?> giveAPermission(@PathVariable Long permissionId, @PathVariable Long userId, @PathVariable Long teamId){
         try{
-            return new ResponseEntity<>(permissionService.save(permissionCreateDTO), HttpStatus.OK);
+            permissionService.changeEnabled(permissionId, userId, teamId);
+            return new ResponseEntity<>(HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
@@ -159,6 +156,15 @@ public class TeamController {
     public ResponseEntity<?> getAllPermissions(@PathVariable Long userId, @PathVariable Long teamId) {
         try {
             return new ResponseEntity<>(permissionService.getAllPermissionOfAUserTeam(userId, teamId), HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/hasPermission/{projectId}/{userId}")
+    public ResponseEntity<?> hasPermission(@PathVariable Long projectId, @PathVariable Long userId) {
+        try {
+            return new ResponseEntity<>(permissionService.hasPermission(projectId, userId), HttpStatus.OK);
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
