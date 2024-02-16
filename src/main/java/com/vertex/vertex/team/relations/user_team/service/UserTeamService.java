@@ -36,6 +36,7 @@ public class UserTeamService {
             BeanUtils.copyProperties(team, dto);
             teams.add(dto);
         }
+        System.out.println(teams);
         return teams;
     }
 
