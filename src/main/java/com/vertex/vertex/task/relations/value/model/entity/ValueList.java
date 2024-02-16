@@ -19,4 +19,5 @@ public class ValueList extends Value {
     public void setValue(Object object) {
         this.value = (PropertyList) object;
     }
+
 }

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Data
 @Entity
@@ -17,7 +18,10 @@ public class ValueDate extends Value {
 
     @Override
     public void setValue(Object object) {
-        String objectS = (String) object;
-        this.value = LocalDateTime.parse(objectS);
+        this.value = LocalDateTime.parse(object.toString());
+    }
+
+    public void setValue(){
+        this.value = LocalDateTime.now();
     }
 }

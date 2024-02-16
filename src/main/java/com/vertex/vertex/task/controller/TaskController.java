@@ -1,6 +1,7 @@
 package com.vertex.vertex.task.controller;
 
 import com.vertex.vertex.property.model.entity.Property;
+import com.vertex.vertex.task.model.DTO.TaskEditDTO;
 import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
 import com.vertex.vertex.task.relations.review.model.DTO.SetFinishedTask;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
@@ -9,6 +10,7 @@ import com.vertex.vertex.task.relations.task_responsables.model.DTOs.TaskRespons
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.service.TaskService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,6 +62,15 @@ public class TaskController {
         }
     }
 
+    @PatchMapping
+    public ResponseEntity<?> edit(@RequestBody TaskEditDTO taskEditDTO){
+        try{
+            return new ResponseEntity<>(taskService.edit(taskEditDTO), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
     @PatchMapping("/value")
     public ResponseEntity<?> save(@RequestBody EditValueDTO editValueDTO){
         try{
@@ -102,6 +113,50 @@ public class TaskController {
             return new ResponseEntity<>(taskService.saveResponsables(taskResponsable), HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping("/user/{id}")
+    public ResponseEntity<?> findAllByUser(
+            @PathVariable Long id) {
+        try {
+            return new ResponseEntity<>(
+                    taskService.getAllByUser(id),
+                        HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(
+                    "Usuário não encontrado!",
+                        HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/project/{id}")
+    public ResponseEntity<?> findAllByProject(
+            @PathVariable Long id) {
+        try {
+            return new ResponseEntity<>(
+                    taskService.getAllByProject(id),
+                        HttpStatus.OK);
+
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(
+                    "Projeto não encontrado!",
+                        HttpStatus.NOT_FOUND
+            );
+        }
+    }
+
+    @GetMapping("/team/{id}")
+    public ResponseEntity<?> findAllByTeam(
+            @PathVariable Long id) {
+        try {
+            return new ResponseEntity<>(
+                    taskService.getAllByTeam(id),
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(
+                    "Equipe não encontrada!",
+                    HttpStatus.NOT_FOUND);
         }
     }
 

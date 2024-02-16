@@ -6,6 +6,7 @@ import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
+import com.vertex.vertex.user.model.entity.User;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -35,6 +36,7 @@ public class UserTeamService {
             BeanUtils.copyProperties(team, dto);
             teams.add(dto);
         }
+        System.out.println(teams);
         return teams;
     }
 
@@ -45,4 +47,5 @@ public class UserTeamService {
     public List<UserTeam> findAll(Long id){
         return userTeamRepository.findAllByUser_Id(id);
     }
+
 }

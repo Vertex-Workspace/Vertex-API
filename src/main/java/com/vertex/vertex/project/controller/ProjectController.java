@@ -28,9 +28,9 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> findById(@PathVariable Long id){
+    public ResponseEntity<?> findProjectById(@PathVariable Long id){
         try{
-            return new ResponseEntity<>(projectService.findById(id), HttpStatus.OK);
+            return new ResponseEntity<>(projectService.findProjectById(id), HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }

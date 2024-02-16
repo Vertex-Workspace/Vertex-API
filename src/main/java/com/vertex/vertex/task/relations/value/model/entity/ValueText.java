@@ -18,4 +18,5 @@ public class ValueText extends Value {
         this.value = (String) object;
     }
 
+
 }

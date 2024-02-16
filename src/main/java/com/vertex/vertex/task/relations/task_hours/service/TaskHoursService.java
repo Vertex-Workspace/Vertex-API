@@ -1,6 +1,7 @@
 package com.vertex.vertex.task.relations.task_hours.service;
 
 import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.relations.task_hours.model.DTO.TimeInTaskDto;
 import com.vertex.vertex.task.relations.task_hours.model.exceptions.TaskIsNotFinishedException;
 import com.vertex.vertex.task.relations.task_hours.repository.TaskHoursRepository;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
@@ -34,29 +35,37 @@ public class TaskHoursService {
     private final UserTeamService userTeamService;
     private final TaskResponsablesService taskResponsablesService;
 
-    public void save(TaskHour taskHour) {
+    public void save(Long idTask, Long idResponsable) {
         int cont = 0;
-        TaskResponsable taskResponsable = taskResponsablesService.findById(taskHour.getTaskResponsable().getId());
+        TaskResponsable taskResponsable = taskResponsablesService.findById(idResponsable);
+        TaskHour taskHour = new TaskHour();
         taskHour.setTaskResponsable(taskResponsable);
         taskResponsable.getTaskHours().add(taskHour);
 
-        for (UserTeam userTeam : userTeamService.findAll(taskResponsable.getUserTeam().getUser().getId())) {
-            for (int i = 0; i < userTeam.getTaskResponsables().size(); i++) {
-                for (int j = 0; j < userTeam.getTaskResponsables().get(i).getTaskHours().size(); j++) {
-                    if (userTeam.getTaskResponsables().get(i).getTaskHours().get(j).getFinalDate() == null) {
-                        cont = cont + 1;
+        System.out.println(taskHour.getTaskResponsable().getTask().getId());
+        System.out.println(taskResponsable);
+
+        if (taskResponsable.getTask().getId().equals(idTask)) {
+
+
+            for (UserTeam userTeam : userTeamService.findAll(taskResponsable.getUserTeam().getUser().getId())) {
+                for (int i = 0; i < userTeam.getTaskResponsables().size(); i++) {
+                    for (int j = 0; j < userTeam.getTaskResponsables().get(i).getTaskHours().size(); j++) {
+                        if (userTeam.getTaskResponsables().get(i).getTaskHours().get(j).getFinalDate() == null) {
+                            cont = cont + 1;
+                        }
                     }
                 }
             }
-        }
-        //we gotta set less one because it is taking the last row with no attributes in database
-        cont = cont - 1;
-        for (int i = 0; i < taskResponsable.getTaskHours().size(); i++) {
-            if (cont == 0) {
-                taskHour.setInitialDate(LocalDateTime.now());
-                taskHoursRepository.save(taskHour);
-            } else {
-                throw new TaskIsNotFinishedException();
+            //we gotta set less one because it is taking the last row with no attributes in database
+            cont = cont - 1;
+            for (int i = 0; i < taskResponsable.getTaskHours().size(); i++) {
+                if (cont == 0) {
+                    taskHour.setInitialDate(LocalDateTime.now());
+                    taskHoursRepository.save(taskHour);
+                } else {
+                    throw new TaskIsNotFinishedException(taskResponsable.getTask().getName());
+                }
             }
         }
     }
@@ -82,33 +91,44 @@ public class TaskHoursService {
         }
     }
 
-    public LocalTime timeInTask(TaskHourEditDTO taskHourEditDTO) {
-        TaskResponsable taskResponsable = taskResponsablesService.findById(taskHourEditDTO.getTaskResponsable().getId());
+    public TimeInTaskDto timeInTask(Long idResponsable) {
+        TaskResponsable taskResponsable = taskResponsablesService.findById(idResponsable);
 
-        Duration duracaoTotal = Duration.ZERO;
+        System.out.println(taskResponsable);
+
+        Duration allTimeSpent = Duration.ZERO;
         //sum all the time spent of one taskResponsable
         for (int i = 0; i < taskResponsable.getTaskHours().size(); i++) {
-            duracaoTotal = duracaoTotal.plusHours(taskResponsable.getTaskHours().get(i).getTimeSpent().getHour())
+            allTimeSpent = allTimeSpent.plusHours(taskResponsable.getTaskHours().get(i).getTimeSpent().getHour())
                     .plusMinutes(taskResponsable.getTaskHours().get(i).getTimeSpent().getMinute())
                     .plusSeconds(taskResponsable.getTaskHours().get(i).getTimeSpent().getSecond());
         }
-        return LocalTime.MIDNIGHT.plus(duracaoTotal);
+    
+        boolean working = false;
+        for (TaskHour taskHour : taskResponsable.getTaskHours()) {
+            working = taskHour.getFinalDate() == null;
+        }
+
+        return new TimeInTaskDto(
+                LocalTime.MIDNIGHT.plus(allTimeSpent)
+                , working
+        );
     }
 
 
     public List<TaskHour> findTaskHoursByTask(Long taskId) {
         Task task = taskService.findById(taskId);
         List<TaskHour> taskHours = new ArrayList<>();
-        for (int i = 0; i <task.getTaskResponsables().size(); i++) {
+        for (int i = 0; i < task.getTaskResponsables().size(); i++) {
             taskHours.addAll(task.getTaskResponsables().get(i).getTaskHours());
         }
         return taskHours;
     }
 
-    public List<TaskHour> findTaskHoursUser(Long userId){
+    public List<TaskHour> findTaskHoursUser(Long userId) {
         UserTeam userTeam = userTeamService.findById(userId);
         List<TaskHour> taskHours = new ArrayList<>();
-        for (int i = 0; i <userTeam.getTaskResponsables().size(); i++) {
+        for (int i = 0; i < userTeam.getTaskResponsables().size(); i++) {
             taskHours.addAll(userTeam.getTaskResponsables().get(i).getTaskHours());
         }
         return taskHours;

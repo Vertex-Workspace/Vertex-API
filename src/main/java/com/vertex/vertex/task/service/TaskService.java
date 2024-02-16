@@ -8,6 +8,7 @@ import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.property.service.PropertyService;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
+import com.vertex.vertex.task.model.DTO.TaskEditDTO;
 import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
 import com.vertex.vertex.task.relations.review.model.DTO.SetFinishedTask;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
@@ -18,16 +19,30 @@ import com.vertex.vertex.task.model.exceptions.TaskDoesNotExistException;
 import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
+import com.vertex.vertex.task.relations.value.model.entity.ValueDate;
+import com.vertex.vertex.task.relations.value.model.entity.ValueNumber;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
+import com.vertex.vertex.team.model.entity.Team;
+import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
+import com.vertex.vertex.team.service.TeamService;
+import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
+import javax.mail.*;
+import javax.mail.internet.*;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Data
@@ -40,12 +55,13 @@ public class TaskService {
     private final ProjectService projectService;
     private final PropertyService propertyService;
     private final UserTeamService userTeamService;
+    private final UserService userService;
+    private final TeamService teamService;
 
     public Task save(TaskCreateDTO taskCreateDTO) {
         Task task = new Task();
         BeanUtils.copyProperties(taskCreateDTO, task);
         Project project;
-        TaskResponsable taskResponsable = new TaskResponsable();
         try {
             project = projectService.findById(taskCreateDTO.getProject().getId());
         } catch (Exception e) {
@@ -62,23 +78,52 @@ public class TaskService {
                     || property.getKind() == PropertyKind.STATUS) {
                 for (int i = 0; i < task.getValues().size(); i++) {
                     for (PropertyList propertyList : task.getValues().get(i).getProperty().getPropertyLists()) {
-                        if (propertyList.getPropertyListKind() == PropertyListKind.TODO) {
-                            currentValue.setValue(propertyList);
+                        if (taskCreateDTO.getValues().get(i).getValue() != null) {
+                            currentValue.setValue(taskCreateDTO.getValues().get(i).getValue());
+                        } else {
+                            if (propertyList.getPropertyListKind() == PropertyListKind.TODO) {
+                                currentValue.setValue(propertyList);
+                            }
                         }
                     }
                 }
             }
+            if (property.getKind() == PropertyKind.DATE) {
+                ((ValueDate) currentValue).setValue();
+            }
         }
 
-        //set the creator of the task
-        try {
-            taskResponsable.setUserTeam(userTeamService.findById(taskCreateDTO.getCreator().getId()));
-            taskResponsable.setTask(task);
-            task.setCreator(taskResponsable);
-        } catch (Exception e) {
-            throw new RuntimeException("Não foi encontrado o usuário para ele ser o criador da tarefa");
+        //Add the taskResponsables on task list of taskResponsables
+        task.setCreator(userTeamService.findById(taskCreateDTO.getCreator().getId()));
+        try{
+            for (UserTeam userTeam : project.getTeam().getUserTeams()) {
+                TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
+                if (task.getTaskResponsables() == null) {
+                    ArrayList<TaskResponsable> listaParaFuncionarEstaCoisaBemLegal = new ArrayList<>();
+                    listaParaFuncionarEstaCoisaBemLegal.add(taskResponsable1);
+                    task.setTaskResponsables(listaParaFuncionarEstaCoisaBemLegal);
+                } else {
+                    task.getTaskResponsables().add(taskResponsable1);
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
+
+        task.setApproveStatus(ApproveStatus.INPROGRESS);
         return taskRepository.save(task);
+
+    }
+
+    public Task edit(TaskEditDTO taskEditDTO) {
+        try {
+            Task task = findById(taskEditDTO.getId());
+            BeanUtils.copyProperties(taskEditDTO, task);
+            return taskRepository.save(task);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public List<Task> findAll() {
@@ -224,5 +269,51 @@ public class TaskService {
             throw new RuntimeException("A tarefa já foi aprovada. Ela não pode voltar para análise");
         }
         return save(task);
+    }
+
+    public List<Task> getAllByProject(Long id) {
+        try {
+            Project project = projectService.findById(id);
+            return project.getTasks();
+
+        } catch (Exception e) {
+            throw new EntityNotFoundException();
+        }
+
+    }
+
+    public List<Task> getAllByTeam(Long id) {
+        try {
+            Team team = teamService.findTeamById(id);
+            List<Task> taskList = new ArrayList<>();
+
+            team.getProjects()
+                    .forEach(p -> {
+                        taskList.addAll(p.getTasks());
+                    });
+
+            return taskList;
+
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
+    }
+
+    public List<Task> getAllByUser(Long id) {
+        try {
+            List<UserTeam> uts = userTeamService.findAll(id);
+            List<Task> taskList = new ArrayList<>();
+
+            uts.forEach(ut -> {
+                ut.getTeam().getProjects().forEach(p -> {
+                    taskList.addAll(p.getTasks());
+                });
+            });
+
+            return taskList;
+
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
     }
 }

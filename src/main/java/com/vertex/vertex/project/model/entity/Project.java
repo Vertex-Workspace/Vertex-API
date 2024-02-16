@@ -33,13 +33,13 @@ public class Project {
     @ToString.Exclude
     private Team team;
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Property> properties;
 
     @ManyToOne
     private UserTeam creator;
 
-    @OneToMany(mappedBy = "project")
+    @OneToMany(mappedBy = "project", orphanRemoval = true)
     private List<Task> tasks;
 
     @OneToOne

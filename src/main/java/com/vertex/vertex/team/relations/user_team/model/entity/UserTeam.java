@@ -36,7 +36,6 @@ public class UserTeam {
     private Team team;
 
     @ManyToOne
-    @JsonIgnore
     private User user;
 
     @OneToMany(mappedBy = "userTeam", cascade = CascadeType.ALL)

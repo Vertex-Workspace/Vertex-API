@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PersonalizationRepository extends JpaRepository<Personalization, Long> {
+
+    Personalization findByUser_Id(Long id);
+
 }
