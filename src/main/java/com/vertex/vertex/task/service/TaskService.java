@@ -25,8 +25,12 @@ import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
+import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
+import com.vertex.vertex.team.service.TeamService;
+import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -51,6 +55,8 @@ public class TaskService {
     private final ProjectService projectService;
     private final PropertyService propertyService;
     private final UserTeamService userTeamService;
+    private final UserService userService;
+    private final TeamService teamService;
 
     public Task save(TaskCreateDTO taskCreateDTO) {
         Task task = new Task();
@@ -274,6 +280,40 @@ public class TaskService {
             throw new EntityNotFoundException();
         }
 
+    }
 
+    public List<Task> getAllByTeam(Long id) {
+        try {
+            Team team = teamService.findTeamById(id);
+            List<Task> taskList = new ArrayList<>();
+
+            team.getProjects()
+                    .forEach(p -> {
+                        taskList.addAll(p.getTasks());
+                    });
+
+            return taskList;
+
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
+    }
+
+    public List<Task> getAllByUser(Long id) {
+        try {
+            List<UserTeam> uts = userTeamService.findAll(id);
+            List<Task> taskList = new ArrayList<>();
+
+            uts.forEach(ut -> {
+                ut.getTeam().getProjects().forEach(p -> {
+                    taskList.addAll(p.getTasks());
+                });
+            });
+
+            return taskList;
+
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
     }
 }

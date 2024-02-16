@@ -25,6 +25,7 @@ import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.*;
@@ -61,9 +62,6 @@ public class TeamService {
 //            team.setCreationDate();
 
 
-            byte[] data = Base64.getDecoder().decode(teamViewListDTO.getImage());
-            team.setImage(data);
-
             String caracteres = "abcdefghijklmnopqrstuvwxyz1234567890";
             StringBuilder token = new StringBuilder();
             Random random = new Random();
@@ -71,8 +69,13 @@ public class TeamService {
                 char a = caracteres.charAt(random.nextInt(0, 34));
                 token.append(a);
             }
-            team.setInvitationCode(token.toString());
 
+            try {
+                byte[] data = Base64.getDecoder().decode(teamViewListDTO.getImage());
+                team.setImage(data);
+            } catch (Exception ignored) {}
+
+            team.setInvitationCode(token.toString());
             return teamRepository.save(team);
 
         } catch (Exception e) {
