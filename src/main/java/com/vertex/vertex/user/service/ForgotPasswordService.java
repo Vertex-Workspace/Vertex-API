@@ -14,21 +14,25 @@ public class ForgotPasswordService {
     public Long sendCodeToEmail(String emailTo) {
         Properties properties = System.getProperties();
 
+        // define os dados básicos
         String host = "smtp.gmail.com";
         String email = "vertex.workspacee@gmail.com";
         String password = "sryx rozm wixy iool";
 
+        //liga os protocolo tudo
         properties.put("mail.smtp.host", host);
         properties.put("mail.smtp.port", "465");
         properties.put("mail.smtp.auth", "true");
         properties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
 
+        //cria a sessão
         Session session = Session.getDefaultInstance(properties, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(email, password);
             }
         });
 
+        //mostra onde tá os erros
         session.setDebug(true);
 
         Long code = generateCode();
@@ -36,8 +40,11 @@ public class ForgotPasswordService {
 
         try {
             MimeMessage message = new MimeMessage(session);
+            // Configurando quem envia
             message.setFrom(new InternetAddress(email, "VERTEX: Gerencie seu tempo de ponta a ponta!"));
+            // Configurando quem recebe
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(emailTo));
+            // Configurando o assunto
             message.setSubject("O código de recuperação da sua conta VERTEX é: " + code + "\n");
 
             // Construindo o conteúdo HTML do e-mail
@@ -54,6 +61,7 @@ public class ForgotPasswordService {
             "</div>"+
             "</body></html>";
 
+            // Configurando o conteúdo do e-mail como HTML
             message.setContent(htmlContent, "text/html; charset=utf-8");
 
             System.out.println("enviando...");

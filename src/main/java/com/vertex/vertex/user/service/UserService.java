@@ -134,6 +134,12 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public User patchUserPassword(UserLoginDTO userLoginDTO){
+        User user = findByEmail(userLoginDTO.getEmail());
+        user.setPassword(userLoginDTO.getPassword());
+        return userRepository.save(user);
+    }
+
     public Boolean imageUpload(Long id, MultipartFile file){
         User user;
 
