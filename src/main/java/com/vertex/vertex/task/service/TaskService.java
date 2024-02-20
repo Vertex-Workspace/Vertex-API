@@ -27,6 +27,7 @@ import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskRespo
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
@@ -59,22 +60,17 @@ public class TaskService {
         }
         //When the task is created, every property is associated with a null value, unless it has a default value
         for (Property property : project.getProperties()) {
+
             Value currentValue = property.getKind().getValue();
             currentValue.setProperty(property);
             currentValue.setTask(task);
             task.getValues().add(currentValue);
 
-            if (property.getKind() == PropertyKind.LIST
-                    || property.getKind() == PropertyKind.STATUS) {
-                for (int i = 0; i < task.getValues().size(); i++) {
-                    for (PropertyList propertyList : task.getValues().get(i).getProperty().getPropertyLists()) {
-                        if (taskCreateDTO.getValues().get(i).getValue() != null) {
-                            currentValue.setValue(taskCreateDTO.getValues().get(i).getValue());
-                        } else {
-                            if (propertyList.getPropertyListKind() == PropertyListKind.TODO) {
-                                currentValue.setValue(propertyList);
-                            }
-                        }
+            if (property.getKind() == PropertyKind.STATUS) {
+                for (PropertyList propertyList : property.getPropertyLists()) {
+                    //DEFAULT VALUE AS TO DO
+                    if (propertyList.getId() == ) {
+                        currentValue.setValue(propertyList);
                     }
                 }
             }
@@ -92,7 +88,6 @@ public class TaskService {
         }
 
         task.setApproveStatus(ApproveStatus.INPROGRESS);
-        System.out.println(task);
         return taskRepository.save(task);
     }
 
@@ -116,6 +111,8 @@ public class TaskService {
     }
 
     public void deleteById(Long id) {
+        Task task = findById(id);
+        System.out.println(task);
         taskRepository.deleteById(id);
     }
 
@@ -132,14 +129,13 @@ public class TaskService {
         }
         for (int i = 0; i < task.getValues().size(); i++) {
             if (task.getValues().get(i).getId().equals(editValueDTO.getValue().getId())) {
-                System.out.println("Entrei e o ID é o mesmo " + editValueDTO.getValue().getId());
-                    Value currentValue = property.getKind().getValue();
-                    currentValue.setId(editValueDTO.getValue().getId());
-                    currentValue.setTask(task);
-                    currentValue.setProperty(property);
-                    currentValue.setValue(editValueDTO.getValue().getValue());
-                    task.getValues().set(i, currentValue);
-                    task.setApproveStatus(ApproveStatus.INPROGRESS);
+                Value currentValue = property.getKind().getValue();
+                currentValue.setId(editValueDTO.getValue().getId());
+                currentValue.setTask(task);
+                currentValue.setProperty(property);
+                currentValue.setValue(editValueDTO.getValue().getValue());
+                task.getValues().set(i, currentValue);
+                task.setApproveStatus(ApproveStatus.INPROGRESS);
             }
         }
         return taskRepository.save(task);

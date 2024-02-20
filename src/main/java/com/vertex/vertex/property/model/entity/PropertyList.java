@@ -19,18 +19,21 @@ public class PropertyList {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String value;
-    @Enumerated(value = EnumType.STRING)
-    private Color color;
+
+    private String color;
+
     @ManyToOne
     @JsonIgnore
     @ToString.Exclude
     private Property property;
+
+
     @Enumerated(value = EnumType.STRING)
     private PropertyListKind propertyListKind;
 
     public PropertyList(String value, Color color, Property property, PropertyListKind propertyListKind) {
         this.value = value;
-        this.color = color;
+        this.color = color.getHexadecimal();
         this.property = property;
         this.propertyListKind = propertyListKind;
     }

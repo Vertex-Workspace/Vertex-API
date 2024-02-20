@@ -39,13 +39,13 @@ public class PropertyService {
 
 
     public Property save(Long projectID, Property property) {
-//        System.out.println(mapper.getConfiguration().setSkipNullEnabled(true));
         Project project = projectService.findById(projectID);
         Property finalProperty = new Property();
 
         if(property.getId() != 0){
             mapper.map(property, finalProperty);
             finalProperty.setProject(project);
+
             //Property Lists
             savePropertyList(property);
 
