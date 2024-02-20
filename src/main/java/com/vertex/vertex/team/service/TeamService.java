@@ -1,5 +1,7 @@
 package com.vertex.vertex.team.service;
 
+import com.vertex.vertex.chat.model.Chat;
+import com.vertex.vertex.chat.service.ChatService;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
@@ -17,6 +19,7 @@ import com.vertex.vertex.team.relations.group.model.exception.GroupNameInvalidEx
 import com.vertex.vertex.team.relations.group.model.exception.GroupNotFoundException;
 import com.vertex.vertex.team.relations.group.service.GroupService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
+import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.repository.TeamRepository;
 import com.vertex.vertex.user.model.entity.User;
@@ -39,42 +42,86 @@ public class TeamService {
     private final UserService userService;
     private final TaskRepository taskRepository;
     private final UserTeamService userTeamService;
+    private final UserTeamRepository userTeamRepository;
+    private final ChatService chatService;
     private final GroupService groupService;
 
 
-    public Team save(TeamViewListDTO teamViewListDTO) {
+
+//    public Team save(TeamViewListDTO teamViewListDTO) {
+//        try {
+//            Team team = new Team();
+//            if (teamViewListDTO.getId() == null) {
+//                //Create a new row at table User_Team based on the user that has been created the team
+//                UserTeam userTeam = new UserTeam(userService.findById(teamViewListDTO.getCreator().getId()), team);
+//                team.setUserTeams(List.of(userTeam));
+//                team.setCreator(userTeam);
+//            } else {
+//                //The Team class has many relations, because of that, when we edit the object, we have to edit
+//                //just the necessary things in a hard way, as setName...
+//                team = findTeamById(teamViewListDTO.getId());
+//            }
+//            team.setName(teamViewListDTO.getName());
+//            team.setDescription(teamViewListDTO.getDescription());
+//            //After the Romas explanation about Date
+////            team.setCreationDate();
+//
+//
+//
+//
+//
+//
+//
+//
+//            return teamRepository.save(team);
+//
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
+
+    public void save(TeamViewListDTO teamViewListDTO) {
         try {
             Team team = new Team();
-            if (teamViewListDTO.getId() == null) {
-                //Create a new row at table User_Team based on the user that has been created the team
-                UserTeam userTeam = new UserTeam(userService.findById(teamViewListDTO.getCreator().getId()), team);
-                team.setUserTeams(List.of(userTeam));
-                team.setCreator(userTeam);
-            } else {
+            if (teamViewListDTO.getId() != null) {
                 //The Team class has many relations, because of that, when we edit the object, we have to edit
                 //just the necessary things in a hard way, as setName...
                 team = findTeamById(teamViewListDTO.getId());
-            }
-            team.setName(teamViewListDTO.getName());
-            team.setDescription(teamViewListDTO.getDescription());
-            //After the Romas explanation about Date
+            } else {
+                team.setName(teamViewListDTO.getName());
+                team.setDescription(teamViewListDTO.getDescription());
+                //After the Romas explanation about Date
 //            team.setCreationDate();
 
+//                byte[] data = Base64.getDecoder().decode(teamViewListDTO.getImage());
+//                team.setImage(data);
 
-            byte[] data = Base64.getDecoder().decode(teamViewListDTO.getImage());
-            team.setImage(data);
+                String caracteres = "abcdefghijklmnopqrstuvwxyz1234567890";
+                StringBuilder token = new StringBuilder();
+                Random random = new Random();
+                for (int i = 0; i < caracteres.length(); i++) {
+                    char a = caracteres.charAt(random.nextInt(0, 34));
+                    token.append(a);
+                }
+                team.setInvitationCode(token.toString());
 
-            String caracteres = "abcdefghijklmnopqrstuvwxyz1234567890";
-            StringBuilder token = new StringBuilder();
-            Random random = new Random();
-            for (int i = 0; i < caracteres.length(); i++) {
-                char a = caracteres.charAt(random.nextInt(0, 34));
-                token.append(a);
+                System.out.println("sout 1 "+team);
+
+                teamRepository.save(team);
+                if(teamViewListDTO.getId() == null) {
+                    UserTeamAssociateDTO userTeamAssociateDTO = new UserTeamAssociateDTO();
+                    userTeamAssociateDTO.setTeam(team);
+                    userTeamAssociateDTO.setUser(teamViewListDTO.getCreator());
+                    userTeamAssociateDTO.setCreator(true);
+                    editUserTeam(userTeamAssociateDTO);
+                }
+
+
+                System.out.println("sout 2 "+team);
+
+                this.chatService.create(team);
+
             }
-            team.setInvitationCode(token.toString());
-
-            return teamRepository.save(team);
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -158,21 +205,50 @@ public class TeamService {
 
     public Team editUserTeam(UserTeamAssociateDTO userTeam) {
         try {
+            List<UserTeam> userTeams = new ArrayList<>();
+
             User user = userService.findById(userTeam.getUser().getId());
             Team team = teamRepository.findById(userTeam.getTeam().getId()).get();
-            team.getUserTeams().add(new UserTeam(user, team));
+            UserTeam newUserTeam = new UserTeam(user, team);
 
-            teamRepository.save(team);
+            if (team.getUserTeams() == null) {
 
-            UserTeam userTeam1 =userTeamService.findUserTeamByComposeId(team.getId(),user.getId());
-            for (Project project : team.getProjects()) {
-                for (Task task : project.getTasks()) {
-                    task.getTaskResponsables().add(new TaskResponsable(userTeam1,task));
-                    taskRepository.save(task);
+                userTeams.add(newUserTeam);
+                team.setUserTeams(userTeams);
+
+                if (userTeam.isCreator()) {
+                    team.setCreator(newUserTeam);
+                }
+                //set the default permissions
+//                permissionService.save(user.getId(), team.getId());
+            } else {
+                boolean userRemoved = false;
+                for (UserTeam userTeamFor : team.getUserTeams()) {
+                    if (userTeamFor.getUser().equals(user)) {
+                        team.getUserTeams().remove(userTeamFor);
+                        userRemoved = true;
+                        break;
+                    }
+                }
+                if(!userRemoved) {
+                    team.getUserTeams().add(newUserTeam);
+//                    permissionService.save(user.getId(), team.getId());
                 }
             }
 
-            return team;
+            //create the chat with the user team members.
+//            Chat chat = new Chat();
+//            chat.setParticipantList(team.getUserTeams());
+//            this.chatService.create(chat);
+
+
+//            //create the chat with the user team members.
+//            Chat chat = new Chat();
+//            chat.setParticipantList(team.getUserTeams());
+//            this.chatService.create(chat);
+//            this.userTeamRepository.findAllByUser_Id(team.)
+
+            return teamRepository.save(team);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class UserTeamAssociateDTO {
     private Team team;
     private User user;
+    private boolean creator;
 }

@@ -1,6 +1,7 @@
 package com.vertex.vertex.team.relations.user_team.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.task.relations.task_hours.model.entity.TaskHour;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.permission.model.entity.Permission;
@@ -34,6 +35,10 @@ public class UserTeam {
     @JsonIgnore
     @ToString.Exclude
     private Team team;
+
+    @ManyToMany
+    @JsonIgnore
+    private List<Chat> chats;
 
     @ManyToOne
     private User user;

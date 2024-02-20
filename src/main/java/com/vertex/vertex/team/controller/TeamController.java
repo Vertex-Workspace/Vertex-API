@@ -26,16 +26,16 @@ public class TeamController {
 
     @PostMapping
     public ResponseEntity<?> save(@RequestBody TeamViewListDTO team) {
-        try {
-            return new ResponseEntity<>(teamService.save(team), HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        }
+
+            teamService.save(team);
+            return new ResponseEntity<>( HttpStatus.CREATED);
+
     }
     @PutMapping
     public ResponseEntity<?> update(@RequestBody TeamViewListDTO team) {
         try {
-            return new ResponseEntity<>(teamService.save(team), HttpStatus.OK);
+            teamService.save(team);
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
