@@ -29,7 +29,6 @@ public class PermissionService {
     private final ProjectRepository projectRepository;
 
     public void save(Long userId, Long teamId) {
-        System.out.println("entrei");
         UserTeam userTeam = getOneUserByTeam(userId,
                 teamId);
         Permission permission1 = new Permission();
@@ -108,8 +107,11 @@ public class PermissionService {
     public List<Permission> hasPermission(Long projectId, Long userId){
         Team team = projectRepository.findById(projectId).get().getTeam();
         UserTeam userTeam = getOneUserByTeam(userId, team.getId());
-        System.out.println(userTeam);
         return userTeam.getPermissionUser();
+    }
+
+    public void permissionsPatch(UserTeam userTeam){
+
     }
 
 }
