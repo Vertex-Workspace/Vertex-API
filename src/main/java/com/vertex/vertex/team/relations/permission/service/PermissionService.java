@@ -32,19 +32,19 @@ public class PermissionService {
         UserTeam userTeam = getOneUserByTeam(userId,
                 teamId);
         Permission permission1 = new Permission();
-        permission1.setName(TypePermissions.VIEW);
+        permission1.setName(TypePermissions.Visualizar);
         permission1.setEnabled(true);
 
         Permission permission2 = new Permission();
-        permission2.setName(TypePermissions.CREATE);
+        permission2.setName(TypePermissions.Criar);
         permission2.setEnabled(false);
 
         Permission permission3 = new Permission();
-        permission3.setName(TypePermissions.DELETE);
+        permission3.setName(TypePermissions.Deletar);
         permission3.setEnabled(false);
 
         Permission permission4 = new Permission();
-        permission4.setName(TypePermissions.EDIT);
+        permission4.setName(TypePermissions.Editar);
         permission4.setEnabled(false);
 
         List<Permission> permissions = new ArrayList<>();
@@ -63,7 +63,7 @@ public class PermissionService {
         UserTeam userTeam = getOneUserByTeam(userId, teamId);
         for(Permission permission : userTeam.getPermissionUser()){
             if(permissionId.equals(permission.getId())){
-                if(permission.getName() != TypePermissions.VIEW){
+                if(permission.getName() != TypePermissions.Visualizar){
                     permission.setEnabled(!permission.isEnabled());
                     permissionRepository.save(permission);
                 }
@@ -108,10 +108,6 @@ public class PermissionService {
         Team team = projectRepository.findById(projectId).get().getTeam();
         UserTeam userTeam = getOneUserByTeam(userId, team.getId());
         return userTeam.getPermissionUser();
-    }
-
-    public void permissionsPatch(UserTeam userTeam){
-
     }
 
 }

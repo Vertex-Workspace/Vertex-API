@@ -2,18 +2,21 @@ package com.vertex.vertex.team.controller;
 
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
+import com.vertex.vertex.team.relations.group.model.DTO.AddUsersDTO;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupEditUserDTO;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupRegisterDTO;
 import com.vertex.vertex.team.relations.group.service.GroupService;
 import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
 import com.vertex.vertex.team.service.TeamService;
+import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @CrossOrigin
@@ -170,5 +173,23 @@ public class TeamController {
         }
     }
 
+    @GetMapping("/{teamId}/group/{groupId}")
+    public ResponseEntity<?> usersOutOfGroup(@PathVariable Long teamId, @PathVariable Long groupId) {
+        try {
+            return new ResponseEntity<>(groupService.participantsOutOfGroup(teamId, groupId), HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PatchMapping("/group/{id}/addParticipants")
+    public ResponseEntity<?> addParticipants(@PathVariable Long id, @RequestBody AddUsersDTO addUsersDTO){
+        try{
+            groupService.addParticipants(id, addUsersDTO);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
 
 }

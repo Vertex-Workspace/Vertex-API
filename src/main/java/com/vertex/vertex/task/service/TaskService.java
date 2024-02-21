@@ -66,8 +66,6 @@ public class TaskService {
             currentValue.setProperty(property);
             currentValue.setTask(task);
             task.getValues().add(currentValue);
-            System.out.println(" tg " + task.getValues());
-            System.out.println("cv" + currentValue);
 
             if (property.getKind() == PropertyKind.STATUS) {
                 for (int i = 0; i < task.getValues().size(); i++) {

@@ -92,7 +92,6 @@ public class TeamService {
 
     public Team editGroup(GroupRegisterDTO groupRegisterDTO) {
         List<UserTeam> userTeams = new ArrayList<>();
-        try {
             Group group = new Group();
 
             Team team = findTeamById(groupRegisterDTO.getTeam().getId());
@@ -118,9 +117,6 @@ public class TeamService {
             }
 
             return teamRepository.save(team);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public Group editUserIntoGroup(GroupEditUserDTO groupEditUserDTO) {
