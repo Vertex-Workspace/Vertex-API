@@ -28,6 +28,11 @@ public class Team {
 
     private String invitationCode;
 
+    @Lob
+    @Column(name = "image",
+            columnDefinition = "BLOB")
+    private byte[] image;
+
     @OneToOne
     private UserTeam creator;
 
@@ -35,10 +40,6 @@ public class Team {
 
     private LocalDateTime creationDate;
 
-    @Lob
-    @Column(name = "image",
-            columnDefinition = "BLOB")
-    private byte[] image;
 
     @OneToMany(mappedBy = "team", fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Project> projects;

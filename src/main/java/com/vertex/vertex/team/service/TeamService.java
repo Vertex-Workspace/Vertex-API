@@ -4,7 +4,6 @@ import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.repository.TaskRepository;
-import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.DTO.TeamLinkDTO;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
@@ -26,8 +25,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.bind.annotation.PathVariable;
 
+import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -70,11 +69,6 @@ public class TeamService {
                 token.append(a);
             }
 
-            try {
-                byte[] data = Base64.getDecoder().decode(teamViewListDTO.getImage());
-                team.setImage(data);
-            } catch (Exception ignored) {}
-
             team.setInvitationCode(token.toString());
             return teamRepository.save(team);
 
@@ -83,6 +77,16 @@ public class TeamService {
         }
     }
 
+    public void updateImage(MultipartFile file, Long teamId) {
+        try {
+            Team team = findTeamById(teamId);
+            team.setImage(file.getBytes());
+            teamRepository.save(team);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public TeamInfoDTO findById(Long id) {
         TeamInfoDTO dto = new TeamInfoDTO(); //retorna as informações necessárias para a tela de equipe
@@ -92,6 +96,7 @@ public class TeamService {
             team = teamRepository.findById(id).get();
             BeanUtils.copyProperties(team, dto);
             addUsers(dto, team); //adiciona os usuários ao grupo com base no userTeam, para utilização no fe
+            dto.setImage(team.getImage());
             return dto;
         }
         throw new TeamNotFoundException(id);
