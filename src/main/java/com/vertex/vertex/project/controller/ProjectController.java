@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Set;
@@ -90,6 +91,21 @@ public class ProjectController {
                 (projectService.existsByIdAndUserBelongs
                         (projectId, userId),
                         HttpStatus.OK);
+    }
+
+    @PatchMapping("/image/{projectId}")
+    public ResponseEntity<?> updateImage(
+            @PathVariable Long projectId,
+            @RequestParam MultipartFile file) {
+        try {
+            projectService.updateImage(file, projectId);
+            return new ResponseEntity<>
+                    (HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>
+                    (HttpStatus.CONFLICT);
+        }
     }
 
 }

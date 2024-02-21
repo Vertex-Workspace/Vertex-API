@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -57,7 +58,6 @@ public class TeamController {
         try {
             return new ResponseEntity<>(teamService.findInvitationCodeById(id), HttpStatus.OK);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
         }
     }
@@ -117,13 +117,28 @@ public class TeamController {
                         HttpStatus.OK);
     }
 
-  
+
     @PatchMapping("/group/user")
     public ResponseEntity<?> editUserIntoGroup(@RequestBody GroupEditUserDTO groupEditUserDTO) {
         try {
             return new ResponseEntity<>(teamService.editUserIntoGroup(groupEditUserDTO), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PatchMapping("/image/{teamId}")
+    public ResponseEntity<?> updateImage(
+            @PathVariable Long teamId,
+            @RequestParam MultipartFile file) {
+        try {
+            teamService.updateImage(file, teamId);
+            return new ResponseEntity<>
+                    (HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>
+                    (HttpStatus.CONFLICT);
         }
     }
 

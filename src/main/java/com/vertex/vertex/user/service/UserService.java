@@ -8,6 +8,7 @@ import com.vertex.vertex.user.model.exception.*;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import com.vertex.vertex.user.relations.personalization.service.PersonalizationService;
 import com.vertex.vertex.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
@@ -86,11 +87,13 @@ public class UserService {
     }
 
     public User findById(Long id) {
-        try {
-            return userRepository.findById(id).get();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        Optional<User> userOpt = userRepository.findById(id);
+
+        if (userOpt.isPresent()) {
+            return userOpt.get();
         }
+
+        throw new EntityNotFoundException();
     }
 
     public User findByEmail(String email) {
@@ -122,7 +125,13 @@ public class UserService {
         throw new UserNotFoundException();
     }
 
-    public void saveImage(MultipartFile imageFile) throws IOException {
+    public void saveImage(MultipartFile imageFile, Long id) throws IOException {
+
+        try {
+            User user = findById(id);
+            user.setImage(imageFile.getBytes());
+            userRepository.save(user);
+        } catch (Exception ignored) {}
 
     }
 

@@ -41,10 +41,8 @@ public class UserController {
     @PutMapping
     public ResponseEntity<User> edit(@RequestBody UserEditionDTO userEditionDTO) {
         try {
-//            System.out.println(userEditionDTO);
             return new ResponseEntity<>(userService.edit(userEditionDTO), HttpStatus.OK);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
@@ -110,16 +108,15 @@ public class UserController {
         }
     }
 
-        @PatchMapping("upload/{userId}")
-        public String uploadImage(
-                @PathVariable Long userId,
-                @RequestParam MultipartFile imageFile) throws IOException {
-            String returnValue = "start";
-
-            userService.saveImage(imageFile);
-
-            return returnValue;
+    @PatchMapping("upload/{userId}")
+    public void uploadImage(
+            @PathVariable Long userId,
+            @RequestParam MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new RuntimeException();
         }
+        userService.saveImage(file, userId);
+    }
 
 
 }

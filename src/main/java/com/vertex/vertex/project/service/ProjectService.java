@@ -16,6 +16,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +55,17 @@ public class ProjectService {
         team.getProjects().add(project);
 
         return projectRepository.save(project);
+    }
+
+    public void updateImage(MultipartFile file, Long projectId) {
+        try {
+            Project project = findById(projectId);
+            project.setImage(file.getBytes());
+            projectRepository.save(project);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public List<Project> findAll(){
