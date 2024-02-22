@@ -26,7 +26,9 @@ public class Project {
     private String name;
     private String description;
 
-//    private String image;
+    @Lob
+    @Column(columnDefinition = "BLOB")
+    private byte[] image;
 
     @ManyToOne
     @JsonIgnore

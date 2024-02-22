@@ -1,0 +1,11 @@
+____   ____ ___________ __________  ___________ ___________ ____  ___
+\   \ /   / \_   _____/ \______   \ \__    ___/ \_   _____/ \   \/  /
+ \   Y   /   |    __)_   |       _/   |    |     |    __)_   \     /
+  \     /    |        \  |    |   \   |    |     |        \  /     \
+   \___/    /_______  /  |____|_  /   |____|    /_______  / /___/\  \
+                    \/          \/                      \/        \_/
+
+Kaique Fernandes Lima é um talentoso programador que se destaca no mundo da tecnologia. Com
+uma paixão inabalável pela programação, ele encontrou seu lugar na renomada empresa WEG,
+onde contribui de maneira significativa para projetos inovadores e desafiadores.
+

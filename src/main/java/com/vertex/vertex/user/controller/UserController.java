@@ -8,12 +8,13 @@ import com.vertex.vertex.user.model.exception.*;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import com.vertex.vertex.user.relations.personalization.service.PersonalizationService;
 import com.vertex.vertex.user.service.UserService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
@@ -40,10 +41,8 @@ public class UserController {
     @PutMapping
     public ResponseEntity<User> edit(@RequestBody UserEditionDTO userEditionDTO) {
         try {
-//            System.out.println(userEditionDTO);
             return new ResponseEntity<>(userService.edit(userEditionDTO), HttpStatus.OK);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
@@ -117,5 +116,16 @@ public class UserController {
             return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
         }
     }
+
+    @PatchMapping("upload/{userId}")
+    public void uploadImage(
+            @PathVariable Long userId,
+            @RequestParam MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new RuntimeException();
+        }
+        userService.saveImage(file, userId);
+    }
+
 
 }

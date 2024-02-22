@@ -26,6 +26,12 @@ public class Team {
     @Column(nullable = false)
     private String name;
 
+    private String invitationCode;
+
+    @Lob
+    @Column(name = "image",
+            columnDefinition = "BLOB")
+    private byte[] image;
 
     @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private UserTeam creator;
@@ -33,6 +39,7 @@ public class Team {
     private String description;
 
     private LocalDateTime creationDate;
+
 
     @OneToMany(mappedBy = "team", fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Project> projects;

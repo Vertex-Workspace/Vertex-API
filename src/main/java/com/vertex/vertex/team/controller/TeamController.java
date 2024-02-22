@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -58,6 +59,16 @@ public class TeamController {
         }
     }
 
+    @GetMapping("/invitation/{id}")
+    public ResponseEntity<?> findInvitationCodeById(@PathVariable Long id) {
+
+        try {
+            return new ResponseEntity<>(teamService.findInvitationCodeById(id), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         try {
@@ -78,6 +89,7 @@ public class TeamController {
     }
 
     //EDIT CASCADE TYPE ALL OBJECTS
+    //ADD USER IN THE TEAM
     @PatchMapping("/user")
     public ResponseEntity<?> editUserTeam(@RequestBody UserTeamAssociateDTO userTeam) {
         try {
@@ -95,6 +107,11 @@ public class TeamController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
+  
+    @GetMapping("/userIsOnTeam/{idUser}/{idTeam}")
+    public boolean userIsOnTeam(@PathVariable Long idUser, @PathVariable Long idTeam){
+        return teamService.userIsOnTeam(idUser,idTeam);
+    }
 
     @GetMapping("/exists/{teamId}/{userId}")
     public ResponseEntity<?> existsByIdAndUserBelongs(
@@ -105,7 +122,7 @@ public class TeamController {
                         HttpStatus.OK);
     }
 
-  
+
     @PatchMapping("/group/user")
     public ResponseEntity<?> editUserIntoGroup(@RequestBody GroupEditUserDTO groupEditUserDTO) {
         try {
@@ -199,6 +216,21 @@ public class TeamController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+  
+    @PatchMapping("/image/{teamId}")
+    public ResponseEntity<?> updateImage(
+            @PathVariable Long teamId,
+            @RequestParam MultipartFile file) {
+        try {
+            teamService.updateImage(file, teamId);
+            return new ResponseEntity<>
+                    (HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>
+                    (HttpStatus.CONFLICT);
         }
     }
 

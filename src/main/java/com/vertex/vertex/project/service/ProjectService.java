@@ -1,5 +1,6 @@
 package com.vertex.vertex.project.service;
 
+import com.vertex.vertex.project.model.DTO.ProjectOneDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.property.model.ENUM.Color;
@@ -13,7 +14,9 @@ import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.service.TeamService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +57,17 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
+    public void updateImage(MultipartFile file, Long projectId) {
+        try {
+            Project project = findById(projectId);
+            project.setImage(file.getBytes());
+            projectRepository.save(project);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public List<Project> findAll(){
         return projectRepository.findAll();
     }
@@ -74,15 +88,20 @@ public class ProjectService {
     public Boolean existsByIdAndUserBelongs(Long projectId, Long userId) {
         if (projectRepository.existsById(projectId)) {
             Project project = findById(projectId);
-            Team team = project.getTeam();
-
-            return teamService.findUserInTeam(team, userId);
+            return teamService.findUserInTeam(project.getTeam(), userId);
         }
         return false;
     }
-
     public Project findById(Long id){
         return projectRepository.findById(id).get();
+    }
+
+    public ProjectOneDTO findProjectById(Long id){
+        ProjectOneDTO projectOneDTO = new ProjectOneDTO();
+        Project project = projectRepository.findById(id).get();
+        BeanUtils.copyProperties(project, projectOneDTO);
+        projectOneDTO.setIdTeam(project.getTeam().getId());
+        return projectOneDTO;
     }
 
     public void deleteById(Long id){

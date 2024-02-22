@@ -13,13 +13,14 @@ import com.vertex.vertex.user.model.exception.*;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import com.vertex.vertex.user.relations.personalization.service.PersonalizationService;
 import com.vertex.vertex.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.parsing.Location;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
-
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import java.util.Collection;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -50,8 +51,6 @@ public class UserService {
 
             User userFind = userRepository.findByEmail(userEmailWithNoEdition.getEmail());
 
-            System.out.println(user);
-            System.out.println(userFind);
 
             if (userFind != null && user.getEmail().equals(userFind.getEmail())) {
                 throw new EmailAlreadyExistsException();
@@ -74,7 +73,9 @@ public class UserService {
         user.setLocation("Jaraguá do Sul - SC");
         user.setPersonalization(personalizationService.defaultSave(user));
 
-
+        System.out.println(userDTO.getImage());
+        byte[] data = Base64.getDecoder().decode(userDTO.getImage());
+        user.setImage(data);
         return userRepository.save(user);
     }
 
@@ -91,11 +92,13 @@ public class UserService {
     }
 
     public User findById(Long id) {
-        try {
-            return userRepository.findById(id).get();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        Optional<User> userOpt = userRepository.findById(id);
+
+        if (userOpt.isPresent()) {
+            return userOpt.get();
         }
+
+        throw new EntityNotFoundException();
     }
 
     public User findByEmail(String email) {
@@ -127,6 +130,16 @@ public class UserService {
         throw new UserNotFoundException();
     }
 
+    public void saveImage(MultipartFile imageFile, Long id) throws IOException {
+
+        try {
+            User user = findById(id);
+            user.setImage(imageFile.getBytes());
+            userRepository.save(user);
+        } catch (Exception ignored) {}
+
+    }
+
     public User patchUserPersonalization(Long id, Personalization personalization){
         User user = findById(id);
         personalization.setId(user.getPersonalization().getId());
@@ -143,6 +156,23 @@ public class UserService {
                 users.add(group.getUserTeams().get(i).getUser());
         }
        return users;
+    }
+
+    public Boolean imageUpload(Long id, MultipartFile file){
+        User user;
+
+        try {
+            if (userRepository.existsById(id)) {
+                user = findById(id);
+                user.setImage(file.getBytes());
+                userRepository.save(user);
+                return true;
+            }
+        } catch (Exception ignored) {
+            throw new RuntimeException("Erro");
+        }
+
+        throw new RuntimeException();
     }
 
 }

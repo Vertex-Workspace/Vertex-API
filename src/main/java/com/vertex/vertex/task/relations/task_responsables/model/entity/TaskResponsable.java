@@ -31,7 +31,6 @@ public class TaskResponsable {
     private Long id;
 
     @ManyToOne
-    @JsonIgnore
     @ToString.Exclude
     private UserTeam userTeam;
 

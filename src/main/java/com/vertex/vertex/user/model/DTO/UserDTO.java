@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @AllArgsConstructor
@@ -15,5 +16,6 @@ public class UserDTO {
     private String email;
     private String password;
     private String passwordConf;
+    private String image;
 
 }

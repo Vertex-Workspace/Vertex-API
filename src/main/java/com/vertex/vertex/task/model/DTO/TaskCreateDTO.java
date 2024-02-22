@@ -19,6 +19,7 @@ public class TaskCreateDTO {
     private Long id;
     private String name;
     private UserTeam creator;
+    private Long teamId;
     private List<TaskResponsable> responsables;
     private String description;
     private List<Comment> comments;
