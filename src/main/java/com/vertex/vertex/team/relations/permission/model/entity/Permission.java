@@ -1,6 +1,7 @@
 package com.vertex.vertex.team.relations.permission.model.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.team.relations.permission.model.enums.TypePermissions;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
@@ -23,5 +24,7 @@ public class Permission {
 
     @ManyToOne
     private UserTeam userTeam;
+
+    private boolean enabled;
 
 }

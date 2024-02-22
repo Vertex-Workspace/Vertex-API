@@ -1,19 +1,19 @@
-package com.vertex.vertex.team.relations.user_team.model.DTO;
+package com.vertex.vertex.team.relations.permission.model.DTOs;
+
 
 import com.vertex.vertex.team.model.entity.Team;
+import com.vertex.vertex.team.relations.permission.model.enums.TypePermissions;
 import com.vertex.vertex.user.model.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserTeamAssociateDTO {
+@Data
+public class PermissionCreateDTO {
 
-
-    private Long id;
+    private TypePermissions name;
+    private Long userId;
     private Team team;
-    private User user;
-    private boolean creator;
 }

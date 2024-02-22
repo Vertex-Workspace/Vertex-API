@@ -38,11 +38,12 @@ public class UserTeam {
     @ManyToOne
     private User user;
 
-    @OneToMany(mappedBy = "userTeam", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "userTeam", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
+    @ToString.Exclude
     private List<Permission> permissionUser;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonIgnore
     private List<Group> groups;
 

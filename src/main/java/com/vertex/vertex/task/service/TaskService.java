@@ -26,6 +26,8 @@ import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
 import com.vertex.vertex.team.model.entity.Team;
+import com.vertex.vertex.team.relations.permission.model.entity.Permission;
+import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.service.TeamService;
@@ -74,16 +76,11 @@ public class TaskService {
             currentValue.setTask(task);
             task.getValues().add(currentValue);
 
-            if (property.getKind() == PropertyKind.LIST
-                    || property.getKind() == PropertyKind.STATUS) {
+            if (property.getKind() == PropertyKind.STATUS) {
                 for (int i = 0; i < task.getValues().size(); i++) {
                     for (PropertyList propertyList : task.getValues().get(i).getProperty().getPropertyLists()) {
-                        if (taskCreateDTO.getValues().get(i).getValue() != null) {
-                            currentValue.setValue(taskCreateDTO.getValues().get(i).getValue());
-                        } else {
-                            if (propertyList.getPropertyListKind() == PropertyListKind.TODO) {
-                                currentValue.setValue(propertyList);
-                            }
+                        if (propertyList.getPropertyListKind() == PropertyListKind.TODO) {
+                            currentValue.setValue(propertyList);
                         }
                     }
                 }

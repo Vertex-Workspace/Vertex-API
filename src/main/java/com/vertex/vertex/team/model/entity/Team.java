@@ -33,7 +33,7 @@ public class Team {
             columnDefinition = "BLOB")
     private byte[] image;
 
-    @OneToOne
+    @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private UserTeam creator;
 
     private String description;
@@ -48,7 +48,7 @@ public class Team {
     private List<Group> groups;
 
 
-    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<UserTeam> userTeams;
 
 

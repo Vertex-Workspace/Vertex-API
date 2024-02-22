@@ -1,5 +1,10 @@
 package com.vertex.vertex.user.service;
 
+import com.vertex.vertex.team.model.entity.Team;
+import com.vertex.vertex.team.relations.group.model.entity.Group;
+import com.vertex.vertex.team.relations.group.service.GroupService;
+import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
+import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.user.model.DTO.UserDTO;
 import com.vertex.vertex.user.model.DTO.UserEditionDTO;
 import com.vertex.vertex.user.model.DTO.UserLoginDTO;
@@ -14,7 +19,6 @@ import lombok.Data;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.util.Collection;
 import java.util.*;
@@ -27,6 +31,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PersonalizationService personalizationService;
+    private final GroupService groupService;
 
     public User save(UserDTO userDTO) {
         User user = new User();
@@ -143,6 +148,16 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public List<User> getUsersByGroup(Long groupId){
+        List<User> users = new ArrayList<>();
+        Group group = groupService.findById(groupId);
+
+        for (int i = 0; i < group.getUserTeams().size(); i++) {
+                users.add(group.getUserTeams().get(i).getUser());
+        }
+       return users;
+    }
+
     public Boolean imageUpload(Long id, MultipartFile file){
         User user;
 
@@ -159,6 +174,5 @@ public class UserService {
 
         throw new RuntimeException();
     }
-
 
 }

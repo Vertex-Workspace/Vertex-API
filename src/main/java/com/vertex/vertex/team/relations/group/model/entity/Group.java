@@ -33,7 +33,8 @@ public class Group {
     private Team team;
 
 
-    @ManyToMany(mappedBy = "groups")
+    @ManyToMany(mappedBy = "groups", fetch = FetchType.EAGER)
+    @ToString.Exclude
     private List<UserTeam> userTeams;
 
 
