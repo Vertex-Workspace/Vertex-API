@@ -28,13 +28,16 @@ public class PropertyList {
     private Property property;
 
 
+    private Boolean isFixed;
+
     @Enumerated(value = EnumType.STRING)
     private PropertyListKind propertyListKind;
 
-    public PropertyList(String value, Color color, Property property, PropertyListKind propertyListKind) {
+    public PropertyList(String value, Color color, Property property, PropertyListKind propertyListKind, Boolean isFixed) {
         this.value = value;
         this.color = color.getHexadecimal();
         this.property = property;
         this.propertyListKind = propertyListKind;
+        this.isFixed = isFixed;
     }
 }

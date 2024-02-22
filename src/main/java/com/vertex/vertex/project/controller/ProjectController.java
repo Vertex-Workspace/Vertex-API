@@ -95,26 +95,4 @@ public class ProjectController {
                         HttpStatus.OK);
     }
 
-
-    //Properties
-    @PatchMapping("/{projectID}/property")
-    public ResponseEntity<?> saveProperty(@PathVariable Long projectID, @RequestBody Property property) {
-        try {
-            return new ResponseEntity<>(propertyService.save(projectID, property), HttpStatus.OK);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        }
-
-    }
-
-    @DeleteMapping("/{projectID}/{propertyID}")
-    public ResponseEntity<?> deleteProperty(@PathVariable Long projectID, @PathVariable Long propertyID) {
-        try {
-            propertyService.delete(projectID, propertyID);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        }
-    }
 }

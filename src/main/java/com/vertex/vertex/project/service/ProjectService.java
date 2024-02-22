@@ -9,6 +9,7 @@ import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
+import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
@@ -34,8 +35,7 @@ public class ProjectService {
 
     private final TeamService teamService;
     private final UserTeamService userTeamService;
-
-    private final ModelMapper mapper = new ModelMapper();
+    private final ValueService valueService;
 
     public Project save(Project project, Long teamId) {
         Team team;
@@ -61,10 +61,6 @@ public class ProjectService {
         team.getProjects().add(project);
 
         return projectRepository.save(project);
-    }
-
-    public List<Project> findAll(){
-        return projectRepository.findAll();
     }
 
     public Set<Project> findAllByTeam(Long teamId){
@@ -100,6 +96,10 @@ public class ProjectService {
     }
 
     public void deleteById(Long id){
+        Project project = findById(id);
+        //Delete every value of tasks on project
+        project.getTasks().forEach(task -> task.getValues().forEach(valueService::delete));
+
         projectRepository.deleteById(id);
     }
 
@@ -109,9 +109,9 @@ public class ProjectService {
 
     public List<PropertyList> defaultStatus(Property property){
         List<PropertyList> propertiesList = new ArrayList<>();
-        propertiesList.add(new PropertyList("to-do default", Color.RED, property, PropertyListKind.TODO));
-        propertiesList.add(new PropertyList("doing default", Color.YELLOW, property, PropertyListKind.DOING));
-        propertiesList.add(new PropertyList("done default", Color.GREEN, property, PropertyListKind.DONE));
+        propertiesList.add(new PropertyList("Não Iniciado", Color.RED, property, PropertyListKind.TODO, true));
+        propertiesList.add(new PropertyList("Em Andamento", Color.YELLOW, property, PropertyListKind.DOING, true));
+        propertiesList.add(new PropertyList("Concluído", Color.GREEN, property, PropertyListKind.DONE, true));
         return propertiesList;
     }
 }

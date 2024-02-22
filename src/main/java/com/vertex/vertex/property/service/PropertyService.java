@@ -6,21 +6,27 @@ import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.property.model.DTO.PropertyListDTO;
 import com.vertex.vertex.property.model.DTO.PropertyRegisterDTO;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
+import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.property.model.exceptions.CantCreateOtherStatusException;
 import com.vertex.vertex.property.model.exceptions.CantDeleteStatusException;
 import com.vertex.vertex.property.model.exceptions.PropertyIsNotAListException;
+import com.vertex.vertex.property.repository.PropertyListRepository;
 import com.vertex.vertex.property.repository.PropertyRepository;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
+import com.vertex.vertex.task.relations.value.model.entity.ValueText;
 import com.vertex.vertex.task.relations.value.service.ValueService;
+import com.vertex.vertex.task.repository.TaskRepository;
+import com.vertex.vertex.task.service.TaskService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -31,10 +37,10 @@ import static com.vertex.vertex.property.model.ENUM.PropertyKind.*;
 public class PropertyService {
 
     private final PropertyRepository propertyRepository;
+    private final PropertyListRepository propertyListRepository;
+    private final TaskRepository taskRepository;
     private final ProjectService projectService;
     private final ValueService valueService;
-    private final ProjectRepository projectRepository;
-
     private final ModelMapper mapper;
 
 
@@ -42,93 +48,109 @@ public class PropertyService {
         Project project = projectService.findById(projectID);
         Property finalProperty = new Property();
 
-        if(property.getId() != 0){
+        if (property.getId() != 0) {
             mapper.map(property, finalProperty);
-            finalProperty.setProject(project);
+            finalProperty.getPropertyLists().forEach(propertyList -> propertyList.setProperty(property));
 
-            //Property Lists
-            savePropertyList(property);
-
-            for ( Property propertyFor : project.getProperties()) {
-                if(propertyFor.getId().equals(property.getId())){
-                    project.getProperties().set(project.getProperties().indexOf(propertyFor), finalProperty);
-                    break;
-                }
+            if (!property.getDefaultValue().equals("")) {
+                project.getTasks().forEach(task ->
+                        task.getValues().forEach(value -> {
+                            if (value.getProperty().getId().equals(property.getId())) {
+                               value.setValue(property.getDefaultValue());
+                               valueService.save(value);
+                            }
+                        })
+                );
             }
         } else {
-            finalProperty  = new Property(PropertyKind.TEXT,
+            finalProperty = new Property(PropertyKind.TEXT,
                     "Nova Propriedade", false, "", PropertyStatus.VISIBLE);
-            finalProperty.setProject(project);
             project.getProperties().add(finalProperty);
+            for (Task task : project.getTasks()) {
+                Value newValue = property.getKind().getValue();
+                newValue.setProperty(finalProperty);
+                newValue.setTask(task);
+                valueService.save(newValue);
+            }
         }
-
-        try{
-            projectRepository.save(project);
-            return finalProperty;
-        } catch(Exception e){
-            throw new RuntimeException(e.getMessage());
-        }
+        finalProperty.setProject(project);
+        return propertyRepository.save(finalProperty);
     }
 
     //in this method, we need, firstly, remove the value, and then remove the property
     public void delete(Long projectId, Long propertyId) {
-        Value valueToDelete;
         Property property = findById(propertyId);
         Project project = projectService.findById(projectId);
+
+
         if (property.getKind() != STATUS &&
                 property.getKind() != DATE) {
+            propertyRepository.delete(property);
             for (Task task : project.getTasks()) {
-                for (int i = 0; i < task.getValues().size(); i++) {
-                    if (task.getValues().get(i).getProperty().getId().equals(propertyId)) {
-                        valueToDelete = task.getValues().get(i);
-                        task.getValues().remove(valueToDelete);
-                        valueService.delete(valueToDelete);
-                        propertyRepository.deleteById(propertyId);
+                for (Value value : task.getValues()) {
+                    if (value.getProperty().getId().equals(property.getId())) {
+                        valueService.delete(value);
                     }
                 }
             }
-            projectRepository.save(project);
         } else {
             throw new CantDeleteStatusException();
         }
-        boolean isRemoved = false;
-        for ( Property propertyFor : project.getProperties()) {
-            if(propertyFor.getId().equals(propertyId)){
-                project.getProperties().remove(propertyFor);
-                isRemoved = true;
-                break;
-            }
-        }
-        if(!isRemoved){
-            throw new RuntimeException("There isn't a project with this property id or there isn't a property with this project id");
-        }
-        projectRepository.save(project);
     }
 
     public Property findById(Long id) {
         return propertyRepository.findById(id).get();
     }
 
-    public List<Property> findAll() {
-        return propertyRepository.findAll();
-    }
 
-    private void savePropertyList(Property property) {
-        try {
-            for (PropertyList list : property.getPropertyLists()) {
-                list.setProperty(property);
-                if(list.getId() != 0) {
-                    //if the id already exists, it'll be edited
-                    for (int cont = 0; cont < property.getPropertyLists().size(); cont++) {
-                        if (property.getPropertyLists().get(cont).getId().equals(list.getId())) {
-                            property.getPropertyLists().set(cont, list);
-                            break;
+    public void deletePropertyList(Long propertyID, Long propertyListID) {
+
+        //It validates if the id are correct
+        Property property = findById(propertyID);
+        PropertyList propertyList = propertyListRepository.findById(propertyListID).get();
+
+        if (property.getPropertyLists().contains(propertyList)) {
+            Project project = property.getProject();
+
+            //Pass through all tasks
+            for (Task task : project.getTasks()) {
+                //Pass through all values inside one task
+                for (Value value : task.getValues()) {
+                    //Validates and find the value with property ID
+                    if (value.getProperty().getId().equals(property.getId())) {
+                        //Validates if the value that intend to be excluded, belongs to the current value
+                        if (value.getProperty().getPropertyLists().contains(propertyList)) {
+                            if (property.getKind() == STATUS) {
+                                PropertyList currentPropertyList = (PropertyList) value.getValue();
+                                //Set the value as the default for each task
+                                value.setValue(getFixedStatusValue(project, currentPropertyList));
+                                valueService.save(value);
+                            }
+//                            if(property.getKind() == LIST){
+//
+//                            }
                         }
                     }
                 }
             }
-        } catch (NoSuchElementException e) {
-            throw new RuntimeException();
+            property.getPropertyLists().remove(propertyList);
+            propertyRepository.save(property);
         }
+    }
+
+
+    //Find the TO DO default of the project
+    private PropertyList getFixedStatusValue(Project project, PropertyList currentPropertyList) {
+        for (Property property : project.getProperties()) {
+            if (property.getKind() == STATUS) {
+                for (PropertyList propertyList : property.getPropertyLists()) {
+                    if (propertyList.getPropertyListKind() == currentPropertyList.getPropertyListKind() &&
+                            propertyList.getIsFixed()) {
+                        return propertyList;
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

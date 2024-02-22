@@ -67,15 +67,14 @@ public class TaskService {
             task.getValues().add(currentValue);
 
             if (property.getKind() == PropertyKind.STATUS) {
-                for (PropertyList propertyList : property.getPropertyLists()) {
-                    //DEFAULT VALUE AS TO DO
-                    if (propertyList.getId() == ) {
-                        currentValue.setValue(propertyList);
-                    }
-                }
+                //Get the first element, how the three are fixed, it always will be TO DO "Não Iniciado"
+                currentValue.setValue(property.getPropertyLists().get(0));
             }
             if (property.getKind() == PropertyKind.DATE) {
                 ((ValueDate) currentValue).setValue();
+            }
+            if(property.getKind() == PropertyKind.TEXT){
+                currentValue.setValue(property.getDefaultValue());
             }
         }
         //set the creator of the task
@@ -112,7 +111,6 @@ public class TaskService {
 
     public void deleteById(Long id) {
         Task task = findById(id);
-        System.out.println(task);
         taskRepository.deleteById(id);
     }
 
