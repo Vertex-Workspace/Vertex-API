@@ -254,4 +254,15 @@ public class TeamService {
         return users;
     }
 
+    public void deleteUserTeam(Long teamId, Long userId){
+        Team team = findTeamById(teamId);
+        User user = userService.findById(userId);
+        for (UserTeam userTeamFor : team.getUserTeams()) {
+            if (userTeamFor.getUser().equals(user) && userTeamFor.getTeam().equals(team)) {
+                team.getUserTeams().remove(userTeamFor);
+                teamRepository.save(team);
+            }
+        }
+    }
+
 }
