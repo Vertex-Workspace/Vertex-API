@@ -72,12 +72,12 @@ public class TeamService {
             StringBuilder token = new StringBuilder();
             Random random = new Random();
             for (int i = 0; i < caracteres.length(); i++) {
-                char a = caracteres.charAt(random.nextInt(0, 34));
+                char a = caracteres.charAt(random.nextInt(34));
                 token.append(a);
             }
 
             team.setInvitationCode(token.toString());
-            return teamRepository.save(team);
+            teamRepository.save(team);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -214,15 +214,10 @@ public class TeamService {
                     permissionService.save(user.getId(), team.getId());
                 }
             }
-            return teamRepository.save(team);
-
-            User user = userService.findById(userTeam.getUser().getId());
-            Team team = teamRepository.findById(userTeam.getTeam().getId()).get();
-            team.getUserTeams().add(new UserTeam(user, team));
-
             teamRepository.save(team);
 
-            UserTeam userTeam1 =userTeamService.findUserTeamByComposeId(team.getId(),user.getId());
+            UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(team.getId(),user.getId());
+
             for (Project project : team.getProjects()) {
                 for (Task task : project.getTasks()) {
                     task.getTaskResponsables().add(new TaskResponsable(userTeam1,task));
