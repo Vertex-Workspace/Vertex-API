@@ -48,31 +48,54 @@ public class PropertyService {
         Project project = projectService.findById(projectID);
         Property finalProperty = new Property();
 
+        mapper.map(property, finalProperty);
+        //Edit
         if (property.getId() != 0) {
-            mapper.map(property, finalProperty);
             finalProperty.getPropertyLists().forEach(propertyList -> propertyList.setProperty(property));
+            //FIXED PROPERTIES CANNOT BE EDITED VERY DEEP
+            if(property.getPropertyStatus() != PropertyStatus.FIXED){
 
-            if (!property.getDefaultValue().equals("")) {
-                project.getTasks().forEach(task ->
-                        task.getValues().forEach(value -> {
+                if (!property.getDefaultValue().equals("")) {
+                    project.getTasks().forEach(task ->
+                            task.getValues().forEach(value -> {
                             if (value.getProperty().getId().equals(property.getId())) {
-                               value.setValue(property.getDefaultValue());
-                               valueService.save(value);
+                                value.setValue(property.getDefaultValue());
+                                valueService.save(value);
                             }
-                        })
-                );
+                            })
+                    );
+                }
+
+                Property oldProperty = findById(property.getId());
+                if(oldProperty.getKind() != property.getKind()){
+                    this.deleteValuesCascade(project, oldProperty);
+                    //Add a new value to each property
+                    for(Task task : project.getTasks()){
+                        Value value = property.getKind().getValue();
+                        value.setTask(task);
+                        value.setProperty(property);
+                        task.getValues().add(value);
+                        taskRepository.save(task);
+                    }
+                }
+
+
             }
-        } else {
-            finalProperty = new Property(PropertyKind.TEXT,
-                    "Nova Propriedade", false, "", PropertyStatus.VISIBLE);
-            project.getProperties().add(finalProperty);
+        }
+        //Create
+        else {
+            finalProperty.setIsObligate(false);
+            Property newProperty = propertyRepository.save(finalProperty);
+            finalProperty.getPropertyLists().forEach(propertyList -> propertyList.setProperty(newProperty));
+            finalProperty.setId(newProperty.getId());
             for (Task task : project.getTasks()) {
                 Value newValue = property.getKind().getValue();
-                newValue.setProperty(finalProperty);
+                newValue.setProperty(newProperty);
                 newValue.setTask(task);
                 valueService.save(newValue);
             }
         }
+
         finalProperty.setProject(project);
         return propertyRepository.save(finalProperty);
     }
@@ -82,19 +105,25 @@ public class PropertyService {
         Property property = findById(propertyId);
         Project project = projectService.findById(projectId);
 
+        if (property.getPropertyStatus() != PropertyStatus.FIXED) {
 
-        if (property.getKind() != STATUS &&
-                property.getKind() != DATE) {
+            this.deleteValuesCascade(project, property);
             propertyRepository.delete(property);
-            for (Task task : project.getTasks()) {
-                for (Value value : task.getValues()) {
-                    if (value.getProperty().getId().equals(property.getId())) {
-                        valueService.delete(value);
-                    }
-                }
-            }
+
         } else {
             throw new CantDeleteStatusException();
+        }
+    }
+
+    private void deleteValuesCascade(Project project, Property property){
+        for (Task task : project.getTasks()) {
+            for (Value value : task.getValues()) {
+                if (value.getProperty().getId().equals(property.getId())) {
+                    task.getValues().remove(value);
+                    taskRepository.save(task);
+                    break;
+                }
+            }
         }
     }
 

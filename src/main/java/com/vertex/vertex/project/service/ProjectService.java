@@ -39,8 +39,8 @@ public class ProjectService {
 
     public Project save(Project project, Long teamId) {
         Team team;
-        Property property = new Property(PropertyKind.STATUS, "Status", true, "", PropertyStatus.FIXED);
-        Property propertyDate = new Property(PropertyKind.DATE, "Data", true, "", PropertyStatus.FIXED);
+        Property property = new Property(PropertyKind.STATUS, "Status", true, null, PropertyStatus.FIXED);
+        Property propertyDate = new Property(PropertyKind.DATE, "Data", true, null, PropertyStatus.FIXED);
         try {
             team = teamService.findTeamById(teamId);
         } catch (Exception e) {
