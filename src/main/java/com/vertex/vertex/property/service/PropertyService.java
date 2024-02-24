@@ -55,17 +55,6 @@ public class PropertyService {
             //FIXED PROPERTIES CANNOT BE EDITED VERY DEEP
             if(property.getPropertyStatus() != PropertyStatus.FIXED){
 
-                if (!property.getDefaultValue().equals("")) {
-                    project.getTasks().forEach(task ->
-                            task.getValues().forEach(value -> {
-                            if (value.getProperty().getId().equals(property.getId())) {
-                                value.setValue(property.getDefaultValue());
-                                valueService.save(value);
-                            }
-                            })
-                    );
-                }
-
                 Property oldProperty = findById(property.getId());
                 if(oldProperty.getKind() != property.getKind()){
                     this.deleteValuesCascade(project, oldProperty);
