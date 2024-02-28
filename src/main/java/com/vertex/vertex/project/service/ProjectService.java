@@ -39,8 +39,13 @@ public class ProjectService {
 
     public Project save(Project project, Long teamId) {
         Team team;
-        Property property = new Property(PropertyKind.STATUS, "Status", true, null, PropertyStatus.FIXED);
-        Property propertyDate = new Property(PropertyKind.DATE, "Data", true, null, PropertyStatus.FIXED);
+        //Default properties of a project
+        List<Property> properties = new ArrayList<>();
+        properties.add(new Property(PropertyKind.STATUS, "Status", true, null, PropertyStatus.FIXED));
+        properties.add(new Property(PropertyKind.DATE, "Data", true, null, PropertyStatus.FIXED));
+        properties.add(new Property(PropertyKind.LIST, "Dificuldade", false, null, PropertyStatus.VISIBLE));
+        properties.add(new Property(PropertyKind.NUMBER, "Número", false, null, PropertyStatus.VISIBLE));
+        properties.add(new Property(PropertyKind.TEXT, "Palavra-Chave", false, null, PropertyStatus.INVISIBLE));
         try {
             team = teamService.findTeamById(teamId);
         } catch (Exception e) {
@@ -53,13 +58,21 @@ public class ProjectService {
         }
         project.setCreator(userTeam);
         project.setTeam(team);
-        property.setPropertyLists(defaultStatus(property));
-        project.addProperty(property);
-        project.addProperty(propertyDate);
-        property.setProject(project);
-        propertyDate.setProject(project);
-        team.getProjects().add(project);
-
+        for ( Property property : properties ) {
+            if(property.getKind() == PropertyKind.STATUS){
+                property.setPropertyLists(defaultStatus(property));
+            }
+            if(property.getKind() == PropertyKind.LIST){
+                List<PropertyList> propertiesList = new ArrayList<>();
+                propertiesList.add(new PropertyList("Fácil", Color.GREEN, property, PropertyListKind.VISIBLE, false));
+                propertiesList.add(new PropertyList("Médio", Color.YELLOW, property, PropertyListKind.VISIBLE, true));
+                propertiesList.add(new PropertyList("Díficil", Color.RED, property, PropertyListKind.VISIBLE, true));
+                propertiesList.add(new PropertyList("Não validado", Color.BLUE, property, PropertyListKind.INVISIBLE, true));
+                property.setPropertyLists(propertiesList);
+            }
+            property.setProject(project);
+            project.addProperty(property);
+        }
         return projectRepository.save(project);
     }
 
@@ -111,6 +124,7 @@ public class ProjectService {
         List<PropertyList> propertiesList = new ArrayList<>();
         propertiesList.add(new PropertyList("Não Iniciado", Color.RED, property, PropertyListKind.TODO, true));
         propertiesList.add(new PropertyList("Em Andamento", Color.YELLOW, property, PropertyListKind.DOING, true));
+        propertiesList.add(new PropertyList("Pausado", Color.BLUE, property, PropertyListKind.DOING, false));
         propertiesList.add(new PropertyList("Concluído", Color.GREEN, property, PropertyListKind.DONE, true));
         return propertiesList;
     }

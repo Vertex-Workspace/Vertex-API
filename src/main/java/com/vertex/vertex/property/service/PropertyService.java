@@ -44,7 +44,7 @@ public class PropertyService {
     private final ModelMapper mapper;
 
 
-    public Property save(Long projectID, Property property) {
+    public Project save(Long projectID, Property property) {
         Project project = projectService.findById(projectID);
         Property finalProperty = new Property();
 
@@ -54,7 +54,6 @@ public class PropertyService {
             finalProperty.getPropertyLists().forEach(propertyList -> propertyList.setProperty(property));
             //FIXED PROPERTIES CANNOT BE EDITED VERY DEEP
             if(property.getPropertyStatus() != PropertyStatus.FIXED){
-
                 Property oldProperty = findById(property.getId());
                 if(oldProperty.getKind() != property.getKind()){
                     this.deleteValuesCascade(project, oldProperty);
@@ -67,8 +66,6 @@ public class PropertyService {
                         taskRepository.save(task);
                     }
                 }
-
-
             }
         }
         //Create
@@ -86,11 +83,13 @@ public class PropertyService {
         }
 
         finalProperty.setProject(project);
-        return propertyRepository.save(finalProperty);
+        propertyRepository.save(finalProperty);
+
+        return projectService.findById(projectID);
     }
 
     //in this method, we need, firstly, remove the value, and then remove the property
-    public void delete(Long projectId, Long propertyId) {
+    public Project delete(Long projectId, Long propertyId) {
         Property property = findById(propertyId);
         Project project = projectService.findById(projectId);
 
@@ -98,7 +97,7 @@ public class PropertyService {
 
             this.deleteValuesCascade(project, property);
             propertyRepository.delete(property);
-
+            return projectService.findById(projectId);
         } else {
             throw new CantDeleteStatusException();
         }
@@ -121,7 +120,7 @@ public class PropertyService {
     }
 
 
-    public void deletePropertyList(Long propertyID, Long propertyListID) {
+    public Project deletePropertyList(Long propertyID, Long propertyListID) {
 
         //It validates if the id are correct
         Property property = findById(propertyID);
@@ -153,7 +152,18 @@ public class PropertyService {
             }
             property.getPropertyLists().remove(propertyList);
             propertyRepository.save(property);
+            return projectService.findById(property.getProject().getId());
         }
+        throw new RuntimeException("The property list doesn't belong to the property");
+    }
+
+    public Property changePropertyListColor(PropertyList propertyList) {
+        PropertyList currentPropertyList = propertyListRepository.findById(propertyList.getId()).get();
+        currentPropertyList.setColor(propertyList.getColor());
+
+        PropertyList propertyListSaved = propertyListRepository.save(currentPropertyList);
+
+        return propertyListSaved.getProperty();
     }
 
 

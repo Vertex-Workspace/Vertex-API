@@ -3,6 +3,7 @@ package com.vertex.vertex.property.controller;
 import com.vertex.vertex.property.model.DTO.PropertyListDTO;
 import com.vertex.vertex.property.model.DTO.PropertyRegisterDTO;
 import com.vertex.vertex.property.model.entity.Property;
+import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.property.service.PropertyService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,17 +28,14 @@ public class PropertyController {
         try {
             return new ResponseEntity<>(propertyService.save(projectID, property), HttpStatus.OK);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
-
     }
 
     @DeleteMapping("{propertyID}/project/{projectID}")
     public ResponseEntity<?> deleteProperty(@PathVariable Long projectID, @PathVariable Long propertyID) {
         try {
-            propertyService.delete(projectID, propertyID);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(propertyService.delete(projectID, propertyID), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
@@ -47,8 +45,16 @@ public class PropertyController {
     @DeleteMapping("/{propertyID}/property-list/{propertyListID}")
     public ResponseEntity<?> deletePropertyList(@PathVariable Long propertyID, @PathVariable Long propertyListID) {
         try {
-            propertyService.deletePropertyList(propertyID, propertyListID);
-            return new ResponseEntity<>(propertyService.findById(propertyID), HttpStatus.OK);
+            return new ResponseEntity<>(propertyService.deletePropertyList(propertyID, propertyListID), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @PatchMapping("/property-list-color")
+    public ResponseEntity<?> saveProperty(@RequestBody PropertyList propertyList) {
+        try {
+            return new ResponseEntity<>(propertyService.changePropertyListColor(propertyList), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
