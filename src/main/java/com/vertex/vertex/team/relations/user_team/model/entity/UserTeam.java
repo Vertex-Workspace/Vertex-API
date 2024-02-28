@@ -9,14 +9,13 @@ import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -34,13 +33,11 @@ public class UserTeam {
     @ManyToOne
     @JsonIgnore
     @ToString.Exclude
+    @EqualsAndHashCode.Include
     private Team team;
 
-    @ManyToMany
-    @JsonIgnore
-    private List<Chat> chats;
-
     @ManyToOne
+    @EqualsAndHashCode.Include
     private User user;
 
     @OneToMany(mappedBy = "userTeam", cascade = CascadeType.ALL)
@@ -51,10 +48,16 @@ public class UserTeam {
     @JsonIgnore
     private List<Group> groups;
 
+    @ManyToMany(mappedBy = "userTeams")
+    @JsonIgnore
+    @ToString.Exclude
+    private List<Chat> chats;
+
 
     @OneToMany(mappedBy = "userTeam", orphanRemoval = true)
     @JsonIgnore
     @ToString.Exclude
     private List<TaskResponsable> taskResponsables;
+
 
 }
