@@ -1,4 +1,4 @@
-package com.vertex.vertex.file;
+package com.vertex.vertex.file.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

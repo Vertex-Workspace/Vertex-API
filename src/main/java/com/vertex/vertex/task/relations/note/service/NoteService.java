@@ -1,6 +1,6 @@
 package com.vertex.vertex.task.relations.note.service;
 
-import com.vertex.vertex.file.File;
+import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.task.relations.note.model.dto.NoteDTO;
@@ -8,11 +8,7 @@ import com.vertex.vertex.task.relations.note.model.dto.NoteEditDTO;
 import com.vertex.vertex.task.relations.note.model.entity.Note;
 import com.vertex.vertex.task.relations.note.repository.NoteRepository;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
-import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
-import com.vertex.vertex.user.model.entity.User;
-import com.vertex.vertex.user.repository.UserRepository;
-import com.vertex.vertex.user.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -20,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -40,6 +37,7 @@ public class NoteService {
         Note note = new Note();
         note.setProject(project);
         note.setCreator(creator);
+
         BeanUtils.copyProperties(dto, note);
         return noteRepository.save(note);
     }
@@ -60,7 +58,7 @@ public class NoteService {
         return noteRepository.save(note);
     }
 
-    public Note uploadImage(Long noteId, MultipartFile multipartFile) {
+    public Note uploadFile(Long noteId, MultipartFile multipartFile) {
         Note note = findById(noteId);
         try {
             File file = new File(multipartFile);
@@ -71,6 +69,11 @@ public class NoteService {
         }
 
         return noteRepository.save(note);
+    }
+
+    public List<Note> findAllByProject(Long projectId) {
+        return noteRepository
+                .findAllByProject_Id(projectId);
     }
 
 }

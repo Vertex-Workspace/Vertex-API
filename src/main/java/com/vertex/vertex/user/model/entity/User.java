@@ -4,19 +4,19 @@ package com.vertex.vertex.user.model.entity;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(nullable = false)
@@ -38,6 +38,7 @@ public class User {
     @Lob
     @Column(name = "image",
             columnDefinition = "BLOB")
+    @ToString.Exclude
     private byte[] image;
 
     private Boolean publicProfile;

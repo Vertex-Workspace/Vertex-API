@@ -1,12 +1,13 @@
 package com.vertex.vertex.task.relations.note.model.entity;
 
-import com.vertex.vertex.file.File;
+import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -26,7 +27,8 @@ public class Note {
     @ManyToOne(cascade = CascadeType.ALL)
     private UserTeam creator;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
+    @ToString.Exclude
     private Project project;
 
     @OneToMany

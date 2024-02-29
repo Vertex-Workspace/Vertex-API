@@ -33,8 +33,7 @@ public class TeamController {
     @PostMapping
     public ResponseEntity<?> save(@RequestBody TeamViewListDTO team) {
         try {
-            teamService.save(team);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(teamService.save(team), HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }

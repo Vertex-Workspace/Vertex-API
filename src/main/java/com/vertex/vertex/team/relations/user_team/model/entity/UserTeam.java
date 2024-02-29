@@ -8,16 +8,14 @@ import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.List;
 
 @Data
 @Entity
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 public class UserTeam {
 
@@ -33,9 +31,11 @@ public class UserTeam {
     @ManyToOne
     @JsonIgnore
     @ToString.Exclude
+    @EqualsAndHashCode.Include
     private Team team;
 
     @ManyToOne
+    @EqualsAndHashCode.Include
     private User user;
 
     @OneToMany(mappedBy = "userTeam", cascade = CascadeType.ALL, orphanRemoval = true)

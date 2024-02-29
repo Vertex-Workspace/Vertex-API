@@ -49,4 +49,5 @@ public class UserTeamService {
         return userTeamRepository.findAllByUser_Id(id);
     }
 
+
 }
