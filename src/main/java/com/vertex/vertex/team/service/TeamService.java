@@ -1,4 +1,6 @@
 package com.vertex.vertex.team.service;
+import com.vertex.vertex.project.model.DTO.ProjectViewListDTO;
+import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.model.entity.Task;
@@ -43,7 +45,6 @@ public class TeamService {
 
     //Services
     private final UserService userService;
-    private final TaskRepository taskRepository;
     private final UserTeamService userTeamService;
     private final GroupService groupService;
     private final PermissionService permissionService;
@@ -104,16 +105,13 @@ public class TeamService {
 
     public TeamInfoDTO findById(Long id) {
         TeamInfoDTO dto = new TeamInfoDTO(); //retorna as informações necessárias para a tela de equipe
-        Team team;
-
-        if (teamRepository.existsById(id)) {
-            team = teamRepository.findById(id).get();
-            BeanUtils.copyProperties(team, dto);
-            addUsers(dto, team); //adiciona os usuários ao grupo com base no userTeam, para utilização no fe
-            dto.setImage(team.getImage());
-            return dto;
-        }
-        throw new TeamNotFoundException(id);
+        Team team = findTeamById(id);
+        List<ProjectViewListDTO> projectList = convertTeamProjectsToDto(team);
+        BeanUtils.copyProperties(team, dto);
+        addUsers(dto, team); //adiciona os usuários ao grupo com base no userTeam, para utilização no fe
+        dto.setProjects(projectList);
+        dto.setImage(team.getImage());
+        return dto;
     }
 
     public TeamLinkDTO findInvitationCodeById(Long id) {
@@ -224,14 +222,7 @@ public class TeamService {
             }
             teamRepository.save(team);
 
-            UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(team.getId(),user.getId());
-
-//             for (Project project : team.getProjects()) {
-//                for (Task task : project.getTasks()) {
-//                    task.getTaskResponsables().add(new TaskResponsable(userTeam1,task));
-//                    taskRepository.save(task);
-//                }
-//             }
+            UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(team.getId(), user.getId());
 
             return team;
         } catch (Exception e) {
@@ -330,6 +321,16 @@ public class TeamService {
                 teamRepository.save(team);
             }
         }
+    }
+
+    public List<ProjectViewListDTO> convertTeamProjectsToDto(Team team) {
+        List<ProjectViewListDTO> projectList = new ArrayList<>();
+
+        team.getProjects().forEach(p -> {
+            projectList.add(new ProjectViewListDTO(p));
+        });
+
+        return projectList;
     }
 
 }
