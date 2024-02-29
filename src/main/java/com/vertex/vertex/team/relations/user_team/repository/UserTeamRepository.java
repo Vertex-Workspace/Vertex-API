@@ -18,4 +18,6 @@ public interface UserTeamRepository extends JpaRepository<UserTeam, Long> {
     List<UserTeam> findAllByUser_Id(Long userID);
 
     UserTeam findByUser(User user);
+
+    UserTeam findByUser_IdAndTeam(Long userId, Team team);
 }

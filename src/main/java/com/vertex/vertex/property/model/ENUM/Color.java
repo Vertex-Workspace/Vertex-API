@@ -5,14 +5,14 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public enum Color {
 
-    BLUE("a"),
+    BLUE("BLUE"),
     RED("#FF9D9D"),
-    PURPLE("a"),
-    PINK("a"),
-    ORANGE("a"),
-    GREY("a"),
+    PURPLE("PURPLE"),
+    PINK("PINK"),
+    ORANGE("ORANGE"),
+    GREY("GREY"),
     YELLOW("#FFD600"),
-    BROWN("a"),
+    BROWN("BROWN"),
     GREEN("#65D73C");
 
     private final String color;
