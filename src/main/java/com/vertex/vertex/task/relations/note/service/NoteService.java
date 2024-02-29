@@ -35,7 +35,7 @@ public class NoteService {
                         (userId, project.getTeam().getId());
 
         Note note = new Note();
-        note.setProject(project);
+//        note.setProject(project);
         note.setCreator(creator);
 
         BeanUtils.copyProperties(dto, note);
