@@ -31,8 +31,6 @@ import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.service.TeamService;
-import com.vertex.vertex.user.model.entity.User;
-import com.vertex.vertex.user.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -57,8 +55,8 @@ public class TaskService {
     private final ProjectService projectService;
     private final PropertyService propertyService;
     private final UserTeamService userTeamService;
-    private final UserService userService;
     private final TeamService teamService;
+
 
     public Task save(TaskCreateDTO taskCreateDTO) {
         Task task = new Task();
@@ -71,22 +69,21 @@ public class TaskService {
         }
         //When the task is created, every property is associated with a null value, unless it has a default value
         for (Property property : project.getProperties()) {
+
             Value currentValue = property.getKind().getValue();
             currentValue.setProperty(property);
             currentValue.setTask(task);
             task.getValues().add(currentValue);
 
             if (property.getKind() == PropertyKind.STATUS) {
-                for (int i = 0; i < task.getValues().size(); i++) {
-                    for (PropertyList propertyList : task.getValues().get(i).getProperty().getPropertyLists()) {
-                        if (propertyList.getPropertyListKind() == PropertyListKind.TODO) {
-                            currentValue.setValue(propertyList);
-                        }
-                    }
-                }
+                //Get the first element, how the three are fixed, it always will be TO DO "Não Iniciado"
+                currentValue.setValue(property.getPropertyLists().get(0));
             }
             if (property.getKind() == PropertyKind.DATE) {
                 ((ValueDate) currentValue).setValue();
+            }
+            if(property.getKind() == PropertyKind.TEXT){
+                currentValue.setValue(property.getDefaultValue());
             }
         }
 
@@ -109,7 +106,6 @@ public class TaskService {
 
         task.setApproveStatus(ApproveStatus.INPROGRESS);
         return taskRepository.save(task);
-
     }
 
     public Task edit(TaskEditDTO taskEditDTO) {
@@ -132,6 +128,7 @@ public class TaskService {
     }
 
     public void deleteById(Long id) {
+        Task task = findById(id);
         taskRepository.deleteById(id);
     }
 
@@ -148,7 +145,6 @@ public class TaskService {
         }
         for (int i = 0; i < task.getValues().size(); i++) {
             if (task.getValues().get(i).getId().equals(editValueDTO.getValue().getId())) {
-
                 Value currentValue = property.getKind().getValue();
                 currentValue.setId(editValueDTO.getValue().getId());
                 currentValue.setTask(task);

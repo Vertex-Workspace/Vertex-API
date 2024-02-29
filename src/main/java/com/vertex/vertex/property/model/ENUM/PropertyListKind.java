@@ -4,6 +4,9 @@ public enum PropertyListKind {
 
     TODO(),
     DOING(),
-    DONE();
+    DONE(),
+
+    VISIBLE(),
+    INVISIBLE();
 
 }
