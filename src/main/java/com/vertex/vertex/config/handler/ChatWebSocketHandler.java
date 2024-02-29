@@ -1,5 +1,6 @@
 package com.vertex.vertex.config.handler;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -19,6 +20,11 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+
+
+        System.out.println(message);
+
+
         for (WebSocketSession webSocketSession : webSocketSessions){
             webSocketSession.sendMessage(message);
         }

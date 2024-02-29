@@ -2,10 +2,13 @@ package com.vertex.vertex.project.controller;
 
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
+import com.vertex.vertex.property.model.entity.Property;
+import com.vertex.vertex.property.service.PropertyService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Set;
@@ -17,6 +20,7 @@ import java.util.Set;
 public class ProjectController {
 
     private final ProjectService projectService;
+    private final PropertyService propertyService;
 
     @PostMapping("/{teamId}")
     public ResponseEntity<?> save(@RequestBody Project project , @PathVariable Long teamId){
@@ -90,6 +94,21 @@ public class ProjectController {
                 (projectService.existsByIdAndUserBelongs
                         (projectId, userId),
                         HttpStatus.OK);
+    }
+
+    @PatchMapping("/image/{projectId}")
+    public ResponseEntity<?> updateImage(
+            @PathVariable Long projectId,
+            @RequestParam MultipartFile file) {
+        try {
+            projectService.updateImage(file, projectId);
+            return new ResponseEntity<>
+                    (HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>
+                    (HttpStatus.CONFLICT);
+        }
     }
 
 }

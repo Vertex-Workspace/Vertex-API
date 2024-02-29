@@ -4,17 +4,23 @@ import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
+import com.vertex.vertex.team.relations.group.model.DTO.AddUsersDTO;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupEditUserDTO;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupRegisterDTO;
+import com.vertex.vertex.team.relations.group.service.GroupService;
+import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
 import com.vertex.vertex.team.service.TeamService;
+import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @CrossOrigin
 @RestController
@@ -23,13 +29,17 @@ import java.util.List;
 public class TeamController {
 
     private final TeamService teamService;
+    private final GroupService groupService;
+    private final PermissionService permissionService;
 
     @PostMapping
     public ResponseEntity<?> save(@RequestBody TeamViewListDTO team) {
-
+        try {
             teamService.save(team);
-            return new ResponseEntity<>( HttpStatus.CREATED);
-
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
     }
     @PutMapping
     public ResponseEntity<?> update(@RequestBody TeamViewListDTO team) {
@@ -124,6 +134,108 @@ public class TeamController {
             return new ResponseEntity<>(teamService.editUserIntoGroup(groupEditUserDTO), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/group/{groupId}")
+    public ResponseEntity<?> deleteGroup(@PathVariable Long groupId){
+        try{
+            groupService.delete(groupId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch(Exception e){
+            e.printStackTrace();
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping("/usersByTeam/{teamId}")
+    public ResponseEntity<?> findByTeam(@PathVariable Long teamId) {
+        try {
+            return new ResponseEntity<>(teamService.getUsersByTeam(teamId), HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/{teamId}/group/{groupId}/user/{userId}")
+    public ResponseEntity<?> deleteUserFromGroup(@PathVariable Long userId, @PathVariable Long teamId, @PathVariable  Long groupId){
+        try{
+            groupService.deleteUserFromGroup(userId, teamId, groupId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @PatchMapping("/permission/{permissionId}/{userId}/{teamId}")
+    public ResponseEntity<?> giveAPermission(@PathVariable Long permissionId, @PathVariable Long userId, @PathVariable Long teamId){
+        try{
+            permissionService.changeEnabled(permissionId, userId, teamId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping("/permission/{userId}/{teamId}")
+    public ResponseEntity<?> getAllPermissions(@PathVariable Long userId, @PathVariable Long teamId) {
+        try {
+            return new ResponseEntity<>(permissionService.getAllPermissionOfAUserTeam(userId, teamId), HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/hasPermission/{projectId}/{userId}")
+    public ResponseEntity<?> hasPermission(@PathVariable Long projectId, @PathVariable Long userId) {
+        try {
+            return new ResponseEntity<>(permissionService.hasPermission(projectId, userId), HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/{teamId}/group/{groupId}")
+    public ResponseEntity<?> usersOutOfGroup(@PathVariable Long teamId, @PathVariable Long groupId) {
+        try {
+            return new ResponseEntity<>(groupService.participantsOutOfGroup(teamId, groupId), HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PatchMapping("/group/{id}/addParticipants")
+    public ResponseEntity<?> addParticipants(@PathVariable Long id, @RequestBody AddUsersDTO addUsersDTO){
+        try{
+            groupService.addParticipants(id, addUsersDTO);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @DeleteMapping("/user-team/{teamId}/{userId}")
+    public ResponseEntity<?> deleteUserFromGroup(@PathVariable Long userId, @PathVariable Long teamId){
+        try{
+            teamService.deleteUserTeam(teamId, userId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @PatchMapping("/image/{teamId}")
+    public ResponseEntity<?> updateImage(
+            @PathVariable Long teamId,
+            @RequestParam MultipartFile file) {
+        try {
+            teamService.updateImage(file, teamId);
+            return new ResponseEntity<>
+                    (HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>
+                    (HttpStatus.CONFLICT);
         }
     }
 

@@ -30,17 +30,18 @@ public class Team {
 
     private String invitationCode;
 
-    @OneToOne
+    @Lob
+    @Column(name = "image",
+            columnDefinition = "BLOB")
+    private byte[] image;
+
+    @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private UserTeam creator;
 
     private String description;
 
     private LocalDateTime creationDate;
 
-    @Lob
-    @Column(name = "image",
-            columnDefinition = "BLOB")
-    private byte[] image;
 
     @OneToMany(mappedBy = "team", fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Project> projects;
@@ -51,7 +52,7 @@ public class Team {
     @OneToOne(cascade = CascadeType.ALL)
     private Chat chat;
 
-    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<UserTeam> userTeams;
 
 
