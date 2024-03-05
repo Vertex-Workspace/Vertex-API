@@ -9,10 +9,12 @@ import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskRespo
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @AllArgsConstructor
+@NoArgsConstructor
 @Data
 public class TaskCreateDTO {
 
@@ -35,4 +37,5 @@ public class TaskCreateDTO {
         this.creator = creator;
         this.project = project;
     }
+
 }

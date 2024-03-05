@@ -53,7 +53,7 @@ public class TaskService {
 
     private final TaskResponsablesRepository taskResponsablesRepository;
     private final TaskRepository taskRepository;
-    private final ProjectRepository projectRepository;
+    private final ProjectService projectService;
     private final PropertyService propertyService;
     private final UserTeamService userTeamService;
 
@@ -64,7 +64,7 @@ public class TaskService {
         Project project;
         List<Value> values = new ArrayList<>();
         try {
-            project = projectRepository.findById(taskCreateDTO.getProject().getId()).get();
+            project = projectService.findById(taskCreateDTO.getProject().getId());
         } catch (Exception e) {
             throw new RuntimeException("There isn't a project with this id is not linked with the current team!");
         }
@@ -95,9 +95,9 @@ public class TaskService {
             for (UserTeam userTeam : project.getTeam().getUserTeams()) {
                 TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
                 if (task.getTaskResponsables() == null) {
-                    ArrayList<TaskResponsable> taskResponsables = new ArrayList<>();
-                    taskResponsables.add(taskResponsable1);
-                    task.setTaskResponsables(taskResponsables);
+                    ArrayList<TaskResponsable> listaParaFuncionarEstaCoisaBemLegal = new ArrayList<>();
+                    listaParaFuncionarEstaCoisaBemLegal.add(taskResponsable1);
+                    task.setTaskResponsables(listaParaFuncionarEstaCoisaBemLegal);
                 } else {
                     task.getTaskResponsables().add(taskResponsable1);
                 }
@@ -109,6 +109,7 @@ public class TaskService {
         task.setApproveStatus(ApproveStatus.INPROGRESS);
         return taskRepository.save(task);
     }
+
 
     public Task edit(TaskEditDTO taskEditDTO) {
         try {
@@ -268,7 +269,7 @@ public class TaskService {
 
     public List<Task> getAllByProject(Long id) {
         try {
-            Project project = projectRepository.findById(id).get();
+            Project project = projectService.findById(id);
             return project.getTasks();
 
         } catch (Exception e) {

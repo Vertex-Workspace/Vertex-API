@@ -88,7 +88,7 @@ public class UserService {
 //        user.setImage(data);
         //creation of the default team
         TeamViewListDTO teamViewListDTO =
-                new TeamViewListDTO("Equipe padrão", user, null, "Sua equipe padrão", null, true);
+                new TeamViewListDTO("Equipe " + user.getFirstName(), user, null, "Sua equipe padrão", null, true);
         teamService.save(teamViewListDTO);
         return userRepository.save(user);
     }

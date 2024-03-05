@@ -87,7 +87,7 @@ public class TeamService {
                     Team teamWithUserTeam = editUserTeam(userTeamAssociateDTO);
 
                     if(teamViewListDTO.isDefaultTeam()){
-                        saveDefaultTasks(team);
+                        saveDefaultTasksAndProject(team);
                     }
 
                     createChatForTeam(teamWithUserTeam);
@@ -385,12 +385,13 @@ public class TeamService {
         return userTeam.getUser();
     }
 
-    public void saveDefaultTasks(Team team){
+    public void saveDefaultTasksAndProject(Team team){
+
         Project projectDefault1 = new Project("Projeto Pessoal", "Seu projeto pessoal padrão", null, team, team.getCreator());
         Project projectDefault2 = new Project("Projeto Profissional", "Seu projeto pessoal padrão", null, team, team.getCreator());
-//
+
         TaskCreateDTO taskCreateDTO1 = new TaskCreateDTO("Lavar a louça", "Sua tarefa é lavar a louça", team.getCreator(), projectDefault1);
-        TaskCreateDTO taskCreateDTO2 = new TaskCreateDTO("Lavar a louça", "Sua tarefa é lavar a louça", team.getCreator(), projectDefault2);
+        TaskCreateDTO taskCreateDTO2 = new TaskCreateDTO("Apresentar seminário", "Sua tarefa é lavar a louça", team.getCreator(), projectDefault2);
 
         projectService.save(projectDefault1, team.getId());
         projectService.save(projectDefault2, team.getId());
