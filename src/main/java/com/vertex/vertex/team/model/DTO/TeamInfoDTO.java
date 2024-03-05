@@ -15,7 +15,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TeamInfoDTO extends TeamViewListDTO{
-    private byte[] image;
     private List<User> users;
     private List<Project> projects;
     private List<Group> groups;

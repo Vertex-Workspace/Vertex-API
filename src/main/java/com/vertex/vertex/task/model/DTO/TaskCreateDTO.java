@@ -7,6 +7,7 @@ import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
+import com.vertex.vertex.user.model.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -18,7 +19,7 @@ public class TaskCreateDTO {
 
     private Long id;
     private String name;
-    private UserTeam creator;
+    private User creator;
     private Long teamId;
     private List<TaskResponsable> responsables;
     private String description;

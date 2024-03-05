@@ -40,6 +40,7 @@ public class ProjectService {
         List<Property> properties = new ArrayList<>();
         properties.add(new Property(PropertyKind.STATUS, "Status", true, null, PropertyStatus.FIXED));
         properties.add(new Property(PropertyKind.DATE, "Data", true, null, PropertyStatus.FIXED));
+
         properties.add(new Property(PropertyKind.LIST, "Dificuldade", false, null, PropertyStatus.VISIBLE));
         properties.add(new Property(PropertyKind.NUMBER, "Número", false, null, PropertyStatus.VISIBLE));
         properties.add(new Property(PropertyKind.TEXT, "Palavra-Chave", false, null, PropertyStatus.INVISIBLE));

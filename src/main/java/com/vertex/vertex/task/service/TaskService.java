@@ -69,7 +69,6 @@ public class TaskService {
         }
         //When the task is created, every property is associated with a null value, unless it has a default value
         for (Property property : project.getProperties()) {
-
             Value currentValue = property.getKind().getValue();
             currentValue.setProperty(property);
             currentValue.setTask(task);
@@ -88,7 +87,7 @@ public class TaskService {
         }
 
         //Add the taskResponsables on task list of taskResponsables
-        task.setCreator(userTeamService.findById(taskCreateDTO.getCreator().getId()));
+        task.setCreator(userTeamService.findUserTeamByComposeId(taskCreateDTO.getTeamId(), taskCreateDTO.getCreator().getId()));
         try{
             for (UserTeam userTeam : project.getTeam().getUserTeams()) {
                 TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
@@ -100,7 +99,7 @@ public class TaskService {
                     task.getTaskResponsables().add(taskResponsable1);
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e){
             e.printStackTrace();
         }
 
@@ -129,6 +128,7 @@ public class TaskService {
 
     public void deleteById(Long id) {
         Task task = findById(id);
+        System.out.println("Delete " + task);
         taskRepository.deleteById(id);
     }
 
@@ -159,34 +159,39 @@ public class TaskService {
 
     //verify if the taskresponsable belongs to the task and if it is, save the comment
     public Task saveComment(CommentDTO commentDTO) {
+        System.out.println(commentDTO);
         Task task;
-        Comment comment;
-        TaskResponsable taskResponsable = taskResponsablesRepository.findById(commentDTO.getTaskResponsable().getId()).get();
+        Comment comment = new Comment();
+        TaskResponsable taskResponsable = taskResponsablesRepository.findById(commentDTO.getTaskResponsableID()).get();
+
         try {
-            task = findById(commentDTO.getTask().getId());
+            task = findById(commentDTO.getTaskID());
         } catch (Exception e) {
             throw new TaskDoesNotExistException();
         }
 
-        if (commentDTO.getId() != null) {
-            for (Comment commentFor : task.getComments()) {
-                if (commentFor.getId().equals(commentDTO.getId())) {
-                    comment = commentFor;
-                    task.getComments().remove(comment);
-                    return taskRepository.save(task);
-                }
-            }
+        if (taskResponsable.getTask().getId().equals(commentDTO.getTaskID())) {
+            comment.setTask(task);
+            comment.setTaskResponsable(taskResponsable);
+            comment.setComment(commentDTO.getComment());
+            comment.setDate(LocalDateTime.now());
+            task.getComments().add(comment);
+            return taskRepository.save(task);
         } else {
-            comment = new Comment();
-            if (taskResponsable.getTask().getId().equals(commentDTO.getTask().getId())) {
-                BeanUtils.copyProperties(commentDTO, comment);
-                task.getComments().add(comment);
-            } else {
-                throw new RuntimeException("O usuário não é um dos responsáveis pela tarefa.");
+            throw new RuntimeException("O usuário não é um dos responsáveis pela tarefa.");
+        }
+    }
+
+    public Boolean deleteComment(Long taskID, Long commentID){
+        Task task = findById(taskID);
+        for (Comment comment : task.getComments()) {
+            if (comment.getId().equals(commentID)) {
+                task.getComments().remove(comment);
+                taskRepository.save(task);
+                return true;
             }
         }
-        return taskRepository.save(task);
-
+        throw new RuntimeException("Comment doesn't exist in this task");
     }
 
     //add responsables to the task

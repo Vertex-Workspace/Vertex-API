@@ -58,8 +58,6 @@ public class TeamService {
             } else {
                 team.setName(teamViewListDTO.getName());
                 team.setDescription(teamViewListDTO.getDescription());
-                //After the Romas explanation about Date
-//            team.setCreationDate();
                 teamRepository.save(team);
                 if(teamViewListDTO.getId() == null) {
                     UserTeamAssociateDTO userTeamAssociateDTO = new UserTeamAssociateDTO();

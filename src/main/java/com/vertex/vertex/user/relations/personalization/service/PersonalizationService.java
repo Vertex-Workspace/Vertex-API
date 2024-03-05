@@ -32,7 +32,7 @@ public class PersonalizationService {
         personalization.setSecondColorLight("#F3F3F3");
         personalization.setPrimaryColorDark("#F3F3F3");
         personalization.setSecondColorDark("#574444");
-        personalization.setFontFamily("arial");
+        personalization.setFontFamily("Inter");
         personalization.setFontSize(14);
         personalization.setTheme(0);
         personalization.setVoiceCommand(false);
