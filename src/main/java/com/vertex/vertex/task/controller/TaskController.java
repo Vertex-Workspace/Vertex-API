@@ -146,18 +146,5 @@ public class TaskController {
         }
     }
 
-    @GetMapping("/team/{id}")
-    public ResponseEntity<?> findAllByTeam(
-            @PathVariable Long id) {
-        try {
-            return new ResponseEntity<>(
-                    taskService.getAllByTeam(id),
-                    HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(
-                    "Equipe não encontrada!",
-                    HttpStatus.NOT_FOUND);
-        }
-    }
 
 }
