@@ -73,9 +73,9 @@ public class UserService {
         user.setLocation("Jaraguá do Sul - SC");
         user.setPersonalization(personalizationService.defaultSave(user));
 
-//        System.out.println(userDTO.getImage());
-//        byte[] data = Base64.getDecoder().decode(userDTO.getImage());
-//        user.setImage(data);
+        System.out.println(userDTO.getImage());
+        byte[] data = Base64.getDecoder().decode(userDTO.getImage());
+        user.setImage(data);
         return userRepository.save(user);
     }
 
