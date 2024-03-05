@@ -280,23 +280,6 @@ public class TaskService {
 
     }
 
-    public List<Task> getAllByTeam(Long id) {
-        try {
-            Team team = teamService.findTeamById(id);
-            List<Task> taskList = new ArrayList<>();
-
-            team.getProjects()
-                    .forEach(p -> {
-                        taskList.addAll(p.getTasks());
-                    });
-
-            return taskList;
-
-        } catch (Exception e) {
-            throw new RuntimeException();
-        }
-    }
-
     public List<Task> getAllByUser(Long id) {
         try {
             List<UserTeam> uts = userTeamService.findAll(id);

@@ -239,4 +239,18 @@ public class TeamController {
         }
     }
 
+    @GetMapping("/tasks/{id}")
+    public ResponseEntity<?> findAllByTeam(
+            @PathVariable Long id) {
+        try {
+            return new ResponseEntity<>(
+                    teamService.getAllTasksByTeam(id),
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(
+                    "Equipe não encontrada!",
+                    HttpStatus.NOT_FOUND);
+        }
+    }
+
 }
