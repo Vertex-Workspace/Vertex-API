@@ -328,7 +328,6 @@ public class TeamService {
             Team team = findTeamById(teamId);
             team.setImage(file.getBytes());
             teamRepository.save(team);
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
