@@ -28,4 +28,11 @@ public class TaskCreateDTO {
     private List<Task> subTasks;
     private List<Review> reviews;
     private List<Value> values;
+
+    public TaskCreateDTO(String name, String description, UserTeam creator, Project project) {
+        this.name = name;
+        this.description = description;
+        this.creator = creator;
+        this.project = project;
+    }
 }

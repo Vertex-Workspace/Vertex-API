@@ -56,4 +56,12 @@ public class Project {
             properties.add(property);
         }
     }
+
+    public Project(String name, String description, byte[] image, Team team, UserTeam creator) {
+        this.name = name;
+        this.description = description;
+        this.image = image;
+        this.team = team;
+        this.creator = creator;
+    }
 }

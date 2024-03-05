@@ -1,6 +1,7 @@
 package com.vertex.vertex.task.service;
 
 import com.vertex.vertex.project.model.entity.Project;
+import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
 import com.vertex.vertex.property.model.ENUM.PropertyListKind;
@@ -52,18 +53,18 @@ public class TaskService {
 
     private final TaskResponsablesRepository taskResponsablesRepository;
     private final TaskRepository taskRepository;
-    private final ProjectService projectService;
+    private final ProjectRepository projectRepository;
     private final PropertyService propertyService;
     private final UserTeamService userTeamService;
-    private final TeamService teamService;
 
 
     public Task save(TaskCreateDTO taskCreateDTO) {
         Task task = new Task();
         BeanUtils.copyProperties(taskCreateDTO, task);
         Project project;
+        List<Value> values = new ArrayList<>();
         try {
-            project = projectService.findById(taskCreateDTO.getProject().getId());
+            project = projectRepository.findById(taskCreateDTO.getProject().getId()).get();
         } catch (Exception e) {
             throw new RuntimeException("There isn't a project with this id is not linked with the current team!");
         }
@@ -73,7 +74,8 @@ public class TaskService {
             Value currentValue = property.getKind().getValue();
             currentValue.setProperty(property);
             currentValue.setTask(task);
-            task.getValues().add(currentValue);
+            values.add(currentValue);
+            task.setValues(values);
 
             if (property.getKind() == PropertyKind.STATUS) {
                 //Get the first element, how the three are fixed, it always will be TO DO "Não Iniciado"
@@ -93,9 +95,9 @@ public class TaskService {
             for (UserTeam userTeam : project.getTeam().getUserTeams()) {
                 TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
                 if (task.getTaskResponsables() == null) {
-                    ArrayList<TaskResponsable> listaParaFuncionarEstaCoisaBemLegal = new ArrayList<>();
-                    listaParaFuncionarEstaCoisaBemLegal.add(taskResponsable1);
-                    task.setTaskResponsables(listaParaFuncionarEstaCoisaBemLegal);
+                    ArrayList<TaskResponsable> taskResponsables = new ArrayList<>();
+                    taskResponsables.add(taskResponsable1);
+                    task.setTaskResponsables(taskResponsables);
                 } else {
                     task.getTaskResponsables().add(taskResponsable1);
                 }
@@ -266,7 +268,7 @@ public class TaskService {
 
     public List<Task> getAllByProject(Long id) {
         try {
-            Project project = projectService.findById(id);
+            Project project = projectRepository.findById(id).get();
             return project.getTasks();
 
         } catch (Exception e) {
@@ -277,19 +279,24 @@ public class TaskService {
 
     public List<Task> getAllByTeam(Long id) {
         try {
-            Team team = teamService.findTeamById(id);
-            List<Task> taskList = new ArrayList<>();
+            userTeamService.findAllByTeam(id);
+            for(UserTeam userTeam : userTeamService.findAllByTeam(id)){
+                if(userTeam.getTeam().getId().equals(id)) {
+                    List<Task> taskList = new ArrayList<>();
 
-            team.getProjects()
-                    .forEach(p -> {
-                        taskList.addAll(p.getTasks());
-                    });
+                    userTeam.getTeam().getProjects()
+                            .forEach(p -> {
+                                taskList.addAll(p.getTasks());
+                            });
 
-            return taskList;
+                    return taskList;
+                }
+            }
 
         } catch (Exception e) {
             throw new RuntimeException();
         }
+        return null;
     }
 
     public List<Task> getAllByUser(Long id) {

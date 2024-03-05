@@ -21,5 +21,15 @@ public class TeamViewListDTO {
     private byte[] image;
     private String description;
     private LocalDateTime creationDate;
+    private boolean defaultTeam;
     private Chat chat;
+
+    public TeamViewListDTO(String name, User creator, byte[] image, String description, LocalDateTime creationDate, boolean defaultTeam) {
+        this.name = name;
+        this.creator = creator;
+        this.image = image;
+        this.description = description;
+        this.creationDate = creationDate;
+        this.defaultTeam = true;
+    }
 }

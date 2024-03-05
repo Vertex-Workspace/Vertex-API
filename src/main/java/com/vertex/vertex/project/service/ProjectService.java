@@ -10,6 +10,7 @@ import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.task.relations.value.service.ValueService;
+import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
@@ -29,13 +30,12 @@ import java.util.Set;
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
-
-    private final TeamService teamService;
     private final UserTeamService userTeamService;
     private final ValueService valueService;
 
     public Project save(Project project, Long teamId) {
         Team team;
+        UserTeam userTeam;
         //Default properties of a project
         List<Property> properties = new ArrayList<>();
         properties.add(new Property(PropertyKind.STATUS, "Status", true, null, PropertyStatus.FIXED));
@@ -44,14 +44,10 @@ public class ProjectService {
         properties.add(new Property(PropertyKind.NUMBER, "Número", false, null, PropertyStatus.VISIBLE));
         properties.add(new Property(PropertyKind.TEXT, "Palavra-Chave", false, null, PropertyStatus.INVISIBLE));
         try {
-            team = teamService.findTeamById(teamId);
+            userTeam = userTeamService.findUserTeamByComposeId(teamId, project.getCreator().getId());
+            team = userTeam.getTeam();
         } catch (Exception e) {
             throw new EntityNotFoundException("There isn't a team with this id!");
-        }
-        UserTeam userTeam = userTeamService.findUserTeamByComposeId(teamId, project.getCreator().getId());
-        if(userTeam == null){
-            //after we have to create the exception
-            throw new RuntimeException("The user isn't in the team!");
         }
         project.setCreator(userTeam);
         project.setTeam(team);
@@ -104,10 +100,11 @@ public class ProjectService {
     public Boolean existsByIdAndUserBelongs(Long projectId, Long userId) {
         if (projectRepository.existsById(projectId)) {
             Project project = findById(projectId);
-            return teamService.findUserInTeam(project.getTeam(), userId);
+            return userTeamService.findUserInTeam(project.getTeam(), userId);
         }
         return false;
     }
+
     public Project findById(Long id){
         return projectRepository.findById(id).get();
     }
@@ -140,4 +137,5 @@ public class ProjectService {
         propertiesList.add(new PropertyList("Concluído", Color.GREEN, property, PropertyListKind.DONE, true));
         return propertiesList;
     }
+
 }

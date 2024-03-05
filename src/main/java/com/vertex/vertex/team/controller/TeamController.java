@@ -63,7 +63,6 @@ public class TeamController {
 
     @GetMapping("/invitation/{id}")
     public ResponseEntity<?> findInvitationCodeById(@PathVariable Long id) {
-
         try {
             return new ResponseEntity<>(teamService.findInvitationCodeById(id), HttpStatus.OK);
         } catch (Exception e) {
@@ -214,14 +213,19 @@ public class TeamController {
         }
     }
 
+//    @DeleteMapping("/user-team/{teamId}/{userId}")
+//    public ResponseEntity<?> deleteUserFromGroup(@PathVariable Long userId, @PathVariable Long teamId){
+//        try{
+//            teamService.deleteUserTeam(teamId, userId);
+//            return new ResponseEntity<>(HttpStatus.OK);
+//        } catch(Exception e){
+//            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+//        }
+//    }
+
     @DeleteMapping("/user-team/{teamId}/{userId}")
-    public ResponseEntity<?> deleteUserFromGroup(@PathVariable Long userId, @PathVariable Long teamId){
-        try{
-            teamService.deleteUserTeam(teamId, userId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        }
+    public void deleteUserFromGroup(@PathVariable Long userId, @PathVariable Long teamId){
+        teamService.deleteUserTeam(teamId, userId);
     }
 
     @PatchMapping("/image/{teamId}")
@@ -236,6 +240,15 @@ public class TeamController {
         } catch (Exception e) {
             return new ResponseEntity<>
                     (HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping("/{teamId}/creator")
+    public ResponseEntity<?> creatorOfTeam(@PathVariable Long teamId) {
+        try {
+            return new ResponseEntity<>(teamService.teamCreatorId(teamId), HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 

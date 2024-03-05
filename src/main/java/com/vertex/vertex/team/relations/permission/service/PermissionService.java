@@ -8,6 +8,8 @@ import com.vertex.vertex.team.relations.permission.repository.PermissionReposito
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.repository.TeamRepository;
+import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user.repository.UserRepository;
 import com.vertex.vertex.user.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
@@ -25,33 +27,35 @@ public class PermissionService {
     private final PermissionRepository permissionRepository;
     private final UserTeamService userTeamService;
     private final TeamRepository teamRepository;
-    private final UserService userService;
     private final ProjectRepository projectRepository;
 
     public void save(Long userId, Long teamId) {
+        List<Permission> permissions;
         UserTeam userTeam = getOneUserByTeam(userId,
                 teamId);
+
         Permission permission1 = new Permission();
         permission1.setName(TypePermissions.Visualizar);
-        permission1.setEnabled(true);
-
         Permission permission2 = new Permission();
         permission2.setName(TypePermissions.Criar);
-        permission2.setEnabled(false);
-
         Permission permission3 = new Permission();
         permission3.setName(TypePermissions.Deletar);
-        permission3.setEnabled(false);
-
         Permission permission4 = new Permission();
         permission4.setName(TypePermissions.Editar);
-        permission4.setEnabled(false);
 
-        List<Permission> permissions = new ArrayList<>();
-        permissions.add(permission1);
-        permissions.add(permission2);
-        permissions.add(permission3);
-        permissions.add(permission4);
+        if(userTeam.getTeam().getCreator().equals(userTeam)){
+            permission2.setEnabled(true);
+            permission3.setEnabled(true);
+            permission4.setEnabled(true);
+        }else {
+            permission2.setEnabled(false);
+            permission3.setEnabled(false);
+            permission4.setEnabled(false);
+        }
+
+        permission1.setEnabled(true);
+
+        permissions = List.of(permission1, permission2, permission3, permission4);
 
         userTeam.setPermissionUser(permissions);
         for (Permission permission : permissions) {

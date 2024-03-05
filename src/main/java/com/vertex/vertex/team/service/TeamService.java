@@ -1,4 +1,7 @@
 package com.vertex.vertex.team.service;
+
+import com.vertex.vertex.project.service.ProjectService;
+import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.model.entity.Task;
@@ -31,10 +34,14 @@ import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.repository.TeamRepository;
 import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user.repository.UserRepository;
 import com.vertex.vertex.user.service.UserService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -48,13 +55,13 @@ public class TeamService {
     private final TeamRepository teamRepository;
 
     //Services
-    private final UserService userService;
-    private final TaskRepository taskRepository;
+    private final TaskService taskService;
     private final UserTeamService userTeamService;
-    private final UserTeamRepository userTeamRepository;
     private final ChatService chatService;
     private final GroupService groupService;
     private final PermissionService permissionService;
+    private final ProjectService projectService;
+    private final UserRepository userRepository;
 
     public void save(TeamViewListDTO teamViewListDTO) {
         try {
@@ -63,7 +70,7 @@ public class TeamService {
                 //The Team class has many relations, because of that, when we edit the object, we have to edit
                 //just the necessary things in a hard way, as setName...
                 team = findTeamById(teamViewListDTO.getId());
-            }else {
+            } else {
                 team.setName(teamViewListDTO.getName());
                 team.setDescription(teamViewListDTO.getDescription());
                 //After the Romas explanation about Date
@@ -79,6 +86,10 @@ public class TeamService {
                     userTeamAssociateDTO.setCreator(true);
                     Team teamWithUserTeam = editUserTeam(userTeamAssociateDTO);
 
+                    if(teamViewListDTO.isDefaultTeam()){
+                        saveDefaultTasks(team);
+                    }
+
                     createChatForTeam(teamWithUserTeam);
                 }
             }
@@ -93,7 +104,7 @@ public class TeamService {
 
         Chat chat = new Chat();
 
-        List<UserTeam> userTeams = userTeamRepository.findAllByTeam_Id(team.getId());
+        List<UserTeam> userTeams = userTeamService.findAllByTeam(team.getId());
         chat.setUserTeams(userTeams);
         chat.setName(team.getName());
 
@@ -108,7 +119,7 @@ public class TeamService {
             } else {
                 userTeam.getChats().add(chatSaved);
             }
-            userTeamRepository.save(userTeam);
+            userTeamService.save(userTeam);
             teamRepository.save(team);
         }
     }
@@ -119,7 +130,7 @@ public class TeamService {
         StringBuilder token = new StringBuilder();
         Random random = new Random();
         for (int i = 0; i < caracteres.length(); i++) {
-            char a = caracteres.charAt(random.nextInt(0, 34));
+            char a = caracteres.charAt(random.nextInt(34));
             token.append(a);
         }
         return token.toString();
@@ -160,32 +171,31 @@ public class TeamService {
 
 
     public Team editGroup(GroupRegisterDTO groupRegisterDTO) {
+
         List<UserTeam> userTeams = new ArrayList<>();
-            Group group = new Group();
+        Group group = new Group();
 
-            Team team = findTeamById(groupRegisterDTO.getTeam().getId());
+        Team team = findTeamById(groupRegisterDTO.getTeam().getId());
 
-            if (groupRegisterDTO.getName().length() < 1) {
-                throw new GroupNameInvalidException();
-            }
+        if (groupRegisterDTO.getName().length() < 1) {
+            throw new GroupNameInvalidException();
+        }
+        group.setName(groupRegisterDTO.getName());
+        team.getGroups().add(group);
 
-            group.setName(groupRegisterDTO.getName());
-            team.getGroups().add(group);
-            group.setTeam(team);
+        group.setTeam(team);
 
-            for (int i = 0; i < groupRegisterDTO.getUsers().size(); i++) {
-                User user = userService.findById(groupRegisterDTO.getUsers().get(i).getId());
-
-                for (UserTeam userTeam : team.getUserTeams()) {
-                    if (userTeam.getUser().equals(user)) {
-                        userTeams.add(userTeam);
-                        userTeam.getGroups().add(group);
-                        group.setUserTeams(userTeams);
-                    }
+        for (int i = 0; i < groupRegisterDTO.getUsers().size(); i++) {
+            for (UserTeam userTeam : team.getUserTeams()) {
+                if (userTeam.getUser().equals(groupRegisterDTO.getUsers().get(i))) {
+                    userTeams.add(userTeam);
+                    userTeam.getGroups().add(group);
+                    group.setUserTeams(userTeams);
                 }
             }
+        }
 
-            return teamRepository.save(team);
+        return teamRepository.save(team);
     }
 
     public Group editUserIntoGroup(GroupEditUserDTO groupEditUserDTO) {
@@ -219,7 +229,7 @@ public class TeamService {
         try {
             List<UserTeam> userTeams = new ArrayList<>();
 
-            User user = userService.findById(userTeam.getUser().getId());
+            User user = userRepository.findById(userTeam.getUser().getId()).get();
             Team team = teamRepository.findById(userTeam.getTeam().getId()).get();
             UserTeam newUserTeam = new UserTeam(user, team);
 
@@ -242,19 +252,21 @@ public class TeamService {
                         break;
                     }
                 }
-                if(!userRemoved) {
+                if (!userRemoved) {
                     team.getUserTeams().add(newUserTeam);
                     permissionService.save(user.getId(), team.getId());
                 }
             }
             teamRepository.save(team);
 
-            UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(team.getId(),user.getId());
+            UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(team.getId(), user.getId());
 
-            for (Project project : team.getProjects()) {
-                for (Task task : project.getTasks()) {
-                    task.getTaskResponsables().add(new TaskResponsable(userTeam1,task));
-                    taskRepository.save(task);
+            if (team.getProjects() != null) {
+                for (Project project : team.getProjects()) {
+                    for (Task task : project.getTasks()) {
+                        task.getTaskResponsables().add(new TaskResponsable(userTeam1, task));
+                        taskService.save(task);
+                    }
                 }
             }
 
@@ -266,7 +278,7 @@ public class TeamService {
 
     public boolean userIsOnTeam(Long idUser, Long idTeam) {
 
-        User user = userService.findById(idUser);
+        User user = userRepository.findById(idUser).get();
         Team team = teamRepository.findById(idTeam).get();
 
         for (UserTeam userTeamFor : team.getUserTeams()) {
@@ -306,16 +318,9 @@ public class TeamService {
     public Boolean existsByIdAndUserBelongs(Long teamId, Long userId) {
         if (teamRepository.existsById(teamId)) {
             Team team = findTeamById(teamId);
-            return findUserInTeam(team, userId);
+            return userTeamService.findUserInTeam(team, userId);
         }
         return false;
-    }
-
-    public Boolean findUserInTeam(Team team, Long userId) {
-        return team.getUserTeams().stream()
-                .anyMatch(ut ->
-                        Objects.equals(ut.getUser().getId(), userId)
-                );
     }
 
     public Team findTeamById(Long id) {
@@ -358,15 +363,40 @@ public class TeamService {
         return users;
     }
 
-    public void deleteUserTeam(Long teamId, Long userId){
+    public void deleteUserTeam(Long teamId, Long userId) {
         Team team = findTeamById(teamId);
-        User user = userService.findById(userId);
+        User user = userRepository.findById(userId).get();
+        UserTeam userTeam = null;
         for (UserTeam userTeamFor : team.getUserTeams()) {
             if (userTeamFor.getUser().equals(user) && userTeamFor.getTeam().equals(team)) {
-                team.getUserTeams().remove(userTeamFor);
-                teamRepository.save(team);
+                userTeam = userTeamFor;
             }
         }
+        if (userTeam != null) {
+            team.getUserTeams().remove(userTeam);
+            userTeam.setTeam(null);
+            teamRepository.save(team);
+        }
+    }
+
+    public User teamCreatorId(Long teamId) {
+        Team team = teamRepository.findById(teamId).get();
+        UserTeam userTeam = team.getCreator();
+        return userTeam.getUser();
+    }
+
+    public void saveDefaultTasks(Team team){
+        Project projectDefault1 = new Project("Projeto Pessoal", "Seu projeto pessoal padrão", null, team, team.getCreator());
+        Project projectDefault2 = new Project("Projeto Profissional", "Seu projeto pessoal padrão", null, team, team.getCreator());
+//
+        TaskCreateDTO taskCreateDTO1 = new TaskCreateDTO("Lavar a louça", "Sua tarefa é lavar a louça", team.getCreator(), projectDefault1);
+        TaskCreateDTO taskCreateDTO2 = new TaskCreateDTO("Lavar a louça", "Sua tarefa é lavar a louça", team.getCreator(), projectDefault2);
+
+        projectService.save(projectDefault1, team.getId());
+        projectService.save(projectDefault2, team.getId());
+
+        taskService.save(taskCreateDTO1);
+        taskService.save(taskCreateDTO2);
     }
 
 }
