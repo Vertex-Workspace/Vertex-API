@@ -1,5 +1,6 @@
 package com.vertex.vertex.team.model.DTO;
 
+import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
@@ -18,5 +19,6 @@ public class TeamInfoDTO extends TeamViewListDTO{
     private List<User> users;
     private List<Project> projects;
     private List<Group> groups;
+    private Chat chat;
 
 }

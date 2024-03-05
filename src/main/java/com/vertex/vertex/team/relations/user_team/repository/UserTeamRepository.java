@@ -1,5 +1,6 @@
 package com.vertex.vertex.team.relations.user_team.repository;
 
+import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.user.model.entity.User;

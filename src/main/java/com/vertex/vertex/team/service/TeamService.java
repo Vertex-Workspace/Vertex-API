@@ -3,6 +3,10 @@ import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
+
+import com.vertex.vertex.chat.model.Chat;
+import com.vertex.vertex.chat.repository.ChatRepository;
+import com.vertex.vertex.chat.service.ChatService;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.model.entity.Task;
@@ -22,6 +26,8 @@ import com.vertex.vertex.team.relations.permission.model.entity.Permission;
 import com.vertex.vertex.team.relations.permission.model.enums.TypePermissions;
 import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
+import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
+import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.repository.TeamRepository;
 import com.vertex.vertex.user.model.entity.User;
@@ -45,6 +51,8 @@ public class TeamService {
     private final UserService userService;
     private final TaskRepository taskRepository;
     private final UserTeamService userTeamService;
+    private final UserTeamRepository userTeamRepository;
+    private final ChatService chatService;
     private final GroupService groupService;
     private final PermissionService permissionService;
 
@@ -55,50 +63,71 @@ public class TeamService {
                 //The Team class has many relations, because of that, when we edit the object, we have to edit
                 //just the necessary things in a hard way, as setName...
                 team = findTeamById(teamViewListDTO.getId());
-            } else {
+            }else {
                 team.setName(teamViewListDTO.getName());
                 team.setDescription(teamViewListDTO.getDescription());
+                //After the Romas explanation about Date
+//            team.setCreationDate();
+                String invitationCode = generateInvitationCode();
+                team.setInvitationCode(invitationCode);
+
                 teamRepository.save(team);
-                if(teamViewListDTO.getId() == null) {
+                if (teamViewListDTO.getId() == null) {
                     UserTeamAssociateDTO userTeamAssociateDTO = new UserTeamAssociateDTO();
                     userTeamAssociateDTO.setTeam(team);
                     userTeamAssociateDTO.setUser(teamViewListDTO.getCreator());
                     userTeamAssociateDTO.setCreator(true);
-                    editUserTeam(userTeamAssociateDTO);
+                    Team teamWithUserTeam = editUserTeam(userTeamAssociateDTO);
+
+                    createChatForTeam(teamWithUserTeam);
                 }
             }
 
 
-            String caracteres = "abcdefghijklmnopqrstuvwxyz1234567890";
-            StringBuilder token = new StringBuilder();
-            Random random = new Random();
-            for (int i = 0; i < caracteres.length(); i++) {
-                char a = caracteres.charAt(random.nextInt(34));
-                token.append(a);
-            }
-
-            team.setInvitationCode(token.toString());
-            teamRepository.save(team);
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void updateImage(MultipartFile file, Long teamId) {
-        try {
-            Team team = findTeamById(teamId);
-            team.setImage(file.getBytes());
-            teamRepository.save(team);
+    private void createChatForTeam(Team team) {
 
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        Chat chat = new Chat();
+
+        List<UserTeam> userTeams = userTeamRepository.findAllByTeam_Id(team.getId());
+        chat.setUserTeams(userTeams);
+        chat.setName(team.getName());
+
+        Chat chatSaved = chatService.create(chat);
+
+        for (UserTeam userTeam : team.getUserTeams()) {
+            if (userTeam.getChats() == null) {
+                List<Chat> newChats = new ArrayList<>();
+                newChats.add(chatSaved);
+                userTeam.setChats(newChats);
+                team.setChat(chatSaved);
+            } else {
+                userTeam.getChats().add(chatSaved);
+            }
+            userTeamRepository.save(userTeam);
+            teamRepository.save(team);
         }
+    }
+
+
+    private String generateInvitationCode() {
+        String caracteres = "abcdefghijklmnopqrstuvwxyz1234567890";
+        StringBuilder token = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < caracteres.length(); i++) {
+            char a = caracteres.charAt(random.nextInt(0, 34));
+            token.append(a);
+        }
+        return token.toString();
     }
 
 
     public TeamInfoDTO findById(Long id) {
-        TeamInfoDTO dto = new TeamInfoDTO(); //retorna as informações necessárias para a tela de equipe
+        TeamInfoDTO dto = new TeamInfoDTO();
         Team team;
 
         if (teamRepository.existsById(id)) {
@@ -291,6 +320,17 @@ public class TeamService {
             return teamRepository.findById(id).get();
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public void updateImage(MultipartFile file, Long teamId) {
+        try {
+            Team team = findTeamById(teamId);
+            team.setImage(file.getBytes());
+            teamRepository.save(team);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

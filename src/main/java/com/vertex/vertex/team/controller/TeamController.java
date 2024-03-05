@@ -2,6 +2,8 @@ package com.vertex.vertex.team.controller;
 
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
+import com.vertex.vertex.team.model.entity.Team;
+import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
 import com.vertex.vertex.team.relations.group.model.DTO.AddUsersDTO;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupEditUserDTO;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupRegisterDTO;
@@ -65,6 +67,7 @@ public class TeamController {
         try {
             return new ResponseEntity<>(teamService.findInvitationCodeById(id), HttpStatus.OK);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
         }
     }
@@ -107,11 +110,13 @@ public class TeamController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
-  
+
     @GetMapping("/userIsOnTeam/{idUser}/{idTeam}")
     public boolean userIsOnTeam(@PathVariable Long idUser, @PathVariable Long idTeam){
         return teamService.userIsOnTeam(idUser,idTeam);
     }
+
+    //
 
     @GetMapping("/exists/{teamId}/{userId}")
     public ResponseEntity<?> existsByIdAndUserBelongs(
@@ -122,7 +127,7 @@ public class TeamController {
                         HttpStatus.OK);
     }
 
-
+  
     @PatchMapping("/group/user")
     public ResponseEntity<?> editUserIntoGroup(@RequestBody GroupEditUserDTO groupEditUserDTO) {
         try {
@@ -218,7 +223,7 @@ public class TeamController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
-  
+
     @PatchMapping("/image/{teamId}")
     public ResponseEntity<?> updateImage(
             @PathVariable Long teamId,
