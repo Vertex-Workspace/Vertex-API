@@ -86,7 +86,6 @@ public class TaskHoursService {
                 taskResponsable.getTaskHours().get(i).setTimeSpent(LocalTime.ofNanoOfDay(timeSpentInTask.toNanos()));
 
                 taskHoursRepository.save(taskHour);
-
             }
         }
     }
@@ -94,14 +93,14 @@ public class TaskHoursService {
     public TimeInTaskDto timeInTask(Long idResponsable) {
         TaskResponsable taskResponsable = taskResponsablesService.findById(idResponsable);
 
-        System.out.println(taskResponsable);
-
         Duration allTimeSpent = Duration.ZERO;
         //sum all the time spent of one taskResponsable
         for (int i = 0; i < taskResponsable.getTaskHours().size(); i++) {
-            allTimeSpent = allTimeSpent.plusHours(taskResponsable.getTaskHours().get(i).getTimeSpent().getHour())
-                    .plusMinutes(taskResponsable.getTaskHours().get(i).getTimeSpent().getMinute())
-                    .plusSeconds(taskResponsable.getTaskHours().get(i).getTimeSpent().getSecond());
+            LocalTime localTime = taskResponsable.getTaskHours().get(i).getTimeSpent();
+
+            allTimeSpent = allTimeSpent.plusHours(localTime.getHour())
+                    .plusMinutes(localTime.getMinute())
+                    .plusSeconds(localTime.getSecond());
         }
     
         boolean working = false;

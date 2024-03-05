@@ -1,10 +1,16 @@
 package com.vertex.vertex.team.service;
-
+import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
+
+import com.vertex.vertex.chat.model.Chat;
+import com.vertex.vertex.chat.repository.ChatRepository;
+import com.vertex.vertex.chat.service.ChatService;
 import com.vertex.vertex.task.repository.TaskRepository;
-import com.vertex.vertex.task.service.TaskService;
+import com.vertex.vertex.project.model.entity.Project;
+import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.DTO.TeamLinkDTO;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
@@ -16,7 +22,12 @@ import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.group.model.exception.GroupNameInvalidException;
 import com.vertex.vertex.team.relations.group.model.exception.GroupNotFoundException;
 import com.vertex.vertex.team.relations.group.service.GroupService;
+import com.vertex.vertex.team.relations.permission.model.entity.Permission;
+import com.vertex.vertex.team.relations.permission.model.enums.TypePermissions;
+import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
+import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
+import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.repository.TeamRepository;
 import com.vertex.vertex.user.model.entity.User;
@@ -26,8 +37,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.bind.annotation.PathVariable;
 
+import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -40,58 +51,90 @@ public class TeamService {
     private final UserService userService;
     private final TaskRepository taskRepository;
     private final UserTeamService userTeamService;
+    private final UserTeamRepository userTeamRepository;
+    private final ChatService chatService;
     private final GroupService groupService;
+    private final PermissionService permissionService;
 
-
-    public Team save(TeamViewListDTO teamViewListDTO) {
+    public void save(TeamViewListDTO teamViewListDTO) {
         try {
             Team team = new Team();
-            if (teamViewListDTO.getId() == null) {
-                //Create a new row at table User_Team based on the user that has been created the team
-                UserTeam userTeam = new UserTeam(userService.findById(teamViewListDTO.getCreator().getId()), team);
-                team.setUserTeams(List.of(userTeam));
-                team.setCreator(userTeam);
-            } else {
+            if (teamViewListDTO.getId() != null) {
                 //The Team class has many relations, because of that, when we edit the object, we have to edit
                 //just the necessary things in a hard way, as setName...
                 team = findTeamById(teamViewListDTO.getId());
-            }
-            team.setName(teamViewListDTO.getName());
-            team.setDescription(teamViewListDTO.getDescription());
-            //After the Romas explanation about Date
+            }else {
+                team.setName(teamViewListDTO.getName());
+                team.setDescription(teamViewListDTO.getDescription());
+                //After the Romas explanation about Date
 //            team.setCreationDate();
+                String invitationCode = generateInvitationCode();
+                team.setInvitationCode(invitationCode);
 
+                teamRepository.save(team);
+                if (teamViewListDTO.getId() == null) {
+                    UserTeamAssociateDTO userTeamAssociateDTO = new UserTeamAssociateDTO();
+                    userTeamAssociateDTO.setTeam(team);
+                    userTeamAssociateDTO.setUser(teamViewListDTO.getCreator());
+                    userTeamAssociateDTO.setCreator(true);
+                    Team teamWithUserTeam = editUserTeam(userTeamAssociateDTO);
 
-            String caracteres = "abcdefghijklmnopqrstuvwxyz1234567890";
-            StringBuilder token = new StringBuilder();
-            Random random = new Random();
-            for (int i = 0; i < caracteres.length(); i++) {
-                char a = caracteres.charAt(random.nextInt(0, 34));
-                token.append(a);
+                    createChatForTeam(teamWithUserTeam);
+                }
             }
 
-            try {
-                byte[] data = Base64.getDecoder().decode(teamViewListDTO.getImage());
-                team.setImage(data);
-            } catch (Exception ignored) {}
-
-            team.setInvitationCode(token.toString());
-            return teamRepository.save(team);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    private void createChatForTeam(Team team) {
+
+        Chat chat = new Chat();
+
+        List<UserTeam> userTeams = userTeamRepository.findAllByTeam_Id(team.getId());
+        chat.setUserTeams(userTeams);
+        chat.setName(team.getName());
+
+        Chat chatSaved = chatService.create(chat);
+
+        for (UserTeam userTeam : team.getUserTeams()) {
+            if (userTeam.getChats() == null) {
+                List<Chat> newChats = new ArrayList<>();
+                newChats.add(chatSaved);
+                userTeam.setChats(newChats);
+                team.setChat(chatSaved);
+            } else {
+                userTeam.getChats().add(chatSaved);
+            }
+            userTeamRepository.save(userTeam);
+            teamRepository.save(team);
+        }
+    }
+
+
+    private String generateInvitationCode() {
+        String caracteres = "abcdefghijklmnopqrstuvwxyz1234567890";
+        StringBuilder token = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < caracteres.length(); i++) {
+            char a = caracteres.charAt(random.nextInt(0, 34));
+            token.append(a);
+        }
+        return token.toString();
+    }
+
 
     public TeamInfoDTO findById(Long id) {
-        TeamInfoDTO dto = new TeamInfoDTO(); //retorna as informações necessárias para a tela de equipe
+        TeamInfoDTO dto = new TeamInfoDTO();
         Team team;
 
         if (teamRepository.existsById(id)) {
             team = teamRepository.findById(id).get();
             BeanUtils.copyProperties(team, dto);
             addUsers(dto, team); //adiciona os usuários ao grupo com base no userTeam, para utilização no fe
+            dto.setImage(team.getImage());
             return dto;
         }
         throw new TeamNotFoundException(id);
@@ -115,10 +158,11 @@ public class TeamService {
 
 
     public Team editGroup(GroupRegisterDTO groupRegisterDTO) {
-        try {
+        List<UserTeam> userTeams = new ArrayList<>();
             Group group = new Group();
 
             Team team = findTeamById(groupRegisterDTO.getTeam().getId());
+
             if (groupRegisterDTO.getName().length() < 1) {
                 throw new GroupNameInvalidException();
             }
@@ -126,10 +170,20 @@ public class TeamService {
             group.setName(groupRegisterDTO.getName());
             team.getGroups().add(group);
             group.setTeam(team);
+
+            for (int i = 0; i < groupRegisterDTO.getUsers().size(); i++) {
+                User user = userService.findById(groupRegisterDTO.getUsers().get(i).getId());
+
+                for (UserTeam userTeam : team.getUserTeams()) {
+                    if (userTeam.getUser().equals(user)) {
+                        userTeams.add(userTeam);
+                        userTeam.getGroups().add(group);
+                        group.setUserTeams(userTeams);
+                    }
+                }
+            }
+
             return teamRepository.save(team);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public Group editUserIntoGroup(GroupEditUserDTO groupEditUserDTO) {
@@ -161,13 +215,40 @@ public class TeamService {
 
     public Team editUserTeam(UserTeamAssociateDTO userTeam) {
         try {
+            List<UserTeam> userTeams = new ArrayList<>();
+
             User user = userService.findById(userTeam.getUser().getId());
             Team team = teamRepository.findById(userTeam.getTeam().getId()).get();
-            team.getUserTeams().add(new UserTeam(user, team));
+            UserTeam newUserTeam = new UserTeam(user, team);
 
+            if (team.getUserTeams() == null) {
+
+                userTeams.add(newUserTeam);
+                team.setUserTeams(userTeams);
+
+                if (userTeam.isCreator()) {
+                    team.setCreator(newUserTeam);
+                }
+                //set the default permissions
+                permissionService.save(user.getId(), team.getId());
+            } else {
+                boolean userRemoved = false;
+                for (UserTeam userTeamFor : team.getUserTeams()) {
+                    if (userTeamFor.getUser().equals(user)) {
+                        team.getUserTeams().remove(userTeamFor);
+                        userRemoved = true;
+                        break;
+                    }
+                }
+                if(!userRemoved) {
+                    team.getUserTeams().add(newUserTeam);
+                    permissionService.save(user.getId(), team.getId());
+                }
+            }
             teamRepository.save(team);
 
-            UserTeam userTeam1 =userTeamService.findUserTeamByComposeId(team.getId(),user.getId());
+            UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(team.getId(),user.getId());
+
             for (Project project : team.getProjects()) {
                 for (Task task : project.getTasks()) {
                     task.getTaskResponsables().add(new TaskResponsable(userTeam1,task));
@@ -194,7 +275,6 @@ public class TeamService {
         return false;
 
     }
-
 
     public List<TeamInfoDTO> findAll() {
         List<TeamInfoDTO> teamHomeDTOS = new ArrayList<>();
@@ -243,6 +323,16 @@ public class TeamService {
         }
     }
 
+    public void updateImage(MultipartFile file, Long teamId) {
+        try {
+            Team team = findTeamById(teamId);
+            team.setImage(file.getBytes());
+            teamRepository.save(team);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void addUsers(TeamInfoDTO dto, Team team) {
         List<User> users = new ArrayList<>();
 
@@ -253,5 +343,44 @@ public class TeamService {
 
         dto.setUsers(users);
     }
+
+    public List<User> getUsersByTeam(Long teamId) {
+        List<User> users = new ArrayList<>();
+        Team team = findTeamById(teamId);
+
+        for (int i = 0; i < team.getUserTeams().size(); i++) {
+            users.add(team.getUserTeams().get(i).getUser());
+        }
+        return users;
+    }
+
+    public void deleteUserTeam(Long teamId, Long userId){
+        Team team = findTeamById(teamId);
+        User user = userService.findById(userId);
+        for (UserTeam userTeamFor : team.getUserTeams()) {
+            if (userTeamFor.getUser().equals(user) && userTeamFor.getTeam().equals(team)) {
+                team.getUserTeams().remove(userTeamFor);
+                teamRepository.save(team);
+            }
+        }
+    }
+
+    public List<Task> getAllTasksByTeam(Long id) {
+        try {
+            Team team = findTeamById(id);
+            List<Task> taskList = new ArrayList<>();
+
+            team.getProjects()
+                    .forEach(p -> {
+                        taskList.addAll(p.getTasks());
+                    });
+
+            return taskList;
+
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
+    }
+
 
 }

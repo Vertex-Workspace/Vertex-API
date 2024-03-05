@@ -20,7 +20,7 @@ import java.util.List;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Task {
+public class  Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

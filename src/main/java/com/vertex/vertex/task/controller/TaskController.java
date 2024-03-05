@@ -89,6 +89,16 @@ public class TaskController {
         }
     }
 
+    @DeleteMapping("/{taskID}/comment/{commentID}")
+    public ResponseEntity<?> deleteComment(@PathVariable Long taskID, @PathVariable Long commentID){
+        try{
+            return new ResponseEntity<>(taskService.deleteComment(taskID, commentID), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+
     @PatchMapping("/review")
     public ResponseEntity<?> saveReview (@RequestBody ReviewCheck reviewCheck){
         try{
@@ -146,18 +156,5 @@ public class TaskController {
         }
     }
 
-    @GetMapping("/team/{id}")
-    public ResponseEntity<?> findAllByTeam(
-            @PathVariable Long id) {
-        try {
-            return new ResponseEntity<>(
-                    taskService.getAllByTeam(id),
-                    HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(
-                    "Equipe não encontrada!",
-                    HttpStatus.NOT_FOUND);
-        }
-    }
 
 }

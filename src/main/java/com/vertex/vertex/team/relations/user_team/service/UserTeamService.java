@@ -22,7 +22,9 @@ public class UserTeamService {
 
     private final UserTeamRepository userTeamRepository;
 
-
+    public void save(UserTeam userTeam){
+        userTeamRepository.save(userTeam);
+    }
 
     public UserTeam findUserTeamByComposeId(Long teamId, Long userId){
         return userTeamRepository.findByTeam_IdAndUser_Id(teamId, userId);
@@ -36,7 +38,6 @@ public class UserTeamService {
             BeanUtils.copyProperties(team, dto);
             teams.add(dto);
         }
-        System.out.println(teams);
         return teams;
     }
 
