@@ -148,6 +148,12 @@ public class UserService {
         return userRepository.save(user);
     }
 
+
+    public User patchUserPassword(UserLoginDTO userLoginDTO){
+        User user = findByEmail(userLoginDTO.getEmail());
+        user.setPassword(userLoginDTO.getPassword());
+        return userRepository.save(user);
+    }
     public List<User> getUsersByGroup(Long groupId){
         List<User> users = new ArrayList<>();
         Group group = groupService.findById(groupId);
