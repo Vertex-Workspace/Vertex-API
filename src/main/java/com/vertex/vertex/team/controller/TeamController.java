@@ -245,7 +245,7 @@ public class TeamController {
         try {
             return new ResponseEntity<>(
                     teamService.getAllTasksByTeam(id),
-                    HttpStatus.OK)
+                    HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(
                     "Equipe não encontrada!",
