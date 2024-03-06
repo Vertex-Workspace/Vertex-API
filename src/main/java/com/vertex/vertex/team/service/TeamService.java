@@ -1,15 +1,10 @@
 package com.vertex.vertex.team.service;
-import com.vertex.vertex.task.service.TaskService;
+import com.vertex.vertex.chat.model.Chat;
+import com.vertex.vertex.chat.service.ChatService;
+import com.vertex.vertex.project.model.DTO.ProjectViewListDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
-
-import com.vertex.vertex.chat.model.Chat;
-import com.vertex.vertex.chat.repository.ChatRepository;
-import com.vertex.vertex.chat.service.ChatService;
-import com.vertex.vertex.task.repository.TaskRepository;
-import com.vertex.vertex.project.model.entity.Project;
-import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.DTO.TeamLinkDTO;
@@ -22,11 +17,8 @@ import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.group.model.exception.GroupNameInvalidException;
 import com.vertex.vertex.team.relations.group.model.exception.GroupNotFoundException;
 import com.vertex.vertex.team.relations.group.service.GroupService;
-import com.vertex.vertex.team.relations.permission.model.entity.Permission;
-import com.vertex.vertex.team.relations.permission.model.enums.TypePermissions;
 import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
-import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.repository.TeamRepository;
@@ -38,7 +30,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -56,34 +47,31 @@ public class TeamService {
     private final GroupService groupService;
     private final PermissionService permissionService;
 
-    public void save(TeamViewListDTO teamViewListDTO) {
+    public Team save(TeamViewListDTO teamViewListDTO) {
         try {
             Team team = new Team();
             if (teamViewListDTO.getId() != null) {
                 //The Team class has many relations, because of that, when we edit the object, we have to edit
                 //just the necessary things in a hard way, as setName...
                 team = findTeamById(teamViewListDTO.getId());
-            }else {
-                team.setName(teamViewListDTO.getName());
-                team.setDescription(teamViewListDTO.getDescription());
-                //After the Romas explanation about Date
-//            team.setCreationDate();
-                String invitationCode = generateInvitationCode();
-                team.setInvitationCode(invitationCode);
-
-                teamRepository.save(team);
-                if (teamViewListDTO.getId() == null) {
-                    UserTeamAssociateDTO userTeamAssociateDTO = new UserTeamAssociateDTO();
-                    userTeamAssociateDTO.setTeam(team);
-                    userTeamAssociateDTO.setUser(teamViewListDTO.getCreator());
-                    userTeamAssociateDTO.setCreator(true);
-                    Team teamWithUserTeam = editUserTeam(userTeamAssociateDTO);
-
-                    createChatForTeam(teamWithUserTeam);
-                }
             }
-
-
+            team.setName(teamViewListDTO.getName());
+            team.setDescription(teamViewListDTO.getDescription());
+            teamRepository.save(team);
+            //After the Romas explanation about Date
+//            team.setCreationDate();
+            String invitationCode = generateInvitationCode();
+            team.setInvitationCode(invitationCode);
+            teamRepository.save(team);
+            if (teamViewListDTO.getId() == null) {
+                UserTeamAssociateDTO userTeamAssociateDTO = new UserTeamAssociateDTO();
+                userTeamAssociateDTO.setTeam(team);
+                userTeamAssociateDTO.setUser(teamViewListDTO.getCreator());
+                userTeamAssociateDTO.setCreator(true);
+                Team teamWithUserTeam = editUserTeam(userTeamAssociateDTO);
+                createChatForTeam(teamWithUserTeam);
+            }
+            return findTeamById(team.getId());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -126,18 +114,16 @@ public class TeamService {
     }
 
 
-    public TeamInfoDTO findById(Long id) {
-        TeamInfoDTO dto = new TeamInfoDTO();
-        Team team;
 
-        if (teamRepository.existsById(id)) {
-            team = teamRepository.findById(id).get();
-            BeanUtils.copyProperties(team, dto);
-            addUsers(dto, team); //adiciona os usuários ao grupo com base no userTeam, para utilização no fe
-            dto.setImage(team.getImage());
-            return dto;
-        }
-        throw new TeamNotFoundException(id);
+    public TeamInfoDTO findById(Long id) {
+        TeamInfoDTO dto = new TeamInfoDTO(); //retorna as informações necessárias para a tela de equipe
+        Team team = findTeamById(id);
+        List<ProjectViewListDTO> projectList = convertTeamProjectsToDto(team);
+        BeanUtils.copyProperties(team, dto);
+        addUsers(dto, team); //adiciona os usuários ao grupo com base no userTeam, para utilização no fe
+        dto.setProjects(projectList);
+        dto.setImage(team.getImage());
+        return dto;
     }
 
     public TeamLinkDTO findInvitationCodeById(Long id) {
@@ -159,31 +145,31 @@ public class TeamService {
 
     public Team editGroup(GroupRegisterDTO groupRegisterDTO) {
         List<UserTeam> userTeams = new ArrayList<>();
-            Group group = new Group();
+        Group group = new Group();
 
-            Team team = findTeamById(groupRegisterDTO.getTeam().getId());
+        Team team = findTeamById(groupRegisterDTO.getTeam().getId());
 
-            if (groupRegisterDTO.getName().length() < 1) {
-                throw new GroupNameInvalidException();
-            }
+        if (groupRegisterDTO.getName().length() < 1) {
+            throw new GroupNameInvalidException();
+        }
 
-            group.setName(groupRegisterDTO.getName());
-            team.getGroups().add(group);
-            group.setTeam(team);
+        group.setName(groupRegisterDTO.getName());
+        team.getGroups().add(group);
+        group.setTeam(team);
 
-            for (int i = 0; i < groupRegisterDTO.getUsers().size(); i++) {
-                User user = userService.findById(groupRegisterDTO.getUsers().get(i).getId());
+        for (int i = 0; i < groupRegisterDTO.getUsers().size(); i++) {
+            User user = userService.findById(groupRegisterDTO.getUsers().get(i).getId());
 
-                for (UserTeam userTeam : team.getUserTeams()) {
-                    if (userTeam.getUser().equals(user)) {
-                        userTeams.add(userTeam);
-                        userTeam.getGroups().add(group);
-                        group.setUserTeams(userTeams);
-                    }
+            for (UserTeam userTeam : team.getUserTeams()) {
+                if (userTeam.getUser().equals(user)) {
+                    userTeams.add(userTeam);
+                    userTeam.getGroups().add(group);
+                    group.setUserTeams(userTeams);
                 }
             }
+        }
 
-            return teamRepository.save(team);
+        return teamRepository.save(team);
     }
 
     public Group editUserIntoGroup(GroupEditUserDTO groupEditUserDTO) {
@@ -247,7 +233,7 @@ public class TeamService {
             }
             teamRepository.save(team);
 
-            UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(team.getId(),user.getId());
+            UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(team.getId(), user.getId());
 
             for (Project project : team.getProjects()) {
                 for (Task task : project.getTasks()) {
@@ -365,6 +351,15 @@ public class TeamService {
         }
     }
 
+    public List<ProjectViewListDTO> convertTeamProjectsToDto(Team team) {
+        List<ProjectViewListDTO> projectList = new ArrayList<>();
+
+        team.getProjects().forEach(p -> {
+            projectList.add(new ProjectViewListDTO(p));
+        });
+
+        return projectList;
+    }
     public List<Task> getAllTasksByTeam(Long id) {
         try {
             Team team = findTeamById(id);

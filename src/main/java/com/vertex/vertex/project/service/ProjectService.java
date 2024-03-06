@@ -1,6 +1,7 @@
 package com.vertex.vertex.project.service;
 
 import com.vertex.vertex.project.model.DTO.ProjectOneDTO;
+import com.vertex.vertex.project.model.DTO.ProjectViewListDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.property.model.ENUM.Color;

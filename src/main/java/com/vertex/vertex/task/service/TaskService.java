@@ -44,6 +44,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @AllArgsConstructor
@@ -72,7 +73,8 @@ public class TaskService {
             Value currentValue = property.getKind().getValue();
             currentValue.setProperty(property);
             currentValue.setTask(task);
-            task.getValues().add(currentValue);
+            if (!Objects.isNull(task.getValues())) task.getValues().add(currentValue);
+            else task.setValues(new ArrayList<>(List.of(currentValue)));
 
             if (property.getKind() == PropertyKind.STATUS) {
                 //Get the first element, how the three are fixed, it always will be TO DO "Não Iniciado"

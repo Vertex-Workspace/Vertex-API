@@ -3,6 +3,7 @@ package com.vertex.vertex.project.model.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.relations.note.model.entity.Note;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
@@ -43,6 +44,9 @@ public class Project {
 
     @OneToMany(mappedBy = "project", orphanRemoval = true)
     private List<Task> tasks;
+
+    @OneToMany(mappedBy = "project", orphanRemoval = true)
+    private List<Note> notes;
 
     @OneToOne
     private Project projectDependency;
