@@ -62,7 +62,6 @@ public class TeamController {
 
     @GetMapping("/invitation/{id}")
     public ResponseEntity<?> findInvitationCodeById(@PathVariable Long id) {
-
         try {
             return new ResponseEntity<>(teamService.findInvitationCodeById(id), HttpStatus.OK);
         } catch (Exception e) {
@@ -249,6 +248,15 @@ public class TeamController {
             return new ResponseEntity<>(
                     "Equipe não encontrada!",
                     HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/{teamId}/creator")
+    public ResponseEntity<?> creatorOfTeam(@PathVariable Long teamId) {
+        try {
+            return new ResponseEntity<>(teamService.teamCreatorId(teamId), HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 

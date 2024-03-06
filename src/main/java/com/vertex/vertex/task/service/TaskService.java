@@ -56,13 +56,13 @@ public class TaskService {
     private final ProjectService projectService;
     private final PropertyService propertyService;
     private final UserTeamService userTeamService;
-    private final TeamService teamService;
 
 
     public Task save(TaskCreateDTO taskCreateDTO) {
         Task task = new Task();
         BeanUtils.copyProperties(taskCreateDTO, task);
         Project project;
+        List<Value> values = new ArrayList<>();
         try {
             project = projectService.findById(taskCreateDTO.getProject().getId());
         } catch (Exception e) {
@@ -73,8 +73,7 @@ public class TaskService {
             Value currentValue = property.getKind().getValue();
             currentValue.setProperty(property);
             currentValue.setTask(task);
-            if (!Objects.isNull(task.getValues())) task.getValues().add(currentValue);
-            else task.setValues(new ArrayList<>(List.of(currentValue)));
+            values.add(currentValue);
 
             if (property.getKind() == PropertyKind.STATUS) {
                 //Get the first element, how the three are fixed, it always will be TO DO "Não Iniciado"
@@ -87,9 +86,10 @@ public class TaskService {
                 currentValue.setValue(property.getDefaultValue());
             }
         }
+        task.setValues(values);
 
         //Add the taskResponsables on task list of taskResponsables
-        task.setCreator(userTeamService.findUserTeamByComposeId(taskCreateDTO.getTeamId(), taskCreateDTO.getCreator().getId()));
+        task.setCreator(userTeamService.findById(taskCreateDTO.getCreator().getId()));
         try{
             for (UserTeam userTeam : project.getTeam().getUserTeams()) {
                 TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
@@ -101,13 +101,14 @@ public class TaskService {
                     task.getTaskResponsables().add(taskResponsable1);
                 }
             }
-        } catch (Exception e){
+        }catch (Exception e){
             e.printStackTrace();
         }
 
         task.setApproveStatus(ApproveStatus.INPROGRESS);
         return taskRepository.save(task);
     }
+
 
     public Task edit(TaskEditDTO taskEditDTO) {
         try {
@@ -130,7 +131,6 @@ public class TaskService {
 
     public void deleteById(Long id) {
         Task task = findById(id);
-        System.out.println("Delete " + task);
         taskRepository.deleteById(id);
     }
 
@@ -161,7 +161,6 @@ public class TaskService {
 
     //verify if the taskresponsable belongs to the task and if it is, save the comment
     public Task saveComment(CommentDTO commentDTO) {
-        System.out.println(commentDTO);
         Task task;
         Comment comment = new Comment();
         TaskResponsable taskResponsable = taskResponsablesRepository.findById(commentDTO.getTaskResponsableID()).get();

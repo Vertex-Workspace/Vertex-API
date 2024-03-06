@@ -1,5 +1,6 @@
 package com.vertex.vertex.user.service;
 
+import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.group.service.GroupService;
@@ -16,7 +17,10 @@ import com.vertex.vertex.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -25,13 +29,18 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 @Data
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class UserService {
 
+    @NonNull
     private final UserRepository userRepository;
+    @NonNull
     private final PersonalizationService personalizationService;
+    @NonNull
     private final GroupService groupService;
+    @Autowired
+    private final TeamService teamService;
 
     public User save(UserDTO userDTO) {
         User user = new User();
@@ -72,10 +81,15 @@ public class UserService {
 
         user.setLocation("Jaraguá do Sul - SC");
         user.setPersonalization(personalizationService.defaultSave(user));
+        userRepository.save(user);
 
-        System.out.println(userDTO.getImage());
-        byte[] data = Base64.getDecoder().decode(userDTO.getImage());
-        user.setImage(data);
+//        System.out.println(userDTO.getImage());
+//        byte[] data = Base64.getDecoder().decode(userDTO.getImage());
+//        user.setImage(data);
+        //creation of the default team
+        TeamViewListDTO teamViewListDTO =
+                new TeamViewListDTO("Equipe " + user.getFirstName(), user, null, "Sua equipe padrão", null, true);
+        teamService.save(teamViewListDTO);
         return userRepository.save(user);
     }
 
