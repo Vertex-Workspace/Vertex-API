@@ -4,6 +4,7 @@ import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.chat.relations.message.Message;
 import com.vertex.vertex.chat.relations.message.MessageRepository;
 import com.vertex.vertex.chat.repository.ChatRepository;
+import com.vertex.vertex.config.handler.ChatWebSocketHandler;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
@@ -11,8 +12,13 @@ import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.WebSocketMessage;
+import org.springframework.web.socket.WebSocketSession;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -22,6 +28,7 @@ public class ChatService {
     private final MessageRepository messageRepository;
     private final UserTeamRepository userTeamRepository;
     private final UserRepository userRepository;
+
 
     public List<Chat> findAll() {
         return chatRepository.findAll();
@@ -57,7 +64,7 @@ public class ChatService {
         User user = userRepository.findById(idUser).get();
         Message message1 = new Message();
         message1.setChat(chat);
-        message1.setUser(user);
+        message1.setUser(user.getFirstName());
         message1.setTime(message.getTime());
         message1.setVisualized(message.isVisualized());
         message1.setContentMessage(message.getContentMessage());

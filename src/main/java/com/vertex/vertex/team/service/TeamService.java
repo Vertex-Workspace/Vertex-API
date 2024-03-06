@@ -68,19 +68,19 @@ public class TeamService {
                 team.setDescription(teamViewListDTO.getDescription());
                 //After the Romas explanation about Date
 //            team.setCreationDate();
-                String invitationCode = generateInvitationCode();
-                team.setInvitationCode(invitationCode);
+            }
+            String invitationCode = generateInvitationCode();
+            team.setInvitationCode(invitationCode);
 
-                teamRepository.save(team);
-                if (teamViewListDTO.getId() == null) {
-                    UserTeamAssociateDTO userTeamAssociateDTO = new UserTeamAssociateDTO();
-                    userTeamAssociateDTO.setTeam(team);
-                    userTeamAssociateDTO.setUser(teamViewListDTO.getCreator());
-                    userTeamAssociateDTO.setCreator(true);
-                    Team teamWithUserTeam = editUserTeam(userTeamAssociateDTO);
+            teamRepository.save(team);
+            if (teamViewListDTO.getId() == null) {
+                UserTeamAssociateDTO userTeamAssociateDTO = new UserTeamAssociateDTO();
+                userTeamAssociateDTO.setTeam(team);
+                userTeamAssociateDTO.setUser(teamViewListDTO.getCreator());
+                userTeamAssociateDTO.setCreator(true);
+                Team teamWithUserTeam = editUserTeam(userTeamAssociateDTO);
 
-                    createChatForTeam(teamWithUserTeam);
-                }
+                createChatForTeam(teamWithUserTeam);
             }
 
 
@@ -249,14 +249,18 @@ public class TeamService {
             }
             teamRepository.save(team);
 
-            UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(team.getId(),user.getId());
+            System.out.println("AAAA");
 
-            for (Project project : team.getProjects()) {
-                for (Task task : project.getTasks()) {
-                    task.getTaskResponsables().add(new TaskResponsable(userTeam1,task));
-                    taskRepository.save(task);
-                }
-            }
+//            UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(team.getId(),user.getId());
+//
+//            for (Project project : team.getProjects()) {
+//                for (Task task : project.getTasks()) {
+//                    task.getTaskResponsables().add(new TaskResponsable(userTeam1,task));
+//                    taskRepository.save(task);
+//                }
+//            }
+
+            System.out.println(team);
 
             return team;
         } catch (Exception e) {
