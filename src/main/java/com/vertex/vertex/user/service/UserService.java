@@ -96,7 +96,6 @@ public class UserService {
         User user = userRepository.findById(userEditionDTO.getId()).get();
 
         BeanUtils.copyProperties(userEditionDTO, user);
-
         return userRepository.save(user);
     }
 
