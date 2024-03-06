@@ -1,15 +1,23 @@
 package com.vertex.vertex.chat.controller;
 
+import com.corundumstudio.socketio.Configuration;
+import com.corundumstudio.socketio.SocketIOServer;
 import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.chat.relations.message.Message;
 import com.vertex.vertex.chat.service.ChatService;
+import com.vertex.vertex.config.handler.ChatWebSocketHandler;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.socket.WebSocketSession;
 
 import java.util.List;
 
@@ -20,10 +28,11 @@ import java.util.List;
 public class ChatController {
 
     private final ChatService chatService;
+
     @PatchMapping("/chat/{idChat}")
     public ResponseEntity<Chat> patchChat(@PathVariable Long idChat, @RequestBody UserTeamAssociateDTO userTeam){
         try {
-        System.out.println(userTeam);
+            System.out.println(userTeam);
             this.chatService.patchUserTeams(idChat,userTeam);
             return new ResponseEntity<>( HttpStatus.CREATED);
         }catch (Exception e){
@@ -44,8 +53,13 @@ public class ChatController {
 
     }
 
+
+//    @MessageMapping("/{idChat}/{idUser}")
+//    @SendTo("/{idChat}")
     @PatchMapping("/messagePatch/{idChat}/{idUser}")
     public ResponseEntity<Chat> patchMessages(@PathVariable Long idChat,@PathVariable Long idUser, @RequestBody Message message){
+
+
         System.out.println("a"+idChat);
         try {
             return new ResponseEntity<>(chatService.patchMessages(idChat,idUser,message),HttpStatus.OK);

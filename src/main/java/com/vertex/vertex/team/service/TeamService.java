@@ -61,9 +61,8 @@ public class TeamService {
             }
             team.setName(teamViewListDTO.getName());
             team.setDescription(teamViewListDTO.getDescription());
-            teamRepository.save(team);
-            //After the Romas explanation about Date
-//            team.setCreationDate();
+ 
+    
             String invitationCode = generateInvitationCode();
             team.setInvitationCode(invitationCode);
             teamRepository.save(team);
@@ -73,6 +72,7 @@ public class TeamService {
                 userTeamAssociateDTO.setUser(teamViewListDTO.getCreator());
                 userTeamAssociateDTO.setCreator(true);
                 Team teamWithUserTeam = editUserTeam(userTeamAssociateDTO);
+
                 createChatForTeam(teamWithUserTeam);
 
                 if(teamViewListDTO.isDefaultTeam()) {
