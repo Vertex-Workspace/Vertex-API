@@ -29,6 +29,7 @@ public class Project {
 
     @Lob
     @Column(columnDefinition = "BLOB")
+    @ToString.Exclude
     private byte[] image;
 
     @ManyToOne

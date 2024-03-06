@@ -31,6 +31,7 @@ public class Team {
     @Lob
     @Column(name = "image",
             columnDefinition = "BLOB")
+    @ToString.Exclude
     private byte[] image;
 
     @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)

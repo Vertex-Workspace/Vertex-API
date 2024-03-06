@@ -39,7 +39,6 @@ public class UserService {
     private final PersonalizationService personalizationService;
     @NonNull
     private final GroupService groupService;
-    @Autowired
     private final TeamService teamService;
 
     public User save(UserDTO userDTO) {
