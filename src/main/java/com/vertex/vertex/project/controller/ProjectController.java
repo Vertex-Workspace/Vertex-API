@@ -104,7 +104,6 @@ public class ProjectController {
             projectService.updateImage(file, projectId);
             return new ResponseEntity<>
                     (HttpStatus.OK);
-
         } catch (Exception e) {
             return new ResponseEntity<>
                     (HttpStatus.CONFLICT);
