@@ -83,9 +83,8 @@ public class UserService {
         user.setPersonalization(personalizationService.defaultSave(user));
         userRepository.save(user);
 
-//        System.out.println(userDTO.getImage());
-//        byte[] data = Base64.getDecoder().decode(userDTO.getImage());
-//        user.setImage(data);
+        byte[] data = Base64.getDecoder().decode(userDTO.getImage());
+        user.setImage(data);
         //creation of the default team
         TeamViewListDTO teamViewListDTO =
                 new TeamViewListDTO("Equipe " + user.getFirstName(), user, null, "Sua equipe padrão", null, true);
