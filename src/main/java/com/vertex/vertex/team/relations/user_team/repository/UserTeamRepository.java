@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserTeamRepository extends JpaRepository<UserTeam, Long> {
@@ -19,4 +20,6 @@ public interface UserTeamRepository extends JpaRepository<UserTeam, Long> {
     List<UserTeam> findAllByUser_Id(Long userID);
 
     UserTeam findByUser(User user);
+
+    UserTeam findByUser_IdAndTeam(Long userId, Team team);
 }

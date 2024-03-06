@@ -7,12 +7,15 @@ import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
+import com.vertex.vertex.user.model.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @AllArgsConstructor
+@NoArgsConstructor
 @Data
 public class TaskCreateDTO {
 
@@ -28,4 +31,12 @@ public class TaskCreateDTO {
     private List<Task> subTasks;
     private List<Review> reviews;
     private List<Value> values;
+
+    public TaskCreateDTO(String name, String description, UserTeam creator, Project project) {
+        this.name = name;
+        this.description = description;
+        this.creator = creator;
+        this.project = project;
+    }
+
 }

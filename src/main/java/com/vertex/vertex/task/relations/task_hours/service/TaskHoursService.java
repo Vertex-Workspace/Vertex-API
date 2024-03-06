@@ -93,8 +93,6 @@ public class TaskHoursService {
     public TimeInTaskDto timeInTask(Long idResponsable) {
         TaskResponsable taskResponsable = taskResponsablesService.findById(idResponsable);
 
-        System.out.println(taskResponsable);
-
         Duration allTimeSpent = Duration.ZERO;
         //sum all the time spent of one taskResponsable
         for (int i = 0; i < taskResponsable.getTaskHours().size(); i++) {

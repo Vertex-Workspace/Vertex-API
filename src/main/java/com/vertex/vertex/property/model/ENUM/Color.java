@@ -3,7 +3,6 @@ package com.vertex.vertex.property.model.ENUM;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-
 public enum Color {
 
     BLUE("#d3e5ef"),

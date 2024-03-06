@@ -38,6 +38,15 @@ public class UserController {
         }
     }
 
+    @PatchMapping("/edit-password")
+    public ResponseEntity<User> patchPassword(@RequestBody UserLoginDTO userLoginDTO) {
+        try {
+            return new ResponseEntity<>(userService.patchUserPassword(userLoginDTO), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
+
     @PutMapping
     public ResponseEntity<User> edit(@RequestBody UserEditionDTO userEditionDTO) {
         try {
