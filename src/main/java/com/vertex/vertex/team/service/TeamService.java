@@ -30,10 +30,12 @@ import com.vertex.vertex.user.repository.UserRepository;
 import com.vertex.vertex.user.service.UserService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
+import org.apache.tomcat.util.http.fileupload.disk.DiskFileItem;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.*;
 
 @Service
@@ -372,9 +374,18 @@ public class TeamService {
     }
 
     public void saveDefaultTasksAndProject(Team team){
+        File file1  = new File("src/main/java/com/vertex/vertex/upload/casaPadrão.png");
+        DiskFileItem fileItem = new DiskFileItem("file", "image/png", false, file1.getName(),
+                (int) file1.length(), file1.getParentFile());
+        fileItem.getOutputStream();
 
-        Project projectDefault1 = new Project("Projeto Pessoal", "Seu projeto pessoal padrão", null, team, team.getCreator());
-        Project projectDefault2 = new Project("Projeto Profissional", "Seu projeto pessoal padrão", null, team, team.getCreator());
+        File file2  = new File("src/main/java/com/vertex/vertex/upload/profissionalPadrao.jfif");
+        DiskFileItem fileItem2 = new DiskFileItem("file", "image/png", false, file2.getName(),
+                (int) file2.length(), file2.getParentFile());
+        fileItem2.getOutputStream();
+
+        Project projectDefault1 = new Project("Projeto Pessoal", "Seu projeto pessoal padrão", fileItem.get(), team, team.getCreator());
+        Project projectDefault2 = new Project("Projeto Profissional", "Seu projeto pessoal padrão", fileItem2.get(), team, team.getCreator());
 
         TaskCreateDTO taskCreateDTO1 = new TaskCreateDTO("Lavar a louça", "Sua tarefa é lavar a louça", team.getCreator(), projectDefault1);
         TaskCreateDTO taskCreateDTO2 = new TaskCreateDTO("Apresentar seminário", "Sua tarefa é lavar a louça", team.getCreator(), projectDefault2);
