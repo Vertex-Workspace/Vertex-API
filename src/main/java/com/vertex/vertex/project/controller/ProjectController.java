@@ -27,8 +27,6 @@ public class ProjectController {
         try {
             return new ResponseEntity<>(projectService.save(project, teamId), HttpStatus.CREATED);
         }catch(Exception e){
-            System.out.println(e.getMessage());
-            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }

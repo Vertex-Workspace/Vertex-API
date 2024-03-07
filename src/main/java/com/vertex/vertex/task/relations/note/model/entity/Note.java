@@ -34,6 +34,7 @@ public class Note {
     @OneToMany
     private List<File> files;
 
+    private String color;
     private Integer height;
     private Integer width;
     private Integer posX;

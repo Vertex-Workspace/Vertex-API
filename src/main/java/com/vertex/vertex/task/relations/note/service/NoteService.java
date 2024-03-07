@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -35,21 +36,17 @@ public class NoteService {
                         (userId, project.getTeam().getId());
 
         Note note = new Note();
+
+        dto.setDescription("Sem descrição.");
 //        note.setProject(project);
         note.setCreator(creator);
-
         BeanUtils.copyProperties(dto, note);
         return noteRepository.save(note);
     }
 
     public Note findById(Long id) {
-        Optional<Note> note = noteRepository.findById(id);
-
-        if (note.isPresent()) {
-            return note.get();
-        }
-
-        throw new EntityNotFoundException();
+        return noteRepository.findById(id)
+                .orElseThrow(EntityNotFoundException::new);
     }
 
     public Note editPatch(NoteEditDTO dto) {
@@ -74,6 +71,13 @@ public class NoteService {
     public List<Note> findAllByProject(Long projectId) {
         return noteRepository
                 .findAllByProject_Id(projectId);
+    }
+
+    public void delete(Long id) {
+        if (noteRepository.existsById(id)) {
+            noteRepository.deleteById(id);
+        }
+        throw new EntityNotFoundException();
     }
 
 }

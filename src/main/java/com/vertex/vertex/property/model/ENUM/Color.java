@@ -12,7 +12,8 @@ public enum Color {
     ORANGE("#fadec9"),
     GREY("#e3e2e0"),
     YELLOW( "#fdecc8"),
-    GREEN("#dbeddb");
+    GREEN("#dbeddb"),
+    WHITE("#ffffff");
 
     private final String hexadecimal;
 
