@@ -46,7 +46,7 @@ public class ProjectService {
         properties.add(new Property(PropertyKind.NUMBER, "Número", false, null, PropertyStatus.VISIBLE));
         properties.add(new Property(PropertyKind.TEXT, "Palavra-Chave", false, null, PropertyStatus.INVISIBLE));
         try {
-            userTeam = userTeamService.findUserTeamByComposeId(teamId, project.getCreator().getId());
+            userTeam = userTeamService.findById(project.getCreator().getId());
             team = userTeam.getTeam();
         } catch (Exception e) {
             throw new EntityNotFoundException("There isn't a team with this id!");
