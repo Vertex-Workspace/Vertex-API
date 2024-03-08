@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,10 +25,29 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
 
-        System.out.println(message.getPayload());
+        System.out.println("PAYLOAD: " + message.getPayload());
 
         for (WebSocketSession webSocketSession : webSocketSessions){
             webSocketSession.sendMessage(message);
+        }
+    }
+
+    @Override
+    protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
+        byte[] imageData = message.getPayload().array();
+
+        System.out.println("ImageData = " + imageData);
+
+        BinaryMessage binaryMessage = new BinaryMessage(imageData);
+
+        System.out.println("BinaryMessage = " + binaryMessage);
+
+        for (WebSocketSession webSocketSession : webSocketSessions){
+            try {
+                webSocketSession.sendMessage(binaryMessage);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

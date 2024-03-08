@@ -1,7 +1,6 @@
 package com.vertex.vertex.chat.controller;
 
-import com.corundumstudio.socketio.Configuration;
-import com.corundumstudio.socketio.SocketIOServer;
+
 import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.chat.relations.message.Message;
 import com.vertex.vertex.chat.service.ChatService;
@@ -17,8 +16,11 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -67,6 +69,19 @@ public class ChatController {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
+    }
+
+    @PatchMapping("patchFile/{chatId}")
+    public void patchFileOnChat(
+            @PathVariable Long chatId,
+            @RequestParam MultipartFile file,
+            @RequestParam String user
+//            @RequestParam LocalDateTime time
+    ) throws IOException {
+        if (file.isEmpty()) {
+            throw new RuntimeException();
+        }
+        chatService.saveFile(chatId,file,user);
     }
 
     @GetMapping()
