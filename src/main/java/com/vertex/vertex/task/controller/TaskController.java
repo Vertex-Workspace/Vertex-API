@@ -54,12 +54,12 @@ public class TaskController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Property> delete(@PathVariable Long id){
+    public ResponseEntity<?> delete(@PathVariable Long id){
         try{
             taskService.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(true, HttpStatus.OK);
         } catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(false, HttpStatus.CONFLICT);
         }
     }
 
@@ -78,6 +78,19 @@ public class TaskController {
             return new ResponseEntity<>(taskService.save(editValueDTO), HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping("/info/{taskID}")
+    public ResponseEntity<?> getTaskInfos(@PathVariable Long taskID) {
+        try
+        {
+            return new ResponseEntity<>
+                    (taskService.getTaskInfos(taskID), HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>
+                    (e.getMessage(),
+                            HttpStatus.NOT_FOUND);
         }
     }
 

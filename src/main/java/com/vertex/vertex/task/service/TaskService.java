@@ -9,6 +9,7 @@ import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.property.service.PropertyService;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.DTO.TaskEditDTO;
+import com.vertex.vertex.task.model.DTO.TaskOpenDTO;
 import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
 import com.vertex.vertex.task.relations.review.model.DTO.SetFinishedTask;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
@@ -279,6 +280,15 @@ public class TaskService {
             throw new EntityNotFoundException();
         }
 
+    }
+
+    public TaskOpenDTO getTaskInfos(Long taskID) {
+        Task task = findById(taskID);
+        String fullName = task.getCreator().getUser().getFirstName() + " " + task.getCreator().getUser().getLastName();
+        return new TaskOpenDTO(task.getProject().getTeam().getName()
+                , task.getProject().getName()
+                , fullName
+                , task.getCreator().getUser().getEmail());
     }
 
     public List<Task> getAllByUser(Long id) {

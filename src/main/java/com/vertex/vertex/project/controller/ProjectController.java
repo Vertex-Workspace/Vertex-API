@@ -80,7 +80,7 @@ public class ProjectController {
     public ResponseEntity<?> existsById(@PathVariable Long id) {
         if (projectService.existsById(id)) {
             return new ResponseEntity<>
-                    (true, HttpStatus.FOUND);
+                    (true, HttpStatus.OK);
         } else {
             return new ResponseEntity<>
                     (false,

@@ -95,14 +95,15 @@ public class TaskHoursService {
 
         Duration allTimeSpent = Duration.ZERO;
         //sum all the time spent of one taskResponsable
-        for (int i = 0; i < taskResponsable.getTaskHours().size(); i++) {
-            LocalTime localTime = taskResponsable.getTaskHours().get(i).getTimeSpent();
+        if(taskResponsable.getTaskHours() != null){
+            for (int i = 0; i < taskResponsable.getTaskHours().size(); i++) {
+                LocalTime localTime = taskResponsable.getTaskHours().get(i).getTimeSpent();
 
-            allTimeSpent = allTimeSpent.plusHours(localTime.getHour())
-                    .plusMinutes(localTime.getMinute())
-                    .plusSeconds(localTime.getSecond());
+                allTimeSpent = allTimeSpent.plusHours(localTime.getHour())
+                        .plusMinutes(localTime.getMinute())
+                        .plusSeconds(localTime.getSecond());
+            }
         }
-    
         boolean working = false;
         for (TaskHour taskHour : taskResponsable.getTaskHours()) {
             working = taskHour.getFinalDate() == null;
