@@ -18,18 +18,19 @@ public class File {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-    private String type;
-
+    private String fileName;
+    private String awsKey;
     @Lob
     @Column(columnDefinition = "BLOB")
-    private byte[] file;
+    private byte[] image;
 
     public File(MultipartFile file)
             throws IOException {
-        this.name = file.getOriginalFilename();
-        this.type = file.getContentType();
-        this.file = file.getBytes();
+
     }
 
+    public File(String fileName, String awsKey) {
+        this.fileName = fileName;
+        this.awsKey = awsKey;
+    }
 }

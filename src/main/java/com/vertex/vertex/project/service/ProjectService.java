@@ -1,7 +1,8 @@
 package com.vertex.vertex.project.service;
 
+import com.vertex.vertex.file.model.File;
+import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.project.model.DTO.ProjectOneDTO;
-import com.vertex.vertex.project.model.DTO.ProjectViewListDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.property.model.ENUM.Color;
@@ -11,11 +12,9 @@ import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.task.relations.value.service.ValueService;
-import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
-import com.vertex.vertex.team.service.TeamService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -33,6 +32,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final UserTeamService userTeamService;
     private final ValueService valueService;
+    private final FileService fileService;
 
     public Project save(Project project, Long teamId) {
         Team team;
@@ -74,16 +74,16 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
-    public void updateImage(MultipartFile file, Long projectId) {
-        try {
-            Project project = findById(projectId);
-            project.setImage(file.getBytes());
-            projectRepository.save(project);
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    public void updateImage(MultipartFile file, Long projectId) {
+//        try {
+//            Project project = findById(projectId);
+//            project.setImage(file.getBytes());
+//            projectRepository.save(project);
+//
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
     public List<Project> findAll(){
         return projectRepository.findAll();

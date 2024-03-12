@@ -1,5 +1,6 @@
 package com.vertex.vertex.project.controller;
 
+import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.property.model.entity.Property;
@@ -20,7 +21,7 @@ import java.util.Set;
 public class ProjectController {
 
     private final ProjectService projectService;
-    private final PropertyService propertyService;
+    private final FileService fileService;
 
     @PostMapping("/{teamId}")
     public ResponseEntity<?> save(@RequestBody Project project , @PathVariable Long teamId){
@@ -101,7 +102,7 @@ public class ProjectController {
             @PathVariable Long projectId,
             @RequestParam MultipartFile file) {
         try {
-            projectService.updateImage(file, projectId);
+            fileService.updateImageProject(file, projectId);
             return new ResponseEntity<>
                     (HttpStatus.OK);
 

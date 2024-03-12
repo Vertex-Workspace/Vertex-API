@@ -36,6 +36,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.*;
 
 @Service
@@ -383,6 +385,7 @@ public class TeamService {
         DiskFileItem fileItem2 = new DiskFileItem("file", "image/png", false, file2.getName(),
                 (int) file2.length(), file2.getParentFile());
         fileItem2.getOutputStream();
+        System.out.println(fileItem);
 
         Project projectDefault1 = new Project("Projeto Pessoal", "Seu projeto pessoal padrão", fileItem.get(), team, team.getCreator());
         Project projectDefault2 = new Project("Projeto Profissional", "Seu projeto pessoal padrão", fileItem2.get(), team, team.getCreator());

@@ -1,6 +1,7 @@
 package com.vertex.vertex.project.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.note.model.entity.Note;
@@ -50,6 +51,9 @@ public class Project {
 
     @OneToOne
     private Project projectDependency;
+
+    @OneToOne
+    private File file;
 
     //create a list of properties if it doesn't exist
     public void addProperty(Property property) {
