@@ -1,9 +1,6 @@
 package com.vertex.vertex.task.controller;
 
-import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.DTO.TaskEditDTO;
-import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
-import com.vertex.vertex.task.relations.review.model.DTO.SetFinishedTask;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.relations.task_responsables.model.DTOs.TaskResponsablesDTO;
@@ -113,23 +110,6 @@ public class TaskController {
     }
 
 
-    @PatchMapping("/review")
-    public ResponseEntity<?> saveReview (@RequestBody ReviewCheck reviewCheck){
-        try{
-            return new ResponseEntity<>(taskService.saveReview(reviewCheck), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        }
-    }
-
-    @PatchMapping("/send-to-review")
-    public ResponseEntity<?> saveToReview (@RequestBody SetFinishedTask setFinishedTask){
-        try{
-            return new ResponseEntity<>(taskService.taskUnderAnalysis(setFinishedTask), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        }
-    }
 
     @PatchMapping("/responsables")
     public ResponseEntity<?> saveResponsables (@RequestBody TaskResponsablesDTO taskResponsable){
