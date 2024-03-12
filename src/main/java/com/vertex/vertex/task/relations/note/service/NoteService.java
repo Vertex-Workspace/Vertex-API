@@ -1,6 +1,8 @@
 package com.vertex.vertex.task.relations.note.service;
 
 import com.vertex.vertex.file.model.File;
+import com.vertex.vertex.file.repository.FileRepository;
+import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.task.relations.note.model.dto.NoteDTO;
@@ -27,6 +29,7 @@ public class NoteService {
     private final NoteRepository noteRepository;
     private final UserTeamService userTeamService;
     private final ProjectService projectService;
+    private final FileService fileService;
     private final ModelMapper modelMapper;
 
     public Note create(NoteDTO dto, Long projectId, Long userId) {
@@ -37,10 +40,14 @@ public class NoteService {
 
         Note note = new Note();
 
+        note.setProject(project);
         dto.setDescription("Sem descrição.");
 //        note.setProject(project);
         note.setCreator(creator);
         BeanUtils.copyProperties(dto, note);
+        if (Objects.isNull(project.getNotes())) project.setNotes(List.of(note));
+        else project.getNotes().add(note);
+
         return noteRepository.save(note);
     }
 
@@ -57,10 +64,12 @@ public class NoteService {
 
     public Note uploadFile(Long noteId, MultipartFile multipartFile) {
         Note note = findById(noteId);
+
         try {
             File file = new File(multipartFile);
-            note.getFiles().add(file);
-
+            fileService.save(file);
+            note.setFiles(List.of(file));
+            System.out.println(note);
         } catch (Exception ignored) {
             throw new RuntimeException();
         }
@@ -68,9 +77,14 @@ public class NoteService {
         return noteRepository.save(note);
     }
 
-    public List<Note> findAllByProject(Long projectId) {
-        return noteRepository
-                .findAllByProject_Id(projectId);
+    public List<NoteDTO> findAllByProject(Long projectId) {
+        List<NoteDTO> list = noteRepository
+                .findAllByProject_Id(projectId)
+                .stream()
+                .map(NoteDTO::new)
+                .toList();
+        System.out.println(list);
+        return list;
     }
 
     public void delete(Long id) {

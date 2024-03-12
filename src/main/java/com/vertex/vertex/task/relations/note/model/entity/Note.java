@@ -1,5 +1,6 @@
 package com.vertex.vertex.task.relations.note.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
@@ -29,6 +30,7 @@ public class Note {
 
     @ManyToOne
     @ToString.Exclude
+    @JsonIgnore
     private Project project;
 
     @OneToMany

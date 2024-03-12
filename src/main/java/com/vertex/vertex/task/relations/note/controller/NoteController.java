@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -19,7 +20,7 @@ public class NoteController {
     private final NoteService noteService;
 
     @GetMapping("/{projectId}")
-    public ResponseEntity<List<Note>> findAllByProject(
+    public ResponseEntity<List<NoteDTO>> findAllByProject(
             Long projectId) {
         return new ResponseEntity<>
                 (noteService.findAllByProject(projectId),
@@ -62,10 +63,22 @@ public class NoteController {
             return new ResponseEntity<>
                     (HttpStatus.OK);
         } catch (Exception e) {
-            System.out.println(e);
-            e.printStackTrace();
             return new ResponseEntity<>
                     (HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PatchMapping("/upload/{id}")
+    public ResponseEntity<?> uploadImage(
+            @PathVariable Long id,
+            @RequestParam MultipartFile file) {
+        try {
+            return new ResponseEntity<>
+                    (noteService.uploadFile(id, file),
+                            HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>
+                    (HttpStatus.CONFLICT);
         }
     }
 

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -23,6 +24,7 @@ public class File {
 
     @Lob
     @Column(columnDefinition = "BLOB")
+    @ToString.Exclude
     private byte[] file;
 
     public File(MultipartFile file)
