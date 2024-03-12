@@ -9,7 +9,10 @@ import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 
 public class ChatWebSocketHandler extends TextWebSocketHandler {
@@ -22,31 +25,29 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         webSocketSessions.add(session);
     }
 
+//    @Override
+//    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+//
+//        System.out.println("PAYLOAD: " + message);
+//
+//        for (WebSocketSession webSocketSession : webSocketSessions) {
+//            webSocketSession.sendMessage(message);
+//        }
+//    }
+
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
 
-        System.out.println("PAYLOAD: " + message.getPayload());
+        System.out.println(message);
 
-        for (WebSocketSession webSocketSession : webSocketSessions){
-            webSocketSession.sendMessage(message);
-        }
-    }
-
-    @Override
-    protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
-        byte[] imageData = message.getPayload().array();
-
-        System.out.println("ImageData = " + imageData);
-
-        BinaryMessage binaryMessage = new BinaryMessage(imageData);
-
-        System.out.println("BinaryMessage = " + binaryMessage);
-
-        for (WebSocketSession webSocketSession : webSocketSessions){
+        byte[] data = Base64.getDecoder().decode((byte[]) message.getPayload());
+        System.out.println(data);
+        System.out.println(Arrays.toString(data));
+        for (WebSocketSession webSocketSession : webSocketSessions) {
             try {
-                webSocketSession.sendMessage(binaryMessage);
+                webSocketSession.sendMessage(new TextMessage(data));
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         }
     }

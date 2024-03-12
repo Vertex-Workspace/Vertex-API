@@ -41,7 +41,7 @@ public class ChatService {
         return chatRepository.save(chat);
     }
 
-    public List<Message> findMessagesByChatId(Long idChat){
+    public List<Message> findMessagesByChatId(Long idChat) {
         return messageRepository.findAllByChat_Id(idChat);
     }
 
@@ -61,7 +61,7 @@ public class ChatService {
         return chatRepository.save(chat);
     }
 
-    public Chat patchMessages(Long idChat,Long idUser, Message message) {
+    public Chat patchMessages(Long idChat, Long idUser, Message message) {
         Chat chat = chatRepository.findById(idChat).get();
         User user = userRepository.findById(idUser).get();
         Message message1 = new Message();
@@ -71,16 +71,15 @@ public class ChatService {
         message1.setVisualized(message.isVisualized());
         message1.setContentMessage(message.getContentMessage());
 
-            message1.setFile(message.getFile());
+        message1.setFile(message.getFile());
 
-        System.out.println("CHAT: " + chat);
-        System.out.println("MESSAGE: " + message);
+
         chat.getMessages().add(message1);
         return chatRepository.save(chat);
     }
 
 
-    public Chat saveFile(Long chatId, MultipartFile file, String user){
+    public Chat saveFile(Long chatId, MultipartFile file, String user) {
 
         Chat chat = chatRepository.findById(chatId).get();
 
