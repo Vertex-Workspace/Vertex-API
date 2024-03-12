@@ -67,7 +67,7 @@ public class ChatService {
         Message message1 = new Message();
         message1.setChat(chat);
         message1.setUser(user.getFirstName());
-        message1.setTime(message.getTime());
+        message1.setTime(LocalDateTime.now());
         message1.setVisualized(message.isVisualized());
         message1.setContentMessage(message.getContentMessage());
 

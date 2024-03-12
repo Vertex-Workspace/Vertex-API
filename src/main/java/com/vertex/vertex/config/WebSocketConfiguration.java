@@ -12,6 +12,7 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.handler.BinaryWebSocketHandler;
+import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
 
 import java.io.IOException;
 import java.util.Base64;
@@ -26,6 +27,16 @@ public class WebSocketConfiguration implements WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(getChatWebSocketHandler(),CHAT_ENDPOINT).setAllowedOrigins("*");
+    }
+
+    @Bean
+    public ServletServerContainerFactoryBean createWebSocketContainer() {
+        ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
+
+        container.setMaxTextMessageBufferSize(99999999);
+//        container.setMaxBinaryMessageBufferSize(900000);
+
+        return container;
     }
 
     @Bean
