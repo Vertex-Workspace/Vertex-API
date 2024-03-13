@@ -277,7 +277,6 @@ public class TeamService {
         for (Team team : teamRepository.findAll()) {
             TeamInfoDTO dto = new TeamInfoDTO();
             BeanUtils.copyProperties(team, dto);
-
             teamHomeDTOS.add(dto);
         }
         return teamHomeDTOS;

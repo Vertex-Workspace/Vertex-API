@@ -1,6 +1,5 @@
 package com.vertex.vertex.chat.controller;
 
-
 import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.chat.relations.message.Message;
 import com.vertex.vertex.chat.service.ChatService;

@@ -1,7 +1,6 @@
 package com.vertex.vertex.project.service;
 
 import com.vertex.vertex.project.model.DTO.ProjectOneDTO;
-import com.vertex.vertex.project.model.DTO.ProjectViewListDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.property.model.ENUM.Color;
@@ -11,11 +10,9 @@ import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.task.relations.value.service.ValueService;
-import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
-import com.vertex.vertex.team.service.TeamService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -37,16 +34,19 @@ public class ProjectService {
     public Project save(Project project, Long teamId) {
         Team team;
         UserTeam userTeam;
+
         //Default properties of a project
         List<Property> properties = new ArrayList<>();
         properties.add(new Property(PropertyKind.STATUS, "Status", true, null, PropertyStatus.FIXED));
         properties.add(new Property(PropertyKind.DATE, "Data", true, null, PropertyStatus.FIXED));
-
         properties.add(new Property(PropertyKind.LIST, "Dificuldade", false, null, PropertyStatus.VISIBLE));
         properties.add(new Property(PropertyKind.NUMBER, "Número", false, null, PropertyStatus.VISIBLE));
         properties.add(new Property(PropertyKind.TEXT, "Palavra-Chave", false, null, PropertyStatus.INVISIBLE));
         try {
-            userTeam = userTeamService.findUserTeamByComposeId(teamId, project.getCreator().getId());
+            userTeam = userTeamService
+                    .findUserTeamByComposeId(
+                            teamId, project.getCreator().getUser().getId());
+
             team = userTeam.getTeam();
         } catch (Exception e) {
             throw new EntityNotFoundException("There isn't a team with this id!");

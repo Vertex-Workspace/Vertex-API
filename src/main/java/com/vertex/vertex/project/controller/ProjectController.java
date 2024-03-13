@@ -27,6 +27,8 @@ public class ProjectController {
         try {
             return new ResponseEntity<>(projectService.save(project, teamId), HttpStatus.CREATED);
         }catch(Exception e){
+            System.out.println(e.getMessage());
+            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
@@ -104,7 +106,6 @@ public class ProjectController {
             projectService.updateImage(file, projectId);
             return new ResponseEntity<>
                     (HttpStatus.OK);
-
         } catch (Exception e) {
             return new ResponseEntity<>
                     (HttpStatus.CONFLICT);
