@@ -72,7 +72,7 @@ public class ChatController {
     }
 
     @PatchMapping("patchFile/{chatId}")
-    public void patchFileOnChat(
+    public Chat patchFileOnChat(
             @PathVariable Long chatId,
             @RequestParam MultipartFile file,
             @RequestParam String user
@@ -81,7 +81,7 @@ public class ChatController {
         if (file.isEmpty()) {
             throw new RuntimeException();
         }
-        chatService.saveFile(chatId,file,user);
+        return chatService.saveFile(chatId,file,user);
     }
 
     @GetMapping()
