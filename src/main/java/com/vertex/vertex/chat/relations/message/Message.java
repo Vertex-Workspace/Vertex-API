@@ -30,6 +30,10 @@ public class Message {
 
     private String user;
 
+    @Lob
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] file;
+
     private String contentMessage;
     private LocalDateTime time;
     private boolean visualized;

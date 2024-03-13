@@ -15,8 +15,11 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -65,6 +68,19 @@ public class ChatController {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
+    }
+
+    @PatchMapping("patchFile/{chatId}")
+    public Chat patchFileOnChat(
+            @PathVariable Long chatId,
+            @RequestParam MultipartFile file,
+            @RequestParam String user
+//            @RequestParam LocalDateTime time
+    ) throws IOException {
+        if (file.isEmpty()) {
+            throw new RuntimeException();
+        }
+        return chatService.saveFile(chatId,file,user);
     }
 
     @GetMapping()

@@ -7,6 +7,6 @@ public enum PropertyListKind {
     DONE(),
 
     VISIBLE(),
-    INVISIBLE();
+    INVISIBLE()
 
 }
