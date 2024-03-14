@@ -10,6 +10,7 @@ import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
+import com.vertex.vertex.task.relations.note.model.dto.NoteDTO;
 import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
@@ -91,14 +92,6 @@ public class ProjectService {
         return projectRepository.findAllByTeam_Id(teamId);
     }
 
-    public boolean existsById(Long projectId){
-        try{
-            findById(projectId);
-            return true;
-        }catch (Exception e){
-            return false;
-        }
-    }
 
     public Boolean existsByIdAndUserBelongs(Long projectId, Long userId) {
         if (projectRepository.existsById(projectId)) {
@@ -109,13 +102,15 @@ public class ProjectService {
     }
 
     public Project findById(Long id){
-        return projectRepository.findById(id).get();
+        return projectRepository.findById(id)
+                .orElseThrow(EntityNotFoundException::new);
     }
 
     public ProjectOneDTO findProjectById(Long id){
         ProjectOneDTO projectOneDTO = new ProjectOneDTO();
-        Project project = projectRepository.findById(id).get();
+        Project project = findById(id);
         BeanUtils.copyProperties(project, projectOneDTO);
+        convertNotesToDto(project, projectOneDTO);
         projectOneDTO.setIdTeam(project.getTeam().getId());
 
         //Remove the tasks that are under analysis of the project task list
@@ -123,6 +118,15 @@ public class ProjectService {
 
 
         return projectOneDTO;
+    }
+
+    private void convertNotesToDto(Project project, ProjectOneDTO dto) {
+        dto.setNotes(
+                project.getNotes()
+                        .stream()
+                        .map(NoteDTO::new)
+                        .toList()
+        );
     }
 
     public void deleteById(Long id){
@@ -133,6 +137,10 @@ public class ProjectService {
         projectRepository.deleteById(id);
     }
 
+
+    public boolean existsById(Long id) {
+        return projectRepository.existsById(id);
+    }
 
     public Project save(Project project){
         return projectRepository.save(project);
