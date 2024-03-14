@@ -21,6 +21,7 @@ public class NoteDTO {
     private Integer posY;
     private Integer descSize;
     private Integer titleSize;
+    private String color;
 
     public NoteDTO(Note note) {
         this.id = note.getId();
@@ -33,6 +34,7 @@ public class NoteDTO {
         this.posY = note.getPosY();
         this.descSize = note.getDescSize();
         this.titleSize = note.getTitleSize();
+        this.color = note.getColor();
     }
 
 }
