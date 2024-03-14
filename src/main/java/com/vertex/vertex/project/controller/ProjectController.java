@@ -27,8 +27,6 @@ public class ProjectController {
         try {
             return new ResponseEntity<>(projectService.save(project, teamId), HttpStatus.CREATED);
         }catch(Exception e){
-            System.out.println(e.getMessage());
-            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
@@ -78,10 +76,12 @@ public class ProjectController {
 
     @GetMapping("/exists/{id}")
     public ResponseEntity<?> existsById(@PathVariable Long id) {
-        if (projectService.existsById(id)) {
+        try {
             return new ResponseEntity<>
-                    (true, HttpStatus.FOUND);
-        } else {
+                    (projectService.existsById(id),
+                            HttpStatus.OK);
+
+        } catch (Exception ignored){
             return new ResponseEntity<>
                     (false,
                             HttpStatus.NOT_FOUND);
