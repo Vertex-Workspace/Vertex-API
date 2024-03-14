@@ -59,5 +59,8 @@ public class User {
 //        return Objects.hash(id, firstName, lastName, email, password, description, location, publicProfile, showCharts);
 //    }
 
+    public String getFullName(){
+        return this.firstName + " " + this.lastName;
+    }
 
 }

@@ -93,17 +93,8 @@ public class TaskHoursService {
     public TimeInTaskDto timeInTask(Long idResponsable) {
         TaskResponsable taskResponsable = taskResponsablesService.findById(idResponsable);
 
-        Duration allTimeSpent = Duration.ZERO;
-        //sum all the time spent of one taskResponsable
-        if(taskResponsable.getTaskHours() != null){
-            for (int i = 0; i < taskResponsable.getTaskHours().size(); i++) {
-                LocalTime localTime = taskResponsable.getTaskHours().get(i).getTimeSpent();
+        Duration allTimeSpent = calculateTimeOnTask(taskResponsable);
 
-                allTimeSpent = allTimeSpent.plusHours(localTime.getHour())
-                        .plusMinutes(localTime.getMinute())
-                        .plusSeconds(localTime.getSecond());
-            }
-        }
         boolean working = false;
         for (TaskHour taskHour : taskResponsable.getTaskHours()) {
             working = taskHour.getFinalDate() == null;
@@ -115,24 +106,16 @@ public class TaskHoursService {
         );
     }
 
+    public Duration calculateTimeOnTask(TaskResponsable taskResponsable){
+        Duration allTimeSpent = Duration.ZERO;
+        //sum all the time spent of one taskResponsable
+        for (TaskHour taskHour : taskResponsable.getTaskHours()) {
 
-    public List<TaskHour> findTaskHoursByTask(Long taskId) {
-        Task task = taskService.findById(taskId);
-        List<TaskHour> taskHours = new ArrayList<>();
-        for (int i = 0; i < task.getTaskResponsables().size(); i++) {
-            taskHours.addAll(task.getTaskResponsables().get(i).getTaskHours());
+            LocalTime localTime = taskHour.getTimeSpent();
+            allTimeSpent = allTimeSpent.plusHours(localTime.getHour())
+                    .plusMinutes(localTime.getMinute())
+                    .plusSeconds(localTime.getSecond());
         }
-        return taskHours;
+        return allTimeSpent;
     }
-
-    public List<TaskHour> findTaskHoursUser(Long userId) {
-        UserTeam userTeam = userTeamService.findById(userId);
-        List<TaskHour> taskHours = new ArrayList<>();
-        for (int i = 0; i < userTeam.getTaskResponsables().size(); i++) {
-            taskHours.addAll(userTeam.getTaskResponsables().get(i).getTaskHours());
-        }
-        return taskHours;
-    }
-
-
 }

@@ -68,7 +68,7 @@ public class TaskService {
             if (property.getKind() == PropertyKind.DATE) {
                 ((ValueDate) currentValue).setValue();
             }
-            if(property.getKind() == PropertyKind.TEXT){
+            if (property.getKind() == PropertyKind.TEXT) {
                 currentValue.setValue(property.getDefaultValue());
             }
         }
@@ -76,7 +76,7 @@ public class TaskService {
 
         //Add the taskResponsables on task list of taskResponsables
         task.setCreator(userTeamService.findById(taskCreateDTO.getCreator().getId()));
-        try{
+        try {
             for (UserTeam userTeam : project.getTeam().getUserTeams()) {
                 TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
                 if (task.getTaskResponsables() == null) {
@@ -87,7 +87,7 @@ public class TaskService {
                     task.getTaskResponsables().add(taskResponsable1);
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -169,7 +169,7 @@ public class TaskService {
         }
     }
 
-    public Boolean deleteComment(Long taskID, Long commentID){
+    public Boolean deleteComment(Long taskID, Long commentID) {
         Task task = findById(taskID);
         for (Comment comment : task.getComments()) {
             if (comment.getId().equals(commentID)) {
@@ -256,4 +256,7 @@ public class TaskService {
             throw new RuntimeException();
         }
     }
+
+
+
 }
