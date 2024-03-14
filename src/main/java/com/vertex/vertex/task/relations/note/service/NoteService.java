@@ -38,16 +38,7 @@ public class NoteService {
                 .findUserTeamByComposeId
                         (userId, project.getTeam().getId());
 
-        Note note = new Note();
-
-        note.setProject(project);
-        dto.setDescription("Sem descrição.");
-//        note.setProject(project);
-        note.setCreator(creator);
-        BeanUtils.copyProperties(dto, note);
-        if (Objects.isNull(project.getNotes())) project.setNotes(List.of(note));
-        else project.getNotes().add(note);
-
+        Note note = new Note(project, creator, dto);
         return noteRepository.save(note);
     }
 
@@ -63,35 +54,38 @@ public class NoteService {
     }
 
     public Note uploadFile(Long noteId, MultipartFile multipartFile) {
-        Note note = findById(noteId);
-
         try {
-            File file = new File(multipartFile);
-            fileService.save(file);
-            note.setFiles(List.of(file));
-            System.out.println(note);
+            Note note = findById(noteId);
+            File file = new File(multipartFile, note);
+            fileService.save(file, note);
+            return noteRepository.save(note);
+
         } catch (Exception ignored) {
             throw new RuntimeException();
         }
-
-        return noteRepository.save(note);
     }
 
     public List<NoteDTO> findAllByProject(Long projectId) {
-        List<NoteDTO> list = noteRepository
+        return noteRepository
                 .findAllByProject_Id(projectId)
                 .stream()
                 .map(NoteDTO::new)
                 .toList();
-        System.out.println(list);
-        return list;
     }
 
     public void delete(Long id) {
-        if (noteRepository.existsById(id)) {
-            noteRepository.deleteById(id);
+        if (!noteRepository.existsById(id)) {
+            throw new EntityNotFoundException();
         }
-        throw new EntityNotFoundException();
+        noteRepository.deleteById(id);
+    }
+
+    public Note removeImage(Long noteId, Long fileId) {
+        Note note = findById(noteId);
+        File file = fileService.findById(fileId);
+        fileService.delete(fileId);
+        note.getFiles().remove(file);
+        return noteRepository.save(note);
     }
 
 }

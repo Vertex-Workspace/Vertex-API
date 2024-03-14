@@ -76,10 +76,12 @@ public class ProjectController {
 
     @GetMapping("/exists/{id}")
     public ResponseEntity<?> existsById(@PathVariable Long id) {
-        if (projectService.existsById(id)) {
+        try {
             return new ResponseEntity<>
-                    (true, HttpStatus.OK);
-        } else {
+                    (projectService.existsById(id),
+                            HttpStatus.OK);
+
+        } catch (Exception ignored){
             return new ResponseEntity<>
                     (false,
                             HttpStatus.NOT_FOUND);

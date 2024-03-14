@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 public class NoteDTO {
 
+    private Long id;
     private String title;
     private String description;
     private List<File> files;
@@ -20,6 +21,7 @@ public class NoteDTO {
     private Integer posY;
 
     public NoteDTO(Note note) {
+        this.id = note.getId();
         this.title = note.getTitle();
         this.description = note.getDescription();
         this.files = note.getFiles();

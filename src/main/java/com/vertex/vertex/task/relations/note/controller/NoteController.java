@@ -82,4 +82,19 @@ public class NoteController {
         }
     }
 
+    @DeleteMapping("/remove/{noteId}/{fileId}")
+    public ResponseEntity<?> removeImage(
+            @PathVariable Long noteId,
+            @PathVariable Long fileId
+    ) {
+        try {
+            return new ResponseEntity<>
+                    (noteService.removeImage(noteId, fileId),
+                            HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>
+                    (HttpStatus.NOT_FOUND);
+        }
+    }
+
 }

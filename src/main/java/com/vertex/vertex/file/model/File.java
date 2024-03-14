@@ -1,5 +1,10 @@
 package com.vertex.vertex.file.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.vertex.vertex.task.relations.note.model.entity.Note;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,11 +32,17 @@ public class File {
     @ToString.Exclude
     private byte[] file;
 
-    public File(MultipartFile file)
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JsonIgnore
+    @ToString.Exclude
+    private Note note;
+
+    public File(MultipartFile file, Note note)
             throws IOException {
         this.name = file.getOriginalFilename();
         this.type = file.getContentType();
         this.file = file.getBytes();
+        this.note = note;
     }
 
 }

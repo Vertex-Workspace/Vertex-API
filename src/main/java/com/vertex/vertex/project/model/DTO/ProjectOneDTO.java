@@ -22,5 +22,5 @@ public class ProjectOneDTO {
     private List<Property> properties;
     private UserTeam creator;
     private List<Task> tasks;
-    private List<Note> notes;
+    private List<NoteDTO> notes;
 }
