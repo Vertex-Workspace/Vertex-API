@@ -19,6 +19,8 @@ public class NoteDTO {
     private Integer width;
     private Integer posX;
     private Integer posY;
+    private Integer descSize;
+    private Integer titleSize;
 
     public NoteDTO(Note note) {
         this.id = note.getId();
@@ -29,6 +31,8 @@ public class NoteDTO {
         this.width = note.getWidth();
         this.posX = note.getPosX();
         this.posY = note.getPosY();
+        this.descSize = note.getDescSize();
+        this.titleSize = note.getTitleSize();
     }
 
 }

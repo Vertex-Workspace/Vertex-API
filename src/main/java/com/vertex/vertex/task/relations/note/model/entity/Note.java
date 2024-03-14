@@ -47,6 +47,8 @@ public class Note {
     private Integer width;
     private Integer posX;
     private Integer posY;
+    private Integer descSize;
+    private Integer titleSize;
 
     public Note(Project project,
                 UserTeam creator,

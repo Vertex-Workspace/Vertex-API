@@ -111,7 +111,6 @@ public class ProjectService {
         BeanUtils.copyProperties(project, projectOneDTO);
         convertNotesToDto(project, projectOneDTO);
         projectOneDTO.setIdTeam(project.getTeam().getId());
-        System.out.println(projectOneDTO.getNotes());
         return projectOneDTO;
     }
 
