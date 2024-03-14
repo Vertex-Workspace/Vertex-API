@@ -59,9 +59,8 @@ public class ChatController {
 //    @MessageMapping("/{idChat}/{idUser}")
 //    @SendTo("/{idChat}")
     @PatchMapping("/messagePatch/{idChat}/{idUser}")
-    public ResponseEntity<Chat> patchMessages(@PathVariable Long idChat,@PathVariable Long idUser, @RequestBody Message message){
-
-
+    public ResponseEntity<Chat> patchMessages(@PathVariable Long idChat,@PathVariable Long idUser,
+                                              @RequestBody Message message){
         System.out.println("a"+idChat);
         try {
             return new ResponseEntity<>(chatService.patchMessages(idChat,idUser,message),HttpStatus.OK);

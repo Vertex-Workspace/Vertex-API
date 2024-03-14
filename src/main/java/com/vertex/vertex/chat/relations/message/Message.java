@@ -34,6 +34,10 @@ public class Message {
     @Column(columnDefinition = "LONGBLOB")
     private byte[] file;
 
+    @Lob
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] imageUser;
+
     private String contentMessage;
     private LocalDateTime time;
     private boolean visualized;
