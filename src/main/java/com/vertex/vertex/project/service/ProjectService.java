@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -62,6 +63,9 @@ public class ProjectService {
         project.setCreator(userTeam);
         project.setTeam(team);
         projectRepository.save(project);
+        if(!collaborators.contains(project.getCreator())) {
+            collaborators.add(project.getCreator());
+        }
         save(project, teamId);
     }
 
@@ -122,6 +126,10 @@ public class ProjectService {
     }
 
     public void updateImage(MultipartFile file, Long projectId) throws IOException {
+        System.out.println(Arrays.toString(file.getBytes()));
+        Project project = projectRepository.findById(projectId).get();
+        project.setImage(file.getBytes());
+        projectRepository.save(project);
         fileService.updateImageProject(file, projectId);
     }
 
@@ -164,6 +172,21 @@ public class ProjectService {
         propertiesList.add(new PropertyList("Pausado", Color.BLUE, property, PropertyListKind.DOING, false));
         propertiesList.add(new PropertyList("Concluído", Color.GREEN, property, PropertyListKind.DONE, true));
         return propertiesList;
+    }
+
+    public List<Project> getAllByTeamAndCollaborators(Long teamId , Long userId){
+        List<Project> projects = new ArrayList<>();
+        UserTeam userTeam = userTeamService.findUserTeamByComposeId(teamId, userId);
+        Team team = userTeam.getTeam();
+
+         for(Project project : team.getProjects()){
+             for(UserTeam userTeamFor : project.getCollaborators()){
+                 if(userTeam.equals(userTeamFor)){
+                     projects.add(project);
+                 }
+             }
+         }
+         return projects;
     }
 
 }

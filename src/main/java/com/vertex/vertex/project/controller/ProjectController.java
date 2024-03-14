@@ -123,4 +123,13 @@ public class ProjectController {
         }
     }
 
+    @GetMapping("/{teamId}/{userId}")
+    public ResponseEntity<?> getProjectsByCollaborators(@PathVariable Long teamId, @PathVariable Long userId){
+        try {
+            return new ResponseEntity<>(projectService.getAllByTeamAndCollaborators(teamId, userId), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
+
 }

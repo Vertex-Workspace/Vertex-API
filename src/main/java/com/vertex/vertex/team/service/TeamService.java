@@ -388,11 +388,15 @@ public class TeamService {
         fileItem2.getOutputStream();
         System.out.println(fileItem);
 
-        Project projectDefault1 = new Project("Projeto Pessoal", "Seu projeto pessoal padrão", fileItem.get(), team, team.getCreator());
-        Project projectDefault2 = new Project("Projeto Profissional", "Seu projeto pessoal padrão", fileItem2.get(), team, team.getCreator());
+        Project projectDefault1 =
+                new Project("Projeto Pessoal", "Seu projeto pessoal padrão", fileItem.get(), team, team.getCreator(), List.of(team.getCreator()));
+        Project projectDefault2 =
+                new Project("Projeto Profissional", "Seu projeto pessoal padrão", fileItem2.get(), team, team.getCreator(),  List.of(team.getCreator()));
 
-        TaskCreateDTO taskCreateDTO1 = new TaskCreateDTO("Lavar a louça", "Sua tarefa é lavar a louça", team.getCreator(), projectDefault1);
-        TaskCreateDTO taskCreateDTO2 = new TaskCreateDTO("Apresentar seminário", "Sua tarefa é lavar a louça", team.getCreator(), projectDefault2);
+        TaskCreateDTO taskCreateDTO1 =
+                new TaskCreateDTO("Lavar a louça", "Sua tarefa é lavar a louça", team.getCreator(), projectDefault1);
+        TaskCreateDTO taskCreateDTO2 =
+                new TaskCreateDTO("Apresentar seminário", "Sua tarefa é lavar a louça", team.getCreator(), projectDefault2);
 
         projectService.save(projectDefault1, team.getId());
         projectService.save(projectDefault2, team.getId());

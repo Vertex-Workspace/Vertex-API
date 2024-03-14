@@ -68,11 +68,12 @@ public class Project {
         }
     }
 
-    public Project(String name, String description, byte[] image, Team team, UserTeam creator) {
+    public Project(String name, String description, byte[] image, Team team, UserTeam creator, List<UserTeam>collaborators) {
         this.name = name;
         this.description = description;
         this.image = image;
         this.team = team;
         this.creator = creator;
+        this.collaborators = collaborators;
     }
 }

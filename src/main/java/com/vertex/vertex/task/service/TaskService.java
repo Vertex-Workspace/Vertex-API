@@ -65,6 +65,7 @@ public class TaskService {
         List<Value> values = new ArrayList<>();
         try {
             project = projectService.findById(taskCreateDTO.getProject().getId());
+            System.out.println(project.getCollaborators());
         } catch (Exception e) {
             throw new RuntimeException("There isn't a project with this id is not linked with the current team!");
         }
@@ -91,7 +92,7 @@ public class TaskService {
         //Add the taskResponsables on task list of taskResponsables
         task.setCreator(userTeamService.findById(taskCreateDTO.getCreator().getId()));
         try{
-            for (UserTeam userTeam : project.getTeam().getUserTeams()) {
+            for (UserTeam userTeam : project.getCollaborators()) {
                 TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
                 if (task.getTaskResponsables() == null) {
                     ArrayList<TaskResponsable> listaParaFuncionarEstaCoisaBemLegal = new ArrayList<>();
