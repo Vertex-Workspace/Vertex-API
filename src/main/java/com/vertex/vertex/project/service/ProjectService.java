@@ -9,6 +9,7 @@ import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
+import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.note.model.dto.NoteDTO;
 import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.team.model.entity.Team;
@@ -111,6 +112,11 @@ public class ProjectService {
         BeanUtils.copyProperties(project, projectOneDTO);
         convertNotesToDto(project, projectOneDTO);
         projectOneDTO.setIdTeam(project.getTeam().getId());
+
+        //Remove the tasks that are under analysis of the project task list
+        projectOneDTO.setTasks(project.getTasks().stream().filter(task -> task.getApproveStatus() != ApproveStatus.UNDERANALYSIS).toList());
+
+
         return projectOneDTO;
     }
 
@@ -130,6 +136,7 @@ public class ProjectService {
 
         projectRepository.deleteById(id);
     }
+
 
     public boolean existsById(Long id) {
         return projectRepository.existsById(id);

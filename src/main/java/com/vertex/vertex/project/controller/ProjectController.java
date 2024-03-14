@@ -78,10 +78,8 @@ public class ProjectController {
     public ResponseEntity<?> existsById(@PathVariable Long id) {
         try {
             return new ResponseEntity<>
-                    (projectService.existsById(id),
-                            HttpStatus.OK);
-
-        } catch (Exception ignored){
+                    (true, HttpStatus.OK);
+        } catch (Exception e){
             return new ResponseEntity<>
                     (false,
                             HttpStatus.NOT_FOUND);
