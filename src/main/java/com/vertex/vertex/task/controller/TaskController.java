@@ -1,9 +1,6 @@
 package com.vertex.vertex.task.controller;
 
-import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.DTO.TaskEditDTO;
-import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
-import com.vertex.vertex.task.relations.review.model.DTO.SetFinishedTask;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.relations.task_responsables.model.DTOs.TaskResponsablesDTO;
@@ -54,12 +51,12 @@ public class TaskController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Property> delete(@PathVariable Long id){
+    public ResponseEntity<?> delete(@PathVariable Long id){
         try{
             taskService.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(true, HttpStatus.OK);
         } catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(false, HttpStatus.CONFLICT);
         }
     }
 
@@ -78,6 +75,19 @@ public class TaskController {
             return new ResponseEntity<>(taskService.save(editValueDTO), HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping("/info/{taskID}")
+    public ResponseEntity<?> getTaskInfos(@PathVariable Long taskID) {
+        try
+        {
+            return new ResponseEntity<>
+                    (taskService.getTaskInfos(taskID), HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>
+                    (e.getMessage(),
+                            HttpStatus.NOT_FOUND);
         }
     }
 
@@ -100,23 +110,6 @@ public class TaskController {
     }
 
 
-    @PatchMapping("/review")
-    public ResponseEntity<?> saveReview (@RequestBody ReviewCheck reviewCheck){
-        try{
-            return new ResponseEntity<>(taskService.saveReview(reviewCheck), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        }
-    }
-
-    @PatchMapping("/send-to-review")
-    public ResponseEntity<?> saveToReview (@RequestBody SetFinishedTask setFinishedTask){
-        try{
-            return new ResponseEntity<>(taskService.taskUnderAnalysis(setFinishedTask), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        }
-    }
 
     @PatchMapping("/responsables")
     public ResponseEntity<?> saveResponsables (@RequestBody TaskResponsablesDTO taskResponsable){
@@ -156,6 +149,8 @@ public class TaskController {
             );
         }
     }
+
+
 
 
 }

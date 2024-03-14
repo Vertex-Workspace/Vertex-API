@@ -76,10 +76,10 @@ public class ProjectController {
 
     @GetMapping("/exists/{id}")
     public ResponseEntity<?> existsById(@PathVariable Long id) {
-        if (projectService.existsById(id)) {
+        try {
             return new ResponseEntity<>
-                    (true, HttpStatus.FOUND);
-        } else {
+                    (true, HttpStatus.OK);
+        } catch (Exception e){
             return new ResponseEntity<>
                     (false,
                             HttpStatus.NOT_FOUND);
@@ -104,7 +104,6 @@ public class ProjectController {
             projectService.updateImage(file, projectId);
             return new ResponseEntity<>
                     (HttpStatus.OK);
-
         } catch (Exception e) {
             return new ResponseEntity<>
                     (HttpStatus.CONFLICT);

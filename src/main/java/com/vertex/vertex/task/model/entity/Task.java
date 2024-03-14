@@ -52,7 +52,7 @@ public class  Task {
     @OneToMany
     private List<Task> subTasks;
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "task", orphanRemoval = true)
     private List<Review> reviews;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "task", orphanRemoval = true)
@@ -61,7 +61,6 @@ public class  Task {
     @Enumerated(value = EnumType.STRING)
     private ApproveStatus approveStatus;
 
-    private String finishDescription;
 
 
 

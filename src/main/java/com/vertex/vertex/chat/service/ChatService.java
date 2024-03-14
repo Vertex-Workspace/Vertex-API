@@ -15,10 +15,12 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -39,7 +41,7 @@ public class ChatService {
         return chatRepository.save(chat);
     }
 
-    public List<Message> findMessagesByChatId(Long idChat){
+    public List<Message> findMessagesByChatId(Long idChat) {
         return messageRepository.findAllByChat_Id(idChat);
     }
 
@@ -59,21 +61,43 @@ public class ChatService {
         return chatRepository.save(chat);
     }
 
-    public Chat patchMessages(Long idChat,Long idUser, Message message) {
+    public Chat patchMessages(Long idChat, Long idUser, Message message) {
         Chat chat = chatRepository.findById(idChat).get();
         User user = userRepository.findById(idUser).get();
         Message message1 = new Message();
         message1.setChat(chat);
         message1.setUser(user.getFirstName());
-        message1.setTime(message.getTime());
+        message1.setTime(LocalDateTime.now());
         message1.setVisualized(message.isVisualized());
         message1.setContentMessage(message.getContentMessage());
-        System.out.println("CHAT: " + chat);
-        System.out.println("MESSAGE: " + message);
+
+        message1.setFile(message.getFile());
+
+
         chat.getMessages().add(message1);
-        System.out.println("CHAT - MESSAGES: " + chat.getMessages());
         return chatRepository.save(chat);
     }
 
 
+    public Chat saveFile(Long chatId, MultipartFile file, String user) {
+
+        Chat chat = chatRepository.findById(chatId).get();
+
+        Message message = new Message();
+        message.setChat(chat);
+        message.setUser(user);
+        message.setTime(LocalDateTime.now());
+        message.setVisualized(false);
+
+        try {
+            message.setFile(file.getBytes());
+//            System.out.println(message);
+            chat.getMessages().add(message);
+            return chatRepository.save(chat);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
 }

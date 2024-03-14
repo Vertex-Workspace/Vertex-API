@@ -90,7 +90,6 @@ public class UserController {
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticate(
             @RequestBody UserLoginDTO dto) {
-
         try {
             return new ResponseEntity<>
                     (userService.authenticate(dto),

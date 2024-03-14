@@ -128,7 +128,7 @@ public class TeamService {
         Team team = findTeamById(id);
         List<ProjectViewListDTO> projectList = convertTeamProjectsToDto(team);
         BeanUtils.copyProperties(team, dto);
-        addUsers(dto, team); //adiciona os usuários ao grupo com base no userTeam, para utilização no fe
+        dto.setUsers(getUsersByTeam(dto.getId())); //adiciona os usuários ao grupo com base no userTeam, para utilização no fe
         dto.setProjects(projectList);
         dto.setImage(team.getImage());
         return dto;
@@ -277,7 +277,6 @@ public class TeamService {
         for (Team team : teamRepository.findAll()) {
             TeamInfoDTO dto = new TeamInfoDTO();
             BeanUtils.copyProperties(team, dto);
-
             teamHomeDTOS.add(dto);
         }
         return teamHomeDTOS;
@@ -298,12 +297,12 @@ public class TeamService {
     public Boolean existsByIdAndUserBelongs(Long teamId, Long userId) {
         if (teamRepository.existsById(teamId)) {
             Team team = findTeamById(teamId);
-            return findUserInTeam(team, userId);
+            return userExistsInTeam(team, userId);
         }
         return false;
     }
 
-    public Boolean findUserInTeam(Team team, Long userId) {
+    public Boolean userExistsInTeam(Team team, Long userId) {
         return team.getUserTeams().stream()
                 .anyMatch(ut ->
                         Objects.equals(ut.getUser().getId(), userId)
@@ -328,25 +327,12 @@ public class TeamService {
         }
     }
 
-    public void addUsers(TeamInfoDTO dto, Team team) {
-        List<User> users = new ArrayList<>();
-
-        team.getUserTeams()
-                .forEach(ut -> {
-                    users.add(ut.getUser());
-                });
-
-        dto.setUsers(users);
-    }
-
     public List<User> getUsersByTeam(Long teamId) {
-        List<User> users = new ArrayList<>();
-        Team team = findTeamById(teamId);
-
-        for (int i = 0; i < team.getUserTeams().size(); i++) {
-            users.add(team.getUserTeams().get(i).getUser());
-        }
-        return users;
+        return findTeamById(teamId)
+                .getUserTeams()
+                .stream()
+                .map(UserTeam::getUser)
+                .toList();
     }
 
     public void deleteUserTeam(Long teamId, Long userId) {
@@ -387,25 +373,18 @@ public class TeamService {
     }
 
     public List<ProjectViewListDTO> convertTeamProjectsToDto(Team team) {
-        List<ProjectViewListDTO> projectList = new ArrayList<>();
-
-        team.getProjects().forEach(p -> {
-            projectList.add(new ProjectViewListDTO(p));
-        });
-
-        return projectList;
+        return team.getProjects()
+                .stream()
+                .map(ProjectViewListDTO::new)
+                .toList();
     }
     public List<Task> getAllTasksByTeam(Long id) {
         try {
-            Team team = findTeamById(id);
-            List<Task> taskList = new ArrayList<>();
-
-            team.getProjects()
-                    .forEach(p -> {
-                        taskList.addAll(p.getTasks());
-                    });
-
-            return taskList;
+            return findTeamById(id)
+                    .getProjects()
+                    .stream()
+                    .flatMap(p -> p.getTasks().stream())
+                    .toList();
 
         } catch (Exception e) {
             throw new RuntimeException();

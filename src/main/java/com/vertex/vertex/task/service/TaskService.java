@@ -3,14 +3,11 @@ package com.vertex.vertex.task.service;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
-import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.Property;
-import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.property.service.PropertyService;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.DTO.TaskEditDTO;
-import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
-import com.vertex.vertex.task.relations.review.model.DTO.SetFinishedTask;
+import com.vertex.vertex.task.model.DTO.TaskOpenDTO;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.relations.task_responsables.model.DTOs.TaskResponsablesDTO;
@@ -18,33 +15,22 @@ import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.model.exceptions.TaskDoesNotExistException;
 import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
-import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.value.model.entity.ValueDate;
-import com.vertex.vertex.task.relations.value.model.entity.ValueNumber;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
-import com.vertex.vertex.team.model.entity.Team;
-import com.vertex.vertex.team.relations.permission.model.entity.Permission;
-import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
-import com.vertex.vertex.team.service.TeamService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
-import javax.mail.*;
-import javax.mail.internet.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 @Data
 @AllArgsConstructor
@@ -82,7 +68,7 @@ public class TaskService {
             if (property.getKind() == PropertyKind.DATE) {
                 ((ValueDate) currentValue).setValue();
             }
-            if(property.getKind() == PropertyKind.TEXT){
+            if (property.getKind() == PropertyKind.TEXT) {
                 currentValue.setValue(property.getDefaultValue());
             }
         }
@@ -90,7 +76,7 @@ public class TaskService {
 
         //Add the taskResponsables on task list of taskResponsables
         task.setCreator(userTeamService.findById(taskCreateDTO.getCreator().getId()));
-        try{
+        try {
             for (UserTeam userTeam : project.getTeam().getUserTeams()) {
                 TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
                 if (task.getTaskResponsables() == null) {
@@ -101,7 +87,7 @@ public class TaskService {
                     task.getTaskResponsables().add(taskResponsable1);
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -183,7 +169,7 @@ public class TaskService {
         }
     }
 
-    public Boolean deleteComment(Long taskID, Long commentID){
+    public Boolean deleteComment(Long taskID, Long commentID) {
         Task task = findById(taskID);
         for (Comment comment : task.getComments()) {
             if (comment.getId().equals(commentID)) {
@@ -232,43 +218,6 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    public Task saveReview(ReviewCheck reviewCheck) {
-        Task task = findById(reviewCheck.getTask().getId());
-        Review review;
-        TaskResponsable taskResponsable = taskResponsablesRepository.findById(reviewCheck.getReviewer().getId()).get();
-
-        if (reviewCheck.getId() != null) {
-            for (Review reviewFor : task.getReviews()) {
-                if (reviewFor.getId().equals(reviewCheck.getId())) {
-                    review = reviewFor;
-                    task.getReviews().remove(review);
-                    return save(task);
-                }
-            }
-        } else {
-            review = new Review();
-            if (task.getCreator().getId().equals(taskResponsable.getId())) {
-                BeanUtils.copyProperties(reviewCheck, review);
-                task.getReviews().add(review);
-                task.setApproveStatus(reviewCheck.getApproveStatus());
-            } else {
-                throw new RuntimeException("O usuário não é o criador da tarefa");
-            }
-        }
-        return save(task);
-    }
-
-    public Task taskUnderAnalysis(SetFinishedTask setFinishedTask) {
-        Task task = findById(setFinishedTask.getTask().getId());
-        if (task.getApproveStatus() == ApproveStatus.DISAPPROVED ||
-                task.getApproveStatus() == ApproveStatus.INPROGRESS) {
-            task.setApproveStatus(ApproveStatus.UNDERANALYSIS);
-            task.setFinishDescription(setFinishedTask.getFinishDescription());
-        } else if (task.getApproveStatus() == ApproveStatus.APPROVED) {
-            throw new RuntimeException("A tarefa já foi aprovada. Ela não pode voltar para análise");
-        }
-        return save(task);
-    }
 
     public List<Task> getAllByProject(Long id) {
         try {
@@ -279,6 +228,15 @@ public class TaskService {
             throw new EntityNotFoundException();
         }
 
+    }
+
+    public TaskOpenDTO getTaskInfos(Long taskID) {
+        Task task = findById(taskID);
+        String fullName = task.getCreator().getUser().getFirstName() + " " + task.getCreator().getUser().getLastName();
+        return new TaskOpenDTO(task.getProject().getTeam().getName()
+                , task.getProject().getName()
+                , fullName
+                , task.getCreator().getUser().getEmail());
     }
 
     public List<Task> getAllByUser(Long id) {
@@ -298,4 +256,7 @@ public class TaskService {
             throw new RuntimeException();
         }
     }
+
+
+
 }
