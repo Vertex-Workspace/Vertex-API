@@ -2,9 +2,11 @@ package com.vertex.vertex.task.relations.review.service;
 
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
+import com.vertex.vertex.task.model.DTO.TaskWaitingToReviewDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
 import com.vertex.vertex.task.relations.review.model.DTO.ReviewHoursDTO;
+import com.vertex.vertex.task.relations.review.model.DTO.ReviewSenderDTO;
 import com.vertex.vertex.task.relations.review.model.DTO.SendToReviewDTO;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
@@ -21,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -72,9 +75,10 @@ public class ReviewService {
                     review.setUserThatSentReview(taskResponsable);
                 }
             });
-            if(review.getUserThatSentReview() == null){
+            if (review.getUserThatSentReview() == null) {
                 throw new RuntimeException("O usuário que enviou a revisão não é um responsável da tarefa");
             }
+            review.setApproveStatus(ApproveStatus.UNDERANALYSIS);
             //Save the initial Review
             reviewRepository.save(review);
 
@@ -85,7 +89,9 @@ public class ReviewService {
         throw new RuntimeException("A tarefa já foi aprovada. Ela não pode voltar para análise");
     }
 
-    public List<Task> getTasksToReview(Long userID, Long projectID) {
+    public List<TaskWaitingToReviewDTO> getTasksToReview(Long userID, Long projectID) {
+        List<TaskWaitingToReviewDTO> tasks = new ArrayList<>();
+
         Project project = projectService.findById(projectID);
 
         UserTeam loggedUser = project.getTeam().getUserTeams()
@@ -94,28 +100,45 @@ public class ReviewService {
                 .findFirst()
                 .get();
 
-        return project.getTasks()
-                .stream()
-                .filter(task -> task.getCreator().equals(loggedUser))
-                .filter(task -> task.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)).toList();
+        for (Task task : project.getTasks()){
+            if(task.getCreator().equals(loggedUser) && task.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)){
+                TaskWaitingToReviewDTO taskWaitingToReviewDTO = new TaskWaitingToReviewDTO(task);
+
+                Optional<Review> currentReview = task.getReviews().stream()
+                        .filter(review -> review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)).findFirst();
+
+                if(currentReview.isPresent()){
+                    Review review = currentReview.get();
+
+                    taskWaitingToReviewDTO.setSender(
+                            new ReviewSenderDTO(
+                                    review.getDescription(),
+                                    review.getUserThatSentReview().getUserTeam().getUser().getFullName(),
+                                    review.getUserThatSentReview().getUserTeam().getUser().getEmail(),
+                                    review.getReviewDate()
+                            )
+
+                    );
+                    taskWaitingToReviewDTO.setReviewHours(getPerformanceInTask(task.getId()));
+
+                    tasks.add(taskWaitingToReviewDTO);
+                }
+            }
+        }
+        return tasks;
 
     }
 
-    public List<ReviewHoursDTO> getPerformanceInTask(Long taskID){
+    public List<ReviewHoursDTO> getPerformanceInTask(Long taskID) {
         Task task = taskService.findById(taskID);
         List<ReviewHoursDTO> reviewHoursDTOS = new ArrayList<>();
         for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
 
-            ReviewHoursDTO reviewHoursDTO = new ReviewHoursDTO(
+            reviewHoursDTOS.add(new ReviewHoursDTO(
                     taskResponsable.getUserTeam().getId(),
                     taskResponsable.getUserTeam().getUser().getFullName(),
-                    LocalTime.MIDNIGHT.plus(taskHoursService.calculateTimeOnTask(taskResponsable)));
-
-
-//            reviewHoursDTOS.add(
-//            ));
+                    LocalTime.MIDNIGHT.plus(taskHoursService.calculateTimeOnTask(taskResponsable))));
         }
-        System.out.println(reviewHoursDTOS);
         return reviewHoursDTOS;
     }
 }
