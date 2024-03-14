@@ -1,7 +1,7 @@
 package com.vertex.vertex.project.service;
 
-import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
+import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
 import com.vertex.vertex.project.model.DTO.ProjectOneDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
@@ -15,12 +15,13 @@ import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
-import jakarta.persistence.EntityNotFoundException;
+import com.vertex.vertex.user.model.entity.User;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -34,9 +35,37 @@ public class ProjectService {
     private final ValueService valueService;
     private final FileService fileService;
 
-    public Project save(Project project, Long teamId) {
-        Team team;
+    public void save(ProjectCreateDTO projectCreateDTO, Long teamId){
         UserTeam userTeam;
+        Team team;
+        Project project = new Project();
+        BeanUtils.copyProperties(projectCreateDTO, project);
+
+        List<UserTeam> collaborators = new ArrayList<>();
+
+        if(projectCreateDTO.getListOfResponsibles() != null){
+            for(User user : projectCreateDTO.getListOfResponsibles()){
+                UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(teamId, user.getId());
+                if(!collaborators.contains(userTeam1)){
+                    collaborators.add(userTeam1);
+                }
+            }
+        }
+
+        project.setCollaborators(collaborators);
+
+        userTeam = userTeamService
+                .findUserTeamByComposeId(
+                        teamId, project.getCreator().getUser().getId());
+        team = userTeam.getTeam();
+
+        project.setCreator(userTeam);
+        project.setTeam(team);
+        projectRepository.save(project);
+        save(project, teamId);
+    }
+
+    public Project save(Project project, Long teamId) {
 
         //Default properties of a project
         List<Property> properties = new ArrayList<>();
@@ -45,17 +74,7 @@ public class ProjectService {
         properties.add(new Property(PropertyKind.LIST, "Dificuldade", false, null, PropertyStatus.VISIBLE));
         properties.add(new Property(PropertyKind.NUMBER, "Número", false, null, PropertyStatus.VISIBLE));
         properties.add(new Property(PropertyKind.TEXT, "Palavra-Chave", false, null, PropertyStatus.INVISIBLE));
-        try {
-            userTeam = userTeamService
-                    .findUserTeamByComposeId(
-                            teamId, project.getCreator().getUser().getId());
 
-            team = userTeam.getTeam();
-        } catch (Exception e) {
-            throw new EntityNotFoundException("There isn't a team with this id!");
-        }
-        project.setCreator(userTeam);
-        project.setTeam(team);
         for ( Property property : properties ) {
             if(property.getKind() == PropertyKind.STATUS){
                 property.setPropertyLists(defaultStatus(property));
@@ -100,6 +119,10 @@ public class ProjectService {
         }catch (Exception e){
             return false;
         }
+    }
+
+    public void updateImage(MultipartFile file, Long projectId) throws IOException {
+        fileService.updateImageProject(file, projectId);
     }
 
     public Boolean existsByIdAndUserBelongs(Long projectId, Long userId) {

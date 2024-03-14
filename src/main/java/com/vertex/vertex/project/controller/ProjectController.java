@@ -1,10 +1,13 @@
 package com.vertex.vertex.project.controller;
 
 import com.vertex.vertex.file.service.FileService;
+import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.service.PropertyService;
+import com.vertex.vertex.team.relations.group.model.entity.Group;
+import com.vertex.vertex.user.model.entity.User;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,13 +26,21 @@ public class ProjectController {
     private final ProjectService projectService;
     private final FileService fileService;
 
+//    @PostMapping("/{teamId}")
+//    public ResponseEntity<?> save(@RequestBody ProjectCreateDTO project, @PathVariable Long teamId){
+//        try {
+//            System.out.println(project);
+//            System.out.println(teamId);
+//            projectService.save(project, teamId);
+//            return new ResponseEntity<>(HttpStatus.CREATED);
+//        }catch(Exception e){
+//            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+//        }
+//    }
+
     @PostMapping("/{teamId}")
-    public ResponseEntity<?> save(@RequestBody Project project , @PathVariable Long teamId){
-        try {
-            return new ResponseEntity<>(projectService.save(project, teamId), HttpStatus.CREATED);
-        }catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        }
+    public void save(@RequestBody ProjectCreateDTO project, @PathVariable Long teamId){
+        projectService.save(project, teamId);
     }
 
     @GetMapping("/{id}")
@@ -102,7 +113,7 @@ public class ProjectController {
             @PathVariable Long projectId,
             @RequestParam MultipartFile file) {
         try {
-            fileService.updateImageProject(file, projectId);
+            projectService.updateImage(file, projectId);
             return new ResponseEntity<>
                     (HttpStatus.OK);
 
