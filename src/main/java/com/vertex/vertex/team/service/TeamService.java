@@ -1,6 +1,7 @@
 package com.vertex.vertex.team.service;
 import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.chat.service.ChatService;
+import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
 import com.vertex.vertex.project.model.DTO.ProjectViewListDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
@@ -36,6 +37,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.*;
 
 @Service
@@ -369,12 +372,17 @@ public class TeamService {
         DiskFileItem fileItem2 = new DiskFileItem("file", "image/png", false, file2.getName(),
                 (int) file2.length(), file2.getParentFile());
         fileItem2.getOutputStream();
+        System.out.println(fileItem);
 
-        Project projectDefault1 = new Project("Projeto Pessoal", "Seu projeto pessoal padrão", fileItem.get(), team, team.getCreator());
-        Project projectDefault2 = new Project("Projeto Profissional", "Seu projeto pessoal padrão", fileItem2.get(), team, team.getCreator());
+        Project projectDefault1 =
+                new Project("Projeto Pessoal", "Seu projeto pessoal padrão", fileItem.get(), team, team.getCreator(), List.of(team.getCreator()));
+        Project projectDefault2 =
+                new Project("Projeto Profissional", "Seu projeto pessoal padrão", fileItem2.get(), team, team.getCreator(),  List.of(team.getCreator()));
 
-        TaskCreateDTO taskCreateDTO1 = new TaskCreateDTO("Lavar a louça", "Sua tarefa é lavar a louça", team.getCreator(), projectDefault1);
-        TaskCreateDTO taskCreateDTO2 = new TaskCreateDTO("Apresentar seminário", "Sua tarefa é lavar a louça", team.getCreator(), projectDefault2);
+        TaskCreateDTO taskCreateDTO1 =
+                new TaskCreateDTO("Lavar a louça", "Sua tarefa é lavar a louça", team.getCreator(), projectDefault1);
+        TaskCreateDTO taskCreateDTO2 =
+                new TaskCreateDTO("Apresentar seminário", "Sua tarefa é lavar a louça", team.getCreator(), projectDefault2);
 
         projectService.save(projectDefault1, team.getId());
         projectService.save(projectDefault2, team.getId());

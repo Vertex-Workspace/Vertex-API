@@ -1,5 +1,7 @@
 package com.vertex.vertex.project.service;
 
+import com.vertex.vertex.file.service.FileService;
+import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
 import com.vertex.vertex.project.model.DTO.ProjectOneDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
@@ -9,19 +11,19 @@ import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
-import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
-import com.vertex.vertex.task.relations.note.model.dto.NoteDTO;
 import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
-import jakarta.persistence.EntityNotFoundException;
+import com.vertex.vertex.user.model.entity.User;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -32,10 +34,42 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final UserTeamService userTeamService;
     private final ValueService valueService;
+    private final FileService fileService;
+
+    public void save(ProjectCreateDTO projectCreateDTO, Long teamId){
+        UserTeam userTeam;
+        Team team;
+        Project project = new Project();
+        BeanUtils.copyProperties(projectCreateDTO, project);
+
+        List<UserTeam> collaborators = new ArrayList<>();
+
+        if(projectCreateDTO.getListOfResponsibles() != null){
+            for(User user : projectCreateDTO.getListOfResponsibles()){
+                UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(teamId, user.getId());
+                if(!collaborators.contains(userTeam1)){
+                    collaborators.add(userTeam1);
+                }
+            }
+        }
+
+        project.setCollaborators(collaborators);
+
+        userTeam = userTeamService
+                .findUserTeamByComposeId(
+                        teamId, project.getCreator().getUser().getId());
+        team = userTeam.getTeam();
+
+        project.setCreator(userTeam);
+        project.setTeam(team);
+        projectRepository.save(project);
+        if(!collaborators.contains(project.getCreator())) {
+            collaborators.add(project.getCreator());
+        }
+        save(project, teamId);
+    }
 
     public Project save(Project project, Long teamId) {
-        Team team;
-        UserTeam userTeam;
 
         //Default properties of a project
         List<Property> properties = new ArrayList<>();
@@ -44,17 +78,7 @@ public class ProjectService {
         properties.add(new Property(PropertyKind.LIST, "Dificuldade", false, null, PropertyStatus.VISIBLE));
         properties.add(new Property(PropertyKind.NUMBER, "Número", false, null, PropertyStatus.VISIBLE));
         properties.add(new Property(PropertyKind.TEXT, "Palavra-Chave", false, null, PropertyStatus.INVISIBLE));
-        try {
-            userTeam = userTeamService
-                    .findUserTeamByComposeId(
-                            teamId, project.getCreator().getUser().getId());
 
-            team = userTeam.getTeam();
-        } catch (Exception e) {
-            throw new EntityNotFoundException("There isn't a team with this id!");
-        }
-        project.setCreator(userTeam);
-        project.setTeam(team);
         for ( Property property : properties ) {
             if(property.getKind() == PropertyKind.STATUS){
                 property.setPropertyLists(defaultStatus(property));
@@ -92,6 +116,22 @@ public class ProjectService {
         return projectRepository.findAllByTeam_Id(teamId);
     }
 
+    public boolean existsById(Long projectId){
+        try{
+            findById(projectId);
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
+
+//    public void updateImage(MultipartFile file, Long projectId) throws IOException {
+//        System.out.println(Arrays.toString(file.getBytes()));
+//        Project project = projectRepository.findById(projectId).get();
+//        project.setImage(file.getBytes());
+//        projectRepository.save(project);
+//        fileService.updateImageProject(file, projectId);
+//    }
 
     public Boolean existsByIdAndUserBelongs(Long projectId, Long userId) {
         if (projectRepository.existsById(projectId)) {
@@ -102,31 +142,15 @@ public class ProjectService {
     }
 
     public Project findById(Long id){
-        return projectRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+        return projectRepository.findById(id).get();
     }
 
     public ProjectOneDTO findProjectById(Long id){
         ProjectOneDTO projectOneDTO = new ProjectOneDTO();
-        Project project = findById(id);
+        Project project = projectRepository.findById(id).get();
         BeanUtils.copyProperties(project, projectOneDTO);
-        convertNotesToDto(project, projectOneDTO);
         projectOneDTO.setIdTeam(project.getTeam().getId());
-
-        //Remove the tasks that are under analysis of the project task list
-        projectOneDTO.setTasks(project.getTasks().stream().filter(task -> task.getApproveStatus() != ApproveStatus.UNDERANALYSIS).toList());
-
-
         return projectOneDTO;
-    }
-
-    private void convertNotesToDto(Project project, ProjectOneDTO dto) {
-        dto.setNotes(
-                project.getNotes()
-                        .stream()
-                        .map(NoteDTO::new)
-                        .toList()
-        );
     }
 
     public void deleteById(Long id){
@@ -135,11 +159,6 @@ public class ProjectService {
         project.getTasks().forEach(task -> task.getValues().forEach(valueService::delete));
 
         projectRepository.deleteById(id);
-    }
-
-
-    public boolean existsById(Long id) {
-        return projectRepository.existsById(id);
     }
 
     public Project save(Project project){
@@ -153,6 +172,21 @@ public class ProjectService {
         propertiesList.add(new PropertyList("Pausado", Color.BLUE, property, PropertyListKind.DOING, false));
         propertiesList.add(new PropertyList("Concluído", Color.GREEN, property, PropertyListKind.DONE, true));
         return propertiesList;
+    }
+
+    public List<Project> getAllByTeamAndCollaborators(Long teamId , Long userId){
+        List<Project> projects = new ArrayList<>();
+        UserTeam userTeam = userTeamService.findUserTeamByComposeId(teamId, userId);
+        Team team = userTeam.getTeam();
+
+        for(Project project : team.getProjects()){
+            for(UserTeam userTeamFor : project.getCollaborators()){
+                if(userTeam.equals(userTeamFor)){
+                    projects.add(project);
+                }
+            }
+        }
+        return projects;
     }
 
 }

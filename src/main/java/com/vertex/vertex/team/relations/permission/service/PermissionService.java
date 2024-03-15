@@ -34,8 +34,6 @@ public class PermissionService {
         UserTeam userTeam = getOneUserByTeam(userId,
                 teamId);
 
-        Permission permission1 = new Permission();
-        permission1.setName(TypePermissions.Visualizar);
         Permission permission2 = new Permission();
         permission2.setName(TypePermissions.Criar);
         Permission permission3 = new Permission();
@@ -53,9 +51,8 @@ public class PermissionService {
             permission4.setEnabled(false);
         }
 
-        permission1.setEnabled(true);
 
-        permissions = List.of(permission1, permission2, permission3, permission4);
+        permissions = List.of(permission2, permission3, permission4);
 
         userTeam.setPermissionUser(permissions);
         for (Permission permission : permissions) {

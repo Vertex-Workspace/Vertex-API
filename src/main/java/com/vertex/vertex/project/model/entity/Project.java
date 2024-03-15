@@ -1,6 +1,7 @@
 package com.vertex.vertex.project.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.note.model.entity.Note;
@@ -52,6 +53,12 @@ public class Project {
     @OneToOne
     private Project projectDependency;
 
+    @OneToOne
+    private File file;
+
+    @ManyToMany
+    private List<UserTeam> collaborators;
+
     //create a list of properties if it doesn't exist
     public void addProperty(Property property) {
         if(properties != null){
@@ -62,11 +69,12 @@ public class Project {
         }
     }
 
-    public Project(String name, String description, byte[] image, Team team, UserTeam creator) {
+    public Project(String name, String description, byte[] image, Team team, UserTeam creator, List<UserTeam>collaborators) {
         this.name = name;
         this.description = description;
         this.image = image;
         this.team = team;
         this.creator = creator;
+        this.collaborators = collaborators;
     }
 }
