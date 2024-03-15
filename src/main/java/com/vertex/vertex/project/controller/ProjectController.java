@@ -26,21 +26,13 @@ public class ProjectController {
     private final ProjectService projectService;
     private final FileService fileService;
 
-//    @PostMapping("/{teamId}")
-//    public ResponseEntity<?> save(@RequestBody ProjectCreateDTO project, @PathVariable Long teamId){
-//        try {
-//            System.out.println(project);
-//            System.out.println(teamId);
-//            projectService.save(project, teamId);
-//            return new ResponseEntity<>(HttpStatus.CREATED);
-//        }catch(Exception e){
-//            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-//        }
-//    }
-
     @PostMapping("/{teamId}")
-    public void save(@RequestBody ProjectCreateDTO project, @PathVariable Long teamId){
-        projectService.save(project, teamId);
+    public ResponseEntity<?> save(@RequestBody ProjectCreateDTO project, @PathVariable Long teamId){
+        try {
+            return new ResponseEntity<>(projectService.save(project, teamId), HttpStatus.CREATED);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
     }
 
     @GetMapping("/{id}")

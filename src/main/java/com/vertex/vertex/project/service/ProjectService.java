@@ -36,7 +36,7 @@ public class ProjectService {
     private final ValueService valueService;
     private final FileService fileService;
 
-    public void save(ProjectCreateDTO projectCreateDTO, Long teamId){
+    public Project save(ProjectCreateDTO projectCreateDTO, Long teamId){
         UserTeam userTeam;
         Team team;
         Project project = new Project();
@@ -66,7 +66,7 @@ public class ProjectService {
         if(!collaborators.contains(project.getCreator())) {
             collaborators.add(project.getCreator());
         }
-        save(project, teamId);
+        return save(project, teamId);
     }
 
     public Project save(Project project, Long teamId) {
@@ -97,11 +97,11 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
-    public void updateImage(MultipartFile file, Long projectId) {
+    public Project updateImage(MultipartFile file, Long projectId) {
         try {
             Project project = findById(projectId);
             project.setImage(file.getBytes());
-            projectRepository.save(project);
+            return projectRepository.save(project);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
