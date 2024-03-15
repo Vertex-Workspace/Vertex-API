@@ -2,6 +2,7 @@ package com.vertex.vertex.chat.relations.message;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.chat.model.Chat;
+import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -30,9 +31,8 @@ public class Message {
 
     private String user;
 
-    @Lob
-    @Column(columnDefinition = "LONGBLOB")
-    private byte[] file;
+    @OneToOne(cascade = CascadeType.ALL)
+    private File file;
 
     @Lob
     @Column(columnDefinition = "LONGBLOB")

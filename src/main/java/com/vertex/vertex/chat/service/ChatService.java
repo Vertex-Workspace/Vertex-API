@@ -6,6 +6,7 @@ import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.chat.relations.message.Message;
 import com.vertex.vertex.chat.relations.message.MessageRepository;
 import com.vertex.vertex.chat.repository.ChatRepository;
+import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
@@ -78,9 +79,11 @@ public class ChatService {
     }
 
 
-    public Chat saveFile(Long chatId, MultipartFile file, String user) {
+    public Chat saveFile(Long chatId, MultipartFile file, String user) throws IOException {
 
         Chat chat = chatRepository.findById(chatId).get();
+
+        File file1 = new File(file);
 
         Message message = new Message();
         message.setChat(chat);
@@ -88,14 +91,10 @@ public class ChatService {
         message.setTime(LocalDateTime.now());
         message.setVisualized(false);
 
-        try {
-            message.setFile(file.getBytes());
+        message.setFile(file1);
 //            System.out.println(message);
-            chat.getMessages().add(message);
-            return chatRepository.save(chat);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        chat.getMessages().add(message);
+        return chatRepository.save(chat);
 
 
     }
