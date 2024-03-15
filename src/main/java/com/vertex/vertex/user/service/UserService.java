@@ -59,7 +59,6 @@ public class UserService {
 
             User userFind = userRepository.findByEmail(userEmailWithNoEdition.getEmail());
 
-
             if (userFind != null && user.getEmail().equals(userFind.getEmail())) {
                 throw new EmailAlreadyExistsException();
             }
