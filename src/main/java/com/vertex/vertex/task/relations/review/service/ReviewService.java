@@ -32,32 +32,34 @@ public class ReviewService {
     private final TaskService taskService;
     private final ProjectService projectService;
     private final TaskHoursService taskHoursService;
+    public void finalReview(ReviewCheck reviewCheck) {
+        Task task = taskService.findById(reviewCheck.getTaskID());
 
-//    public Task saveReview(ReviewCheck reviewCheck) {
-//        Task task = findById(reviewCheck.getTask().getId());
-//        Review review;
-//        TaskResponsable taskResponsable = taskResponsablesRepository.findById(reviewCheck.getReviewer().getId()).get();
-//
-//        if (reviewCheck.getId() != null) {
-//            for (Review reviewFor : task.getReviews()) {
-//                if (reviewFor.getId().equals(reviewCheck.getId())) {
-//                    review = reviewFor;
-//                    task.getReviews().remove(review);
-//                    return save(task);
-//                }
-//            }
-//        } else {
-//            review = new Review();
-//            if (task.getCreator().getId().equals(taskResponsable.getId())) {
-//                BeanUtils.copyProperties(reviewCheck, review);
-//                task.getReviews().add(review);
-//                task.setApproveStatus(reviewCheck.getApproveStatus());
-//            } else {
-//                throw new RuntimeException("O usuário não é o criador da tarefa");
-//            }
-//        }
-//        return save(task);
-//    }
+        Optional<Review> reviewOptional = task.getReviews().stream()
+                .filter(review1 -> reviewCheck.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)).findFirst();
+
+        if(reviewOptional.isEmpty()){
+            throw new RuntimeException("Nenhuma revisão em aberto!");
+        }
+
+        Review review = reviewOptional.get();
+
+
+        review.setReviewDate(LocalDateTime.now());
+        review.setGrade(review.getGrade());
+        review.setFinalDescription(review.getFinalDescription());
+
+        Optional<TaskResponsable> creator = review.getTask().getTaskResponsables()
+                .stream().filter(
+                        taskResponsable -> taskResponsable.getId().equals(reviewCheck.getReviewerID()))
+                .findFirst();
+        if(creator.isEmpty()){
+            throw new RuntimeException("Id do revisador errado!");
+        }
+        review.setCreatorReviewer(creator.get());
+
+        reviewRepository.save(review);
+    }
 
     public Task sendToReview(SendToReviewDTO sendToReviewDTO) {
         Task task = taskService.findById(sendToReviewDTO.getTask().getId());
@@ -140,5 +142,14 @@ public class ReviewService {
                     LocalTime.MIDNIGHT.plus(taskHoursService.calculateTimeOnTask(taskResponsable))));
         }
         return reviewHoursDTOS;
+    }
+
+    public Review findById(Long reviewID){
+        Optional<Review> review = reviewRepository.findById(reviewID);
+        if(review.isPresent()){
+            return review.get();
+        }
+        throw new RuntimeException("Review não existe!");
+
     }
 }

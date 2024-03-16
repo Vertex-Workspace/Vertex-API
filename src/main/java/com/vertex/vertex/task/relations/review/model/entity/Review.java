@@ -25,6 +25,8 @@ public class Review {
 
     private String description;
 
+    private String finalDescription;
+
     private LocalDateTime sentDate;
 
     private LocalDateTime reviewDate;

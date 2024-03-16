@@ -36,7 +36,7 @@ public class ProjectService {
     private final ValueService valueService;
     private final FileService fileService;
 
-    public void save(ProjectCreateDTO projectCreateDTO, Long teamId){
+    public Project save(ProjectCreateDTO projectCreateDTO, Long teamId){
         UserTeam userTeam;
         Team team;
         Project project = new Project();
@@ -59,17 +59,17 @@ public class ProjectService {
                 .findUserTeamByComposeId(
                         teamId, project.getCreator().getUser().getId());
         team = userTeam.getTeam();
-
         project.setCreator(userTeam);
         project.setTeam(team);
+        defaultProperties(project);
         projectRepository.save(project);
         if(!collaborators.contains(project.getCreator())) {
             collaborators.add(project.getCreator());
         }
-        save(project, teamId);
+        return projectRepository.save(project);
     }
 
-    public Project save(Project project, Long teamId) {
+    public void defaultProperties(Project project) {
 
         //Default properties of a project
         List<Property> properties = new ArrayList<>();
@@ -94,7 +94,6 @@ public class ProjectService {
             property.setProject(project);
             project.addProperty(property);
         }
-        return projectRepository.save(project);
     }
 
     public void updateImage(MultipartFile file, Long projectId) {

@@ -384,8 +384,11 @@ public class TeamService {
         TaskCreateDTO taskCreateDTO2 =
                 new TaskCreateDTO("Apresentar seminário", "Sua tarefa é lavar a louça", team.getCreator(), projectDefault2);
 
-        projectService.save(projectDefault1, team.getId());
-        projectService.save(projectDefault2, team.getId());
+        projectService.defaultProperties(projectDefault1);
+        projectService.defaultProperties(projectDefault2);
+
+        projectService.save(projectDefault1);
+        projectService.save(projectDefault2);
 
         taskService.save(taskCreateDTO1);
         taskService.save(taskCreateDTO2);

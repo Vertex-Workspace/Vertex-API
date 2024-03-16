@@ -24,7 +24,7 @@ public class ProjectCreateDTO {
     private UserTeam creator;
     private Team team;
     private Project projectDependency;
-    private File file;
+//    private File file;
     private List<User> listOfResponsibles;
 
 }

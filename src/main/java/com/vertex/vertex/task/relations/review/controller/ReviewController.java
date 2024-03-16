@@ -1,5 +1,6 @@
 package com.vertex.vertex.task.relations.review.controller;
 
+import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
 import com.vertex.vertex.task.relations.review.model.DTO.SendToReviewDTO;
 import com.vertex.vertex.task.relations.review.service.ReviewService;
 import lombok.AllArgsConstructor;
@@ -23,23 +24,16 @@ public class ReviewController {
         }
     }
 
-//    @PatchMapping("/review")
-//    public ResponseEntity<?> saveReview (@RequestBody ReviewCheck reviewCheck){
-//        try{
-//            return new ResponseEntity<>(taskService.saveReview(reviewCheck), HttpStatus.OK);
-//        }catch(Exception e){
-//            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-//        }
-//    }
-//
-//    @PatchMapping("/send-to-review")
-//    public ResponseEntity<?> saveToReview (@RequestBody SetFinishedTask setFinishedTask){
-//        try{
-//            return new ResponseEntity<>(taskService.taskUnderAnalysis(setFinishedTask), HttpStatus.OK);
-//        }catch(Exception e){
-//            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-//        }
-//    }
+    @PatchMapping("/review/final")
+    public ResponseEntity<?> saveReview (@RequestBody ReviewCheck reviewCheck){
+        try{
+            reviewService.finalReview(reviewCheck);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
 
     @GetMapping("/review/{userID}/project/{projectID}")
     public ResponseEntity<?> getTasksToReview(@PathVariable Long userID, @PathVariable Long projectID){
