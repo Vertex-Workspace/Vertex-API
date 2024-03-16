@@ -189,4 +189,17 @@ public class ProjectService {
         return projects;
     }
 
+    public List<User> getUsersByProject(Long projectId){
+        List<User> users = new ArrayList<>();
+        Project project = projectRepository.findById(projectId).get();
+        for(UserTeam userTeam : project.getCollaborators()){
+            users.add(userTeam.getUser());
+        }
+        return users;
+    }
+//
+//    public List<User> updateProjectCollaborators(Long projectId, ){
+//
+//    }
+
 }
