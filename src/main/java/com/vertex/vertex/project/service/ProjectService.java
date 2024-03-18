@@ -2,6 +2,7 @@ package com.vertex.vertex.project.service;
 
 import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
+import com.vertex.vertex.project.model.DTO.ProjectEditDTO;
 import com.vertex.vertex.project.model.DTO.ProjectOneDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
@@ -197,9 +198,21 @@ public class ProjectService {
         }
         return users;
     }
-//
-//    public List<User> updateProjectCollaborators(Long projectId, ){
-//
-//    }
+
+    public void updateProjectCollaborators(ProjectEditDTO projectEditDTO){
+        Project project = projectRepository.findById(projectEditDTO.getId()).get();
+
+        for(UserTeam userTeam : project.getCollaborators()){
+            //if the user selected, it means that it was in project and now it won't be more
+            if(projectEditDTO.getListOfResponsibles().contains(userTeam)){
+                project.getCollaborators().remove(userTeam);
+            } else {
+                for(UserTeam userTeamDTO : projectEditDTO.getListOfResponsibles()) {
+                    project.getCollaborators().add(userTeamDTO);
+                }
+            }
+            projectRepository.save(project);
+        }
+    }
 
 }
