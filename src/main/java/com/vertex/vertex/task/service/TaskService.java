@@ -287,6 +287,18 @@ public class TaskService {
         }
     }
 
+    public Task removeFile(Long taskId, Long fileId) {
+        try {
+            Task task = findById(taskId);
+            File file = fileService.findById(fileId);
+            task.getFiles().remove(file);
+            fileService.delete(fileId);
+            return taskRepository.save(task);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
 
 
 }

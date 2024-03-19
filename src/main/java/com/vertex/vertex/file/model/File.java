@@ -27,16 +27,16 @@ public class File {
     private String type;
 
     @Lob
-    @Column(columnDefinition = "BLOB")
+    @Column(columnDefinition = "LONGBLOB")
     @ToString.Exclude
     private byte[] file;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JsonIgnore
     @ToString.Exclude
     private Note note;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JsonIgnore
     @ToString.Exclude
     private Task task;
