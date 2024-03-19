@@ -1,11 +1,14 @@
 package com.vertex.vertex.file.service;
 
 import com.vertex.vertex.file.model.File;
+import com.vertex.vertex.file.model.FileSupporter;
 import com.vertex.vertex.file.repository.FileRepository;
+import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.note.model.entity.Note;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
@@ -16,10 +19,13 @@ public class FileService {
 
     private final FileRepository fileRepository;
 
-    public File save(File file, Note note) {
-        if (Objects.isNull(note.getFiles())) note.setFiles(List.of(file));
-        else note.getFiles().add(file);
-        return fileRepository.save(file);
+    public File save(MultipartFile multipartFile, FileSupporter item) {
+        try {
+            File file = new File(multipartFile, item);
+            return fileRepository.save(file);
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
     }
 
     public void delete(Long id) {

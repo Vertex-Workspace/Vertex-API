@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vertex.vertex.file.model.File;
+import com.vertex.vertex.file.model.FileSupporter;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.relations.note.model.dto.NoteDTO;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
@@ -20,7 +21,7 @@ import java.util.Objects;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Note {
+public class Note implements FileSupporter {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,8 +48,6 @@ public class Note {
     private Integer width;
     private Integer posX;
     private Integer posY;
-    private Integer descSize;
-    private Integer titleSize;
 
     public Note(Project project,
                 UserTeam creator,

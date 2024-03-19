@@ -1,5 +1,7 @@
 package com.vertex.vertex.task.service;
 
+import com.vertex.vertex.file.model.File;
+import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
@@ -36,6 +38,8 @@ import lombok.Data;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import javax.mail.*;
 import javax.mail.internet.*;
 
@@ -55,6 +59,7 @@ public class TaskService {
     private final ProjectService projectService;
     private final PropertyService propertyService;
     private final UserTeamService userTeamService;
+    private final FileService fileService;
 
 
     public Task save(TaskCreateDTO taskCreateDTO) {
@@ -125,7 +130,8 @@ public class TaskService {
     }
 
     public Task findById(Long id) {
-        return taskRepository.findById(id).get();
+        return taskRepository.findById(id)
+                .orElseThrow(EntityNotFoundException::new);
     }
 
     public void deleteById(Long id) {
@@ -255,16 +261,27 @@ public class TaskService {
     public List<Task> getAllByUser(Long id) {
         try {
             List<UserTeam> uts = userTeamService.findAll(id);
-            List<Task> taskList = new ArrayList<>();
 
-            uts.forEach(ut -> {
-                ut.getTeam().getProjects().forEach(p -> {
-                    taskList.addAll(p.getTasks());
-                });
-            });
+            return uts.stream()
+                    .flatMap(ut -> ut.getTeam()
+                            .getProjects().stream()
+                            .flatMap(p -> p.getTasks().stream()))
+                    .toList();
 
-            return taskList;
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
+    }
 
+    public Task uploadFile(MultipartFile multipartFile, Long id) {
+        try {
+            Task task = findById(id);
+            File file = fileService.save(multipartFile, task);
+
+            if (Objects.isNull(task.getFiles())) task.setFiles(List.of(file));
+            else task.getFiles().add(file);
+
+            return taskRepository.save(task);
         } catch (Exception e) {
             throw new RuntimeException();
         }

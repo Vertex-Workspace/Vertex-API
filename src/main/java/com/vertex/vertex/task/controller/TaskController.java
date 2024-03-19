@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -147,6 +148,21 @@ public class TaskController {
                     "Projeto não encontrado!",
                         HttpStatus.NOT_FOUND
             );
+        }
+    }
+
+    @PatchMapping("/{id}/upload")
+    public ResponseEntity<?> uploadFile(
+            @PathVariable Long id,
+            @RequestParam MultipartFile file) {
+        try {
+            return new ResponseEntity<>
+                    (taskService.uploadFile(file, id),
+                        HttpStatus.OK);
+
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>
+                    (HttpStatus.CONFLICT);
         }
     }
 

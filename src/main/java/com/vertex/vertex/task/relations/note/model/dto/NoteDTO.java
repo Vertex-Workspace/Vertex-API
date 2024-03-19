@@ -32,8 +32,6 @@ public class NoteDTO {
         this.width = note.getWidth();
         this.posX = note.getPosX();
         this.posY = note.getPosY();
-        this.descSize = note.getDescSize();
-        this.titleSize = note.getTitleSize();
         this.color = note.getColor();
     }
 

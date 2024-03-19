@@ -1,6 +1,7 @@
 package com.vertex.vertex.file.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.note.model.entity.Note;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.ToString;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @Entity
 @Data
@@ -34,12 +36,20 @@ public class File {
     @ToString.Exclude
     private Note note;
 
-    public File(MultipartFile file, Note note)
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JsonIgnore
+    @ToString.Exclude
+    private Task task;
+
+
+    public File(MultipartFile file, FileSupporter item)
             throws IOException {
         this.name = file.getOriginalFilename();
         this.type = file.getContentType();
         this.file = file.getBytes();
-        this.note = note;
+
+        if (item instanceof Note) this.note = (Note) item;
+        else this.task = (Task) item;
     }
 
 }
