@@ -56,10 +56,12 @@ public class NoteService {
     public Note uploadFile(Long noteId, MultipartFile multipartFile) {
         try {
             Note note = findById(noteId);
-            File file = new File(multipartFile, note);
-            fileService.save(file, note);
-            return noteRepository.save(note);
+            File file = fileService.save(multipartFile, note);
 
+            if (Objects.isNull(note.getFiles())) note.setFiles(List.of(file));
+            else note.getFiles().add(file);
+
+            return noteRepository.save(note);
         } catch (Exception ignored) {
             throw new RuntimeException();
         }

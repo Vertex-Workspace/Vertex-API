@@ -1,6 +1,8 @@
 package com.vertex.vertex.task.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vertex.vertex.file.model.File;
+import com.vertex.vertex.file.model.FileSupporter;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
@@ -20,7 +22,7 @@ import java.util.List;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class  Task {
+public class Task implements FileSupporter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -61,8 +63,8 @@ public class  Task {
     @Enumerated(value = EnumType.STRING)
     private ApproveStatus approveStatus;
 
-
-
+    @OneToMany(cascade = CascadeType.ALL)
+    List<File> files;
 
 
 }
