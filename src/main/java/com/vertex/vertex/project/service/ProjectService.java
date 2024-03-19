@@ -1,5 +1,6 @@
 package com.vertex.vertex.project.service;
 
+import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
 import com.vertex.vertex.project.model.DTO.ProjectEditDTO;
@@ -37,7 +38,7 @@ public class ProjectService {
     private final ValueService valueService;
     private final FileService fileService;
 
-    public Project save(ProjectCreateDTO projectCreateDTO, Long teamId){
+    public Project save(ProjectCreateDTO projectCreateDTO, Long teamId) {
         UserTeam userTeam;
         Team team;
         Project project = new Project();
@@ -45,10 +46,10 @@ public class ProjectService {
 
         List<UserTeam> collaborators = new ArrayList<>();
 
-        if(projectCreateDTO.getListOfResponsibles() != null){
-            for(User user : projectCreateDTO.getListOfResponsibles()){
+        if (projectCreateDTO.getListOfResponsibles() != null) {
+            for (User user : projectCreateDTO.getListOfResponsibles()) {
                 UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(teamId, user.getId());
-                if(!collaborators.contains(userTeam1)){
+                if (!collaborators.contains(userTeam1)) {
                     collaborators.add(userTeam1);
                 }
             }
@@ -64,7 +65,7 @@ public class ProjectService {
         project.setCreator(userTeam);
         project.setTeam(team);
         projectRepository.save(project);
-        if(!collaborators.contains(project.getCreator())) {
+        if (!collaborators.contains(project.getCreator())) {
             collaborators.add(project.getCreator());
         }
         return save(project, teamId);
@@ -80,11 +81,11 @@ public class ProjectService {
         properties.add(new Property(PropertyKind.NUMBER, "Número", false, null, PropertyStatus.VISIBLE));
         properties.add(new Property(PropertyKind.TEXT, "Palavra-Chave", false, null, PropertyStatus.INVISIBLE));
 
-        for ( Property property : properties ) {
-            if(property.getKind() == PropertyKind.STATUS){
+        for (Property property : properties) {
+            if (property.getKind() == PropertyKind.STATUS) {
                 property.setPropertyLists(defaultStatus(property));
             }
-            if(property.getKind() == PropertyKind.LIST){
+            if (property.getKind() == PropertyKind.LIST) {
                 List<PropertyList> propertiesList = new ArrayList<>();
                 propertiesList.add(new PropertyList("Fácil", Color.GREEN, property, PropertyListKind.VISIBLE, false));
                 propertiesList.add(new PropertyList("Médio", Color.YELLOW, property, PropertyListKind.VISIBLE, true));
@@ -98,41 +99,41 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
-    public Project updateImage(MultipartFile file, Long projectId) {
-        try {
-            Project project = findById(projectId);
-            project.setImage(file.getBytes());
-            return projectRepository.save(project);
+//    public Project updateImage(MultipartFile file, Long projectId) {
+//        try {
+//            Project project = findById(projectId);
+//            project.setImage(file.getBytes());
+//
+//            return projectRepository.save(project);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<Project> findAll(){
+    public List<Project> findAll() {
         return projectRepository.findAll();
     }
 
-    public Set<Project> findAllByTeam(Long teamId){
+    public Set<Project> findAllByTeam(Long teamId) {
         return projectRepository.findAllByTeam_Id(teamId);
     }
 
-    public boolean existsById(Long projectId){
-        try{
+    public boolean existsById(Long projectId) {
+        try {
             findById(projectId);
             return true;
-        }catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
     }
 
-//    public void updateImage(MultipartFile file, Long projectId) throws IOException {
-//        System.out.println(Arrays.toString(file.getBytes()));
-//        Project project = projectRepository.findById(projectId).get();
+    public void updateImage(MultipartFile file, Long projectId) throws IOException {
+        Project project = projectRepository.findById(projectId).get();
+        File file1 = fileService.updateImageProject(file);
 //        project.setImage(file.getBytes());
-//        projectRepository.save(project);
-//        fileService.updateImageProject(file, projectId);
-//    }
+        project.setFile(file1);
+        projectRepository.save(project);
+    }
 
     public Boolean existsByIdAndUserBelongs(Long projectId, Long userId) {
         if (projectRepository.existsById(projectId)) {
@@ -142,11 +143,11 @@ public class ProjectService {
         return false;
     }
 
-    public Project findById(Long id){
+    public Project findById(Long id) {
         return projectRepository.findById(id).get();
     }
 
-    public ProjectOneDTO findProjectById(Long id){
+    public ProjectOneDTO findProjectById(Long id) {
         ProjectOneDTO projectOneDTO = new ProjectOneDTO();
         Project project = projectRepository.findById(id).get();
         BeanUtils.copyProperties(project, projectOneDTO);
@@ -154,7 +155,7 @@ public class ProjectService {
         return projectOneDTO;
     }
 
-    public void deleteById(Long id){
+    public void deleteById(Long id) {
         Project project = findById(id);
         //Delete every value of tasks on project
         project.getTasks().forEach(task -> task.getValues().forEach(valueService::delete));
@@ -162,11 +163,11 @@ public class ProjectService {
         projectRepository.deleteById(id);
     }
 
-    public Project save(Project project){
+    public Project save(Project project) {
         return projectRepository.save(project);
     }
 
-    public List<PropertyList> defaultStatus(Property property){
+    public List<PropertyList> defaultStatus(Property property) {
         List<PropertyList> propertiesList = new ArrayList<>();
         propertiesList.add(new PropertyList("Não Iniciado", Color.RED, property, PropertyListKind.TODO, true));
         propertiesList.add(new PropertyList("Em Andamento", Color.YELLOW, property, PropertyListKind.DOING, true));
@@ -175,14 +176,14 @@ public class ProjectService {
         return propertiesList;
     }
 
-    public List<Project> getAllByTeamAndCollaborators(Long teamId , Long userId){
+    public List<Project> getAllByTeamAndCollaborators(Long teamId, Long userId) {
         List<Project> projects = new ArrayList<>();
         UserTeam userTeam = userTeamService.findUserTeamByComposeId(teamId, userId);
         Team team = userTeam.getTeam();
 
-        for(Project project : team.getProjects()){
-            for(UserTeam userTeamFor : project.getCollaborators()){
-                if(userTeam.equals(userTeamFor)){
+        for (Project project : team.getProjects()) {
+            for (UserTeam userTeamFor : project.getCollaborators()) {
+                if (userTeam.equals(userTeamFor)) {
                     projects.add(project);
                 }
             }
@@ -190,29 +191,39 @@ public class ProjectService {
         return projects;
     }
 
-    public List<User> getUsersByProject(Long projectId){
+    public List<User> getUsersByProject(Long projectId) {
         List<User> users = new ArrayList<>();
         Project project = projectRepository.findById(projectId).get();
-        for(UserTeam userTeam : project.getCollaborators()){
+        for (UserTeam userTeam : project.getCollaborators()) {
             users.add(userTeam.getUser());
         }
         return users;
     }
 
-    public void updateProjectCollaborators(ProjectEditDTO projectEditDTO){
+    public Project updateProjectCollaborators(ProjectEditDTO projectEditDTO) {
         Project project = projectRepository.findById(projectEditDTO.getId()).get();
+        System.out.println(projectEditDTO);
+        project.setName(projectEditDTO.getName());
+        project.setDescription(projectEditDTO.getDescription());
 
-        for(UserTeam userTeam : project.getCollaborators()){
-            //if the user selected, it means that it was in project and now it won't be more
-            if(projectEditDTO.getListOfResponsibles().contains(userTeam)){
-                project.getCollaborators().remove(userTeam);
-            } else {
-                for(UserTeam userTeamDTO : projectEditDTO.getListOfResponsibles()) {
-                    project.getCollaborators().add(userTeamDTO);
+        if (project.getCollaborators() != null) {
+            for (UserTeam userTeam : project.getCollaborators()) {
+                //if the user selected, it means that it was in project and now it won't be more
+                if (projectEditDTO.getListOfResponsibles() != null) {
+//                    if (projectEditDTO.getListOfResponsibles().contains(userTeam)) {
+//                        userTeam.setProject(null);
+//                        project.getCollaborators().remove(userTeam);
+//                    } else {
+                        for (UserTeam userTeamDTO : projectEditDTO.getListOfResponsibles()) {
+                            project.getCollaborators().add(userTeamDTO);
+                            userTeamService.save(userTeamDTO);
+                        }
+//                    }
                 }
             }
-            projectRepository.save(project);
         }
+        System.out.println(project);
+        return projectRepository.save(project);
     }
 
 }

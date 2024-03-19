@@ -53,7 +53,7 @@ public class Project {
     @OneToOne
     private Project projectDependency;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private File file;
 
     @ManyToMany

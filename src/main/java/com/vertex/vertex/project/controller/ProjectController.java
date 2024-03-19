@@ -2,6 +2,7 @@ package com.vertex.vertex.project.controller;
 
 import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
+import com.vertex.vertex.project.model.DTO.ProjectEditDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.property.model.entity.Property;
@@ -69,14 +70,14 @@ public class ProjectController {
         }
     }
 
-    @PutMapping
-    public ResponseEntity<Project> update(@RequestBody Project project){
-        try {
-            return new ResponseEntity<>(projectService.save(project), HttpStatus.CREATED);
-        }catch(Exception e){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
+//    @PutMapping
+//    public ResponseEntity<Project> update(@RequestBody Project project){
+//        try {
+//            return new ResponseEntity<>(projectService.save(project), HttpStatus.CREATED);
+//        }catch(Exception e){
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+//    }
 
     @GetMapping("/exists/{id}")
     public ResponseEntity<?> existsById(@PathVariable Long id) {
@@ -128,6 +129,16 @@ public class ProjectController {
         try {
             return new ResponseEntity<>(projectService.getUsersByProject(projectId), HttpStatus.OK);
         }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
+
+    @PatchMapping("/update")
+    public ResponseEntity<?> updateProject (@RequestBody ProjectEditDTO projectEditDTO){
+        try {
+            return new ResponseEntity<>(projectService.updateProjectCollaborators(projectEditDTO), HttpStatus.OK);
+        }catch(Exception e){
+            System.out.println(e);
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }

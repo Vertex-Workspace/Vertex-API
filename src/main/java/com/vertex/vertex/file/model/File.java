@@ -23,6 +23,7 @@ public class File {
 
     private String name;
     private String type;
+    private String codeAWS;
 
     @Lob
     @Column(columnDefinition = "BLOB")
@@ -42,4 +43,12 @@ public class File {
         this.note = note;
     }
 
+    public File(MultipartFile file) throws IOException {
+        this.file = file.getBytes();
+    }
+
+    public File(String name, String codeAWS) {
+        this.name = name;
+        this.codeAWS = codeAWS;
+    }
 }
