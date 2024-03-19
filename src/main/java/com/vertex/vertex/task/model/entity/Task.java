@@ -58,11 +58,14 @@ public class  Task {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "task", orphanRemoval = true)
     private List<Value> values;
 
-    @Enumerated(value = EnumType.STRING)
-    private ApproveStatus approveStatus;
 
-
-
-
-
+    public boolean isUnderAnalysis(){
+        if(this.getReviews() != null){
+            return this.getReviews()
+                    .stream()
+                    .map(review -> review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS))
+                    .isParallel();
+        }
+        return false;
+    }
 }

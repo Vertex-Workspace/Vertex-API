@@ -36,8 +36,8 @@ public class ReviewService {
         Task task = taskService.findById(reviewCheck.getTaskID());
 
         Optional<Review> reviewOptional = task.getReviews().stream()
-                .filter(review1 -> reviewCheck.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)).findFirst();
-
+                .filter(review1 -> review1.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)).findFirst();
+        System.out.println(reviewOptional);
         if(reviewOptional.isEmpty()){
             throw new RuntimeException("Nenhuma revisão em aberto!");
         }
@@ -46,26 +46,25 @@ public class ReviewService {
 
 
         review.setReviewDate(LocalDateTime.now());
-        review.setGrade(review.getGrade());
-        review.setFinalDescription(review.getFinalDescription());
+        review.setGrade(reviewCheck.getGrade());
+        review.setFinalDescription(reviewCheck.getFinalDescription());
 
         Optional<TaskResponsable> creator = review.getTask().getTaskResponsables()
                 .stream().filter(
-                        taskResponsable -> taskResponsable.getId().equals(reviewCheck.getReviewerID()))
+                        taskResponsable -> taskResponsable.getUserTeam().getUser().getId().equals(reviewCheck.getReviewerID()))
                 .findFirst();
         if(creator.isEmpty()){
             throw new RuntimeException("Id do revisador errado!");
         }
         review.setCreatorReviewer(creator.get());
-
+        review.setApproveStatus(reviewCheck.getApproveStatus());
         reviewRepository.save(review);
     }
 
-    public Task sendToReview(SendToReviewDTO sendToReviewDTO) {
+    public void sendToReview(SendToReviewDTO sendToReviewDTO) {
         Task task = taskService.findById(sendToReviewDTO.getTask().getId());
         //Validations
-        if (task.getApproveStatus() == ApproveStatus.DISAPPROVED ||
-                task.getApproveStatus() == ApproveStatus.INPROGRESS) {
+        if (!task.isUnderAnalysis()) {
             Review review = new Review();
             //Description
             review.setDescription(sendToReviewDTO.getDescription());
@@ -81,14 +80,12 @@ public class ReviewService {
                 throw new RuntimeException("O usuário que enviou a revisão não é um responsável da tarefa");
             }
             review.setApproveStatus(ApproveStatus.UNDERANALYSIS);
+            review.setSentDate(LocalDateTime.now());
             //Save the initial Review
             reviewRepository.save(review);
-
-            //Change the state of the task and save
-            task.setApproveStatus(ApproveStatus.UNDERANALYSIS);
-            return taskService.save(task);
+        } else {
+            throw new RuntimeException("A tarefa já foi aprovada. Ela não pode voltar para análise");
         }
-        throw new RuntimeException("A tarefa já foi aprovada. Ela não pode voltar para análise");
     }
 
     public List<TaskWaitingToReviewDTO> getTasksToReview(Long userID, Long projectID) {
@@ -103,7 +100,7 @@ public class ReviewService {
                 .get();
 
         for (Task task : project.getTasks()){
-            if(task.getCreator().equals(loggedUser) && task.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)){
+            if(task.getCreator().equals(loggedUser) && !task.isUnderAnalysis()){
                 TaskWaitingToReviewDTO taskWaitingToReviewDTO = new TaskWaitingToReviewDTO(task);
 
                 Optional<Review> currentReview = task.getReviews().stream()

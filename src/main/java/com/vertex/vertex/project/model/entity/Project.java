@@ -59,6 +59,8 @@ public class Project {
     @ManyToMany
     private List<UserTeam> collaborators;
 
+
+
     //create a list of properties if it doesn't exist
     public void addProperty(Property property) {
         if(properties != null){

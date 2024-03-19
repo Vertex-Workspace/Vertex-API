@@ -11,6 +11,9 @@ import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
+import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
+import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
@@ -148,6 +151,24 @@ public class ProjectService {
         ProjectOneDTO projectOneDTO = new ProjectOneDTO();
         Project project = projectRepository.findById(id).get();
         BeanUtils.copyProperties(project, projectOneDTO);
+
+        //To Set as null
+        projectOneDTO.setTasks(new ArrayList<>());
+
+        //Pass through all tasks of the project and validates if task has an opened review (UNDERANALYSIS)
+        //If it has, It won't be included into list
+        for (Task task : project.getTasks()) {
+            boolean isReviewed = false;
+            for (Review review : task.getReviews()){
+                if(review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)
+                ){
+                    isReviewed = true;
+                }
+            }
+            if(!isReviewed){
+                projectOneDTO.getTasks().add(task);
+            }
+        }
         projectOneDTO.setIdTeam(project.getTeam().getId());
         return projectOneDTO;
     }

@@ -91,8 +91,6 @@ public class TaskService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        task.setApproveStatus(ApproveStatus.INPROGRESS);
         return taskRepository.save(task);
     }
 
@@ -140,7 +138,6 @@ public class TaskService {
                 currentValue.setProperty(property);
                 currentValue.setValue(editValueDTO.getValue().getValue());
                 task.getValues().set(i, currentValue);
-                task.setApproveStatus(ApproveStatus.INPROGRESS);
             }
         }
         return taskRepository.save(task);

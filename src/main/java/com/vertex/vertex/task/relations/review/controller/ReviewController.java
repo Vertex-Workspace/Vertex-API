@@ -18,7 +18,8 @@ public class ReviewController {
     @PostMapping("/review/send")
     public ResponseEntity<?> sendToReview(@RequestBody SendToReviewDTO sendToReviewDTO){
         try{
-            return new ResponseEntity<>(reviewService.sendToReview(sendToReviewDTO), HttpStatus.OK);
+            reviewService.sendToReview(sendToReviewDTO);
+            return new ResponseEntity<>(HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }

@@ -30,6 +30,7 @@ public class Review {
     private LocalDateTime sentDate;
 
     private LocalDateTime reviewDate;
+
     @ManyToOne
     @JsonIgnore
     @ToString.Exclude
