@@ -20,6 +20,7 @@ import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,12 +39,12 @@ public class ProjectService {
     private final UserTeamService userTeamService;
     private final ValueService valueService;
     private final FileService fileService;
-
+    private final ModelMapper modelMapper;
     public Project save(ProjectCreateDTO projectCreateDTO, Long teamId){
         UserTeam userTeam;
         Team team;
         Project project = new Project();
-        BeanUtils.copyProperties(projectCreateDTO, project);
+        modelMapper.map(projectCreateDTO, project);
 
         List<UserTeam> collaborators = new ArrayList<>();
 
@@ -152,23 +153,23 @@ public class ProjectService {
         Project project = projectRepository.findById(id).get();
         BeanUtils.copyProperties(project, projectOneDTO);
 
-        //To Set as null
-        projectOneDTO.setTasks(new ArrayList<>());
-
-        //Pass through all tasks of the project and validates if task has an opened review (UNDERANALYSIS)
-        //If it has, It won't be included into list
-        for (Task task : project.getTasks()) {
-            boolean isReviewed = false;
-            for (Review review : task.getReviews()){
-                if(review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)
-                ){
-                    isReviewed = true;
-                }
-            }
-            if(!isReviewed){
-                projectOneDTO.getTasks().add(task);
-            }
-        }
+//        //To Set as null
+//        projectOneDTO.setTasks(new ArrayList<>());
+//
+//        //Pass through all tasks of the project and validates if task has an opened review (UNDERANALYSIS)
+//        //If it has, It won't be included into list
+//        for (Task task : project.getTasks()) {
+//            boolean isReviewed = false;
+//            for (Review review : task.getReviews()){
+//                if(review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)
+//                ){
+//                    isReviewed = true;
+//                }
+//            }
+//            if(!isReviewed){
+//                projectOneDTO.getTasks().add(task);
+//            }
+//        }
         projectOneDTO.setIdTeam(project.getTeam().getId());
         return projectOneDTO;
     }

@@ -53,4 +53,17 @@ public class ReviewController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
+
+
+    @PatchMapping("/{taskID}/review/change-state/{booleanState}")
+    public ResponseEntity<?> getPerformanceInTask(
+            @PathVariable Long taskID,
+            @PathVariable Boolean booleanState){
+        try{
+            reviewService.setRevisable(taskID, booleanState);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
 }

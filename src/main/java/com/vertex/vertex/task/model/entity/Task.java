@@ -28,11 +28,13 @@ public class  Task {
     @Column(length = 55)
     private String name;
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
     private List<TaskResponsable> taskResponsables;
 
     @Column(length = 1000)
     private String description;
+
+    private boolean isRevisable;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @ToString.Exclude

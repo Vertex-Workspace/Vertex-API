@@ -1,14 +1,18 @@
 package com.vertex.vertex.task.service;
 
+import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
+import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.Property;
+import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.property.service.PropertyService;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.DTO.TaskEditDTO;
 import com.vertex.vertex.task.model.DTO.TaskOpenDTO;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
+import com.vertex.vertex.task.relations.review.repository.ReviewRepository;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.relations.task_responsables.model.DTOs.TaskResponsablesDTO;
 import com.vertex.vertex.task.model.entity.Task;
@@ -23,9 +27,11 @@ import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskRespo
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
+import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +49,8 @@ public class TaskService {
     private final ProjectService projectService;
     private final PropertyService propertyService;
     private final UserTeamService userTeamService;
-
+    private final ModelMapper modelMapper;
+    private final ReviewRepository reviewRepository;
 
     public Task save(TaskCreateDTO taskCreateDTO) {
         Task task = new Task();
@@ -69,7 +76,7 @@ public class TaskService {
             if (property.getKind() == PropertyKind.DATE) {
                 ((ValueDate) currentValue).setValue();
             }
-            if(property.getKind() == PropertyKind.TEXT){
+            if (property.getKind() == PropertyKind.TEXT) {
                 currentValue.setValue(property.getDefaultValue());
             }
         }
@@ -91,6 +98,10 @@ public class TaskService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        //Set if the task is revisable or no...
+        task.setRevisable(project.getProjectReviewENUM().equals(ProjectReviewENUM.MANDATORY));
+
         return taskRepository.save(task);
     }
 
@@ -98,7 +109,7 @@ public class TaskService {
     public Task edit(TaskEditDTO taskEditDTO) {
         try {
             Task task = findById(taskEditDTO.getId());
-            BeanUtils.copyProperties(taskEditDTO, task);
+            modelMapper.map(taskEditDTO, task);
             return taskRepository.save(task);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -115,7 +126,6 @@ public class TaskService {
     }
 
     public void deleteById(Long id) {
-        Task task = findById(id);
         taskRepository.deleteById(id);
     }
 
@@ -130,12 +140,28 @@ public class TaskService {
         if (!task.getProject().getProperties().contains(property)) {
             throw new RuntimeException("There isn't a property with this id on the project : " + task.getProject().getName());
         }
+        UserTeam userTeam = userTeamService.findUserTeamByComposeId(task.getProject().getTeam().getId(), editValueDTO.getUserID());
+
         for (int i = 0; i < task.getValues().size(); i++) {
             if (task.getValues().get(i).getId().equals(editValueDTO.getValue().getId())) {
                 Value currentValue = property.getKind().getValue();
                 currentValue.setId(editValueDTO.getValue().getId());
                 currentValue.setTask(task);
                 currentValue.setProperty(property);
+                if(property.getKind() == PropertyKind.STATUS){
+                    if(!userTeam.equals(task.getCreator())){
+                        PropertyList propertyList = (PropertyList) editValueDTO.getValue().getValue();
+                        if(propertyList.getPropertyListKind().equals(PropertyListKind.DONE)){
+                            throw new RuntimeException("Não é possível definir como concluído, " +
+                                    "pois a tarefa deve passar por uma revisão do criador!");
+                        }
+
+//                        PropertyList propertyListCurrent = (PropertyList) currentValue.getValue();
+//                        if(propertyListCurrent.getPropertyListKind().equals(PropertyListKind.DONE)){
+//                            throw new RuntimeException("Apenas o criador da tarefa pode remover dos concluídos!");
+//                        }
+                    }
+                }
                 currentValue.setValue(editValueDTO.getValue().getValue());
                 task.getValues().set(i, currentValue);
             }
@@ -254,7 +280,6 @@ public class TaskService {
             throw new RuntimeException();
         }
     }
-
 
 
 }

@@ -37,7 +37,8 @@ public class ReviewService {
 
         Optional<Review> reviewOptional = task.getReviews().stream()
                 .filter(review1 -> review1.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)).findFirst();
-        System.out.println(reviewOptional);
+
+
         if(reviewOptional.isEmpty()){
             throw new RuntimeException("Nenhuma revisão em aberto!");
         }
@@ -148,5 +149,11 @@ public class ReviewService {
         }
         throw new RuntimeException("Review não existe!");
 
+    }
+
+    public void setRevisable(Long taskID, Boolean booleanState){
+        Task task = taskService.findById(taskID);
+        task.setRevisable(booleanState);
+        taskService.save(task);
     }
 }
