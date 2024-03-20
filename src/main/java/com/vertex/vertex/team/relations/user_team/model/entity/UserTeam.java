@@ -61,6 +61,11 @@ public class UserTeam {
     @ToString.Exclude
     private List<TaskResponsable> taskResponsables;
 
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonIgnore
+    @ToString.Exclude
+    private List<Project> project;
+
 
 
 

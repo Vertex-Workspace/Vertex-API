@@ -56,7 +56,7 @@ public class Project {
     @OneToOne(cascade = CascadeType.ALL)
     private File file;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     private List<UserTeam> collaborators;
 
     //create a list of properties if it doesn't exist

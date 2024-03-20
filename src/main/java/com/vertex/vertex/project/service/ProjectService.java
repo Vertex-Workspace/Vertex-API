@@ -15,6 +15,7 @@ import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.team.model.entity.Team;
+import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
@@ -200,29 +201,31 @@ public class ProjectService {
         return users;
     }
 
+
     public Project updateProjectCollaborators(ProjectEditDTO projectEditDTO) {
         Project project = projectRepository.findById(projectEditDTO.getId()).get();
-        System.out.println(projectEditDTO);
         project.setName(projectEditDTO.getName());
         project.setDescription(projectEditDTO.getDescription());
 
-        if (project.getCollaborators() != null) {
-            for (UserTeam userTeam : project.getCollaborators()) {
-                //if the user selected, it means that it was in project and now it won't be more
-                if (projectEditDTO.getListOfResponsibles() != null) {
-//                    if (projectEditDTO.getListOfResponsibles().contains(userTeam)) {
-//                        userTeam.setProject(null);
-//                        project.getCollaborators().remove(userTeam);
-//                    } else {
-                        for (UserTeam userTeamDTO : projectEditDTO.getListOfResponsibles()) {
-                            project.getCollaborators().add(userTeamDTO);
-                            userTeamService.save(userTeamDTO);
+        if (projectEditDTO.getListOfResponsibles() != null) {
+            for (User user : projectEditDTO.getListOfResponsibles()) {
+//                if the user selected, it means that it was in project and now it won't be more
+                UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), user.getId());
+                if (!project.getCollaborators().contains(userTeam1)) {
+                    project.getCollaborators().add(userTeam1);
+                } else {
+                    for (UserTeam userTeam : project.getCollaborators()) {
+                        if (userTeam != null) {
+                            if (userTeam.getUser().equals(user)) {
+                                userTeam.setProject(null);
+                                userTeamService.save(userTeam);
+                                project.getCollaborators().remove(userTeam);
+                            }
                         }
-//                    }
+                    }
                 }
             }
         }
-        System.out.println(project);
         return projectRepository.save(project);
     }
 
