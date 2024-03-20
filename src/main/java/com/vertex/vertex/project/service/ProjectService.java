@@ -25,10 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -213,14 +210,14 @@ public class ProjectService {
                 UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), user.getId());
                 if (!project.getCollaborators().contains(userTeam1)) {
                     project.getCollaborators().add(userTeam1);
-                } else {
-                    for (UserTeam userTeam : project.getCollaborators()) {
-                        if (userTeam != null) {
-                            if (userTeam.getUser().equals(user)) {
-                                userTeam.setProject(null);
-                                userTeamService.save(userTeam);
-                                project.getCollaborators().remove(userTeam);
-                            }
+                }else {
+                    Iterator<UserTeam> collaboratorsIterator = project.getCollaborators().iterator();
+                    while (collaboratorsIterator.hasNext()) {
+                        UserTeam userTeam = collaboratorsIterator.next();
+                        if (userTeam != null && userTeam.getUser().equals(user)) {
+                            userTeam.setProject(null);
+                            userTeamService.save(userTeam);
+                            collaboratorsIterator.remove();
                         }
                     }
                 }
@@ -228,5 +225,6 @@ public class ProjectService {
         }
         return projectRepository.save(project);
     }
+
 
 }
