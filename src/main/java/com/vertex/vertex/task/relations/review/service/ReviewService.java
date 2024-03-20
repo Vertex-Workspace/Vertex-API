@@ -32,38 +32,40 @@ public class ReviewService {
     private final TaskService taskService;
     private final ProjectService projectService;
     private final TaskHoursService taskHoursService;
+    public void finalReview(ReviewCheck reviewCheck) {
+        Task task = taskService.findById(reviewCheck.getTaskID());
 
-//    public Task saveReview(ReviewCheck reviewCheck) {
-//        Task task = findById(reviewCheck.getTask().getId());
-//        Review review;
-//        TaskResponsable taskResponsable = taskResponsablesRepository.findById(reviewCheck.getReviewer().getId()).get();
-//
-//        if (reviewCheck.getId() != null) {
-//            for (Review reviewFor : task.getReviews()) {
-//                if (reviewFor.getId().equals(reviewCheck.getId())) {
-//                    review = reviewFor;
-//                    task.getReviews().remove(review);
-//                    return save(task);
-//                }
-//            }
-//        } else {
-//            review = new Review();
-//            if (task.getCreator().getId().equals(taskResponsable.getId())) {
-//                BeanUtils.copyProperties(reviewCheck, review);
-//                task.getReviews().add(review);
-//                task.setApproveStatus(reviewCheck.getApproveStatus());
-//            } else {
-//                throw new RuntimeException("O usuário não é o criador da tarefa");
-//            }
-//        }
-//        return save(task);
-//    }
+        Optional<Review> reviewOptional = task.getReviews().stream()
+                .filter(review1 -> review1.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)).findFirst();
 
-    public Task sendToReview(SendToReviewDTO sendToReviewDTO) {
+
+        if(reviewOptional.isEmpty()){
+            throw new RuntimeException("Nenhuma revisão em aberto!");
+        }
+
+        Review review = reviewOptional.get();
+
+
+        review.setReviewDate(LocalDateTime.now());
+        review.setGrade(reviewCheck.getGrade());
+        review.setFinalDescription(reviewCheck.getFinalDescription());
+
+        Optional<TaskResponsable> creator = review.getTask().getTaskResponsables()
+                .stream().filter(
+                        taskResponsable -> taskResponsable.getUserTeam().getUser().getId().equals(reviewCheck.getReviewerID()))
+                .findFirst();
+        if(creator.isEmpty()){
+            throw new RuntimeException("Id do revisador errado!");
+        }
+        review.setCreatorReviewer(creator.get());
+        review.setApproveStatus(reviewCheck.getApproveStatus());
+        reviewRepository.save(review);
+    }
+
+    public void sendToReview(SendToReviewDTO sendToReviewDTO) {
         Task task = taskService.findById(sendToReviewDTO.getTask().getId());
         //Validations
-        if (task.getApproveStatus() == ApproveStatus.DISAPPROVED ||
-                task.getApproveStatus() == ApproveStatus.INPROGRESS) {
+        if (!task.isUnderAnalysis()) {
             Review review = new Review();
             //Description
             review.setDescription(sendToReviewDTO.getDescription());
@@ -79,14 +81,12 @@ public class ReviewService {
                 throw new RuntimeException("O usuário que enviou a revisão não é um responsável da tarefa");
             }
             review.setApproveStatus(ApproveStatus.UNDERANALYSIS);
+            review.setSentDate(LocalDateTime.now());
             //Save the initial Review
             reviewRepository.save(review);
-
-            //Change the state of the task and save
-            task.setApproveStatus(ApproveStatus.UNDERANALYSIS);
-            return taskService.save(task);
+        } else {
+            throw new RuntimeException("A tarefa já foi aprovada. Ela não pode voltar para análise");
         }
-        throw new RuntimeException("A tarefa já foi aprovada. Ela não pode voltar para análise");
     }
 
     public List<TaskWaitingToReviewDTO> getTasksToReview(Long userID, Long projectID) {
@@ -101,7 +101,7 @@ public class ReviewService {
                 .get();
 
         for (Task task : project.getTasks()){
-            if(task.getCreator().equals(loggedUser) && task.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)){
+            if(task.getCreator().equals(loggedUser) && !task.isUnderAnalysis()){
                 TaskWaitingToReviewDTO taskWaitingToReviewDTO = new TaskWaitingToReviewDTO(task);
 
                 Optional<Review> currentReview = task.getReviews().stream()
@@ -140,5 +140,20 @@ public class ReviewService {
                     LocalTime.MIDNIGHT.plus(taskHoursService.calculateTimeOnTask(taskResponsable))));
         }
         return reviewHoursDTOS;
+    }
+
+    public Review findById(Long reviewID){
+        Optional<Review> review = reviewRepository.findById(reviewID);
+        if(review.isPresent()){
+            return review.get();
+        }
+        throw new RuntimeException("Review não existe!");
+
+    }
+
+    public void setRevisable(Long taskID, Boolean booleanState){
+        Task task = taskService.findById(taskID);
+        task.setRevisable(booleanState);
+        taskService.save(task);
     }
 }

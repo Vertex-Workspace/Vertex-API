@@ -14,8 +14,10 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.stereotype.Service;
 
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @AllArgsConstructor
 @Service
@@ -28,12 +30,21 @@ public class UserTeamService {
     }
 
     public UserTeam findUserTeamByComposeId(Long teamId, Long userId){
-        return userTeamRepository.findByTeam_IdAndUser_Id(teamId, userId);
+        Optional<UserTeam> userTeam = userTeamRepository.findByTeam_IdAndUser_Id(teamId, userId);
+        if(userTeam.isPresent()){
+            return userTeam.get();
+        }
+        throw new RuntimeException("User Team Not Found!");
     }
 
     public Boolean findUserInTeam(Team team, Long userId) {
-        UserTeam userTeam = userTeamRepository.findByTeam_IdAndUser_Id(team.getId(), userId);
-        return userTeam != null;
+        UserTeam userTeam = null;
+        try {
+            findUserTeamByComposeId(team.getId(), userId);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public List<TeamViewListDTO> findTeamsByUser(Long userID){

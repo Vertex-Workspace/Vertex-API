@@ -1,6 +1,7 @@
 package com.vertex.vertex.project.model.DTO;
 
 import com.vertex.vertex.file.model.File;
+import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
@@ -24,8 +25,10 @@ public class ProjectCreateDTO {
     private UserTeam creator;
     private Team team;
     private Project projectDependency;
-    private File file;
+//    private File file;
     private List<User> listOfResponsibles;
+
+    private ProjectReviewENUM projectReviewENUM;
 
 }
 

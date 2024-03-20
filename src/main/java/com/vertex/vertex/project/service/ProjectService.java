@@ -13,6 +13,9 @@ import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
+import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
+import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
@@ -62,6 +65,7 @@ public class ProjectService {
 
         project.setCreator(userTeam);
         project.setTeam(team);
+        defaultProperties(project);
         projectRepository.save(project);
         if (!collaborators.contains(project.getCreator())) {
             collaborators.add(project.getCreator());
@@ -149,6 +153,24 @@ public class ProjectService {
         ProjectOneDTO projectOneDTO = new ProjectOneDTO();
         Project project = projectRepository.findById(id).get();
         BeanUtils.copyProperties(project, projectOneDTO);
+
+        //To Set as null
+        projectOneDTO.setTasks(new ArrayList<>());
+
+        //Pass through all tasks of the project and validates if task has an opened review (UNDERANALYSIS)
+        //If it has, It won't be included into list
+        for (Task task : project.getTasks()) {
+            boolean isReviewed = false;
+            for (Review review : task.getReviews()){
+                if(review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)
+                ){
+                    isReviewed = true;
+                }
+            }
+            if(!isReviewed){
+                projectOneDTO.getTasks().add(task);
+            }
+        }
         projectOneDTO.setIdTeam(project.getTeam().getId());
         return projectOneDTO;
     }
@@ -164,6 +186,33 @@ public class ProjectService {
     public Project save(Project project) {
         return projectRepository.save(project);
     }
+    public void defaultProperties(Project project) {
+
+        //Default properties of a project
+        List<Property> properties = new ArrayList<>();
+        properties.add(new Property(PropertyKind.STATUS, "Status", true, null, PropertyStatus.FIXED));
+        properties.add(new Property(PropertyKind.DATE, "Data", true, null, PropertyStatus.FIXED));
+        properties.add(new Property(PropertyKind.LIST, "Dificuldade", false, null, PropertyStatus.VISIBLE));
+        properties.add(new Property(PropertyKind.NUMBER, "Número", false, null, PropertyStatus.VISIBLE));
+        properties.add(new Property(PropertyKind.TEXT, "Palavra-Chave", false, null, PropertyStatus.INVISIBLE));
+
+        for ( Property property : properties ) {
+            if(property.getKind() == PropertyKind.STATUS){
+                property.setPropertyLists(defaultStatus(property));
+            }
+            if(property.getKind() == PropertyKind.LIST){
+                List<PropertyList> propertiesList = new ArrayList<>();
+                propertiesList.add(new PropertyList("Fácil", Color.GREEN, property, PropertyListKind.VISIBLE, false));
+                propertiesList.add(new PropertyList("Médio", Color.YELLOW, property, PropertyListKind.VISIBLE, true));
+                propertiesList.add(new PropertyList("Díficil", Color.RED, property, PropertyListKind.VISIBLE, true));
+                propertiesList.add(new PropertyList("Não validado", Color.BLUE, property, PropertyListKind.INVISIBLE, true));
+                property.setPropertyLists(propertiesList);
+            }
+            property.setProject(project);
+            project.addProperty(property);
+        }
+    }
+
 
     public List<PropertyList> defaultStatus(Property property) {
         List<PropertyList> propertiesList = new ArrayList<>();
@@ -225,6 +274,7 @@ public class ProjectService {
         }
         return projectRepository.save(project);
     }
+
 
 
 }

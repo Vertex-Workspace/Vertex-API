@@ -2,6 +2,7 @@ package com.vertex.vertex.project.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.file.model.File;
+import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.note.model.entity.Note;
@@ -54,6 +55,11 @@ public class Project {
     @ManyToMany(cascade = CascadeType.ALL)
     private List<UserTeam> collaborators;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ProjectReviewENUM projectReviewENUM;
+
+
     //create a list of properties if it doesn't exist
     public void addProperty(Property property) {
         if(properties != null){
@@ -70,5 +76,6 @@ public class Project {
         this.team = team;
         this.creator = creator;
         this.collaborators = collaborators;
+        this.projectReviewENUM = ProjectReviewENUM.OPTIONAL;
     }
 }

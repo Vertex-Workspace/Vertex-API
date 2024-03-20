@@ -70,10 +70,10 @@ public class TeamService {
     
             String invitationCode = generateInvitationCode();
             team.setInvitationCode(invitationCode);
-            teamRepository.save(team);
+            Team savedTeam = teamRepository.save(team);
             if (teamViewListDTO.getId() == null) {
                 UserTeamAssociateDTO userTeamAssociateDTO = new UserTeamAssociateDTO();
-                userTeamAssociateDTO.setTeam(team);
+                userTeamAssociateDTO.setTeam(savedTeam);
                 userTeamAssociateDTO.setUser(teamViewListDTO.getCreator());
                 userTeamAssociateDTO.setCreator(true);
                 Team teamWithUserTeam = editUserTeam(userTeamAssociateDTO);
@@ -81,6 +81,7 @@ public class TeamService {
                 createChatForTeam(teamWithUserTeam);
 
                 if(teamViewListDTO.isDefaultTeam()) {
+                    System.out.println(teamWithUserTeam);
                     saveDefaultTasksAndProject(teamWithUserTeam);
                 }
             }
@@ -370,12 +371,15 @@ public class TeamService {
                 new Project("Projeto Profissional", "Seu projeto pessoal padrão", team, team.getCreator(),  List.of(team.getCreator()));
 
         TaskCreateDTO taskCreateDTO1 =
-                new TaskCreateDTO("Lavar a louça", "Sua tarefa é lavar a louça", team.getCreator(), projectDefault1);
+                new TaskCreateDTO("Lavar a louça", "Sua tarefa é lavar a louça", team.getCreator().getUser(), projectDefault1);
         TaskCreateDTO taskCreateDTO2 =
-                new TaskCreateDTO("Apresentar seminário", "Sua tarefa é lavar a louça", team.getCreator(), projectDefault2);
+                new TaskCreateDTO("Apresentar seminário", "Sua tarefa é lavar a louça", team.getCreator().getUser(), projectDefault2);
 
-        projectService.save(projectDefault1, team.getId());
-        projectService.save(projectDefault2, team.getId());
+        projectService.defaultProperties(projectDefault1);
+        projectService.defaultProperties(projectDefault2);
+
+        projectService.save(projectDefault1);
+        projectService.save(projectDefault2);
 
         taskService.save(taskCreateDTO1);
         taskService.save(taskCreateDTO2);

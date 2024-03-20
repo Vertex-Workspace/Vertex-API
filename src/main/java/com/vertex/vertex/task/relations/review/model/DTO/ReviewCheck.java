@@ -12,12 +12,9 @@ import java.sql.Date;
 @AllArgsConstructor
 @Data
 public class ReviewCheck {
-
-    private Long id;
-    private Task task;
-    private String description;
-    private Date date;
-    private TaskResponsable reviewer;
+    private Long taskID;
+    private Long reviewerID;
     private Double grade;
+    private String finalDescription;
     private ApproveStatus approveStatus;
 }

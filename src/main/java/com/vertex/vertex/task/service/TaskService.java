@@ -2,6 +2,7 @@ package com.vertex.vertex.task.service;
 
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
+import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
@@ -12,40 +13,30 @@ import com.vertex.vertex.property.service.PropertyService;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.DTO.TaskEditDTO;
 import com.vertex.vertex.task.model.DTO.TaskOpenDTO;
-import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
+import com.vertex.vertex.task.relations.review.repository.ReviewRepository;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.relations.task_responsables.model.DTOs.TaskResponsablesDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.model.exceptions.TaskDoesNotExistException;
 import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
-import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.value.model.entity.ValueDate;
-import com.vertex.vertex.task.relations.value.model.entity.ValueNumber;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
-import com.vertex.vertex.team.model.entity.Team;
-import com.vertex.vertex.team.relations.permission.model.entity.Permission;
-import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
-import com.vertex.vertex.team.service.TeamService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.mail.*;
-import javax.mail.internet.*;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -59,6 +50,8 @@ public class TaskService {
     private final ProjectService projectService;
     private final PropertyService propertyService;
     private final UserTeamService userTeamService;
+    private final ModelMapper modelMapper;
+    private final ReviewRepository reviewRepository;
     private final FileService fileService;
 
 
@@ -86,14 +79,13 @@ public class TaskService {
             if (property.getKind() == PropertyKind.DATE) {
                 ((ValueDate) currentValue).setValue();
             }
-            if(property.getKind() == PropertyKind.TEXT){
+            if (property.getKind() == PropertyKind.TEXT) {
                 currentValue.setValue(property.getDefaultValue());
             }
         }
         task.setValues(values);
-
         //Add the taskResponsables on task list of taskResponsables
-        task.setCreator(userTeamService.findById(taskCreateDTO.getCreator().getId()));
+        task.setCreator(userTeamService.findUserTeamByComposeId(project.getTeam().getId(), taskCreateDTO.getCreator().getId()));
         try {
             for (UserTeam userTeam : project.getTeam().getUserTeams()) {
                 TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
@@ -109,7 +101,9 @@ public class TaskService {
             e.printStackTrace();
         }
 
-        task.setApproveStatus(ApproveStatus.INPROGRESS);
+        //Set if the task is revisable or no...
+        task.setRevisable(project.getProjectReviewENUM().equals(ProjectReviewENUM.MANDATORY));
+
         return taskRepository.save(task);
     }
 
@@ -117,7 +111,7 @@ public class TaskService {
     public Task edit(TaskEditDTO taskEditDTO) {
         try {
             Task task = findById(taskEditDTO.getId());
-            BeanUtils.copyProperties(taskEditDTO, task);
+            modelMapper.map(taskEditDTO, task);
             return taskRepository.save(task);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -135,7 +129,6 @@ public class TaskService {
     }
 
     public void deleteById(Long id) {
-        Task task = findById(id);
         taskRepository.deleteById(id);
     }
 
@@ -150,15 +143,30 @@ public class TaskService {
         if (!task.getProject().getProperties().contains(property)) {
             throw new RuntimeException("There isn't a property with this id on the project : " + task.getProject().getName());
         }
+        UserTeam userTeam = userTeamService.findUserTeamByComposeId(task.getProject().getTeam().getId(), editValueDTO.getUserID());
+
         for (int i = 0; i < task.getValues().size(); i++) {
             if (task.getValues().get(i).getId().equals(editValueDTO.getValue().getId())) {
                 Value currentValue = property.getKind().getValue();
                 currentValue.setId(editValueDTO.getValue().getId());
                 currentValue.setTask(task);
                 currentValue.setProperty(property);
+                if(property.getKind() == PropertyKind.STATUS){
+                    if(!userTeam.equals(task.getCreator()) && task.isRevisable()){
+                        PropertyList propertyList = (PropertyList) editValueDTO.getValue().getValue();
+                        if(propertyList.getPropertyListKind().equals(PropertyListKind.DONE)){
+                            throw new RuntimeException("Não é possível definir como concluído, " +
+                                    "pois a tarefa deve passar por uma revisão do criador!");
+                        }
+
+//                        PropertyList propertyListCurrent = (PropertyList) currentValue.getValue();
+//                        if(propertyListCurrent.getPropertyListKind().equals(PropertyListKind.DONE)){
+//                            throw new RuntimeException("Apenas o criador da tarefa pode remover dos concluídos!");
+//                        }
+                    }
+                }
                 currentValue.setValue(editValueDTO.getValue().getValue());
                 task.getValues().set(i, currentValue);
-                task.setApproveStatus(ApproveStatus.INPROGRESS);
             }
         }
         return taskRepository.save(task);

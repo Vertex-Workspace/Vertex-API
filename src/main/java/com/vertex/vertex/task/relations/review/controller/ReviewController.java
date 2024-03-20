@@ -1,5 +1,6 @@
 package com.vertex.vertex.task.relations.review.controller;
 
+import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
 import com.vertex.vertex.task.relations.review.model.DTO.SendToReviewDTO;
 import com.vertex.vertex.task.relations.review.service.ReviewService;
 import lombok.AllArgsConstructor;
@@ -17,29 +18,23 @@ public class ReviewController {
     @PostMapping("/review/send")
     public ResponseEntity<?> sendToReview(@RequestBody SendToReviewDTO sendToReviewDTO){
         try{
-            return new ResponseEntity<>(reviewService.sendToReview(sendToReviewDTO), HttpStatus.OK);
+            reviewService.sendToReview(sendToReviewDTO);
+            return new ResponseEntity<>(HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
-//    @PatchMapping("/review")
-//    public ResponseEntity<?> saveReview (@RequestBody ReviewCheck reviewCheck){
-//        try{
-//            return new ResponseEntity<>(taskService.saveReview(reviewCheck), HttpStatus.OK);
-//        }catch(Exception e){
-//            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-//        }
-//    }
-//
-//    @PatchMapping("/send-to-review")
-//    public ResponseEntity<?> saveToReview (@RequestBody SetFinishedTask setFinishedTask){
-//        try{
-//            return new ResponseEntity<>(taskService.taskUnderAnalysis(setFinishedTask), HttpStatus.OK);
-//        }catch(Exception e){
-//            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-//        }
-//    }
+    @PatchMapping("/review/final")
+    public ResponseEntity<?> saveReview (@RequestBody ReviewCheck reviewCheck){
+        try{
+            reviewService.finalReview(reviewCheck);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
 
     @GetMapping("/review/{userID}/project/{projectID}")
     public ResponseEntity<?> getTasksToReview(@PathVariable Long userID, @PathVariable Long projectID){
@@ -54,6 +49,19 @@ public class ReviewController {
     public ResponseEntity<?> getPerformanceInTask(@PathVariable Long taskID){
         try{
             return new ResponseEntity<>(reviewService.getPerformanceInTask(taskID), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+
+    @PatchMapping("/{taskID}/review/change-state/{booleanState}")
+    public ResponseEntity<?> getPerformanceInTask(
+            @PathVariable Long taskID,
+            @PathVariable Boolean booleanState){
+        try{
+            reviewService.setRevisable(taskID, booleanState);
+            return new ResponseEntity<>(HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }

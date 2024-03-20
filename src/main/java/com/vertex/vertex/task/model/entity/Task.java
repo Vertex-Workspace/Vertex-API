@@ -30,11 +30,13 @@ public class Task implements FileSupporter {
     @Column(length = 55)
     private String name;
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
     private List<TaskResponsable> taskResponsables;
 
     @Column(length = 1000)
     private String description;
+
+    private boolean isRevisable;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @ToString.Exclude
@@ -60,11 +62,16 @@ public class Task implements FileSupporter {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "task", orphanRemoval = true)
     private List<Value> values;
 
-    @Enumerated(value = EnumType.STRING)
-    private ApproveStatus approveStatus;
-
     @OneToMany(cascade = CascadeType.ALL)
     List<File> files;
 
-
+    public boolean isUnderAnalysis(){
+        if(this.getReviews() != null){
+            return this.getReviews()
+                    .stream()
+                    .map(review -> review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS))
+                    .isParallel();
+        }
+        return false;
+    }
 }
