@@ -363,21 +363,11 @@ public class TeamService {
     }
 
     public void saveDefaultTasksAndProject(Team team){
-        File file1  = new File("src/main/java/com/vertex/vertex/upload/casaPadrão.png");
-        DiskFileItem fileItem = new DiskFileItem("file", "image/png", false, file1.getName(),
-                (int) file1.length(), file1.getParentFile());
-        fileItem.getOutputStream();
-
-        File file2  = new File("src/main/java/com/vertex/vertex/upload/profissionalPadrao.jfif");
-        DiskFileItem fileItem2 = new DiskFileItem("file", "image/png", false, file2.getName(),
-                (int) file2.length(), file2.getParentFile());
-        fileItem2.getOutputStream();
-        System.out.println(fileItem);
 
         Project projectDefault1 =
-                new Project("Projeto Pessoal", "Seu projeto pessoal padrão", fileItem.get(), team, team.getCreator(), List.of(team.getCreator()));
+                new Project("Projeto Pessoal", "Seu projeto pessoal padrão", team, team.getCreator(), List.of(team.getCreator()));
         Project projectDefault2 =
-                new Project("Projeto Profissional", "Seu projeto pessoal padrão", fileItem2.get(), team, team.getCreator(),  List.of(team.getCreator()));
+                new Project("Projeto Profissional", "Seu projeto pessoal padrão", team, team.getCreator(),  List.of(team.getCreator()));
 
         TaskCreateDTO taskCreateDTO1 =
                 new TaskCreateDTO("Lavar a louça", "Sua tarefa é lavar a louça", team.getCreator(), projectDefault1);

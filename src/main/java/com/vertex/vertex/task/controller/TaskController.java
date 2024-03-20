@@ -9,9 +9,11 @@ import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.service.TaskService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import org.hibernate.Remove;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -147,6 +149,36 @@ public class TaskController {
                     "Projeto não encontrado!",
                         HttpStatus.NOT_FOUND
             );
+        }
+    }
+
+    @PatchMapping("/{id}/upload")
+    public ResponseEntity<?> uploadFile(
+            @PathVariable Long id,
+            @RequestParam MultipartFile file) {
+        try {
+            return new ResponseEntity<>
+                    (taskService.uploadFile(file, id),
+                        HttpStatus.OK);
+
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>
+                    (HttpStatus.CONFLICT);
+        }
+    }
+
+    @DeleteMapping("/{taskId}/remove-file/{fileId}")
+    public ResponseEntity<?> uploadFile(
+            @PathVariable Long taskId,
+            @PathVariable Long fileId) {
+        try {
+            return new ResponseEntity<>
+                    (taskService.removeFile(taskId, fileId),
+                            HttpStatus.OK);
+
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>
+                    (HttpStatus.CONFLICT);
         }
     }
 

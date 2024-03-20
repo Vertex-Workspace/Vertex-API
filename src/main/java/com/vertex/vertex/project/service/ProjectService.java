@@ -127,7 +127,7 @@ public class ProjectService {
 
     public void updateImage(MultipartFile file, Long projectId) throws IOException {
         Project project = projectRepository.findById(projectId).get();
-        File file1 = fileService.updateImageProject(file);
+        File file1 = fileService.save(file);
 //        project.setImage(file.getBytes());
         project.setFile(file1);
         projectRepository.save(project);

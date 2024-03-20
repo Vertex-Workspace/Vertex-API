@@ -28,11 +28,6 @@ public class Project {
     private String name;
     private String description;
 
-    @Lob
-    @Column(columnDefinition = "BLOB")
-    @ToString.Exclude
-    private byte[] image;
-
     @ManyToOne
     @JsonIgnore
     @ToString.Exclude
@@ -69,10 +64,9 @@ public class Project {
         }
     }
 
-    public Project(String name, String description, byte[] image, Team team, UserTeam creator, List<UserTeam>collaborators) {
+    public Project(String name, String description, Team team, UserTeam creator, List<UserTeam>collaborators) {
         this.name = name;
         this.description = description;
-        this.image = image;
         this.team = team;
         this.creator = creator;
         this.collaborators = collaborators;
