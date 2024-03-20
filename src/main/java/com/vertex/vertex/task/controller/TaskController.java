@@ -150,7 +150,22 @@ public class TaskController {
         }
     }
 
+    @GetMapping("/taskResponsables/{taskId}")
+    public ResponseEntity<?> getTaskResponsables(@PathVariable Long taskId){
+        try{
+            return new ResponseEntity<>(taskService.getTaskResponsables(taskId), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
 
-
-
+    @PatchMapping("/taskResponsables/{taskId}/{teamId}/{userId}")
+    public ResponseEntity<?> updateParticipants(@PathVariable Long taskId, @PathVariable Long userId, @PathVariable Long teamId){
+        try{
+            taskService.editTaskResponsables(taskId, userId, teamId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
 }

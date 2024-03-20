@@ -30,6 +30,7 @@ import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.service.TeamService;
+import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -90,7 +91,7 @@ public class TaskService {
         //Add the taskResponsables on task list of taskResponsables
         task.setCreator(userTeamService.findById(taskCreateDTO.getCreator().getId()));
         try {
-            for (UserTeam userTeam : project.getTeam().getUserTeams()) {
+            for (UserTeam userTeam : project.getCollaborators()) {
                 TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
                 if (task.getTaskResponsables() == null) {
                     ArrayList<TaskResponsable> listaParaFuncionarEstaCoisaBemLegal = new ArrayList<>();
@@ -267,6 +268,31 @@ public class TaskService {
 
         } catch (Exception e) {
             throw new RuntimeException();
+        }
+    }
+
+    public List<User> getTaskResponsables(Long taskId){
+        Task task = findById(taskId);
+        List<User> users = new ArrayList<>();
+        for(TaskResponsable taskResponsable : task.getTaskResponsables()){
+            users.add(taskResponsable.getUserTeam().getUser());
+        }
+        return users;
+    }
+
+    public void editTaskResponsables(Long taskId, Long userId, Long teamId){
+        Task task = findById(taskId);
+        UserTeam userTeam = userTeamService.findUserTeamByComposeId(teamId, userId);
+
+        if(task.getTaskResponsables() != null){
+            for(TaskResponsable taskResponsable : task.getTaskResponsables()){
+                if(taskResponsable.getUserTeam().equals(userTeam)){
+                    taskResponsable.setTask(null);
+                    task.getTaskResponsables().remove(taskResponsable);
+                }
+            }
+            TaskResponsable taskResponsable = new TaskResponsable(userTeam, task);
+            task.getTaskResponsables().add(taskResponsable);
         }
     }
 

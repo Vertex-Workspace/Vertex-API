@@ -44,4 +44,6 @@ public class TaskResponsable {
     @ToString.Exclude
     private List<TaskHour> taskHours;
 
+
+
 }
