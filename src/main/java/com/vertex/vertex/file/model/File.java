@@ -22,8 +22,10 @@ public class File {
     private String type;
 
     @Lob
-    @Column(columnDefinition = "BLOB")
+    @Column(columnDefinition = "LONGBLOB")
     private byte[] file;
+
+
 
     public File(MultipartFile file)
             throws IOException {

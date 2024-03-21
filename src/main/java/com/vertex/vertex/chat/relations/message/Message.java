@@ -12,6 +12,7 @@ import lombok.ToString;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.socket.WebSocketMessage;
 
+import java.sql.Blob;
 import java.time.LocalDateTime;
 
 @Entity
@@ -32,11 +33,8 @@ public class Message {
     private String user;
 
     @OneToOne(cascade = CascadeType.ALL)
+    @ToString.Exclude
     private File file;
-
-    @Lob
-    @Column(columnDefinition = "LONGBLOB")
-    private byte[] imageUser;
 
     private String contentMessage;
     private LocalDateTime time;

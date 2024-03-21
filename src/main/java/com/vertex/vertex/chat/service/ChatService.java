@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.sql.Blob;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -79,7 +80,7 @@ public class ChatService {
     }
 
 
-    public Chat saveFile(Long chatId, MultipartFile file, String user) throws IOException {
+    public Message saveFile(Long chatId, MultipartFile file, String user) throws IOException {
 
         Chat chat = chatRepository.findById(chatId).get();
 
@@ -92,9 +93,13 @@ public class ChatService {
         message.setVisualized(false);
 
         message.setFile(file1);
+
 //            System.out.println(message);
         chat.getMessages().add(message);
-        return chatRepository.save(chat);
+
+        System.out.println("MESSAGE"+message);
+        chatRepository.save(chat);
+        return message;
 
 
     }

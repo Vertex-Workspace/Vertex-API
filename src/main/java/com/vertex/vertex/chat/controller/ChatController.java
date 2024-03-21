@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
+import java.sql.Blob;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -71,7 +72,7 @@ public class ChatController {
     }
 
     @PatchMapping("patchFile/{chatId}")
-    public Chat patchFileOnChat(
+    public Message patchFileOnChat(
             @PathVariable Long chatId,
             @RequestParam MultipartFile file,
             @RequestParam String user
