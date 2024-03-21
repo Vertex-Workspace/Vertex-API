@@ -1,6 +1,5 @@
 package com.vertex.vertex.notification.entity.model;
 
-import com.vertex.vertex.notification.entity.Enum.TypeNotification;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,16 +14,18 @@ import java.time.LocalDateTime;
 public class Notification {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    String message;
-    Boolean status;
-    LocalDateTime date;
+    private String title;
+    private String message;
+    private Boolean archive;
+    private LocalDateTime date;
+    private String linkRedirect;
 
-
-    public Notification(String s, boolean b, LocalDateTime now) {
-        this.message = s;
-        this.status = b;
-        this.date = now;
+    public Notification(String title, String message, LocalDateTime date, String linkRedirect) {
+        this.title = title;
+        this.message = message;
+        this.date = date;
+        this.linkRedirect = linkRedirect;
     }
 }
