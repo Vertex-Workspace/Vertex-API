@@ -1,5 +1,6 @@
 package com.vertex.vertex.task.model.DTO;
 
+import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
@@ -19,4 +20,6 @@ public class TaskOpenDTO {
     private String projectName;
     private String creatorFullName;
     private String email;
+
+    private ProjectReviewENUM projectReviewENUM;
 }

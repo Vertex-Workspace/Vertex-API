@@ -64,6 +64,11 @@ public class ReviewService {
 
     public void sendToReview(SendToReviewDTO sendToReviewDTO) {
         Task task = taskService.findById(sendToReviewDTO.getTask().getId());
+
+        if(!task.isRevisable()){
+            throw new RuntimeException("A Tarefa não exige entrega!");
+        }
+
         //Validations
         if (!task.isUnderAnalysis()) {
             Review review = new Review();

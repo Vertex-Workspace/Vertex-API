@@ -5,6 +5,7 @@ import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
 import com.vertex.vertex.project.model.DTO.ProjectEditDTO;
 import com.vertex.vertex.project.model.DTO.ProjectOneDTO;
+import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.property.model.ENUM.Color;
@@ -17,6 +18,7 @@ import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.value.service.ValueService;
+import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
@@ -38,6 +40,7 @@ public class ProjectService {
     private final UserTeamService userTeamService;
     private final ValueService valueService;
     private final FileService fileService;
+    private final TaskRepository taskRepository;
 
     public Project save(ProjectCreateDTO projectCreateDTO, Long teamId) {
         UserTeam userTeam;
@@ -65,7 +68,8 @@ public class ProjectService {
 
         project.setCreator(userTeam);
         project.setTeam(team);
-        defaultProperties(project);
+        project.setProjectReviewENUM(projectCreateDTO.getProjectReviewENUM());
+
         projectRepository.save(project);
         if (!collaborators.contains(project.getCreator())) {
             collaborators.add(project.getCreator());
@@ -272,6 +276,16 @@ public class ProjectService {
                 }
             }
         }
+        project.setProjectReviewENUM(projectEditDTO.getProjectReviewENUM());
+
+        if(projectEditDTO.getProjectReviewENUM() == ProjectReviewENUM.MANDATORY){
+            project.getTasks().forEach(task -> task.setRevisable(true));
+            taskRepository.saveAll(project.getTasks());
+        } else if (projectEditDTO.getProjectReviewENUM() == ProjectReviewENUM.EMPTY){
+            project.getTasks().forEach(task -> task.setRevisable(false));
+            taskRepository.saveAll(project.getTasks());
+        }
+
         return projectRepository.save(project);
     }
 

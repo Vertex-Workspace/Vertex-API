@@ -145,6 +145,7 @@ public class TaskService {
         }
         UserTeam userTeam = userTeamService.findUserTeamByComposeId(task.getProject().getTeam().getId(), editValueDTO.getUserID());
 
+
         for (int i = 0; i < task.getValues().size(); i++) {
             if (task.getValues().get(i).getId().equals(editValueDTO.getValue().getId())) {
                 Value currentValue = property.getKind().getValue();
@@ -153,16 +154,19 @@ public class TaskService {
                 currentValue.setProperty(property);
                 if(property.getKind() == PropertyKind.STATUS){
                     if(!userTeam.equals(task.getCreator()) && task.isRevisable()){
+
+                        // Validates another -> done
                         PropertyList propertyList = (PropertyList) editValueDTO.getValue().getValue();
                         if(propertyList.getPropertyListKind().equals(PropertyListKind.DONE)){
                             throw new RuntimeException("Não é possível definir como concluído, " +
                                     "pois a tarefa deve passar por uma revisão do criador!");
                         }
 
-//                        PropertyList propertyListCurrent = (PropertyList) currentValue.getValue();
-//                        if(propertyListCurrent.getPropertyListKind().equals(PropertyListKind.DONE)){
-//                            throw new RuntimeException("Apenas o criador da tarefa pode remover dos concluídos!");
-//                        }
+                        // Validates done -> another
+                        PropertyList propertyListCurrent = (PropertyList) task.getValues().get(i).getValue();
+                        if(propertyListCurrent.getPropertyListKind().equals(PropertyListKind.DONE)){
+                            throw new RuntimeException("Apenas o criador da tarefa pode remover dos concluídos!");
+                        }
                     }
                 }
                 currentValue.setValue(editValueDTO.getValue().getValue());
@@ -263,7 +267,8 @@ public class TaskService {
         return new TaskOpenDTO(task.getProject().getTeam().getName()
                 , task.getProject().getName()
                 , fullName
-                , task.getCreator().getUser().getEmail());
+                , task.getCreator().getUser().getEmail()
+                , task.getProject().getProjectReviewENUM());
     }
 
     public List<Task> getAllByUser(Long id) {
