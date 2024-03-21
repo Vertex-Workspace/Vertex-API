@@ -324,30 +324,39 @@ public class TaskService {
         Task task = findById(updateTaskResponsableDTO.getTaskId());
 
         if (updateTaskResponsableDTO.getTaskResponsableList() != null) {
+            List<User> usersToRemove = new ArrayList<>();
             for (User user : updateTaskResponsableDTO.getTaskResponsableList()) {
                 UserTeam userTeam = userTeamService.findUserTeamByComposeId(updateTaskResponsableDTO.getTeamId(), user.getId());
-                if (task.getTaskResponsables() != null) {
-                    Iterator<TaskResponsable> collaboratorsIterator = task.getTaskResponsables().iterator();
-                    while (collaboratorsIterator.hasNext()) {
-                        TaskResponsable taskResponsable = collaboratorsIterator.next();
-                        if (taskResponsable != null && taskResponsable.getUserTeam().equals(userTeam)) {
-                            collaboratorsIterator.remove();
-                            task.getTaskResponsables().remove(taskResponsable);
-                            taskResponsablesRepository.delete(taskResponsable);
-                            return taskRepository.save(task);
-                        }
+                boolean userExists = false;
+                for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
+                    if (taskResponsable.getUserTeam().equals(userTeam)) {
+                        usersToRemove.add(user);
+                        userExists = true;
+                        break;
                     }
                 }
-                for(User user1 : updateTaskResponsableDTO.getTaskResponsableList()) {
-//                    if (!user1.equals(userTeam.getUser())) {
-//                        TaskResponsable taskResponsable = new TaskResponsable(userTeam, task);
-//                        task.getTaskResponsables().add(taskResponsable);
-//                    }
+
+
+                if (!userExists) {
+                    TaskResponsable taskResponsable = new TaskResponsable(userTeam, task);
+                    task.getTaskResponsables().add(taskResponsable);
+                }
+            }
+
+            for (User userToRemove : usersToRemove) {
+                UserTeam userTeamToRemove = userTeamService.findUserTeamByComposeId(updateTaskResponsableDTO.getTeamId(), userToRemove.getId());
+                for (Iterator<TaskResponsable> iterator = task.getTaskResponsables().iterator(); iterator.hasNext();) {
+                    TaskResponsable taskResponsable = iterator.next();
+                    if (taskResponsable.getUserTeam().equals(userTeamToRemove)) {
+                        iterator.remove();
+                        taskResponsablesRepository.delete(taskResponsable);
+                    }
                 }
             }
         }
 
         return taskRepository.save(task);
     }
+
 
 }
