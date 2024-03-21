@@ -5,6 +5,7 @@ import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
 import com.vertex.vertex.project.model.DTO.ProjectEditDTO;
 import com.vertex.vertex.project.model.DTO.ProjectOneDTO;
+import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.property.model.ENUM.Color;
@@ -97,6 +98,7 @@ public class ProjectService {
             }
             property.setProject(project);
             project.addProperty(property);
+            project.setProjectReviewENUM(ProjectReviewENUM.OPTIONAL);
         }
         return projectRepository.save(project);
     }

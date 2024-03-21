@@ -13,6 +13,8 @@ import com.vertex.vertex.property.service.PropertyService;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.DTO.TaskEditDTO;
 import com.vertex.vertex.task.model.DTO.TaskOpenDTO;
+import com.vertex.vertex.task.model.DTO.UpdateTaskResponsableDTO;
+import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.review.repository.ReviewRepository;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.relations.task_responsables.model.DTOs.TaskResponsablesDTO;
@@ -27,6 +29,7 @@ import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskRespo
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
+import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -37,6 +40,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -151,10 +155,10 @@ public class TaskService {
                 currentValue.setId(editValueDTO.getValue().getId());
                 currentValue.setTask(task);
                 currentValue.setProperty(property);
-                if(property.getKind() == PropertyKind.STATUS){
-                    if(!userTeam.equals(task.getCreator()) && task.isRevisable()){
+                if (property.getKind() == PropertyKind.STATUS) {
+                    if (!userTeam.equals(task.getCreator()) && task.isRevisable()) {
                         PropertyList propertyList = (PropertyList) editValueDTO.getValue().getValue();
-                        if(propertyList.getPropertyListKind().equals(PropertyListKind.DONE)){
+                        if (propertyList.getPropertyListKind().equals(PropertyListKind.DONE)) {
                             throw new RuntimeException("Não é possível definir como concluído, " +
                                     "pois a tarefa deve passar por uma revisão do criador!");
                         }
@@ -307,6 +311,43 @@ public class TaskService {
         }
     }
 
+    public List<User> getTaskResponsables(Long taskId) {
+        Task task = findById(taskId);
+        List<User> users = new ArrayList<>();
+        for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
+            users.add(taskResponsable.getUserTeam().getUser());
+        }
+        return users;
+    }
 
+    public Task editTaskResponsables(UpdateTaskResponsableDTO updateTaskResponsableDTO) {
+        Task task = findById(updateTaskResponsableDTO.getTaskId());
+
+        if (updateTaskResponsableDTO.getTaskResponsableList() != null) {
+            for (User user : updateTaskResponsableDTO.getTaskResponsableList()) {
+                UserTeam userTeam = userTeamService.findUserTeamByComposeId(updateTaskResponsableDTO.getTeamId(), user.getId());
+                if (task.getTaskResponsables() != null) {
+                    Iterator<TaskResponsable> collaboratorsIterator = task.getTaskResponsables().iterator();
+                    while (collaboratorsIterator.hasNext()) {
+                        TaskResponsable taskResponsable = collaboratorsIterator.next();
+                        if (taskResponsable != null && taskResponsable.getUserTeam().equals(userTeam)) {
+                            collaboratorsIterator.remove();
+                            task.getTaskResponsables().remove(taskResponsable);
+                            taskResponsablesRepository.delete(taskResponsable);
+                            return taskRepository.save(task);
+                        }
+                    }
+                }
+                for(User user1 : updateTaskResponsableDTO.getTaskResponsableList()) {
+//                    if (!user1.equals(userTeam.getUser())) {
+//                        TaskResponsable taskResponsable = new TaskResponsable(userTeam, task);
+//                        task.getTaskResponsables().add(taskResponsable);
+//                    }
+                }
+            }
+        }
+
+        return taskRepository.save(task);
+    }
 
 }

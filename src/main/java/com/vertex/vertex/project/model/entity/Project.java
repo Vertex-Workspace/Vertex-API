@@ -56,7 +56,7 @@ public class Project {
     private List<UserTeam> collaborators;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+//    @Column(nullable = false)
     private ProjectReviewENUM projectReviewENUM;
 
 

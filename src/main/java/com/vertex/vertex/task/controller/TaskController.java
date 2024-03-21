@@ -1,6 +1,7 @@
 package com.vertex.vertex.task.controller;
 
 import com.vertex.vertex.task.model.DTO.TaskEditDTO;
+import com.vertex.vertex.task.model.DTO.UpdateTaskResponsableDTO;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.relations.task_responsables.model.DTOs.TaskResponsablesDTO;
@@ -179,6 +180,26 @@ public class TaskController {
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>
                     (HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping("/taskResponsables/{taskId}")
+    public ResponseEntity<?> getTaskResponsables(@PathVariable Long taskId){
+        try{
+            return new ResponseEntity<>(taskService.getTaskResponsables(taskId), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
+
+    @PatchMapping("/taskResponsables")
+    public ResponseEntity<?> updateParticipants(@RequestBody UpdateTaskResponsableDTO updateTaskResponsableDTO){
+        try{
+            taskService.editTaskResponsables(updateTaskResponsableDTO);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch(Exception e){
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 
