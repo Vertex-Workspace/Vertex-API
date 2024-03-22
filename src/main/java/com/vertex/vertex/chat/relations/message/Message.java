@@ -2,6 +2,7 @@ package com.vertex.vertex.chat.relations.message;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.chat.model.Chat;
+import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -11,6 +12,7 @@ import lombok.ToString;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.socket.WebSocketMessage;
 
+import java.sql.Blob;
 import java.time.LocalDateTime;
 
 @Entity
@@ -30,9 +32,9 @@ public class Message {
 
     private String user;
 
-    @Lob
-    @Column(columnDefinition = "LONGBLOB")
-    private byte[] file;
+    @OneToOne(cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private File file;
 
     private String contentMessage;
     private LocalDateTime time;

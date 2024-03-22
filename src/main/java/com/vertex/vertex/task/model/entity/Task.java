@@ -1,6 +1,7 @@
 package com.vertex.vertex.task.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.model.FileSupporter;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
@@ -52,6 +53,11 @@ public class Task implements FileSupporter {
 
     @OneToOne
     private Task taskDependency;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    private Chat chat;
+
+    boolean chatCreated;
 
     @OneToMany
     private List<Task> subTasks;

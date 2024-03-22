@@ -5,9 +5,8 @@ import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ChatRepository extends JpaRepository<Chat,Long> {
-
-
-
 }

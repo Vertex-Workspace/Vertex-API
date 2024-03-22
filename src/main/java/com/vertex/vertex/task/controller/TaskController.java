@@ -1,5 +1,8 @@
 package com.vertex.vertex.task.controller;
 
+import com.vertex.vertex.chat.model.Chat;
+import com.vertex.vertex.chat.service.ChatService;
+import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.DTO.TaskEditDTO;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
@@ -7,6 +10,7 @@ import com.vertex.vertex.task.relations.task_responsables.model.DTOs.TaskRespons
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.service.TaskService;
+import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.hibernate.Remove;
@@ -15,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -24,6 +29,7 @@ import java.util.List;
 public class TaskController {
 
     private final TaskService taskService;
+    private final ChatService chatService;
 
     @GetMapping("/{id}")
     public ResponseEntity<Task> findById(@PathVariable Long id){
@@ -152,6 +158,23 @@ public class TaskController {
         }
     }
 
+    @PostMapping("/{idTask}/chat")
+    public Task createChatOfTask(@PathVariable Long idTask){
+        Task task = taskService.findById(idTask);
+        List<UserTeam> userTeamsList = new ArrayList<>();
+        task.getTaskResponsables().forEach(taskResponsable ->{
+            userTeamsList.add(taskResponsable.getUserTeam());
+        });
+
+        Chat chat = new Chat();
+        chat.setName(task.getName());
+        chat.setUserTeams(userTeamsList);
+        chat.setMessages(new ArrayList<>());
+        task.setChatCreated(true);
+        task.setChat(chat);
+        this.chatService.create(chat);
+        return task;
+    }
     @PatchMapping("/{id}/upload")
     public ResponseEntity<?> uploadFile(
             @PathVariable Long id,
@@ -183,6 +206,8 @@ public class TaskController {
     }
 
 
-
-
+    @GetMapping("/{idTask}/chat")
+    public Chat getChatOfTask(@PathVariable Long idTask){
+        return taskService.findById(idTask).getChat();
+    }
 }

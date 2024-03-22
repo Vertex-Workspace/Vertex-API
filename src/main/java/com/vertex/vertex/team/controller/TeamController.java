@@ -14,6 +14,8 @@ import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -49,7 +51,6 @@ public class TeamController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<TeamInfoDTO> findById(@PathVariable Long id) {
