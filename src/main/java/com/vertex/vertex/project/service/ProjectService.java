@@ -240,19 +240,32 @@ public class ProjectService {
         return projects;
     }
 
-    public List<User> getUsersByProject(Long projectId) {
-        int sizeUserTeam = 0;
-        int size = 0;
+    public Object getUsersByProject(Long projectId) {
 
         List<User> users = new ArrayList<>();
+        List<UserTeam> userTeams = new ArrayList<>();
         Project project = projectRepository.findById(projectId).get();
+        List<Group> groups = new ArrayList<>();
+
         for (UserTeam userTeam : project.getCollaborators()) {
             users.add(userTeam.getUser());
-            size = userTeam.getGroups().size();
+            userTeams.add(userTeam);
+            groups.addAll(userTeam.getGroups());
         }
 
-        return users;
+        // Verifica se todos os usuários estão em pelo menos um grupo do tipo "Grupo"
+        boolean allUsersInGroup = userTeams.stream()
+                .allMatch(userTeam -> groups.stream()
+                        .anyMatch(group -> group.getUserTeams().contains(userTeam)));
+
+        // Se todos os usuários estiverem em pelo menos um grupo do tipo "Grupo", retorne o grupo
+        if(allUsersInGroup && !groups.isEmpty()) {
+            return groups.get(0); // Retornando o primeiro grupo da lista
+        } else {
+            return users; // Caso contrário, retorne a lista de usuários
+        }
     }
+
 
     public Project updateProjectCollaborators(ProjectEditDTO projectEditDTO) {
         List<UserTeam> userTeams = new ArrayList<>();

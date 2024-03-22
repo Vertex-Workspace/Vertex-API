@@ -91,7 +91,7 @@ public class TaskService {
         //Add the taskResponsables on task list of taskResponsables
         task.setCreator(userTeamService.findUserTeamByComposeId(project.getTeam().getId(), taskCreateDTO.getCreator().getId()));
         try {
-            for (UserTeam userTeam : project.getTeam().getUserTeams()) {
+            for (UserTeam userTeam : project.getCollaborators()) {
                 TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
                 if (task.getTaskResponsables() == null) {
                     ArrayList<TaskResponsable> listaParaFuncionarEstaCoisaBemLegal = new ArrayList<>();
