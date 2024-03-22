@@ -50,7 +50,7 @@ public class  Task {
     @OneToOne
     private Task taskDependency;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private Chat chat;
 
     boolean chatCreated;

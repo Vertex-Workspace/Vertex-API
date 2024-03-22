@@ -183,6 +183,5 @@ public class TaskController {
     @GetMapping("/{idTask}/chat")
     public Chat getChatOfTask(@PathVariable Long idTask){
         return taskService.findById(idTask).getChat();
-
     }
 }
