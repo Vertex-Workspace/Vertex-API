@@ -68,6 +68,7 @@ public class ReviewService {
             taskService.setAsDone(updateTask);
         }
 
+        //Notifications
         String status = review.getApproveStatus() == ApproveStatus.APPROVED ? " aprovou " : " reprovou ";
 
         String title =
@@ -75,8 +76,7 @@ public class ReviewService {
                         + " " + status + " " + task.getName() + " com a nota " + review.getGrade() + " (0-5)";
 
         Notification notification = new Notification(
-                task.getProject().getTeam().getName(),
-                task.getProject().getName(),
+                task.getProject(),
                 title,
                 "project/" + task.getProject().getId() + "/tarefas",
                 review.getUserThatSentReview().getUserTeam().getUser()
@@ -112,12 +112,13 @@ public class ReviewService {
             //Save the initial Review
             reviewRepository.save(review);
 
+
+            //Notifications
             String title =
                     review.getUserThatSentReview().getUserTeam().getUser().getFullName()
                             + " entregou " + task.getName();
             Notification notification = new Notification(
-                    task.getProject().getTeam().getName(),
-                    task.getProject().getName(),
+                    task.getProject(),
                     title,
                     "project/" + task.getProject().getId() + "/tarefas",
                     task.getCreator().getUser()

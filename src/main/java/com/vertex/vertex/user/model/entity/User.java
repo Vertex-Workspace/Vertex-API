@@ -52,6 +52,15 @@ public class User{
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
     private Personalization personalization;
 
+    //Notifications
+    private Boolean taskReview;
+    private Boolean newMembers;
+    private Boolean permissionsChanged;
+    private Boolean responsibleInProjectOrTask;
+    private Boolean anyUpdateOnTask;
+    private Boolean sendToEmail;
+
+
     public String getFullName(){
         return this.firstName + " " + this.lastName;
     }

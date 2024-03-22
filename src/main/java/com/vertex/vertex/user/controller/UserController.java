@@ -1,20 +1,14 @@
 package com.vertex.vertex.user.controller;
 
 import com.vertex.vertex.notification.entity.model.Notification;
-import com.vertex.vertex.notification.entity.service.NotificationService;
-import com.vertex.vertex.notification.repository.NotificationRepository;
 import com.vertex.vertex.user.model.DTO.UserDTO;
 import com.vertex.vertex.user.model.DTO.UserEditionDTO;
 import com.vertex.vertex.user.model.DTO.UserLoginDTO;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.exception.*;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
-import com.vertex.vertex.user.relations.personalization.service.PersonalizationService;
 import com.vertex.vertex.user.service.UserService;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -143,6 +137,10 @@ public class UserController {
     }
 
 
+    //======================================================
+    //NOTIFICATIONS
+    //======================================================
+
     @GetMapping("/{userID}/notification")
     public ResponseEntity<?> getNotifcations(@PathVariable Long userID){
         try {
@@ -152,14 +150,36 @@ public class UserController {
         }
     }
 
-    @PatchMapping("/{userID}/notification/archive")
-    public ResponseEntity<?> archiveNotifications(@PathVariable Long userID, @RequestBody List<Notification> notifications){
+    @PatchMapping("/{userID}/notification/read")
+    public ResponseEntity<?> readNotifications(@PathVariable Long userID, @RequestBody List<Notification> notifications){
         try {
-            userService.archiveNotifications(userID, notifications);
+            userService.readNotifications(userID, notifications);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
         }
     }
+
+    @PatchMapping("/{userID}/notification/delete")
+    public ResponseEntity<?> deleteNotifications(@PathVariable Long userID, @RequestBody List<Notification> notifications){
+        try {
+            userService.deleteNotifications(userID, notifications);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
+        }
+    }
+
+
+    @PatchMapping("/{userID}/notification/settings/{settingID}")
+    public ResponseEntity<?> notificationSettings(@PathVariable Long userID, @PathVariable Integer settingID){
+        try {
+
+            return new ResponseEntity<>(userService.changeNotificationSettings(userID, settingID), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        }
+    }
+
+    //======================================================
 }

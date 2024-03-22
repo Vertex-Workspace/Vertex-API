@@ -1,6 +1,7 @@
 package com.vertex.vertex.notification.entity.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -30,9 +31,9 @@ public class Notification {
     @ToString.Exclude
     private User user;
 
-    public Notification(String teamName, String projectName, String title, String linkRedirect, User user) {
-        this.teamName = teamName;
-        this.projectName = projectName;
+    public Notification(Project project, String title, String linkRedirect, User user) {
+        this.teamName = project.getTeam().getName();
+        this.projectName = project.getName();
         this.title = title;
         this.date = LocalDateTime.now();
         this.linkRedirect = linkRedirect;

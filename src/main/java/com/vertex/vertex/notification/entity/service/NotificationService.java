@@ -18,9 +18,17 @@ public class NotificationService {
         return notificationRepository.save(notification);
     }
 
+    public void delete(Notification notification){
+        notificationRepository.delete(notification);
+    }
+
 
     public List<Notification> getNotificationsByUser(Long userID){
         return notificationRepository.findAllByUser_IdOrderByIdDesc(userID);
     }
+
+
+
+
 
 }
