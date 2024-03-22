@@ -1,6 +1,8 @@
 package com.vertex.vertex.task.relations.note.service;
 
 import com.vertex.vertex.file.model.File;
+import com.vertex.vertex.file.repository.FileRepository;
+import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.task.relations.note.model.dto.NoteDTO;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -26,6 +29,7 @@ public class NoteService {
     private final NoteRepository noteRepository;
     private final UserTeamService userTeamService;
     private final ProjectService projectService;
+    private final FileService fileService;
     private final ModelMapper modelMapper;
 
     public Note create(NoteDTO dto, Long projectId, Long userId) {
@@ -34,22 +38,13 @@ public class NoteService {
                 .findUserTeamByComposeId
                         (userId, project.getTeam().getId());
 
-        Note note = new Note();
-//        note.setProject(project);
-        note.setCreator(creator);
-
-        BeanUtils.copyProperties(dto, note);
+        Note note = new Note(project, creator, dto);
         return noteRepository.save(note);
     }
 
     public Note findById(Long id) {
-        Optional<Note> note = noteRepository.findById(id);
-
-        if (note.isPresent()) {
-            return note.get();
-        }
-
-        throw new EntityNotFoundException();
+        return noteRepository.findById(id)
+                .orElseThrow(EntityNotFoundException::new);
     }
 
     public Note editPatch(NoteEditDTO dto) {
@@ -59,21 +54,40 @@ public class NoteService {
     }
 
     public Note uploadFile(Long noteId, MultipartFile multipartFile) {
-        Note note = findById(noteId);
         try {
-            File file = new File(multipartFile);
-            note.getFiles().add(file);
+            Note note = findById(noteId);
+            File file = fileService.save(multipartFile, note);
 
+            if (Objects.isNull(note.getFiles())) note.setFiles(List.of(file));
+            else note.getFiles().add(file);
+
+            return noteRepository.save(note);
         } catch (Exception ignored) {
             throw new RuntimeException();
         }
-
-        return noteRepository.save(note);
     }
 
-    public List<Note> findAllByProject(Long projectId) {
+    public List<NoteDTO> findAllByProject(Long projectId) {
         return noteRepository
-                .findAllByProject_Id(projectId);
+                .findAllByProject_Id(projectId)
+                .stream()
+                .map(NoteDTO::new)
+                .toList();
+    }
+
+    public void delete(Long id) {
+        if (!noteRepository.existsById(id)) {
+            throw new EntityNotFoundException();
+        }
+        noteRepository.deleteById(id);
+    }
+
+    public Note removeImage(Long noteId, Long fileId) {
+        Note note = findById(noteId);
+        File file = fileService.findById(fileId);
+        fileService.delete(fileId);
+        note.getFiles().remove(file);
+        return noteRepository.save(note);
     }
 
 }

@@ -1,22 +1,19 @@
 package com.vertex.vertex.user.model.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
-import java.util.Objects;
 
 @Entity
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class User{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
@@ -59,5 +56,8 @@ public class User {
 //        return Objects.hash(id, firstName, lastName, email, password, description, location, publicProfile, showCharts);
 //    }
 
+    public String getFullName(){
+        return this.firstName + " " + this.lastName;
+    }
 
 }

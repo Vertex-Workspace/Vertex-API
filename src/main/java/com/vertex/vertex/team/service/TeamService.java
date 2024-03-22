@@ -1,6 +1,7 @@
 package com.vertex.vertex.team.service;
 import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.chat.service.ChatService;
+import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
 import com.vertex.vertex.project.model.DTO.ProjectViewListDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
@@ -30,10 +31,14 @@ import com.vertex.vertex.user.repository.UserRepository;
 import com.vertex.vertex.user.service.UserService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
+import org.apache.tomcat.util.http.fileupload.disk.DiskFileItem;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.*;
 
 @Service
@@ -65,10 +70,10 @@ public class TeamService {
     
             String invitationCode = generateInvitationCode();
             team.setInvitationCode(invitationCode);
-            teamRepository.save(team);
+            Team savedTeam = teamRepository.save(team);
             if (teamViewListDTO.getId() == null) {
                 UserTeamAssociateDTO userTeamAssociateDTO = new UserTeamAssociateDTO();
-                userTeamAssociateDTO.setTeam(team);
+                userTeamAssociateDTO.setTeam(savedTeam);
                 userTeamAssociateDTO.setUser(teamViewListDTO.getCreator());
                 userTeamAssociateDTO.setCreator(true);
                 Team teamWithUserTeam = editUserTeam(userTeamAssociateDTO);
@@ -76,6 +81,7 @@ public class TeamService {
                 createChatForTeam(teamWithUserTeam);
 
                 if(teamViewListDTO.isDefaultTeam()) {
+                    System.out.println(teamWithUserTeam);
                     saveDefaultTasksAndProject(teamWithUserTeam);
                 }
             }
@@ -133,7 +139,7 @@ public class TeamService {
         Team team = findTeamById(id);
         List<ProjectViewListDTO> projectList = convertTeamProjectsToDto(team);
         BeanUtils.copyProperties(team, dto);
-        addUsers(dto, team); //adiciona os usuários ao grupo com base no userTeam, para utilização no fe
+        dto.setUsers(getUsersByTeam(dto.getId())); //adiciona os usuários ao grupo com base no userTeam, para utilização no fe
         dto.setProjects(projectList);
         dto.setImage(team.getImage());
         return dto;
@@ -282,7 +288,6 @@ public class TeamService {
         for (Team team : teamRepository.findAll()) {
             TeamInfoDTO dto = new TeamInfoDTO();
             BeanUtils.copyProperties(team, dto);
-
             teamHomeDTOS.add(dto);
         }
         return teamHomeDTOS;
@@ -303,12 +308,12 @@ public class TeamService {
     public Boolean existsByIdAndUserBelongs(Long teamId, Long userId) {
         if (teamRepository.existsById(teamId)) {
             Team team = findTeamById(teamId);
-            return findUserInTeam(team, userId);
+            return userExistsInTeam(team, userId);
         }
         return false;
     }
 
-    public Boolean findUserInTeam(Team team, Long userId) {
+    public Boolean userExistsInTeam(Team team, Long userId) {
         return team.getUserTeams().stream()
                 .anyMatch(ut ->
                         Objects.equals(ut.getUser().getId(), userId)
@@ -333,25 +338,12 @@ public class TeamService {
         }
     }
 
-    public void addUsers(TeamInfoDTO dto, Team team) {
-        List<User> users = new ArrayList<>();
-
-        team.getUserTeams()
-                .forEach(ut -> {
-                    users.add(ut.getUser());
-                });
-
-        dto.setUsers(users);
-    }
-
     public List<User> getUsersByTeam(Long teamId) {
-        List<User> users = new ArrayList<>();
-        Team team = findTeamById(teamId);
-
-        for (int i = 0; i < team.getUserTeams().size(); i++) {
-            users.add(team.getUserTeams().get(i).getUser());
-        }
-        return users;
+        return findTeamById(teamId)
+                .getUserTeams()
+                .stream()
+                .map(UserTeam::getUser)
+                .toList();
     }
 
     public void deleteUserTeam(Long teamId, Long userId) {
@@ -378,39 +370,39 @@ public class TeamService {
 
     public void saveDefaultTasksAndProject(Team team){
 
-        Project projectDefault1 = new Project("Projeto Pessoal", "Seu projeto pessoal padrão", null, team, team.getCreator());
-        Project projectDefault2 = new Project("Projeto Profissional", "Seu projeto pessoal padrão", null, team, team.getCreator());
+        Project projectDefault1 =
+                new Project("Projeto Pessoal", "Seu projeto pessoal padrão", team, team.getCreator(), List.of(team.getCreator()));
+        Project projectDefault2 =
+                new Project("Projeto Profissional", "Seu projeto pessoal padrão", team, team.getCreator(),  List.of(team.getCreator()));
 
-        TaskCreateDTO taskCreateDTO1 = new TaskCreateDTO("Lavar a louça", "Sua tarefa é lavar a louça", team.getCreator(), projectDefault1);
-        TaskCreateDTO taskCreateDTO2 = new TaskCreateDTO("Apresentar seminário", "Sua tarefa é lavar a louça", team.getCreator(), projectDefault2);
+        TaskCreateDTO taskCreateDTO1 =
+                new TaskCreateDTO("Lavar a louça", "Sua tarefa é lavar a louça", team.getCreator().getUser(), projectDefault1);
+        TaskCreateDTO taskCreateDTO2 =
+                new TaskCreateDTO("Apresentar seminário", "Sua tarefa é lavar a louça", team.getCreator().getUser(), projectDefault2);
 
-        projectService.save(projectDefault1, team.getId());
-        projectService.save(projectDefault2, team.getId());
+        projectService.defaultProperties(projectDefault1);
+        projectService.defaultProperties(projectDefault2);
+
+        projectService.save(projectDefault1);
+        projectService.save(projectDefault2);
 
         taskService.save(taskCreateDTO1);
         taskService.save(taskCreateDTO2);
     }
 
     public List<ProjectViewListDTO> convertTeamProjectsToDto(Team team) {
-        List<ProjectViewListDTO> projectList = new ArrayList<>();
-
-        team.getProjects().forEach(p -> {
-            projectList.add(new ProjectViewListDTO(p));
-        });
-
-        return projectList;
+        return team.getProjects()
+                .stream()
+                .map(ProjectViewListDTO::new)
+                .toList();
     }
     public List<Task> getAllTasksByTeam(Long id) {
         try {
-            Team team = findTeamById(id);
-            List<Task> taskList = new ArrayList<>();
-
-            team.getProjects()
-                    .forEach(p -> {
-                        taskList.addAll(p.getTasks());
-                    });
-
-            return taskList;
+            return findTeamById(id)
+                    .getProjects()
+                    .stream()
+                    .flatMap(p -> p.getTasks().stream())
+                    .toList();
 
         } catch (Exception e) {
             throw new RuntimeException();

@@ -18,7 +18,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Team {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
@@ -32,6 +31,7 @@ public class Team {
     @Lob
     @Column(name = "image",
             columnDefinition = "BLOB")
+    @ToString.Exclude
     private byte[] image;
 
     @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)

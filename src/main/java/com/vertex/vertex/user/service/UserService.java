@@ -39,7 +39,6 @@ public class UserService {
     private final PersonalizationService personalizationService;
     @NonNull
     private final GroupService groupService;
-    @Autowired
     private final TeamService teamService;
 
     public User save(UserDTO userDTO) {
@@ -59,7 +58,6 @@ public class UserService {
             user.setEmail(userEmailWithNoEdition.getEmail());
 
             User userFind = userRepository.findByEmail(userEmailWithNoEdition.getEmail());
-
 
             if (userFind != null && user.getEmail().equals(userFind.getEmail())) {
                 throw new EmailAlreadyExistsException();
@@ -83,9 +81,8 @@ public class UserService {
         user.setPersonalization(personalizationService.defaultSave(user));
         userRepository.save(user);
 
-//        System.out.println(userDTO.getImage());
-//        byte[] data = Base64.getDecoder().decode(userDTO.getImage());
-//        user.setImage(data);
+        byte[] data = Base64.getDecoder().decode(userDTO.getImage());
+        user.setImage(data);
         //creation of the default team
         TeamViewListDTO teamViewListDTO =
                 new TeamViewListDTO("Equipe " + user.getFirstName(), user, null, "Sua equipe padrão", null, true);
@@ -95,9 +92,7 @@ public class UserService {
 
     public User edit(UserEditionDTO userEditionDTO) throws Exception {
         User user = userRepository.findById(userEditionDTO.getId()).get();
-
         BeanUtils.copyProperties(userEditionDTO, user);
-
         return userRepository.save(user);
     }
 
@@ -132,7 +127,6 @@ public class UserService {
                 (dto.getEmail())) {
             User user =
                     userRepository.findByEmail(dto.getEmail());
-
             if (user.getPassword()
                     .equals(dto.getPassword())) {
                 return user;

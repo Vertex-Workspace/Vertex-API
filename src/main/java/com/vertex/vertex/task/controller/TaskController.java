@@ -4,8 +4,6 @@ import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.chat.service.ChatService;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.DTO.TaskEditDTO;
-import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
-import com.vertex.vertex.task.relations.review.model.DTO.SetFinishedTask;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.relations.task_responsables.model.DTOs.TaskResponsablesDTO;
@@ -15,9 +13,11 @@ import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import org.hibernate.Remove;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,12 +59,12 @@ public class TaskController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Property> delete(@PathVariable Long id){
+    public ResponseEntity<?> delete(@PathVariable Long id){
         try{
             taskService.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(true, HttpStatus.OK);
         } catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(false, HttpStatus.CONFLICT);
         }
     }
 
@@ -83,6 +83,19 @@ public class TaskController {
             return new ResponseEntity<>(taskService.save(editValueDTO), HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping("/info/{taskID}")
+    public ResponseEntity<?> getTaskInfos(@PathVariable Long taskID) {
+        try
+        {
+            return new ResponseEntity<>
+                    (taskService.getTaskInfos(taskID), HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>
+                    (e.getMessage(),
+                            HttpStatus.NOT_FOUND);
         }
     }
 
@@ -105,23 +118,6 @@ public class TaskController {
     }
 
 
-    @PatchMapping("/review")
-    public ResponseEntity<?> saveReview (@RequestBody ReviewCheck reviewCheck){
-        try{
-            return new ResponseEntity<>(taskService.saveReview(reviewCheck), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        }
-    }
-
-    @PatchMapping("/send-to-review")
-    public ResponseEntity<?> saveToReview (@RequestBody SetFinishedTask setFinishedTask){
-        try{
-            return new ResponseEntity<>(taskService.taskUnderAnalysis(setFinishedTask), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        }
-    }
 
     @PatchMapping("/responsables")
     public ResponseEntity<?> saveResponsables (@RequestBody TaskResponsablesDTO taskResponsable){
@@ -179,6 +175,36 @@ public class TaskController {
         this.chatService.create(chat);
         return task;
     }
+    @PatchMapping("/{id}/upload")
+    public ResponseEntity<?> uploadFile(
+            @PathVariable Long id,
+            @RequestParam MultipartFile file) {
+        try {
+            return new ResponseEntity<>
+                    (taskService.uploadFile(file, id),
+                        HttpStatus.OK);
+
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>
+                    (HttpStatus.CONFLICT);
+        }
+    }
+
+    @DeleteMapping("/{taskId}/remove-file/{fileId}")
+    public ResponseEntity<?> uploadFile(
+            @PathVariable Long taskId,
+            @PathVariable Long fileId) {
+        try {
+            return new ResponseEntity<>
+                    (taskService.removeFile(taskId, fileId),
+                            HttpStatus.OK);
+
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>
+                    (HttpStatus.CONFLICT);
+        }
+    }
+
 
     @GetMapping("/{idTask}/chat")
     public Chat getChatOfTask(@PathVariable Long idTask){

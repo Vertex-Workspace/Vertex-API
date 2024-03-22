@@ -1,6 +1,8 @@
 package com.vertex.vertex.project.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vertex.vertex.file.model.File;
+import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.note.model.entity.Note;
@@ -27,10 +29,6 @@ public class Project {
     private String name;
     private String description;
 
-    @Lob
-    @Column(columnDefinition = "BLOB")
-    private byte[] image;
-
     @ManyToOne
     @JsonIgnore
     @ToString.Exclude
@@ -51,6 +49,17 @@ public class Project {
     @OneToOne
     private Project projectDependency;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    private File file;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    private List<UserTeam> collaborators;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ProjectReviewENUM projectReviewENUM;
+
+
     //create a list of properties if it doesn't exist
     public void addProperty(Property property) {
         if(properties != null){
@@ -61,11 +70,12 @@ public class Project {
         }
     }
 
-    public Project(String name, String description, byte[] image, Team team, UserTeam creator) {
+    public Project(String name, String description, Team team, UserTeam creator, List<UserTeam>collaborators) {
         this.name = name;
         this.description = description;
-        this.image = image;
         this.team = team;
         this.creator = creator;
+        this.collaborators = collaborators;
+        this.projectReviewENUM = ProjectReviewENUM.OPTIONAL;
     }
 }

@@ -27,7 +27,7 @@ import java.util.List;
 public class ChatService {
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
-    private final UserTeamRepository userTeamRepository;
+    private final UserTeamService userTeamService;
     private final UserRepository userRepository;
 
 
@@ -36,7 +36,6 @@ public class ChatService {
     }
 
     public Chat create(Chat chat) {
-        System.out.println("CHAT SERVICE " + chat);
         return chatRepository.save(chat);
     }
 
@@ -45,18 +44,9 @@ public class ChatService {
     }
 
     public Chat patchUserTeams(Long idChat, UserTeamAssociateDTO userTeamAssociateDTO) {
-
         Chat chat = chatRepository.findById(idChat).get();
-//        System.out.println("UserTeam Associate DTO"+userTeamAssociateDTO);
-        UserTeam userTeam = userTeamRepository.findByTeam_IdAndUser_Id(userTeamAssociateDTO.getTeam().getId(), userTeamAssociateDTO.getUser().getId());
-
-//        System.out.println("FINDALL "+ userTeamRepository.findAll());
-
-//        System.out.println("userTeam"+userTeam);
+        UserTeam userTeam = userTeamService.findUserTeamByComposeId(userTeamAssociateDTO.getTeam().getId(), userTeamAssociateDTO.getUser().getId());
         chat.getUserTeams().add(userTeam);
-//        System.out.println("LISTA USERTEAMS-CHAT"+chat.getUserTeams());
-
-//        System.out.println("CHAT SERVICE 2" + chat);
         return chatRepository.save(chat);
     }
 

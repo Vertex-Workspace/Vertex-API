@@ -10,6 +10,7 @@ public class NoteEditDTO {
     private Long id;
     private String title;
     private String description;
+    private String color;
     private Integer height;
     private Integer width;
     private Integer posX;
