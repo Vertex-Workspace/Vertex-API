@@ -1,5 +1,7 @@
 package com.vertex.vertex.task.relations.review.service;
 
+import com.vertex.vertex.notification.entity.model.Notification;
+import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.task.model.DTO.TaskWaitingToReviewDTO;
@@ -16,7 +18,6 @@ import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskRespo
 import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -32,6 +33,7 @@ public class ReviewService {
     private final TaskService taskService;
     private final ProjectService projectService;
     private final TaskHoursService taskHoursService;
+    private final NotificationService notificationService;
     public void finalReview(ReviewCheck reviewCheck) {
         Task task = taskService.findById(reviewCheck.getTaskID());
 
@@ -57,9 +59,29 @@ public class ReviewService {
         if(creator.isEmpty()){
             throw new RuntimeException("Id do revisador errado!");
         }
-        review.setCreatorReviewer(creator.get());
+        review.setReviewer(creator.get());
         review.setApproveStatus(reviewCheck.getApproveStatus());
         reviewRepository.save(review);
+
+        if(review.getApproveStatus() == ApproveStatus.APPROVED){
+            Task updateTask = review.getTask();
+            taskService.setAsDone(updateTask);
+        }
+
+        String status = review.getApproveStatus() == ApproveStatus.APPROVED ? " aprovou " : " reprovou ";
+
+        String title =
+                review.getReviewer().getUserTeam().getUser().getFullName()
+                        + " " + status + " " + task.getName() + " com a nota " + review.getGrade() + " (0-5)";
+
+        Notification notification = new Notification(
+                task.getProject().getTeam().getName(),
+                task.getProject().getName(),
+                title,
+                "project/" + task.getProject().getId() + "/tarefas",
+                review.getUserThatSentReview().getUserTeam().getUser()
+        );
+        notificationService.save(notification);
     }
 
     public void sendToReview(SendToReviewDTO sendToReviewDTO) {
@@ -70,7 +92,7 @@ public class ReviewService {
         }
 
         //Validations
-        if (!task.isUnderAnalysis()) {
+        if (task.isNotUnderAnalysis()) {
             Review review = new Review();
             //Description
             review.setDescription(sendToReviewDTO.getDescription());
@@ -89,6 +111,18 @@ public class ReviewService {
             review.setSentDate(LocalDateTime.now());
             //Save the initial Review
             reviewRepository.save(review);
+
+            String title =
+                    review.getUserThatSentReview().getUserTeam().getUser().getFullName()
+                            + " entregou " + task.getName();
+            Notification notification = new Notification(
+                    task.getProject().getTeam().getName(),
+                    task.getProject().getName(),
+                    title,
+                    "project/" + task.getProject().getId() + "/tarefas",
+                    task.getCreator().getUser()
+            );
+            notificationService.save(notification);
         } else {
             throw new RuntimeException("A tarefa já foi aprovada. Ela não pode voltar para análise");
         }
@@ -106,7 +140,7 @@ public class ReviewService {
                 .get();
 
         for (Task task : project.getTasks()){
-            if(task.getCreator().equals(loggedUser) && !task.isUnderAnalysis()){
+            if(task.getCreator().equals(loggedUser) && task.isNotUnderAnalysis()){
                 TaskWaitingToReviewDTO taskWaitingToReviewDTO = new TaskWaitingToReviewDTO(task);
 
                 Optional<Review> currentReview = task.getReviews().stream()

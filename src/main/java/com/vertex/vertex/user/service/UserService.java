@@ -1,10 +1,10 @@
 package com.vertex.vertex.user.service;
 
+import com.vertex.vertex.notification.entity.model.Notification;
+import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
-import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.group.service.GroupService;
-import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.user.model.DTO.UserDTO;
 import com.vertex.vertex.user.model.DTO.UserEditionDTO;
@@ -15,12 +15,10 @@ import com.vertex.vertex.user.relations.personalization.model.entity.Personaliza
 import com.vertex.vertex.user.relations.personalization.service.PersonalizationService;
 import com.vertex.vertex.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -39,6 +37,10 @@ public class UserService {
     private final PersonalizationService personalizationService;
     @NonNull
     private final GroupService groupService;
+    @NonNull
+    private final NotificationService notificationService;
+
+
     private final TeamService teamService;
 
     public User save(UserDTO userDTO) {
@@ -187,6 +189,23 @@ public class UserService {
         }
 
         throw new RuntimeException();
+    }
+
+    public List<Notification> getUserNotifications(Long userID){
+        User user = findById(userID);
+        //If findById didn't throw an exception, the user exist
+        System.out.println(notificationService.getNotificationsByUser(userID));
+        System.out.println(user.getNotifications());
+        return notificationService.getNotificationsByUser(userID);
+    }
+
+    public void archiveNotifications(Long userID, List<Notification> notifications){
+        User user = findById(userID);
+        for (Notification notification : notifications) {
+            notification.setIsRead(!notification.getIsRead());
+            notification.setUser(user);
+            notificationService.save(notification);
+        }
     }
 
 }

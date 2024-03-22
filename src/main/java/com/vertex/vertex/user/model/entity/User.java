@@ -6,6 +6,7 @@ import com.vertex.vertex.user.relations.personalization.model.entity.Personaliza
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -45,16 +46,11 @@ public class User{
 
     private Boolean showCharts;
 
-    @OneToMany(cascade = CascadeType.ALL,orphanRemoval = true)
-    private List<Notification> notificationList;
+    @OneToMany(orphanRemoval = true, mappedBy ="user")
+    private List<Notification> notifications;
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
     private Personalization personalization;
-//
-//    @Override
-//    public int hashCode() {
-//        return Objects.hash(id, firstName, lastName, email, password, description, location, publicProfile, showCharts);
-//    }
 
     public String getFullName(){
         return this.firstName + " " + this.lastName;

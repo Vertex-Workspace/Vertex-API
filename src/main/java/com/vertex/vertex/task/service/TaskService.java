@@ -39,6 +39,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Data
 @AllArgsConstructor
@@ -310,6 +311,22 @@ public class TaskService {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    public Task setAsDone(Task task){
+        for (Value value: task.getValues()) {
+            if(value.getProperty().getKind().equals(PropertyKind.STATUS)){
+                Optional<PropertyList> doneDefault =
+                        value.getProperty().getPropertyLists()
+                                .stream()
+                                .filter(propertyList ->
+                                        propertyList.getIsFixed() &&
+                                                propertyList.getPropertyListKind().equals(PropertyListKind.DONE))
+                                .findFirst();
+                doneDefault.ifPresent(value::setValue);
+            }
+        }
+        return save(task);
     }
 
 
