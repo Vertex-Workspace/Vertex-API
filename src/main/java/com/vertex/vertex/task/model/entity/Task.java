@@ -9,6 +9,7 @@ import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
+import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -64,6 +65,10 @@ public class Task implements FileSupporter {
 
     @OneToMany(cascade = CascadeType.ALL)
     List<File> files;
+
+    @ManyToMany
+    @JsonIgnore
+    List<Group> groups;
 
     public boolean isUnderAnalysis(){
         if(this.getReviews() != null){

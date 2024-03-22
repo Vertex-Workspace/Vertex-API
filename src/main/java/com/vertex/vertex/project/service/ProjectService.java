@@ -20,6 +20,7 @@ import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
+import com.vertex.vertex.team.relations.group.service.GroupService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
@@ -41,6 +42,7 @@ public class ProjectService {
     private final FileService fileService;
 
     public Project save(ProjectCreateDTO projectCreateDTO, Long teamId) {
+        System.out.println(projectCreateDTO.getGroups());
         UserTeam userTeam;
         Team team;
         Project project = new Project();
@@ -57,6 +59,7 @@ public class ProjectService {
             }
         }
 
+        project.setGroups(projectCreateDTO.getGroups());
         project.setCollaborators(collaborators);
 
         userTeam = userTeamService
@@ -163,13 +166,13 @@ public class ProjectService {
         //If it has, It won't be included into list
         for (Task task : project.getTasks()) {
             boolean isReviewed = false;
-            for (Review review : task.getReviews()){
-                if(review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)
-                ){
+            for (Review review : task.getReviews()) {
+                if (review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)
+                ) {
                     isReviewed = true;
                 }
             }
-            if(!isReviewed){
+            if (!isReviewed) {
                 projectOneDTO.getTasks().add(task);
             }
         }
@@ -188,6 +191,7 @@ public class ProjectService {
     public Project save(Project project) {
         return projectRepository.save(project);
     }
+
     public void defaultProperties(Project project) {
 
         //Default properties of a project
@@ -198,11 +202,11 @@ public class ProjectService {
         properties.add(new Property(PropertyKind.NUMBER, "Número", false, null, PropertyStatus.VISIBLE));
         properties.add(new Property(PropertyKind.TEXT, "Palavra-Chave", false, null, PropertyStatus.INVISIBLE));
 
-        for ( Property property : properties ) {
-            if(property.getKind() == PropertyKind.STATUS){
+        for (Property property : properties) {
+            if (property.getKind() == PropertyKind.STATUS) {
                 property.setPropertyLists(defaultStatus(property));
             }
-            if(property.getKind() == PropertyKind.LIST){
+            if (property.getKind() == PropertyKind.LIST) {
                 List<PropertyList> propertiesList = new ArrayList<>();
                 propertiesList.add(new PropertyList("Fácil", Color.GREEN, property, PropertyListKind.VISIBLE, false));
                 propertiesList.add(new PropertyList("Médio", Color.YELLOW, property, PropertyListKind.VISIBLE, true));
@@ -240,24 +244,16 @@ public class ProjectService {
         return projects;
     }
 
-    public Object getUsersByProject(Long projectId) {
+    public List<User> getUsersByProject(Long projectId) {
 
         List<User> users = new ArrayList<>();
-        List<UserTeam> userTeams = new ArrayList<>();
         Project project = projectRepository.findById(projectId).get();
-        List<Group> groups = new ArrayList<>();
 
         for (UserTeam userTeam : project.getCollaborators()) {
             users.add(userTeam.getUser());
-            userTeams.add(userTeam);
-            groups.addAll(userTeam.getGroups());
         }
 
-        boolean allUsersInGroup = userTeams.stream()
-                .allMatch(userTeam -> groups.stream()
-                        .anyMatch(group -> group.getUserTeams().contains(userTeam)));
-
-            return users;
+        return users;
     }
 
 
@@ -266,14 +262,30 @@ public class ProjectService {
         Project project = projectRepository.findById(projectEditDTO.getId()).get();
         project.setName(projectEditDTO.getName());
         project.setDescription(projectEditDTO.getDescription());
-        for(User user : projectEditDTO.getListOfResponsibles()){
+        for (User user : projectEditDTO.getListOfResponsibles()) {
             UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), user.getId());
             userTeams.add(userTeam1);
         }
+
         project.setCollaborators(userTeams);
+        for(Group groupProject : project.getGroups()){
+            if(!projectEditDTO.getGroups().contains(groupProject)) {
+                if (groupProject.getUserTeams() != null) {
+                    for (UserTeam userTeam : groupProject.getUserTeams()) {
+                        project.getCollaborators().remove(userTeam);
+                    }
+                }
+            }
+        }
+
+        project.setGroups(projectEditDTO.getGroups());
         return projectRepository.save(project);
     }
 
+    public List<Group> getGroupsByProject(Long projectId) {
+        Project project = projectRepository.findById(projectId).get();
+        return project.getGroups();
+    }
 
 
 }

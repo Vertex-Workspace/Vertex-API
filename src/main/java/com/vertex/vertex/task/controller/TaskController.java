@@ -203,6 +203,15 @@ public class TaskController {
         }
     }
 
+    @GetMapping("/groups/{taskId}")
+    public ResponseEntity<?> getGroupsByTask(@PathVariable Long taskId){
+        try{
+            return new ResponseEntity<>(taskService.getGroupsByTask(taskId), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
+
 
 
 

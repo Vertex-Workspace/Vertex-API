@@ -27,6 +27,7 @@ import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
+import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
@@ -105,6 +106,8 @@ public class TaskService {
             e.printStackTrace();
         }
 
+        List<Group> groups = new ArrayList<>(project.getGroups());
+        task.setGroups(groups);
         //Set if the task is revisable or no...
         task.setRevisable(project.getProjectReviewENUM().equals(ProjectReviewENUM.MANDATORY));
 
@@ -321,6 +324,7 @@ public class TaskService {
     }
 
     public Task editTaskResponsables(UpdateTaskResponsableDTO updateTaskResponsableDTO) {
+        System.out.println(updateTaskResponsableDTO.getGroup());
         Task task = findById(updateTaskResponsableDTO.getTaskId());
         List<TaskResponsable> responsablesToDelete = new ArrayList<>();
         boolean canDelete = false;
@@ -349,7 +353,6 @@ public class TaskService {
             taskResponsablesRepository.save(taskResponsable1);
         } else {
             for (TaskResponsable taskResponsable : responsablesToDelete) {
-                System.out.println("remove");
                 task.getTaskResponsables().remove(taskResponsable);
                 taskResponsable.setTask(null);
                 taskResponsablesRepository.delete(taskResponsable);
@@ -359,15 +362,9 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-//    Iterator<UserTeam> collaboratorsIterator = project.getCollaborators().iterator();
-//                    while (collaboratorsIterator.hasNext()) {
-//        UserTeam userTeam = collaboratorsIterator.next();
-//        if (userTeam != null && userTeam.getUser().equals(user)) {
-//            userTeam.setProject(null);
-//            userTeamService.save(userTeam);
-//            collaboratorsIterator.remove();
-//        }
-//    }
-
+    public List<Group> getGroupsByTask(Long taskId){
+        Task task = findById(taskId);
+        return task.getGroups();
+    }
 
 }

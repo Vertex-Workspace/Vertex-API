@@ -27,6 +27,7 @@ public class ProjectCreateDTO {
     private Project projectDependency;
 //    private File file;
     private List<User> listOfResponsibles;
+    private List<Group> groups;
 
     private ProjectReviewENUM projectReviewENUM;
 

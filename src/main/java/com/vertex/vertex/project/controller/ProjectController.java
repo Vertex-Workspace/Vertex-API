@@ -32,6 +32,7 @@ public class ProjectController {
         try {
             return new ResponseEntity<>(projectService.save(project, teamId), HttpStatus.CREATED);
         }catch(Exception e){
+            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
@@ -128,6 +129,15 @@ public class ProjectController {
     public ResponseEntity<?> getCollaborators(@PathVariable Long projectId){
         try {
             return new ResponseEntity<>(projectService.getUsersByProject(projectId), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping("/groups/{projectId}")
+    public ResponseEntity<?> getGroups(@PathVariable Long projectId){
+        try {
+            return new ResponseEntity<>(projectService.getGroupsByProject(projectId), HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }

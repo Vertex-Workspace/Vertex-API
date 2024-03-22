@@ -80,7 +80,7 @@ public class GroupService {
         Team team = group.getTeam();
         for (User user : addUsersDTO.getUsers()) {
             for (UserTeam userTeam : team.getUserTeams()) {
-                if (userTeam.getUser().getId() == user.getId()) {
+                if (userTeam.getUser().getId().equals(user.getId())) {
                     if (userTeam.getGroups().contains(group)){
                         throw new RuntimeException("Esse userTeam já está no grupo");
                     } else {

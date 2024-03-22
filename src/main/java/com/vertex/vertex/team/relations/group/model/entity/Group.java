@@ -1,6 +1,8 @@
 package com.vertex.vertex.team.relations.group.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vertex.vertex.project.model.entity.Project;
+import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
@@ -33,6 +35,12 @@ public class Group{
     @ManyToMany(mappedBy = "groups", fetch = FetchType.EAGER)
     @ToString.Exclude
     private List<UserTeam> userTeams;
+
+    @ManyToMany(mappedBy = "groups", fetch = FetchType.EAGER)
+    private List<Project> projects;
+
+    @ManyToMany(mappedBy = "groups", fetch = FetchType.EAGER)
+    private List<Task> tasks;
 
 
 
