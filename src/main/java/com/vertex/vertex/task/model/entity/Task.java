@@ -30,7 +30,7 @@ public class Task implements FileSupporter {
     @Column(length = 55)
     private String name;
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<TaskResponsable> taskResponsables;
 
     @Column(length = 1000)
@@ -38,7 +38,7 @@ public class Task implements FileSupporter {
 
     private boolean isRevisable;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @ToString.Exclude
     private UserTeam creator;
 

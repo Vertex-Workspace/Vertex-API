@@ -14,6 +14,6 @@ public class UpdateTaskResponsableDTO {
 
     Long teamId;
     Long taskId;
-    List<User> taskResponsableList;
+    User user;
 
 }

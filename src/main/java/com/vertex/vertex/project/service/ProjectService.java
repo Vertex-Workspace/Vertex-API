@@ -241,39 +241,29 @@ public class ProjectService {
     }
 
     public List<User> getUsersByProject(Long projectId) {
+        int sizeUserTeam = 0;
+        int size = 0;
+
         List<User> users = new ArrayList<>();
         Project project = projectRepository.findById(projectId).get();
         for (UserTeam userTeam : project.getCollaborators()) {
             users.add(userTeam.getUser());
+            size = userTeam.getGroups().size();
         }
+
         return users;
     }
 
-
     public Project updateProjectCollaborators(ProjectEditDTO projectEditDTO) {
+        List<UserTeam> userTeams = new ArrayList<>();
         Project project = projectRepository.findById(projectEditDTO.getId()).get();
         project.setName(projectEditDTO.getName());
         project.setDescription(projectEditDTO.getDescription());
-
-        if (projectEditDTO.getListOfResponsibles() != null) {
-            for (User user : projectEditDTO.getListOfResponsibles()) {
-//                if the user selected, it means that it was in project and now it won't be more
-                UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), user.getId());
-                if (!project.getCollaborators().contains(userTeam1)) {
-                    project.getCollaborators().add(userTeam1);
-                }else {
-                    Iterator<UserTeam> collaboratorsIterator = project.getCollaborators().iterator();
-                    while (collaboratorsIterator.hasNext()) {
-                        UserTeam userTeam = collaboratorsIterator.next();
-                        if (userTeam != null && userTeam.getUser().equals(user)) {
-                            userTeam.setProject(null);
-                            userTeamService.save(userTeam);
-                            collaboratorsIterator.remove();
-                        }
-                    }
-                }
-            }
+        for(User user : projectEditDTO.getListOfResponsibles()){
+            UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), user.getId());
+            userTeams.add(userTeam1);
         }
+        project.setCollaborators(userTeams);
         return projectRepository.save(project);
     }
 
