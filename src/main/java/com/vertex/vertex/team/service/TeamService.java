@@ -93,7 +93,12 @@ public class TeamService {
         chat.setUserTeams(userTeams);
         chat.setName(team.getName());
 
-        Chat chatSaved = chatService.create(chat);
+        Chat chatSaved = null;
+        try {
+            chatSaved = chatService.create(chat);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         for (UserTeam userTeam : team.getUserTeams()) {
             if (userTeam.getChats() == null) {
