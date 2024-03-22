@@ -253,17 +253,11 @@ public class ProjectService {
             groups.addAll(userTeam.getGroups());
         }
 
-        // Verifica se todos os usuários estão em pelo menos um grupo do tipo "Grupo"
         boolean allUsersInGroup = userTeams.stream()
                 .allMatch(userTeam -> groups.stream()
                         .anyMatch(group -> group.getUserTeams().contains(userTeam)));
 
-        // Se todos os usuários estiverem em pelo menos um grupo do tipo "Grupo", retorne o grupo
-        if(allUsersInGroup && !groups.isEmpty()) {
-            return groups.get(0); // Retornando o primeiro grupo da lista
-        } else {
-            return users; // Caso contrário, retorne a lista de usuários
-        }
+            return users;
     }
 
 
