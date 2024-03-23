@@ -262,22 +262,25 @@ public class ProjectService {
         Project project = projectRepository.findById(projectEditDTO.getId()).get();
         project.setName(projectEditDTO.getName());
         project.setDescription(projectEditDTO.getDescription());
+
         for (User user : projectEditDTO.getListOfResponsibles()) {
             UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), user.getId());
             userTeams.add(userTeam1);
         }
 
-        project.setCollaborators(userTeams);
-        for(Group groupProject : project.getGroups()){
-            if(!projectEditDTO.getGroups().contains(groupProject)) {
-                if (groupProject.getUserTeams() != null) {
-                    for (UserTeam userTeam : groupProject.getUserTeams()) {
-                        project.getCollaborators().remove(userTeam);
-                    }
-                }
-            }
-        }
+//        for(Group group: projectEditDTO.getGroups()){
+//            System.out.println(group);
+//            for(UserTeam userTeam : group.getUserTeams()) {
+//                for(UserTeam userTeam1 : project.getCollaborators()){
+//                    if(userTeam.equals(userTeam1)){
+//                        userTeams.remove(userTeam);
+//                        userTeams.remove(userTeam1);
+//                    }
+//                }
+//            }
+//        }
 
+        project.setCollaborators(userTeams);
         project.setGroups(projectEditDTO.getGroups());
         return projectRepository.save(project);
     }

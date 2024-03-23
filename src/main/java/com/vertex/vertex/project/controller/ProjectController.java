@@ -148,7 +148,7 @@ public class ProjectController {
         try {
             return new ResponseEntity<>(projectService.updateProjectCollaborators(projectEditDTO), HttpStatus.OK);
         }catch(Exception e){
-            System.out.println(e);
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }

@@ -106,9 +106,10 @@ public class TaskService {
             e.printStackTrace();
         }
 
-        List<Group> groups = new ArrayList<>(project.getGroups());
-        task.setGroups(groups);
+//        List<Group> groups = new ArrayList<>(project.getGroups());
+//        task.setGroups(groups);
         //Set if the task is revisable or no...
+        task.setTaskDependency(null);
         task.setRevisable(project.getProjectReviewENUM().equals(ProjectReviewENUM.MANDATORY));
 
         return taskRepository.save(task);
@@ -364,7 +365,15 @@ public class TaskService {
 
     public List<Group> getGroupsByTask(Long taskId){
         Task task = findById(taskId);
+        System.out.println(task.getGroups());
         return task.getGroups();
+    }
+
+    public Task setDependency(Long taskId, Long taskDependencyId){
+        Task task = findById(taskId);
+        Task taskDependency = findById(taskDependencyId);
+        task.setTaskDependency(taskDependency);
+        return taskRepository.save(task);
     }
 
 }
