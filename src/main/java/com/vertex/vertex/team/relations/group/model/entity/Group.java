@@ -37,6 +37,7 @@ public class Group{
     private List<UserTeam> userTeams;
 
     @ManyToMany(mappedBy = "groups", fetch = FetchType.EAGER)
+    @ToString.Exclude
     private List<Project> projects;
 
     @ManyToMany(mappedBy = "groups", fetch = FetchType.EAGER)

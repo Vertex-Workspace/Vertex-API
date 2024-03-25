@@ -15,7 +15,7 @@ public class ProjectEditDTO {
     private Long id;
     private String name;
     private String description;
-    private List<User> listOfResponsibles;
+    private List<User> users;
     private List<Group> groups;
 
 }

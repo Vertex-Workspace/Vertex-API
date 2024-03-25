@@ -258,32 +258,30 @@ public class ProjectService {
 
 
     public Project updateProjectCollaborators(ProjectEditDTO projectEditDTO) {
-        List<UserTeam> userTeams = new ArrayList<>();
-        Project project = projectRepository.findById(projectEditDTO.getId()).get();
+        Project project = projectRepository.findById(projectEditDTO.getId())
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
         project.setName(projectEditDTO.getName());
         project.setDescription(projectEditDTO.getDescription());
 
-        for (User user : projectEditDTO.getListOfResponsibles()) {
+        List<UserTeam> userTeamsToAdd = new ArrayList<>();
+
+        for (User user : projectEditDTO.getUsers()) {
             UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), user.getId());
-            userTeams.add(userTeam1);
+            userTeamsToAdd.add(userTeam1);
+        }
+        project.setCollaborators(userTeamsToAdd);
+
+        for (Group group : projectEditDTO.getGroups()) {
+            group.setUserTeams(new ArrayList<>());
         }
 
-//        for(Group group: projectEditDTO.getGroups()){
-//            System.out.println(group);
-//            for(UserTeam userTeam : group.getUserTeams()) {
-//                for(UserTeam userTeam1 : project.getCollaborators()){
-//                    if(userTeam.equals(userTeam1)){
-//                        userTeams.remove(userTeam);
-//                        userTeams.remove(userTeam1);
-//                    }
-//                }
-//            }
-//        }
-
-        project.setCollaborators(userTeams);
         project.setGroups(projectEditDTO.getGroups());
+
         return projectRepository.save(project);
     }
+
+
 
     public List<Group> getGroupsByProject(Long projectId) {
         Project project = projectRepository.findById(projectId).get();

@@ -195,8 +195,7 @@ public class TaskController {
     @PatchMapping("/taskResponsables")
     public ResponseEntity<?> updateParticipants(@RequestBody UpdateTaskResponsableDTO updateTaskResponsableDTO){
         try{
-            taskService.editTaskResponsables(updateTaskResponsableDTO);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(taskService.editTaskResponsables(updateTaskResponsableDTO), HttpStatus.OK);
         }catch(Exception e){
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.CONFLICT);

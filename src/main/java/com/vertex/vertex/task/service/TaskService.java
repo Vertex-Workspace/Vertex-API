@@ -106,8 +106,8 @@ public class TaskService {
             e.printStackTrace();
         }
 
-//        List<Group> groups = new ArrayList<>(project.getGroups());
-//        task.setGroups(groups);
+        List<Group> groups = new ArrayList<>(project.getGroups());
+        task.setGroups(groups);
         //Set if the task is revisable or no...
         task.setTaskDependency(null);
         task.setRevisable(project.getProjectReviewENUM().equals(ProjectReviewENUM.MANDATORY));
@@ -325,15 +325,14 @@ public class TaskService {
     }
 
     public Task editTaskResponsables(UpdateTaskResponsableDTO updateTaskResponsableDTO) {
-        System.out.println(updateTaskResponsableDTO.getGroup());
         Task task = findById(updateTaskResponsableDTO.getTaskId());
         List<TaskResponsable> responsablesToDelete = new ArrayList<>();
-        boolean canDelete = false;
+        List<Group> groupsToDelete = new ArrayList<>();
+        boolean canDeleteUser = false;
+        boolean canDeleteGroup = false;
 
         if (task.getTaskResponsables().isEmpty()) {
-            UserTeam userTeam =
-                    userTeamService.findUserTeamByComposeId
-                            (updateTaskResponsableDTO.getTeamId(), updateTaskResponsableDTO.getUser().getId());
+            UserTeam userTeam = userTeamService.findUserTeamByComposeId(updateTaskResponsableDTO.getTeamId(), updateTaskResponsableDTO.getUser().getId());
             TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
             taskResponsablesRepository.save(taskResponsable1);
         }
@@ -341,23 +340,44 @@ public class TaskService {
         for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
             if (taskResponsable.getUserTeam().getUser().getId().equals(updateTaskResponsableDTO.getUser().getId())) {
                 responsablesToDelete.add(taskResponsable);
-                canDelete = true;
+                canDeleteUser = true;
             }
         }
 
-        if (!canDelete) {
-            System.out.println("add");
-            UserTeam userTeam =
-                    userTeamService.findUserTeamByComposeId
-                            (updateTaskResponsableDTO.getTeamId(), updateTaskResponsableDTO.getUser().getId());
-            TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
-            taskResponsablesRepository.save(taskResponsable1);
-        } else {
-            for (TaskResponsable taskResponsable : responsablesToDelete) {
-                task.getTaskResponsables().remove(taskResponsable);
-                taskResponsable.setTask(null);
-                taskResponsablesRepository.delete(taskResponsable);
+        if (updateTaskResponsableDTO.getGroup() != null) {
+            for (Group group : task.getGroups()) {
+                if (group.getId().equals(updateTaskResponsableDTO.getGroup().getId())) {
+                    groupsToDelete.add(group);
+                    canDeleteGroup = true;
+                }
             }
+        }
+
+        if (!canDeleteUser && !canDeleteGroup) {
+            if (updateTaskResponsableDTO.getUser() != null) {
+                UserTeam userTeam = userTeamService.findUserTeamByComposeId(updateTaskResponsableDTO.getTeamId(), updateTaskResponsableDTO.getUser().getId());
+                TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
+                taskResponsablesRepository.save(taskResponsable1);
+            }
+            if (updateTaskResponsableDTO.getGroup() != null) {
+                if(task.getGroups()!=null) {
+                    task.getGroups().add(updateTaskResponsableDTO.getGroup());
+                }else {
+                    List<Group> groups = new ArrayList<>();
+                    groups.add(updateTaskResponsableDTO.getGroup());
+                    task.setGroups(groups);
+                }
+            }
+        }
+
+        for (TaskResponsable taskResponsable : responsablesToDelete) {
+            task.getTaskResponsables().remove(taskResponsable);
+            taskResponsable.setTask(null);
+            taskResponsablesRepository.delete(taskResponsable);
+        }
+        for(Group group : groupsToDelete){
+            task.getGroups().remove(group);
+            group.setTasks(null);
         }
 
         return taskRepository.save(task);
@@ -365,7 +385,6 @@ public class TaskService {
 
     public List<Group> getGroupsByTask(Long taskId){
         Task task = findById(taskId);
-        System.out.println(task.getGroups());
         return task.getGroups();
     }
 
