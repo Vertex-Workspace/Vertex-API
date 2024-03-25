@@ -16,4 +16,11 @@ public class ValueService {
     public void delete(Value value){
         valueRepository.delete(value);
     }
+    public void deleteById(Long id){
+        valueRepository.deleteById(id);
+    }
+
+    public void save(Value value){
+        valueRepository.save(value);
+    }
 }

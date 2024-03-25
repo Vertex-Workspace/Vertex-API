@@ -6,14 +6,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
 public class CommentDTO {
 
     private Long id;
-    private Task task;
+    private Long taskID;
     private String comment;
-    private Date date;
-    private TaskResponsable taskResponsable;
+    private LocalDateTime date;
+    private Long taskResponsableID;
 }

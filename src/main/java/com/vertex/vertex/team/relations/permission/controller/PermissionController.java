@@ -17,35 +17,35 @@ public class PermissionController {
 
     private final PermissionService permissionService;
 
-    @PostMapping("/{userTeamId}")
-    public ResponseEntity<Permission> create(
-            @RequestBody Permission permissionUser,
-            @PathVariable Long userTeamId){
-        try{
-            return new ResponseEntity<>
-                    (permissionService.save(permissionUser, userTeamId),
-                            HttpStatus.CREATED);
-
-        }catch (Exception e){
-            return new ResponseEntity<>
-                    (HttpStatus.CONFLICT);
-        }
-    }
-
-    @PutMapping("/{userTeamId}")
-    public ResponseEntity<Permission> edit(
-            @RequestBody Permission permissionUser,
-            @PathVariable Long userTeamId){
-        try{
-            return new ResponseEntity<>
-                    (permissionService.save(permissionUser, userTeamId),
-                            HttpStatus.CREATED);
-
-        }catch (Exception e){
-            return new ResponseEntity<>
-                    (HttpStatus.CONFLICT);
-        }
-    }
+//    @PostMapping("/{userTeamId}")
+//    public ResponseEntity<Permission> create(
+//            @RequestBody Permission permissionUser,
+//            @PathVariable Long userTeamId){
+//        try{
+//            return new ResponseEntity<>
+//                    (permissionService.save(permissionUser, userTeamId),
+//                            HttpStatus.CREATED);
+//
+//        }catch (Exception e){
+//            return new ResponseEntity<>
+//                    (HttpStatus.CONFLICT);
+//        }
+//    }
+//
+//    @PutMapping("/{userTeamId}")
+//    public ResponseEntity<Permission> edit(
+//            @RequestBody Permission permissionUser,
+//            @PathVariable Long userTeamId){
+//        try{
+//            return new ResponseEntity<>
+//                    (permissionService.save(permissionUser, userTeamId),
+//                            HttpStatus.CREATED);
+//
+//        }catch (Exception e){
+//            return new ResponseEntity<>
+//                    (HttpStatus.CONFLICT);
+//        }
+//    }
 
     @GetMapping
     public ResponseEntity<List<Permission>> findAll(){

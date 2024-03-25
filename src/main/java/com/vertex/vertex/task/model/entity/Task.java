@@ -1,6 +1,9 @@
 package com.vertex.vertex.task.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vertex.vertex.chat.model.Chat;
+import com.vertex.vertex.file.model.File;
+import com.vertex.vertex.file.model.FileSupporter;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
@@ -20,7 +23,7 @@ import java.util.List;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Task {
+public class Task implements FileSupporter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,11 +31,13 @@ public class Task {
     @Column(length = 55)
     private String name;
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
     private List<TaskResponsable> taskResponsables;
 
     @Column(length = 1000)
     private String description;
+
+    private boolean isRevisable;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @ToString.Exclude
@@ -49,21 +54,30 @@ public class Task {
     @OneToOne
     private Task taskDependency;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    private Chat chat;
+
+    boolean chatCreated;
+
     @OneToMany
     private List<Task> subTasks;
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "task", orphanRemoval = true)
     private List<Review> reviews;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "task", orphanRemoval = true)
     private List<Value> values;
 
-    @Enumerated(value = EnumType.STRING)
-    private ApproveStatus approveStatus;
+    @OneToMany(cascade = CascadeType.ALL)
+    List<File> files;
 
-    private String finishDescription;
-
-
-
-
+    public boolean isUnderAnalysis(){
+        if(this.getReviews() != null){
+            return this.getReviews()
+                    .stream()
+                    .map(review -> review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS))
+                    .isParallel();
+        }
+        return false;
+    }
 }

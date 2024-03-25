@@ -12,4 +12,6 @@ public class EditValueDTO {
     private Long id;
     private Value value;
 
+    private Long userID;
+
 }

@@ -1,21 +1,25 @@
 package com.vertex.vertex.task.controller;
 
+import com.vertex.vertex.chat.model.Chat;
+import com.vertex.vertex.chat.service.ChatService;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.DTO.TaskEditDTO;
-import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
-import com.vertex.vertex.task.relations.review.model.DTO.SetFinishedTask;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.relations.task_responsables.model.DTOs.TaskResponsablesDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.service.TaskService;
+import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import org.hibernate.Remove;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -25,6 +29,7 @@ import java.util.List;
 public class TaskController {
 
     private final TaskService taskService;
+    private final ChatService chatService;
 
     @GetMapping("/{id}")
     public ResponseEntity<Task> findById(@PathVariable Long id){
@@ -48,17 +53,18 @@ public class TaskController {
         try{
             return new ResponseEntity<>(taskService.save(taskCreateDTO), HttpStatus.OK);
         }catch(Exception e){
+            System.out.println(e.getMessage());
             return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Property> delete(@PathVariable Long id){
+    public ResponseEntity<?> delete(@PathVariable Long id){
         try{
             taskService.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(true, HttpStatus.OK);
         } catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(false, HttpStatus.CONFLICT);
         }
     }
 
@@ -80,6 +86,19 @@ public class TaskController {
         }
     }
 
+    @GetMapping("/info/{taskID}")
+    public ResponseEntity<?> getTaskInfos(@PathVariable Long taskID) {
+        try
+        {
+            return new ResponseEntity<>
+                    (taskService.getTaskInfos(taskID), HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>
+                    (e.getMessage(),
+                            HttpStatus.NOT_FOUND);
+        }
+    }
+
     @PatchMapping("/comment")
     public ResponseEntity<?> saveComment (@RequestBody CommentDTO commentDTO){
         try{
@@ -89,23 +108,16 @@ public class TaskController {
         }
     }
 
-    @PatchMapping("/review")
-    public ResponseEntity<?> saveReview (@RequestBody ReviewCheck reviewCheck){
+    @DeleteMapping("/{taskID}/comment/{commentID}")
+    public ResponseEntity<?> deleteComment(@PathVariable Long taskID, @PathVariable Long commentID){
         try{
-            return new ResponseEntity<>(taskService.saveReview(reviewCheck), HttpStatus.OK);
+            return new ResponseEntity<>(taskService.deleteComment(taskID, commentID), HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
-    @PatchMapping("/send-to-review")
-    public ResponseEntity<?> saveToReview (@RequestBody SetFinishedTask setFinishedTask){
-        try{
-            return new ResponseEntity<>(taskService.taskUnderAnalysis(setFinishedTask), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        }
-    }
+
 
     @PatchMapping("/responsables")
     public ResponseEntity<?> saveResponsables (@RequestBody TaskResponsablesDTO taskResponsable){
@@ -146,18 +158,56 @@ public class TaskController {
         }
     }
 
-    @GetMapping("/team/{id}")
-    public ResponseEntity<?> findAllByTeam(
-            @PathVariable Long id) {
+    @PostMapping("/{idTask}/chat")
+    public Task createChatOfTask(@PathVariable Long idTask){
+        Task task = taskService.findById(idTask);
+        List<UserTeam> userTeamsList = new ArrayList<>();
+        task.getTaskResponsables().forEach(taskResponsable ->{
+            userTeamsList.add(taskResponsable.getUserTeam());
+        });
+
+        Chat chat = new Chat();
+        chat.setName(task.getName());
+        chat.setUserTeams(userTeamsList);
+        chat.setMessages(new ArrayList<>());
+        task.setChatCreated(true);
+        task.setChat(chat);
+        this.chatService.create(chat);
+        return task;
+    }
+    @PatchMapping("/{id}/upload")
+    public ResponseEntity<?> uploadFile(
+            @PathVariable Long id,
+            @RequestParam MultipartFile file) {
         try {
-            return new ResponseEntity<>(
-                    taskService.getAllByTeam(id),
-                    HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(
-                    "Equipe não encontrada!",
-                    HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>
+                    (taskService.uploadFile(file, id),
+                        HttpStatus.OK);
+
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>
+                    (HttpStatus.CONFLICT);
         }
     }
 
+    @DeleteMapping("/{taskId}/remove-file/{fileId}")
+    public ResponseEntity<?> uploadFile(
+            @PathVariable Long taskId,
+            @PathVariable Long fileId) {
+        try {
+            return new ResponseEntity<>
+                    (taskService.removeFile(taskId, fileId),
+                            HttpStatus.OK);
+
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>
+                    (HttpStatus.CONFLICT);
+        }
+    }
+
+
+    @GetMapping("/{idTask}/chat")
+    public Chat getChatOfTask(@PathVariable Long idTask){
+        return taskService.findById(idTask).getChat();
+    }
 }

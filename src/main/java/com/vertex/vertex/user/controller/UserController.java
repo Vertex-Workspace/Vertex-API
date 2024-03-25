@@ -50,10 +50,8 @@ public class UserController {
     @PutMapping
     public ResponseEntity<User> edit(@RequestBody UserEditionDTO userEditionDTO) {
         try {
-//            System.out.println(userEditionDTO);
             return new ResponseEntity<>(userService.edit(userEditionDTO), HttpStatus.OK);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
@@ -92,7 +90,6 @@ public class UserController {
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticate(
             @RequestBody UserLoginDTO dto) {
-
         try {
             return new ResponseEntity<>
                     (userService.authenticate(dto),
@@ -119,16 +116,24 @@ public class UserController {
         }
     }
 
-        @PatchMapping("upload/{userId}")
-        public String uploadImage(
-                @PathVariable Long userId,
-                @RequestParam MultipartFile imageFile) throws IOException {
-            String returnValue = "start";
-
-            userService.saveImage(imageFile);
-
-            return returnValue;
+    @GetMapping("/usersByGroup/{groupId}")
+    public ResponseEntity<?> findByGroup(@PathVariable Long groupId) {
+        try {
+            return new ResponseEntity<>(userService.getUsersByGroup(groupId), HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
         }
+    }
+
+    @PatchMapping("upload/{userId}")
+    public void uploadImage(
+            @PathVariable Long userId,
+            @RequestParam MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new RuntimeException();
+        }
+        userService.saveImage(file, userId);
+    }
 
 
 }

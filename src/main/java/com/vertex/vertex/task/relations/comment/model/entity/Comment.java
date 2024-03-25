@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @AllArgsConstructor
@@ -21,9 +23,9 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String comment;
-    private Date date;
+    private LocalDateTime date;
+
     @ManyToOne
-    @JsonIgnore
     @ToString.Exclude
     private TaskResponsable taskResponsable;
     @ManyToOne

@@ -1,5 +1,8 @@
 package com.vertex.vertex.task.service;
 
+import com.vertex.vertex.file.model.File;
+import com.vertex.vertex.file.service.FileService;
+import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
@@ -9,41 +12,33 @@ import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.property.service.PropertyService;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.DTO.TaskEditDTO;
-import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
-import com.vertex.vertex.task.relations.review.model.DTO.SetFinishedTask;
-import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
+import com.vertex.vertex.task.model.DTO.TaskOpenDTO;
+import com.vertex.vertex.task.relations.review.repository.ReviewRepository;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.relations.task_responsables.model.DTOs.TaskResponsablesDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.model.exceptions.TaskDoesNotExistException;
 import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
-import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.value.model.entity.ValueDate;
-import com.vertex.vertex.task.relations.value.model.entity.ValueNumber;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
-import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
-import com.vertex.vertex.team.service.TeamService;
-import com.vertex.vertex.user.model.entity.User;
-import com.vertex.vertex.user.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
-import javax.mail.*;
-import javax.mail.internet.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @AllArgsConstructor
@@ -55,13 +50,16 @@ public class TaskService {
     private final ProjectService projectService;
     private final PropertyService propertyService;
     private final UserTeamService userTeamService;
-    private final UserService userService;
-    private final TeamService teamService;
+    private final ModelMapper modelMapper;
+    private final ReviewRepository reviewRepository;
+    private final FileService fileService;
+
 
     public Task save(TaskCreateDTO taskCreateDTO) {
         Task task = new Task();
         BeanUtils.copyProperties(taskCreateDTO, task);
         Project project;
+        List<Value> values = new ArrayList<>();
         try {
             project = projectService.findById(taskCreateDTO.getProject().getId());
         } catch (Exception e) {
@@ -72,30 +70,23 @@ public class TaskService {
             Value currentValue = property.getKind().getValue();
             currentValue.setProperty(property);
             currentValue.setTask(task);
-            task.getValues().add(currentValue);
+            values.add(currentValue);
 
-            if (property.getKind() == PropertyKind.LIST
-                    || property.getKind() == PropertyKind.STATUS) {
-                for (int i = 0; i < task.getValues().size(); i++) {
-                    for (PropertyList propertyList : task.getValues().get(i).getProperty().getPropertyLists()) {
-                        if (taskCreateDTO.getValues().get(i).getValue() != null) {
-                            currentValue.setValue(taskCreateDTO.getValues().get(i).getValue());
-                        } else {
-                            if (propertyList.getPropertyListKind() == PropertyListKind.TODO) {
-                                currentValue.setValue(propertyList);
-                            }
-                        }
-                    }
-                }
+            if (property.getKind() == PropertyKind.STATUS) {
+                //Get the first element, how the three are fixed, it always will be TO DO "Não Iniciado"
+                currentValue.setValue(property.getPropertyLists().get(0));
             }
             if (property.getKind() == PropertyKind.DATE) {
                 ((ValueDate) currentValue).setValue();
             }
+            if (property.getKind() == PropertyKind.TEXT) {
+                currentValue.setValue(property.getDefaultValue());
+            }
         }
-
+        task.setValues(values);
         //Add the taskResponsables on task list of taskResponsables
-        task.setCreator(userTeamService.findById(taskCreateDTO.getCreator().getId()));
-        try{
+        task.setCreator(userTeamService.findUserTeamByComposeId(project.getTeam().getId(), taskCreateDTO.getCreator().getId()));
+        try {
             for (UserTeam userTeam : project.getTeam().getUserTeams()) {
                 TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
                 if (task.getTaskResponsables() == null) {
@@ -106,19 +97,21 @@ public class TaskService {
                     task.getTaskResponsables().add(taskResponsable1);
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
-        task.setApproveStatus(ApproveStatus.INPROGRESS);
-        return taskRepository.save(task);
+        //Set if the task is revisable or no...
+        task.setRevisable(project.getProjectReviewENUM().equals(ProjectReviewENUM.MANDATORY));
 
+        return taskRepository.save(task);
     }
+
 
     public Task edit(TaskEditDTO taskEditDTO) {
         try {
             Task task = findById(taskEditDTO.getId());
-            BeanUtils.copyProperties(taskEditDTO, task);
+            modelMapper.map(taskEditDTO, task);
             return taskRepository.save(task);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -131,7 +124,8 @@ public class TaskService {
     }
 
     public Task findById(Long id) {
-        return taskRepository.findById(id).get();
+        return taskRepository.findById(id)
+                .orElseThrow(EntityNotFoundException::new);
     }
 
     public void deleteById(Long id) {
@@ -149,16 +143,34 @@ public class TaskService {
         if (!task.getProject().getProperties().contains(property)) {
             throw new RuntimeException("There isn't a property with this id on the project : " + task.getProject().getName());
         }
+        UserTeam userTeam = userTeamService.findUserTeamByComposeId(task.getProject().getTeam().getId(), editValueDTO.getUserID());
+
+
         for (int i = 0; i < task.getValues().size(); i++) {
             if (task.getValues().get(i).getId().equals(editValueDTO.getValue().getId())) {
-
                 Value currentValue = property.getKind().getValue();
                 currentValue.setId(editValueDTO.getValue().getId());
                 currentValue.setTask(task);
                 currentValue.setProperty(property);
+                if(property.getKind() == PropertyKind.STATUS){
+                    if(!userTeam.equals(task.getCreator()) && task.isRevisable()){
+
+                        // Validates another -> done
+                        PropertyList propertyList = (PropertyList) editValueDTO.getValue().getValue();
+                        if(propertyList.getPropertyListKind().equals(PropertyListKind.DONE)){
+                            throw new RuntimeException("Não é possível definir como concluído, " +
+                                    "pois a tarefa deve passar por uma revisão do criador!");
+                        }
+
+                        // Validates done -> another
+                        PropertyList propertyListCurrent = (PropertyList) task.getValues().get(i).getValue();
+                        if(propertyListCurrent.getPropertyListKind().equals(PropertyListKind.DONE)){
+                            throw new RuntimeException("Apenas o criador da tarefa pode remover dos concluídos!");
+                        }
+                    }
+                }
                 currentValue.setValue(editValueDTO.getValue().getValue());
                 task.getValues().set(i, currentValue);
-                task.setApproveStatus(ApproveStatus.INPROGRESS);
             }
         }
         return taskRepository.save(task);
@@ -167,33 +179,37 @@ public class TaskService {
     //verify if the taskresponsable belongs to the task and if it is, save the comment
     public Task saveComment(CommentDTO commentDTO) {
         Task task;
-        Comment comment;
-        TaskResponsable taskResponsable = taskResponsablesRepository.findById(commentDTO.getTaskResponsable().getId()).get();
+        Comment comment = new Comment();
+        TaskResponsable taskResponsable = taskResponsablesRepository.findById(commentDTO.getTaskResponsableID()).get();
+
         try {
-            task = findById(commentDTO.getTask().getId());
+            task = findById(commentDTO.getTaskID());
         } catch (Exception e) {
             throw new TaskDoesNotExistException();
         }
 
-        if (commentDTO.getId() != null) {
-            for (Comment commentFor : task.getComments()) {
-                if (commentFor.getId().equals(commentDTO.getId())) {
-                    comment = commentFor;
-                    task.getComments().remove(comment);
-                    return taskRepository.save(task);
-                }
-            }
+        if (taskResponsable.getTask().getId().equals(commentDTO.getTaskID())) {
+            comment.setTask(task);
+            comment.setTaskResponsable(taskResponsable);
+            comment.setComment(commentDTO.getComment());
+            comment.setDate(LocalDateTime.now());
+            task.getComments().add(comment);
+            return taskRepository.save(task);
         } else {
-            comment = new Comment();
-            if (taskResponsable.getTask().getId().equals(commentDTO.getTask().getId())) {
-                BeanUtils.copyProperties(commentDTO, comment);
-                task.getComments().add(comment);
-            } else {
-                throw new RuntimeException("O usuário não é um dos responsáveis pela tarefa.");
+            throw new RuntimeException("O usuário não é um dos responsáveis pela tarefa.");
+        }
+    }
+
+    public Boolean deleteComment(Long taskID, Long commentID) {
+        Task task = findById(taskID);
+        for (Comment comment : task.getComments()) {
+            if (comment.getId().equals(commentID)) {
+                task.getComments().remove(comment);
+                taskRepository.save(task);
+                return true;
             }
         }
-        return taskRepository.save(task);
-
+        throw new RuntimeException("Comment doesn't exist in this task");
     }
 
     //add responsables to the task
@@ -233,43 +249,6 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    public Task saveReview(ReviewCheck reviewCheck) {
-        Task task = findById(reviewCheck.getTask().getId());
-        Review review;
-        TaskResponsable taskResponsable = taskResponsablesRepository.findById(reviewCheck.getReviewer().getId()).get();
-
-        if (reviewCheck.getId() != null) {
-            for (Review reviewFor : task.getReviews()) {
-                if (reviewFor.getId().equals(reviewCheck.getId())) {
-                    review = reviewFor;
-                    task.getReviews().remove(review);
-                    return save(task);
-                }
-            }
-        } else {
-            review = new Review();
-            if (task.getCreator().getId().equals(taskResponsable.getId())) {
-                BeanUtils.copyProperties(reviewCheck, review);
-                task.getReviews().add(review);
-                task.setApproveStatus(reviewCheck.getApproveStatus());
-            } else {
-                throw new RuntimeException("O usuário não é o criador da tarefa");
-            }
-        }
-        return save(task);
-    }
-
-    public Task taskUnderAnalysis(SetFinishedTask setFinishedTask) {
-        Task task = findById(setFinishedTask.getTask().getId());
-        if (task.getApproveStatus() == ApproveStatus.DISAPPROVED ||
-                task.getApproveStatus() == ApproveStatus.INPROGRESS) {
-            task.setApproveStatus(ApproveStatus.UNDERANALYSIS);
-            task.setFinishDescription(setFinishedTask.getFinishDescription());
-        } else if (task.getApproveStatus() == ApproveStatus.APPROVED) {
-            throw new RuntimeException("A tarefa já foi aprovada. Ela não pode voltar para análise");
-        }
-        return save(task);
-    }
 
     public List<Task> getAllByProject(Long id) {
         try {
@@ -282,38 +261,57 @@ public class TaskService {
 
     }
 
-    public List<Task> getAllByTeam(Long id) {
-        try {
-            Team team = teamService.findTeamById(id);
-            List<Task> taskList = new ArrayList<>();
-
-            team.getProjects()
-                    .forEach(p -> {
-                        taskList.addAll(p.getTasks());
-                    });
-
-            return taskList;
-
-        } catch (Exception e) {
-            throw new RuntimeException();
-        }
+    public TaskOpenDTO getTaskInfos(Long taskID) {
+        Task task = findById(taskID);
+        String fullName = task.getCreator().getUser().getFirstName() + " " + task.getCreator().getUser().getLastName();
+        return new TaskOpenDTO(task.getProject().getTeam().getName()
+                , task.getProject().getName()
+                , fullName
+                , task.getCreator().getUser().getEmail()
+                , task.getProject().getProjectReviewENUM());
     }
 
     public List<Task> getAllByUser(Long id) {
         try {
             List<UserTeam> uts = userTeamService.findAll(id);
-            List<Task> taskList = new ArrayList<>();
 
-            uts.forEach(ut -> {
-                ut.getTeam().getProjects().forEach(p -> {
-                    taskList.addAll(p.getTasks());
-                });
-            });
-
-            return taskList;
+            return uts.stream()
+                    .flatMap(ut -> ut.getTeam()
+                            .getProjects().stream()
+                            .flatMap(p -> p.getTasks().stream()))
+                    .toList();
 
         } catch (Exception e) {
             throw new RuntimeException();
         }
     }
+
+    public Task uploadFile(MultipartFile multipartFile, Long id) {
+        try {
+            Task task = findById(id);
+            File file = fileService.save(multipartFile, task);
+
+            if (Objects.isNull(task.getFiles())) task.setFiles(List.of(file));
+            else task.getFiles().add(file);
+
+            return taskRepository.save(task);
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
+    }
+
+    public Task removeFile(Long taskId, Long fileId) {
+        try {
+            Task task = findById(taskId);
+            File file = fileService.findById(fileId);
+            task.getFiles().remove(file);
+            fileService.delete(fileId);
+            return taskRepository.save(task);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+
+
 }

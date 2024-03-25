@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -24,18 +25,29 @@ public class Review {
 
     private String description;
 
-    private Date date;
+    private String finalDescription;
+
+    private LocalDateTime sentDate;
+
+    private LocalDateTime reviewDate;
 
     @ManyToOne
     @JsonIgnore
     @ToString.Exclude
-    private TaskResponsable reviewer;
+    //Can be null
+    private TaskResponsable creatorReviewer;
+
+    @ManyToOne
+    @JsonIgnore
+    @ToString.Exclude
+    private TaskResponsable userThatSentReview;
 
     @ManyToOne
     @JsonIgnore
     @ToString.Exclude
     private Task task;
 
+    //Can be null
     private Double grade;
 
     @Enumerated(value = EnumType.STRING)
