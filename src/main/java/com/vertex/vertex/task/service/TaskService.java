@@ -106,8 +106,10 @@ public class TaskService {
             e.printStackTrace();
         }
 
-        List<Group> groups = new ArrayList<>(project.getGroups());
-        task.setGroups(groups);
+        if(project.getGroups() != null) {
+            List<Group> groups = new ArrayList<>(project.getGroups());
+            task.setGroups(groups);
+        }
         //Set if the task is revisable or no...
         task.setTaskDependency(null);
         task.setRevisable(project.getProjectReviewENUM().equals(ProjectReviewENUM.MANDATORY));
@@ -332,6 +334,7 @@ public class TaskService {
         boolean canDeleteGroup = false;
 
         if (task.getTaskResponsables().isEmpty()) {
+            System.out.println("add1");
             UserTeam userTeam = userTeamService.findUserTeamByComposeId(updateTaskResponsableDTO.getTeamId(), updateTaskResponsableDTO.getUser().getId());
             TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
             taskResponsablesRepository.save(taskResponsable1);
@@ -355,6 +358,7 @@ public class TaskService {
 
         if (!canDeleteUser && !canDeleteGroup) {
             if (updateTaskResponsableDTO.getUser() != null) {
+                System.out.println("add2");
                 UserTeam userTeam = userTeamService.findUserTeamByComposeId(updateTaskResponsableDTO.getTeamId(), updateTaskResponsableDTO.getUser().getId());
                 TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
                 taskResponsablesRepository.save(taskResponsable1);
@@ -371,11 +375,13 @@ public class TaskService {
         }
 
         for (TaskResponsable taskResponsable : responsablesToDelete) {
+            System.out.println("delete1");
             task.getTaskResponsables().remove(taskResponsable);
             taskResponsable.setTask(null);
             taskResponsablesRepository.delete(taskResponsable);
         }
         for(Group group : groupsToDelete){
+            System.out.println("delete2");
             task.getGroups().remove(group);
             group.setTasks(null);
         }
