@@ -158,6 +158,36 @@ public class TaskController {
         }
     }
 
+    @PatchMapping("/{id}/upload")
+    public ResponseEntity<?> uploadFile(
+            @PathVariable Long id,
+            @RequestParam MultipartFile file) {
+        try {
+            return new ResponseEntity<>
+                    (taskService.uploadFile(file, id),
+                        HttpStatus.OK);
+
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>
+                    (HttpStatus.CONFLICT);
+        }
+    }
+    @DeleteMapping("/{taskId}/remove-file/{fileId}")
+    public ResponseEntity<?> uploadFile(
+            @PathVariable Long taskId,
+            @PathVariable Long fileId) {
+        try {
+            return new ResponseEntity<>
+                    (taskService.removeFile(taskId, fileId),
+                            HttpStatus.OK);
+
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>
+                    (HttpStatus.CONFLICT);
+        }
+    }
+
+
     @PostMapping("/{idTask}/chat")
     public Task createChatOfTask(@PathVariable Long idTask){
         Task task = taskService.findById(idTask);
@@ -175,36 +205,6 @@ public class TaskController {
         this.chatService.create(chat);
         return task;
     }
-    @PatchMapping("/{id}/upload")
-    public ResponseEntity<?> uploadFile(
-            @PathVariable Long id,
-            @RequestParam MultipartFile file) {
-        try {
-            return new ResponseEntity<>
-                    (taskService.uploadFile(file, id),
-                        HttpStatus.OK);
-
-        } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>
-                    (HttpStatus.CONFLICT);
-        }
-    }
-
-    @DeleteMapping("/{taskId}/remove-file/{fileId}")
-    public ResponseEntity<?> uploadFile(
-            @PathVariable Long taskId,
-            @PathVariable Long fileId) {
-        try {
-            return new ResponseEntity<>
-                    (taskService.removeFile(taskId, fileId),
-                            HttpStatus.OK);
-
-        } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>
-                    (HttpStatus.CONFLICT);
-        }
-    }
-
 
     @GetMapping("/{idTask}/chat")
     public Chat getChatOfTask(@PathVariable Long idTask){
