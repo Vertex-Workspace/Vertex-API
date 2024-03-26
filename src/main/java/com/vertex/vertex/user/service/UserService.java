@@ -87,7 +87,7 @@ public class UserService {
         user.setPersonalization(personalizationService.defaultSave(user));
         //
         user.setTaskReview(true);
-        user.setNewMembers(true);
+        user.setNewMembersAndGroups(true);
         user.setPermissionsChanged(true);
         user.setSendToEmail(true);
         user.setAnyUpdateOnTask(true);
@@ -230,18 +230,18 @@ public class UserService {
     public User changeNotificationSettings(Long userID, Integer notificationID) throws NoSuchMethodException {
         User user = findById(userID);
 
-        List<List<String>> methods = List.of(
-                List.of("setTaskReview", "getTaskReview"),
-                List.of("setNewMembers", "getNewMembers"),
-                List.of("setPermissionsChanged", "getPermissionsChanged"),
-                List.of("setResponsibleInProjectOrTask", "getResponsibleInProjectOrTask"),
-                List.of("setAnyUpdateOnTask", "getAnyUpdateOnTask"),
-                List.of("setSendToEmail", "getSendToEmail"));
+        List<String> methods = List.of(
+                "TaskReview",
+                "NewMembersAndGroups",
+                "PermissionsChanged",
+                "ResponsibleInProjectOrTask",
+                "AnyUpdateOnTask",
+                "SendToEmail");
 
-        Function<List<String>, Void> variable = method -> {
+        Function<String, Void> variable = method -> {
             try {
-                Method setMethod = user.getClass().getMethod(method.get(0), Boolean.class);
-                Method getMethod = user.getClass().getMethod(method.get(1));
+                Method setMethod = user.getClass().getMethod("set" + method, Boolean.class);
+                Method getMethod = user.getClass().getMethod("get" + method);
 
                 //Get the current boolean value
                 Boolean currentValue = (Boolean) getMethod.invoke(user);

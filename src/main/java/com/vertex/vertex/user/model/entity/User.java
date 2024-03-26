@@ -54,7 +54,7 @@ public class User{
 
     //Notifications
     private Boolean taskReview;
-    private Boolean newMembers;
+    private Boolean newMembersAndGroups;
     private Boolean permissionsChanged;
     private Boolean responsibleInProjectOrTask;
     private Boolean anyUpdateOnTask;

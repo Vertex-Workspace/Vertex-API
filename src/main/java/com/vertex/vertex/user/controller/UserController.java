@@ -142,7 +142,7 @@ public class UserController {
     //======================================================
 
     @GetMapping("/{userID}/notification")
-    public ResponseEntity<?> getNotifcations(@PathVariable Long userID){
+    public ResponseEntity<?> getNotifications(@PathVariable Long userID){
         try {
             return new ResponseEntity<>(userService.getUserNotifications(userID), HttpStatus.OK);
         } catch (NoSuchElementException e) {

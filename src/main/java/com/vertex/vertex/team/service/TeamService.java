@@ -1,14 +1,14 @@
 package com.vertex.vertex.team.service;
 import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.chat.service.ChatService;
-import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
+import com.vertex.vertex.notification.entity.model.Notification;
+import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.project.model.DTO.ProjectViewListDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
-import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.DTO.TeamLinkDTO;
@@ -23,22 +23,16 @@ import com.vertex.vertex.team.relations.group.model.exception.GroupNotFoundExcep
 import com.vertex.vertex.team.relations.group.service.GroupService;
 import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
-import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.repository.TeamRepository;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.repository.UserRepository;
-import com.vertex.vertex.user.service.UserService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
-import org.apache.tomcat.util.http.fileupload.disk.DiskFileItem;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.*;
 
 @Service
@@ -55,7 +49,7 @@ public class TeamService {
     private final PermissionService permissionService;
     private final ProjectService projectService;
     private final UserRepository userRepository;
-
+    private final NotificationService notificationService;
     public Team save(TeamViewListDTO teamViewListDTO) {
         try {
             Team team = new Team();
@@ -157,7 +151,7 @@ public class TeamService {
     }
 
 
-    public Team editGroup(GroupRegisterDTO groupRegisterDTO) {
+    public Team saveGroup(GroupRegisterDTO groupRegisterDTO) {
 
         List<UserTeam> userTeams = new ArrayList<>();
         Group group = new Group();
@@ -178,11 +172,26 @@ public class TeamService {
                     userTeams.add(userTeam);
                     userTeam.getGroups().add(group);
                     group.setUserTeams(userTeams);
+
+                    if (userTeam.getUser().getNewMembersAndGroups()) {
+                        createGroupNotification("Você foi adicionado(a) ao grupo " + group.getName(), userTeam);
+                    }
                 }
             }
         }
-
+        System.out.println(team);
         return teamRepository.save(team);
+    }
+
+    private void createGroupNotification(String title, UserTeam userTeam){
+        System.out.println(userTeam);
+        Notification notification = new Notification(
+                userTeam.getTeam(),
+                title,
+                "team/" + userTeam.getTeam().getId(),
+                userTeam.getUser()
+        );
+        notificationService.save(notification);
     }
 
     public Group editUserIntoGroup(GroupEditUserDTO groupEditUserDTO) {
@@ -196,11 +205,17 @@ public class TeamService {
                 if (userTeam.getGroups().contains(group) || group.getUserTeams().contains(userTeam)) {
                     userTeam.getGroups().remove(group);
                     group.getUserTeams().remove(userTeam);
+                    if (userTeam.getUser().getNewMembersAndGroups()) {
+                        createGroupNotification("Você foi removido(a) ao grupo " + group.getName(), userTeam);
+                    }
                 }
                 //Else, it will be associated and the user will be on the group.
                 else {
                     userTeam.getGroups().add(group);
                     group.getUserTeams().add(userTeam);
+                    if (userTeam.getUser().getNewMembersAndGroups()) {
+                        createGroupNotification("Você foi adicionado(a) ao grupo " + group.getName(), userTeam);
+                    }
                 }
                 return groupService.edit(group);
             } else {
