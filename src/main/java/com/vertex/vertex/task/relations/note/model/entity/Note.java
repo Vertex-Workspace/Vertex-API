@@ -32,7 +32,7 @@ public class Note implements FileSupporter {
     @Column(length = 500)
     private String description;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private UserTeam creator;
 
     @ManyToOne

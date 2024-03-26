@@ -12,6 +12,7 @@ import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.DTO.TeamLinkDTO;
+import com.vertex.vertex.team.model.DTO.TeamSearchDTO;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
@@ -407,6 +408,20 @@ public class TeamService {
         } catch (Exception e) {
             throw new RuntimeException();
         }
+    }
+
+    public List<TeamSearchDTO> findAllByUserAndQuery(Long userId, String query) {
+        return userTeamService
+                .findAllByUserAndQuery(userId, query)
+                .stream()
+                .map(UserTeam::getTeam)
+                .map(TeamSearchDTO::new)
+                .toList();
+    }
+
+    public List<UserTeam> findAllLoggedUserTeams(Long userId) {
+        return userTeamService
+                .findAllByUser(userId);
     }
 
 

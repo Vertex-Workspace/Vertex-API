@@ -20,6 +20,8 @@ public interface UserTeamRepository extends JpaRepository<UserTeam, Long> {
 
     List<UserTeam> findAllByUser_Id(Long userID);
 
+    List<UserTeam> findAllByUser_IdAndTeam_Name(Long userId, String name);
+
     UserTeam findByUser(User user);
 
     UserTeam findByUser_IdAndTeam(Long userId, Team team);
