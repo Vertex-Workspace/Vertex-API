@@ -31,7 +31,7 @@ public class PersonalizationService {
         personalization.setPrimaryColorLight("#092C4C");
         personalization.setSecondColorLight("#F3F3F3");
         personalization.setPrimaryColorDark("#F3F3F3");
-        personalization.setSecondColorDark("#574444");
+        personalization.setSecondColorDark("#1E1E1E");
         personalization.setFontFamily("Inter");
         personalization.setFontSize(14);
         personalization.setTheme(0);
