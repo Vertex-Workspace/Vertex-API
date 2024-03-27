@@ -28,8 +28,6 @@ public class Notification {
     private String linkRedirect;
 
     @ManyToOne
-    @JsonIgnore
-    @ToString.Exclude
     private User user;
 
     public Notification(Project project, String title, String linkRedirect, User user) {

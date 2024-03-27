@@ -1,6 +1,7 @@
 package com.vertex.vertex.user.model.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import jakarta.persistence.*;
@@ -47,6 +48,8 @@ public class User{
     private Boolean showCharts;
 
     @OneToMany(orphanRemoval = true, mappedBy ="user")
+    @JsonIgnore
+    @ToString.Exclude
     private List<Notification> notifications;
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
