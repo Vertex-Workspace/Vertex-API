@@ -5,6 +5,7 @@ import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
 import com.vertex.vertex.project.model.DTO.ProjectEditDTO;
 import com.vertex.vertex.project.model.DTO.ProjectOneDTO;
+import com.vertex.vertex.project.model.DTO.ProjectSearchDTO;
 import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
@@ -287,6 +288,16 @@ public class ProjectService {
         }
 
         return projectRepository.save(project);
+    }
+
+    public List<ProjectSearchDTO> findAllByUserAndQuery(Long userId, String query) {
+        return userTeamService.findAllByUser(userId)
+                .stream()
+                .map(UserTeam::getTeam)
+                .flatMap(ut -> ut.getProjects().stream())
+                .filter(ut -> ut.getName().contains(query))
+                .map(ProjectSearchDTO::new)
+                .toList();
     }
 
 

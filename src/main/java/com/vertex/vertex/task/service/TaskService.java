@@ -13,6 +13,7 @@ import com.vertex.vertex.property.service.PropertyService;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.DTO.TaskEditDTO;
 import com.vertex.vertex.task.model.DTO.TaskOpenDTO;
+import com.vertex.vertex.task.model.DTO.TaskSearchDTO;
 import com.vertex.vertex.task.relations.review.repository.ReviewRepository;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.relations.task_responsables.model.DTOs.TaskResponsablesDTO;
@@ -310,6 +311,22 @@ public class TaskService {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    public List<TaskSearchDTO> findAllByUserAndQuery(
+            Long userId, String query) {
+
+        return userTeamService.findAllByUser(userId)
+                .stream()
+                .map(UserTeam::getTeam)
+                .flatMap(t -> t.getProjects().stream())
+                .flatMap(p -> p.getTasks().stream())
+                .filter(task -> task.getTaskResponsables()
+                        .stream()
+                        .anyMatch(tr -> tr.getUserTeam().getUser().getId().equals(userId))
+                            && task.getName().contains(query))
+                .map(TaskSearchDTO::new)
+                .toList();
     }
 
 

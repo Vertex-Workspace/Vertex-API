@@ -72,7 +72,7 @@ public class UserTeamService {
 
     public List<UserTeam> findAllByUserAndQuery(Long userId, String query) {
         return userTeamRepository
-                .findAllByUser_IdAndTeam_Name(userId, query);
+                .findAllByUser_IdAndTeam_NameContaining(userId, query);
     }
 
     public List<UserTeam> findAllByUser(Long userId) {

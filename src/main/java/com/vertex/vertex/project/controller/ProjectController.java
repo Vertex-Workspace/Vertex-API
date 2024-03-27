@@ -143,4 +143,17 @@ public class ProjectController {
         }
     }
 
+    @GetMapping("/query/{query}/{userId}")
+    public ResponseEntity<?> findAllByUserAndQuery(
+            @PathVariable Long userId, @PathVariable String query) {
+        try {
+            return new ResponseEntity<>
+                    (projectService.findAllByUserAndQuery(userId, query),
+                            HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>
+                    (HttpStatus.CONFLICT);
+        }
+    }
+
 }

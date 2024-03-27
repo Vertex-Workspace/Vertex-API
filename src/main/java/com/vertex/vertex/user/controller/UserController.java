@@ -135,5 +135,18 @@ public class UserController {
         userService.saveImage(file, userId);
     }
 
+    @GetMapping("/query/{query}/{userId}")
+    public ResponseEntity<?> findByUserAndQuery(
+            @PathVariable Long userId, @PathVariable String query) {
+        try {
+            return new ResponseEntity<>
+                    (userService.findAllByUserAndQuery(userId, query),
+                            HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>
+                    (HttpStatus.CONFLICT);
+        }
+    }
+
 
 }
