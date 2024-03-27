@@ -52,6 +52,7 @@ public class Task implements FileSupporter {
     private Project project;
 
     @ManyToOne
+    @ToString.Exclude
     private Task taskDependency;
 
     @OneToMany

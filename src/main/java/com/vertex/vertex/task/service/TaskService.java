@@ -106,7 +106,7 @@ public class TaskService {
             e.printStackTrace();
         }
 
-        if(project.getGroups() != null) {
+        if (project.getGroups() != null) {
             List<Group> groups = new ArrayList<>(project.getGroups());
             task.setGroups(groups);
         }
@@ -364,9 +364,9 @@ public class TaskService {
                 taskResponsablesRepository.save(taskResponsable1);
             }
             if (updateTaskResponsableDTO.getGroup() != null) {
-                if(task.getGroups()!=null) {
+                if (task.getGroups() != null) {
                     task.getGroups().add(updateTaskResponsableDTO.getGroup());
-                }else {
+                } else {
                     List<Group> groups = new ArrayList<>();
                     groups.add(updateTaskResponsableDTO.getGroup());
                     task.setGroups(groups);
@@ -380,7 +380,7 @@ public class TaskService {
             taskResponsable.setTask(null);
             taskResponsablesRepository.delete(taskResponsable);
         }
-        for(Group group : groupsToDelete){
+        for (Group group : groupsToDelete) {
             System.out.println("delete2");
             task.getGroups().remove(group);
             group.setTasks(null);
@@ -389,16 +389,37 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    public List<Group> getGroupsByTask(Long taskId){
+    public List<Group> getGroupsByTask(Long taskId) {
         Task task = findById(taskId);
         return task.getGroups();
     }
 
-    public Task setDependency(Long taskId, Long taskDependencyId){
+    public Task setDependency(Long taskId, Long taskDependencyId) {
         Task task = findById(taskId);
-        Task taskDependency = findById(taskDependencyId);
-        task.setTaskDependency(taskDependency);
-        return taskRepository.save(task);
+        Task tDependency = findById(taskDependencyId);
+        if(tDependency.getTaskDependency() != null){
+            if(tDependency.getTaskDependency().getId().equals(taskId)){
+                throw new RuntimeException("A outra tarefa já está associada a essa");
+            }
+        } else {
+            Task taskDependency = findById(taskDependencyId);
+            task.setTaskDependency(taskDependency);
+            return taskRepository.save(task);
+        }
+        return null;
     }
+
+    public void setDependencyByTask(Long taskId) {
+        Task task = findById(taskId);
+        for (Task taskDependents : taskRepository.findAll()) {
+            if (taskDependents.getTaskDependency() != null) {
+                if (task.getId().equals(taskDependents.getTaskDependency().getId())) {
+                    taskDependents.setTaskDependency(null);
+                    taskRepository.save(taskDependents);
+                }
+            }
+        }
+    }
+
 
 }

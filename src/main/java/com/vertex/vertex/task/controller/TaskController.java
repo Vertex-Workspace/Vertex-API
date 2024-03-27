@@ -221,7 +221,15 @@ public class TaskController {
         }
     }
 
-
-
+    @PatchMapping("/taskDependency/{taskId}")
+    public ResponseEntity<?> setTaskDependencyNull(@PathVariable Long taskId){
+        try{
+            taskService.setDependencyByTask(taskId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch(Exception e){
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
 
 }
