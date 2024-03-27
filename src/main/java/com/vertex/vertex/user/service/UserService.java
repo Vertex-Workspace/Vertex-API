@@ -195,9 +195,9 @@ public class UserService {
                 .findAllLoggedUserTeams(userId)
                 .stream()
                 .map(UserTeam::getUser)
-                .filter(u -> u.getFirstName().contains(query)
-                            || u.getLastName().contains(query)
-                                && !Objects.equals(u.getId(), userId))
+                .filter(u -> (u.getFirstName().toLowerCase().contains(query.toLowerCase())
+                                || u.getLastName().toLowerCase().contains(query.toLowerCase()))
+                                    && !Objects.equals(u.getId(), userId))
                 .map(UserSearchDTO::new)
                 .toList();
     }

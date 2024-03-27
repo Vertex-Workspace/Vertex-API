@@ -295,7 +295,7 @@ public class ProjectService {
                 .stream()
                 .map(UserTeam::getTeam)
                 .flatMap(ut -> ut.getProjects().stream())
-                .filter(ut -> ut.getName().contains(query))
+                .filter(ut -> ut.getName().toLowerCase().contains(query.toLowerCase()))
                 .map(ProjectSearchDTO::new)
                 .toList();
     }

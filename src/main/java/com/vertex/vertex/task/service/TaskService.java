@@ -324,7 +324,7 @@ public class TaskService {
                 .filter(task -> task.getTaskResponsables()
                         .stream()
                         .anyMatch(tr -> tr.getUserTeam().getUser().getId().equals(userId))
-                            && task.getName().contains(query))
+                            && task.getName().toLowerCase().contains(query.toLowerCase()))
                 .map(TaskSearchDTO::new)
                 .toList();
     }

@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,7 +22,9 @@ public class ProjectSearchDTO {
         this.id = project.getId();
         this.name = project.getName();
         this.description = project.getDescription();
-        this.image = project.getFile().getFile();
+
+        if (!Objects.isNull(project.getFile())) this.image = project.getFile().getFile();
+
         this.kindAsString = "Project";
     }
 
