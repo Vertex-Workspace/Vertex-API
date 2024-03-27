@@ -13,11 +13,13 @@ public class TaskSearchDTO {
     private Long id;
     private String name;
     private String description;
+    private String kindAsString;
 
     public TaskSearchDTO(Task task) {
         this.id = task.getId();
         this.name = task.getName();
         this.description = task.getDescription();
+        this.kindAsString = "Task";
     }
 
 }

@@ -14,12 +14,14 @@ public class ProjectSearchDTO {
     private String name;
     private String description;
     private byte[] image;
+    private String kindAsString;
 
     public ProjectSearchDTO(Project project) {
         this.id = project.getId();
         this.name = project.getName();
         this.description = project.getDescription();
         this.image = project.getFile().getFile();
+        this.kindAsString = "Project";
     }
 
 }

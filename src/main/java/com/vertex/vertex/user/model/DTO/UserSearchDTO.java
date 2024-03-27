@@ -10,16 +10,16 @@ import lombok.NoArgsConstructor;
 @Data
 public class UserSearchDTO {
 
-    private String firstName;
-    private String lastName;
+    private String name;
     private String description;
     private byte[] image;
+    private String kindAsString;
 
     public UserSearchDTO(User user) {
-        this.firstName = user.getFirstName();
-        this.lastName = user.getLastName();
+        this.name = user.getFirstName() + " " + user.getLastName();
         this.description = user.getDescription();
         this.image = user.getImage();
+        this.kindAsString = "User";
     }
 
 }

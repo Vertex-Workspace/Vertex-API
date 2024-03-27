@@ -14,11 +14,13 @@ public class TeamSearchDTO {
     private String name;
     private String description;
     private byte[] image;
+    private String kindAsString;
 
     public TeamSearchDTO(Team team) {
         this.id = team.getId();
         this.name = team.getName();
         this.description = team.getDescription();
         this.image = team.getImage();
+        this.kindAsString = "Team";
     }
 }
