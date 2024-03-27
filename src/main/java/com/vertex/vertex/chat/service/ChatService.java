@@ -87,7 +87,9 @@ public class ChatService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
 
-
+    public Chat save(Chat chat){
+        return chatRepository.save(chat);
     }
 }

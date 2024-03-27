@@ -121,16 +121,6 @@ public class TeamController {
                         HttpStatus.OK);
     }
 
-  
-    @PatchMapping("/group/user")
-    public ResponseEntity<?> editUserIntoGroup(@RequestBody GroupEditUserDTO groupEditUserDTO) {
-        try {
-            return new ResponseEntity<>(teamService.editUserIntoGroup(groupEditUserDTO), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        }
-    }
-
     @DeleteMapping("/group/{groupId}")
     public ResponseEntity<?> deleteGroup(@PathVariable Long groupId){
         try{
@@ -161,15 +151,7 @@ public class TeamController {
         }
     }
 
-    @PatchMapping("/permission/{permissionId}/{userId}/{teamId}")
-    public ResponseEntity<?> giveAPermission(@PathVariable Long permissionId, @PathVariable Long userId, @PathVariable Long teamId){
-        try{
-            permissionService.changeEnabled(permissionId, userId, teamId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        }
-    }
+
 
     @GetMapping("/permission/{userId}/{teamId}")
     public ResponseEntity<?> getAllPermissions(@PathVariable Long userId, @PathVariable Long teamId) {

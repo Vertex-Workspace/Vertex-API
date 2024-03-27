@@ -36,7 +36,6 @@ public class ForgotPasswordService {
         session.setDebug(true);
 
         Long code = generateCode();
-        System.out.println(code);
 
         try {
             MimeMessage message = new MimeMessage(session);
@@ -64,15 +63,12 @@ public class ForgotPasswordService {
             // Configurando o conteúdo do e-mail como HTML
             message.setContent(htmlContent, "text/html; charset=utf-8");
 
-            System.out.println("enviando...");
             Transport.send(message);
-            System.out.println("Email enviado com sucesso...");
         } catch (MessagingException mex) {
             mex.printStackTrace();
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
-
         return code;
     }
 

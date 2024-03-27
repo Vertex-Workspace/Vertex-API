@@ -1,4 +1,5 @@
 package com.vertex.vertex.team.service;
+
 import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.chat.service.ChatService;
 import com.vertex.vertex.notification.entity.model.Notification;
@@ -50,6 +51,7 @@ public class TeamService {
     private final ProjectService projectService;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+
     public Team save(TeamViewListDTO teamViewListDTO) {
         try {
             Team team = new Team();
@@ -60,8 +62,8 @@ public class TeamService {
             }
             team.setName(teamViewListDTO.getName());
             team.setDescription(teamViewListDTO.getDescription());
- 
-    
+
+
             String invitationCode = generateInvitationCode();
             team.setInvitationCode(invitationCode);
             Team savedTeam = teamRepository.save(team);
@@ -74,7 +76,7 @@ public class TeamService {
 
                 createChatForTeam(teamWithUserTeam);
 
-                if(teamViewListDTO.isDefaultTeam()) {
+                if (teamViewListDTO.isDefaultTeam()) {
                     System.out.println(teamWithUserTeam);
                     saveDefaultTasksAndProject(teamWithUserTeam);
                 }
@@ -122,7 +124,6 @@ public class TeamService {
     }
 
 
-
     public TeamInfoDTO findById(Long id) {
         TeamInfoDTO dto = new TeamInfoDTO(); //retorna as informações necessárias para a tela de equipe
         Team team = findTeamById(id);
@@ -150,7 +151,9 @@ public class TeamService {
         }
     }
 
-
+    //============================================================
+    //GROUPS WITH NOTIFICATION
+    //============================================================
     public Team saveGroup(GroupRegisterDTO groupRegisterDTO) {
 
         List<UserTeam> userTeams = new ArrayList<>();
@@ -174,57 +177,15 @@ public class TeamService {
                     group.setUserTeams(userTeams);
 
                     if (userTeam.getUser().getNewMembersAndGroups()) {
-                        createGroupNotification("Você foi adicionado(a) ao grupo " + group.getName(), userTeam);
+                        notificationService.groupAndTeam("Você foi adicionado(a) ao grupo " + group.getName(), userTeam);
                     }
                 }
             }
         }
-        System.out.println(team);
         return teamRepository.save(team);
     }
 
-    private void createGroupNotification(String title, UserTeam userTeam){
-        System.out.println(userTeam);
-        Notification notification = new Notification(
-                userTeam.getTeam(),
-                title,
-                "team/" + userTeam.getTeam().getId(),
-                userTeam.getUser()
-        );
-        notificationService.save(notification);
-    }
-
-    public Group editUserIntoGroup(GroupEditUserDTO groupEditUserDTO) {
-        try {
-            Group group = groupService.findById(groupEditUserDTO.getGroupId());
-            UserTeam userTeam = userTeamService.findById(groupEditUserDTO.getUserTeam().getId());
-
-            if (userTeam.getTeam().getGroups().contains(group)) {
-                //This logic makes a validation to verify if the user is already associated with this group
-                //If it is, then the associated will be removed.
-                if (userTeam.getGroups().contains(group) || group.getUserTeams().contains(userTeam)) {
-                    userTeam.getGroups().remove(group);
-                    group.getUserTeams().remove(userTeam);
-                    if (userTeam.getUser().getNewMembersAndGroups()) {
-                        createGroupNotification("Você foi removido(a) ao grupo " + group.getName(), userTeam);
-                    }
-                }
-                //Else, it will be associated and the user will be on the group.
-                else {
-                    userTeam.getGroups().add(group);
-                    group.getUserTeams().add(userTeam);
-                    if (userTeam.getUser().getNewMembersAndGroups()) {
-                        createGroupNotification("Você foi adicionado(a) ao grupo " + group.getName(), userTeam);
-                    }
-                }
-                return groupService.edit(group);
-            } else {
-                throw new GroupNotFoundException(group.getId());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+    //===========================================================
 
 
     public Team editUserTeam(UserTeamAssociateDTO userTeam) {
@@ -235,6 +196,7 @@ public class TeamService {
             Team team = teamRepository.findById(userTeam.getTeam().getId()).get();
             UserTeam newUserTeam = new UserTeam(user, team);
 
+            //Set the Creator
             if (team.getUserTeams() == null) {
 
                 userTeams.add(newUserTeam);
@@ -245,18 +207,34 @@ public class TeamService {
                 }
                 //set the default permissions
                 permissionService.save(user.getId(), team.getId());
-            } else {
-                boolean userRemoved = false;
+            }
+            //
+            else {
+                boolean userIsOnTeam = false;
                 for (UserTeam userTeamFor : team.getUserTeams()) {
                     if (userTeamFor.getUser().equals(user)) {
-                        team.getUserTeams().remove(userTeamFor);
-                        userRemoved = true;
+                        userIsOnTeam = true;
                         break;
                     }
                 }
-                if (!userRemoved) {
+                if (!userIsOnTeam) {
                     team.getUserTeams().add(newUserTeam);
                     permissionService.save(user.getId(), team.getId());
+
+                    //Notifications
+                    //To the new user
+                    if (newUserTeam.getUser().getNewMembersAndGroups()) {
+                        notificationService.groupAndTeam("Você entrou em " + team.getName(), newUserTeam);
+                    }
+
+                    //To all users on team
+                    for (UserTeam userTeam1 : team.getUserTeams()) {
+                        if (!userTeam1.equals(newUserTeam)) {
+                            if (userTeam1.getUser().getNewMembersAndGroups()) {
+                                notificationService.groupAndTeam(newUserTeam.getUser().getFullName() + " entrou em " + team.getName(), userTeam1);
+                            }
+                        }
+                    }
                 }
             }
             teamRepository.save(team);
@@ -275,6 +253,28 @@ public class TeamService {
             return team;
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void deleteUserTeam(Long teamId, Long userId) {
+        Team team = findTeamById(teamId);
+        User user = userRepository.findById(userId).get();
+        UserTeam userTeam = null;
+        for (UserTeam userTeamFor : team.getUserTeams()) {
+            if (userTeamFor.getUser().equals(user)) {
+                userTeam = userTeamFor;
+                break;
+            }
+        }
+        if (userTeam != null) {
+            if (userTeam.getUser().getNewMembersAndGroups()) {
+                notificationService.groupAndTeam("Você foi removido(a) de " + team.getName(), userTeam);
+            }
+            team.getUserTeams().remove(userTeam);
+            userTeam.setTeam(null);
+            team.getChat().getUserTeams().remove(userTeam);
+            chatService.save(team.getChat());
+            userTeamService.delete(userTeam);
         }
     }
 
@@ -356,21 +356,7 @@ public class TeamService {
                 .toList();
     }
 
-    public void deleteUserTeam(Long teamId, Long userId) {
-        Team team = findTeamById(teamId);
-        User user = userRepository.findById(userId).get();
-        UserTeam userTeam = null;
-        for (UserTeam userTeamFor : team.getUserTeams()) {
-            if (userTeamFor.getUser().equals(user) && userTeamFor.getTeam().equals(team)) {
-                userTeam = userTeamFor;
-            }
-        }
-        if (userTeam != null) {
-            team.getUserTeams().remove(userTeam);
-            userTeam.setTeam(null);
-            teamRepository.save(team);
-        }
-    }
+
 
     public User teamCreatorId(Long teamId) {
         Team team = teamRepository.findById(teamId).get();
@@ -378,12 +364,12 @@ public class TeamService {
         return userTeam.getUser();
     }
 
-    public void saveDefaultTasksAndProject(Team team){
+    public void saveDefaultTasksAndProject(Team team) {
 
         Project projectDefault1 =
                 new Project("Projeto Pessoal", "Seu projeto pessoal padrão", team, team.getCreator(), List.of(team.getCreator()));
         Project projectDefault2 =
-                new Project("Projeto Profissional", "Seu projeto pessoal padrão", team, team.getCreator(),  List.of(team.getCreator()));
+                new Project("Projeto Profissional", "Seu projeto pessoal padrão", team, team.getCreator(), List.of(team.getCreator()));
 
         TaskCreateDTO taskCreateDTO1 =
                 new TaskCreateDTO("Lavar a louça", "Sua tarefa é lavar a louça", team.getCreator().getUser(), projectDefault1);
@@ -406,6 +392,7 @@ public class TeamService {
                 .map(ProjectViewListDTO::new)
                 .toList();
     }
+
     public List<Task> getAllTasksByTeam(Long id) {
         try {
             return findTeamById(id)

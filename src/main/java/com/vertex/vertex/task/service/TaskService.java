@@ -2,6 +2,8 @@ package com.vertex.vertex.task.service;
 
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
+import com.vertex.vertex.notification.entity.model.Notification;
+import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
@@ -54,6 +56,7 @@ public class TaskService {
     private final ModelMapper modelMapper;
     private final ReviewRepository reviewRepository;
     private final FileService fileService;
+    private final NotificationService notificationService;
 
 
     public Task save(TaskCreateDTO taskCreateDTO) {
@@ -91,11 +94,22 @@ public class TaskService {
             for (UserTeam userTeam : project.getTeam().getUserTeams()) {
                 TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
                 if (task.getTaskResponsables() == null) {
-                    ArrayList<TaskResponsable> listaParaFuncionarEstaCoisaBemLegal = new ArrayList<>();
-                    listaParaFuncionarEstaCoisaBemLegal.add(taskResponsable1);
-                    task.setTaskResponsables(listaParaFuncionarEstaCoisaBemLegal);
+                    ArrayList<TaskResponsable> taskResponsibleList = new ArrayList<>();
+                    taskResponsibleList.add(taskResponsable1);
+                    task.setTaskResponsables(taskResponsibleList);
+
                 } else {
                     task.getTaskResponsables().add(taskResponsable1);
+                }
+
+                //Notifications
+                if (userTeam.getUser().getResponsibleInProjectOrTask()) {
+                    notificationService.save(new Notification(
+                            project,
+                            "Você foi adicionado como responsável da tarefa " + task.getName(),
+                            "projeto/" + project.getId() + "/tarefas",
+                            taskResponsable1.getUserTeam().getUser()
+                    ));
                 }
             }
         } catch (Exception e) {
@@ -153,28 +167,47 @@ public class TaskService {
                 currentValue.setId(editValueDTO.getValue().getId());
                 currentValue.setTask(task);
                 currentValue.setProperty(property);
-                if(property.getKind() == PropertyKind.STATUS){
-                    if(!userTeam.equals(task.getCreator()) && task.isRevisable()){
+                if (property.getKind() == PropertyKind.STATUS) {
+                    if (!userTeam.equals(task.getCreator()) && task.isRevisable()) {
 
                         // Validates another -> done
                         PropertyList propertyList = (PropertyList) editValueDTO.getValue().getValue();
-                        if(propertyList.getPropertyListKind().equals(PropertyListKind.DONE)){
+                        if (propertyList.getPropertyListKind().equals(PropertyListKind.DONE)) {
                             throw new RuntimeException("Não é possível definir como concluído, " +
                                     "pois a tarefa deve passar por uma revisão do criador!");
                         }
 
                         // Validates done -> another
                         PropertyList propertyListCurrent = (PropertyList) task.getValues().get(i).getValue();
-                        if(propertyListCurrent.getPropertyListKind().equals(PropertyListKind.DONE)){
+                        if (propertyListCurrent.getPropertyListKind().equals(PropertyListKind.DONE)) {
                             throw new RuntimeException("Apenas o criador da tarefa pode remover dos concluídos!");
                         }
                     }
                 }
                 currentValue.setValue(editValueDTO.getValue().getValue());
                 task.getValues().set(i, currentValue);
+                break;
             }
         }
-        return taskRepository.save(task);
+        Task taskTest =  taskRepository.save(task);
+
+        //Notifications
+        try {
+            for (TaskResponsable taskResponsableFor : task.getTaskResponsables()) {
+                if (taskResponsableFor.getUserTeam().getUser().getAnyUpdateOnTask()) {
+                    notificationService.save(new Notification(
+                            task.getProject(),
+                            "Valor da propriedade " + property.getName() + " alterado em " + taskTest.getName(),
+                            "projeto/" + task.getProject().getId() + "/tarefas",
+                            taskResponsableFor.getUserTeam().getUser()
+                    ));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return taskTest;
     }
 
     //verify if the taskresponsable belongs to the task and if it is, save the comment
@@ -195,6 +228,19 @@ public class TaskService {
             comment.setComment(commentDTO.getComment());
             comment.setDate(LocalDateTime.now());
             task.getComments().add(comment);
+
+
+            //Notifications
+            for (TaskResponsable taskResponsableFor : task.getTaskResponsables()) {
+                if (taskResponsableFor.getUserTeam().getUser().getAnyUpdateOnTask()) {
+                    notificationService.save(new Notification(
+                            task.getProject(),
+                            "Novo comentário de " + taskResponsable.getUserTeam().getUser().getFullName() + " em " + task.getName(),
+                            "projeto/" + task.getProject().getId() + "/tarefas",
+                            taskResponsableFor.getUserTeam().getUser()
+                    ));
+                }
+            }
             return taskRepository.save(task);
         } else {
             throw new RuntimeException("O usuário não é um dos responsáveis pela tarefa.");
@@ -230,6 +276,14 @@ public class TaskService {
 
         for (TaskResponsable taskResponsableFor : task.getTaskResponsables()) {
             if (taskResponsableFor.getId().equals(taskResponsableDTO.getId())) {
+                if (taskResponsableFor.getUserTeam().getUser().getResponsibleInProjectOrTask()) {
+                    notificationService.save(new Notification(
+                            task.getProject(),
+                            "Você não é mais responsável da tarefa " + task.getName(),
+                            "projeto/" + task.getProject().getId() + "/tarefas",
+                            taskResponsableFor.getUserTeam().getUser()
+                    ));
+                }
                 taskResponsable = taskResponsableFor;
                 task.getTaskResponsables().remove(taskResponsable);
                 return taskRepository.save(task);
@@ -240,10 +294,21 @@ public class TaskService {
             BeanUtils.copyProperties(taskResponsableDTO, taskResponsable);
             taskResponsableDTO.setTask(task);
             task.getTaskResponsables().add(taskResponsable);
+
+            //Notifications
+            if (taskResponsable.getUserTeam().getUser().getResponsibleInProjectOrTask()) {
+                notificationService.save(new Notification(
+                        task.getProject(),
+                        "Você foi adicionado como responsável da tarefa " + task.getName(),
+                        "projeto/" + task.getProject().getId() + "/tarefas",
+                        taskResponsable.getUserTeam().getUser()
+                ));
+            }
+
+            return taskRepository.save(task);
         } else {
             throw new RuntimeException("Erro na exclusão de um participante");
         }
-        return taskRepository.save(task);
     }
 
     public Task save(Task task) {
@@ -295,6 +360,18 @@ public class TaskService {
             if (Objects.isNull(task.getFiles())) task.setFiles(List.of(file));
             else task.getFiles().add(file);
 
+            //Notifications
+            for (TaskResponsable taskResponsableFor : task.getTaskResponsables()) {
+                if (taskResponsableFor.getUserTeam().getUser().getAnyUpdateOnTask()) {
+                    notificationService.save(new Notification(
+                            task.getProject(),
+                            "Novo anexo adicionado em " + task.getName(),
+                            "projeto/" + task.getProject().getId() + "/tarefas",
+                            taskResponsableFor.getUserTeam().getUser()
+                    ));
+                }
+            }
+
             return taskRepository.save(task);
         } catch (Exception e) {
             throw new RuntimeException();
@@ -313,9 +390,9 @@ public class TaskService {
         }
     }
 
-    public Task setAsDone(Task task){
-        for (Value value: task.getValues()) {
-            if(value.getProperty().getKind().equals(PropertyKind.STATUS)){
+    public Task setAsDone(Task task) {
+        for (Value value : task.getValues()) {
+            if (value.getProperty().getKind().equals(PropertyKind.STATUS)) {
                 Optional<PropertyList> doneDefault =
                         value.getProperty().getPropertyLists()
                                 .stream()
@@ -328,7 +405,6 @@ public class TaskService {
         }
         return save(task);
     }
-
 
 
 }
