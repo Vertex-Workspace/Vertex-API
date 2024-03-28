@@ -80,7 +80,7 @@ public class ReviewService {
             Notification notification = new Notification(
                     task.getProject(),
                     title,
-                    "project/" + task.getProject().getId() + "/tarefas",
+                    "projeto/" + task.getProject().getId() + "/tarefas?taskID=" + task.getId(),
                     review.getUserThatSentReview().getUserTeam().getUser()
             );
             notificationService.save(notification);
@@ -124,7 +124,7 @@ public class ReviewService {
                 Notification notification = new Notification(
                         task.getProject(),
                         title,
-                        "project/" + task.getProject().getId() + "/tarefas",
+                        "projeto/" + task.getProject().getId() + "/tarefas",
                         task.getCreator().getUser()
                 );
                 notificationService.save(notification);

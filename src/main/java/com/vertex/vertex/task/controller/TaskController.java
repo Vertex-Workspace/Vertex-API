@@ -152,13 +152,14 @@ public class TaskController {
         }
     }
 
-    @PatchMapping("/{id}/upload")
+    @PatchMapping("/{id}/upload/{userID}")
     public ResponseEntity<?> uploadFile(
             @PathVariable Long id,
+            @PathVariable Long userID,
             @RequestParam MultipartFile file) {
         try {
             return new ResponseEntity<>
-                    (taskService.uploadFile(file, id),
+                    (taskService.uploadFile(file, id, userID),
                         HttpStatus.OK);
 
         } catch (EntityNotFoundException e) {
@@ -168,7 +169,7 @@ public class TaskController {
     }
 
     @DeleteMapping("/{taskId}/remove-file/{fileId}")
-    public ResponseEntity<?> uploadFile(
+    public ResponseEntity<?> deleteFile(
             @PathVariable Long taskId,
             @PathVariable Long fileId) {
         try {

@@ -29,6 +29,7 @@ import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskRespo
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
+import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -90,21 +91,15 @@ public class TaskService {
         task.setValues(values);
         //Add the taskResponsables on task list of taskResponsables
         task.setCreator(userTeamService.findUserTeamByComposeId(project.getTeam().getId(), taskCreateDTO.getCreator().getId()));
-        try {
-            for (UserTeam userTeam : project.getTeam().getUserTeams()) {
-                TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
-                if (task.getTaskResponsables() == null) {
-                    ArrayList<TaskResponsable> taskResponsibleList = new ArrayList<>();
-                    taskResponsibleList.add(taskResponsable1);
-                    task.setTaskResponsables(taskResponsibleList);
-
-                } else {
-                    task.getTaskResponsables().add(taskResponsable1);
-                }
-
+        for (UserTeam userTeam : project.getTeam().getUserTeams()) {
+            TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
+            if (task.getTaskResponsables() == null) {
+                ArrayList<TaskResponsable> taskResponsibleList = new ArrayList<>();
+                taskResponsibleList.add(taskResponsable1);
+                task.setTaskResponsables(taskResponsibleList);
+            } else {
+                task.getTaskResponsables().add(taskResponsable1);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
         //Set if the task is revisable or no...
@@ -196,19 +191,15 @@ public class TaskService {
         Task taskTest =  taskRepository.save(task);
 
         //Notifications
-        try {
-            for (TaskResponsable taskResponsableFor : task.getTaskResponsables()) {
-                if (taskResponsableFor.getUserTeam().getUser().getAnyUpdateOnTask()) {
-                    notificationService.save(new Notification(
-                            task.getProject(),
-                            "Valor da propriedade " + property.getName() + " alterado em " + taskTest.getName(),
-                            "projeto/" + task.getProject().getId() + "/tarefas?taskID=" + task.getId(),
-                            taskResponsableFor.getUserTeam().getUser()
-                    ));
-                }
+        for (TaskResponsable taskResponsableFor : task.getTaskResponsables()) {
+            if (!taskResponsableFor.getUserTeam().equals(userTeam) && taskResponsableFor.getUserTeam().getUser().getAnyUpdateOnTask()) {
+                notificationService.save(new Notification(
+                        task.getProject(),
+                        "Valor da propriedade " + property.getName() + " alterado em " + taskTest.getName(),
+                        "projeto/" + task.getProject().getId() + "/tarefas?taskID=" + task.getId(),
+                        taskResponsableFor.getUserTeam().getUser()
+                ));
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
         return taskTest;
@@ -233,10 +224,9 @@ public class TaskService {
             comment.setDate(LocalDateTime.now());
             task.getComments().add(comment);
 
-
             //Notifications
             for (TaskResponsable taskResponsableFor : task.getTaskResponsables()) {
-                if (taskResponsableFor.getUserTeam().getUser().getAnyUpdateOnTask()) {
+                if (!taskResponsableFor.equals(taskResponsable) && taskResponsableFor.getUserTeam().getUser().getAnyUpdateOnTask()) {
                     notificationService.save(new Notification(
                             task.getProject(),
                             "Novo comentário de " + taskResponsable.getUserTeam().getUser().getFullName() + " em " + task.getName(),
@@ -356,7 +346,7 @@ public class TaskService {
         }
     }
 
-    public Task uploadFile(MultipartFile multipartFile, Long id) {
+    public Task uploadFile(MultipartFile multipartFile, Long id, Long userThatSentID) {
         try {
             Task task = findById(id);
             File file = fileService.save(multipartFile, task);
@@ -365,13 +355,17 @@ public class TaskService {
             else task.getFiles().add(file);
 
             //Notifications
-            for (TaskResponsable taskResponsableFor : task.getTaskResponsables()) {
-                if (taskResponsableFor.getUserTeam().getUser().getAnyUpdateOnTask()) {
+            for (TaskResponsable taskResponsibleFor : task.getTaskResponsables()) {
+                User user = taskResponsibleFor.getUserTeam().getUser();
+
+                if (!user.getId().equals(userThatSentID)
+                        && user.getAnyUpdateOnTask()) {
+
                     notificationService.save(new Notification(
                             task.getProject(),
                             "Novo anexo adicionado em " + task.getName(),
                             "projeto/" + task.getProject().getId() + "/tarefas?taskID=" + task.getId(),
-                            taskResponsableFor.getUserTeam().getUser()
+                            user
                     ));
                 }
             }
