@@ -7,6 +7,7 @@ import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.service.PropertyService;
+import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.user.model.entity.User;
 import lombok.AllArgsConstructor;
@@ -140,6 +141,20 @@ public class ProjectController {
         }catch(Exception e){
             System.out.println(e);
             return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping("/query/{query}/{userId}")
+    public ResponseEntity<?> findAllByUserAndQuery(
+            @PathVariable Long userId, @PathVariable String query) {
+        try {
+            return new ResponseEntity<>
+                    (projectService.findAllByUserAndQuery(userId, query),
+                            HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>
+                    (HttpStatus.CONFLICT);
         }
     }
 

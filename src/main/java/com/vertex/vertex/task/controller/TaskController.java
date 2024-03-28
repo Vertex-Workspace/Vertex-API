@@ -205,9 +205,24 @@ public class TaskController {
         }
     }
 
-
     @GetMapping("/{idTask}/chat")
     public Chat getChatOfTask(@PathVariable Long idTask){
         return taskService.findById(idTask).getChat();
     }
+
+    @GetMapping("/query/{query}/{userId}")
+    public ResponseEntity<?> findAllByUserAndQuery(
+            @PathVariable Long userId, @PathVariable String query) {
+        try {
+            return new ResponseEntity<>
+                    (taskService.findAllByUserAndQuery(userId, query),
+                            HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>
+                    (HttpStatus.CONFLICT);
+        }
+    }
+
+
 }

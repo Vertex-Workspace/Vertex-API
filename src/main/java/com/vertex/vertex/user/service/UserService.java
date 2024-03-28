@@ -9,6 +9,7 @@ import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.user.model.DTO.UserDTO;
 import com.vertex.vertex.user.model.DTO.UserEditionDTO;
 import com.vertex.vertex.user.model.DTO.UserLoginDTO;
+import com.vertex.vertex.user.model.DTO.UserSearchDTO;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.exception.*;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
@@ -187,6 +188,18 @@ public class UserService {
         }
 
         throw new RuntimeException();
+    }
+
+    public List<UserSearchDTO> findAllByUserAndQuery(Long userId, String query) {
+        return teamService
+                .findAllLoggedUserTeams(userId)
+                .stream()
+                .map(UserTeam::getUser)
+                .filter(u -> (u.getFirstName().toLowerCase().contains(query.toLowerCase())
+                                || u.getLastName().toLowerCase().contains(query.toLowerCase()))
+                                    && !Objects.equals(u.getId(), userId))
+                .map(UserSearchDTO::new)
+                .toList();
     }
 
 }

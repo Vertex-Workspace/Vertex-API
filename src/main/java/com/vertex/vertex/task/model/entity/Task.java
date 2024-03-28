@@ -39,7 +39,7 @@ public class Task implements FileSupporter {
 
     private boolean isRevisable;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @ToString.Exclude
     private UserTeam creator;
 

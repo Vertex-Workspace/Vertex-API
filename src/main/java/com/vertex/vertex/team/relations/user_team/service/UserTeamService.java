@@ -70,5 +70,15 @@ public class UserTeamService {
         return userTeamRepository.findAllByUser_Id(id);
     }
 
+    public List<UserTeam> findAllByUserAndQuery(Long userId, String query) {
+        return userTeamRepository
+                .findAllByUser_IdAndTeam_NameContainingIgnoreCase(userId, query);
+    }
+
+    public List<UserTeam> findAllByUser(Long userId) {
+        return userTeamRepository
+                .findAllByUser_Id(userId);
+    }
+
 
 }
