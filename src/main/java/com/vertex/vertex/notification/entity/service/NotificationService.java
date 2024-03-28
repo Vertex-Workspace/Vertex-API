@@ -2,13 +2,16 @@ package com.vertex.vertex.notification.entity.service;
 
 
 import com.vertex.vertex.config.handler.UsedWebSocketHandler;
+import com.vertex.vertex.notification.entity.NotificationWebSocketDTO;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.repository.NotificationRepository;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -16,14 +19,18 @@ import java.util.List;
 public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final UsedWebSocketHandler usedWebSocketHandler;
-
+    private final ModelMapper mapper;
     public Notification save(Notification notification) {
         Notification notificationSaved = notificationRepository.save(notification);
-        sendToEmail(notificationSaved);
-        try {
-            usedWebSocketHandler.sendNotification(new TextMessage(notification.toString()));
-        } catch (Exception ignored) {}
+        if(notification.getUser().getSendToEmail()){
+            sendToEmail(notificationSaved);
+        }
+        webSocket(notification.getUser().getId());
         return notificationSaved;
+    }
+
+    public Notification update(Notification notification){
+        return notificationRepository.save(notification);
     }
 
     public void delete(Notification notification) {
@@ -39,13 +46,19 @@ public class NotificationService {
         Notification notification = new Notification(
                 userTeam.getTeam(),
                 title,
-                "team/" + userTeam.getTeam().getId(),
+                "equipe/" + userTeam.getTeam().getId(),
                 userTeam.getUser()
         );
         save(notification);
     }
 
-    public void sendToEmail(Notification notification) {
+    public void webSocket(Long userID){
+        try {
+            usedWebSocketHandler.sendNotification(userID);
+        } catch (IOException ignored) {}
+    }
+
+    private void sendToEmail(Notification notification) {
 //        try {
 //
 //            Properties properties = System.getProperties();

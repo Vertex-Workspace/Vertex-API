@@ -1,8 +1,10 @@
 package com.vertex.vertex.config.handler;
 
+import com.vertex.vertex.notification.entity.NotificationWebSocketDTO;
 import com.vertex.vertex.notification.entity.model.Notification;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
@@ -21,15 +23,14 @@ public class UsedWebSocketHandler extends AbstractWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         webSocketSessions.add(session);
-        session.sendMessage(new TextMessage(session.toString()));
-        System.out.println(session);
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        System.out.println(message.getPayload());
         for (WebSocketSession webSocketSession : webSocketSessions) {
-            webSocketSession.sendMessage(message);
+            if(Objects.requireNonNull(webSocketSession.getUri()).getPath().contains("chat")) {
+                webSocketSession.sendMessage(message);
+            }
         }
     }
 
@@ -38,10 +39,10 @@ public class UsedWebSocketHandler extends AbstractWebSocketHandler {
         webSocketSessions.remove(session);
     }
 
-    public void sendNotification(TextMessage message) throws IOException {
+    public void sendNotification(Long userID) throws IOException {
         for (WebSocketSession webSocketSession : webSocketSessions) {
             if(Objects.requireNonNull(webSocketSession.getUri()).getPath().contains("notifications")){
-                webSocketSession.sendMessage(message);
+                webSocketSession.sendMessage(new TextMessage(userID.toString()));
             }
         }
     }

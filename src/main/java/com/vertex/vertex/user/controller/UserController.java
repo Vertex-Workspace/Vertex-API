@@ -150,20 +150,21 @@ public class UserController {
         }
     }
 
-    @PatchMapping("/{userID}/notification/read")
-    public ResponseEntity<?> readNotifications(@PathVariable Long userID, @RequestBody List<Notification> notifications){
+
+    @PatchMapping("/{userID}/notification/delete")
+    public ResponseEntity<?> deleteNotifications(@PathVariable Long userID, @RequestBody List<Notification> notifications){
         try {
-            userService.readNotifications(userID, notifications);
+            userService.deleteNotifications(userID, notifications);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
         }
     }
 
-    @PatchMapping("/{userID}/notification/delete")
-    public ResponseEntity<?> deleteNotifications(@PathVariable Long userID, @RequestBody List<Notification> notifications){
+    @PatchMapping("/{userID}/notification/read")
+    public ResponseEntity<?> readNotifications(@PathVariable Long userID, @RequestBody List<Notification> notifications){
         try {
-            userService.deleteNotifications(userID, notifications);
+            userService.readNotifications(userID, notifications);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);

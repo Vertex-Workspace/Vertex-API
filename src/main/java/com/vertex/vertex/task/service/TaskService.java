@@ -102,15 +102,6 @@ public class TaskService {
                     task.getTaskResponsables().add(taskResponsable1);
                 }
 
-                //Notifications
-                if (userTeam.getUser().getResponsibleInProjectOrTask()) {
-                    notificationService.save(new Notification(
-                            project,
-                            "Você foi adicionado como responsável da tarefa " + task.getName(),
-                            "projeto/" + project.getId() + "/tarefas",
-                            taskResponsable1.getUserTeam().getUser()
-                    ));
-                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -119,7 +110,20 @@ public class TaskService {
         //Set if the task is revisable or no...
         task.setRevisable(project.getProjectReviewENUM().equals(ProjectReviewENUM.MANDATORY));
 
-        return taskRepository.save(task);
+        Task finalTask = taskRepository.save(task);
+
+        //Notifications
+        for (TaskResponsable taskResponsable : finalTask.getTaskResponsables()) {
+            if (taskResponsable.getUserTeam().getUser().getResponsibleInProjectOrTask() && !taskResponsable.getUserTeam().equals(task.getCreator())) {
+                notificationService.save(new Notification(
+                        project,
+                        "Você foi adicionado como responsável da tarefa " + task.getName(),
+                        "projeto/" + project.getId() + "/tarefas?taskID=" + finalTask.getId(),
+                        taskResponsable.getUserTeam().getUser()
+                ));
+            }
+        }
+        return task;
     }
 
 
@@ -198,7 +202,7 @@ public class TaskService {
                     notificationService.save(new Notification(
                             task.getProject(),
                             "Valor da propriedade " + property.getName() + " alterado em " + taskTest.getName(),
-                            "projeto/" + task.getProject().getId() + "/tarefas",
+                            "projeto/" + task.getProject().getId() + "/tarefas?taskID=" + task.getId(),
                             taskResponsableFor.getUserTeam().getUser()
                     ));
                 }
@@ -236,7 +240,7 @@ public class TaskService {
                     notificationService.save(new Notification(
                             task.getProject(),
                             "Novo comentário de " + taskResponsable.getUserTeam().getUser().getFullName() + " em " + task.getName(),
-                            "projeto/" + task.getProject().getId() + "/tarefas",
+                            "projeto/" + task.getProject().getId() + "/tarefas?taskID=" + task.getId(),
                             taskResponsableFor.getUserTeam().getUser()
                     ));
                 }
@@ -280,7 +284,7 @@ public class TaskService {
                     notificationService.save(new Notification(
                             task.getProject(),
                             "Você não é mais responsável da tarefa " + task.getName(),
-                            "projeto/" + task.getProject().getId() + "/tarefas",
+                            "projeto/" + task.getProject().getId() + "/tarefas?taskID=" + task.getId(),
                             taskResponsableFor.getUserTeam().getUser()
                     ));
                 }
@@ -300,7 +304,7 @@ public class TaskService {
                 notificationService.save(new Notification(
                         task.getProject(),
                         "Você foi adicionado como responsável da tarefa " + task.getName(),
-                        "projeto/" + task.getProject().getId() + "/tarefas",
+                        "projeto/" + task.getProject().getId() + "/tarefas?taskID=" + task.getId(),
                         taskResponsable.getUserTeam().getUser()
                 ));
             }
@@ -366,7 +370,7 @@ public class TaskService {
                     notificationService.save(new Notification(
                             task.getProject(),
                             "Novo anexo adicionado em " + task.getName(),
-                            "projeto/" + task.getProject().getId() + "/tarefas",
+                            "projeto/" + task.getProject().getId() + "/tarefas?taskID=" + task.getId(),
                             taskResponsableFor.getUserTeam().getUser()
                     ));
                 }

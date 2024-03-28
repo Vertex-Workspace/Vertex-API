@@ -213,8 +213,9 @@ public class UserService {
         for (Notification notification : notifications) {
             notification.setIsRead(!notification.getIsRead());
             notification.setUser(user);
-            notificationService.save(notification);
+            notificationService.update(notification);
         }
+        notificationService.webSocket(userID);
     }
 
     public void deleteNotifications(Long userID, List<Notification> notifications){
@@ -226,6 +227,7 @@ public class UserService {
                 }
             }
         }
+        notificationService.webSocket(userID);
     }
     public User changeNotificationSettings(Long userID, Integer notificationID) throws NoSuchMethodException {
         User user = findById(userID);
@@ -255,6 +257,7 @@ public class UserService {
         };
 
         variable.apply(methods.get(notificationID-1));
+
         return userRepository.save(user);
     }
 
