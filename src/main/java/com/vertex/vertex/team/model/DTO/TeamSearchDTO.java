@@ -21,6 +21,6 @@ public class TeamSearchDTO {
         this.name = team.getName();
         this.description = team.getDescription();
         this.image = team.getImage();
-        this.kindAsString = "Team";
+        this.kindAsString = "Equipe";
     }
 }

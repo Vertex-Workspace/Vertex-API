@@ -19,7 +19,7 @@ public class UserSearchDTO {
         this.name = user.getFirstName() + " " + user.getLastName();
         this.description = user.getDescription();
         this.image = user.getImage();
-        this.kindAsString = "User";
+        this.kindAsString = "Usuário";
     }
 
 }

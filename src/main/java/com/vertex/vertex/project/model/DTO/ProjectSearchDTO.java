@@ -25,7 +25,7 @@ public class ProjectSearchDTO {
 
         if (!Objects.isNull(project.getFile())) this.image = project.getFile().getFile();
 
-        this.kindAsString = "Project";
+        this.kindAsString = "Projeto";
     }
 
 }

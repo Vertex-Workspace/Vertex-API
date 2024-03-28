@@ -21,7 +21,7 @@ public class TaskSearchDTO {
         this.name = task.getName();
         this.description = task.getDescription();
         this.projectId = task.getProject().getId();
-        this.kindAsString = "Task";
+        this.kindAsString = "Tarefa";
     }
 
 }
