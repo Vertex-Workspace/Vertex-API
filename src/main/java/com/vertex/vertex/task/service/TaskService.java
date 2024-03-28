@@ -334,7 +334,6 @@ public class TaskService {
         boolean canDeleteGroup = false;
 
         if (task.getTaskResponsables().isEmpty()) {
-            System.out.println("add1");
             UserTeam userTeam = userTeamService.findUserTeamByComposeId(updateTaskResponsableDTO.getTeamId(), updateTaskResponsableDTO.getUser().getId());
             TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
             taskResponsablesRepository.save(taskResponsable1);
@@ -357,12 +356,6 @@ public class TaskService {
         }
 
         if (!canDeleteUser && !canDeleteGroup) {
-            if (updateTaskResponsableDTO.getUser() != null) {
-                System.out.println("add2");
-                UserTeam userTeam = userTeamService.findUserTeamByComposeId(updateTaskResponsableDTO.getTeamId(), updateTaskResponsableDTO.getUser().getId());
-                TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
-                taskResponsablesRepository.save(taskResponsable1);
-            }
             if (updateTaskResponsableDTO.getGroup() != null) {
                 if (task.getGroups() != null) {
                     task.getGroups().add(updateTaskResponsableDTO.getGroup());
@@ -371,17 +364,19 @@ public class TaskService {
                     groups.add(updateTaskResponsableDTO.getGroup());
                     task.setGroups(groups);
                 }
+            }else {
+                UserTeam userTeam = userTeamService.findUserTeamByComposeId(updateTaskResponsableDTO.getTeamId(), updateTaskResponsableDTO.getUser().getId());
+                TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
+                taskResponsablesRepository.save(taskResponsable1);
             }
         }
 
         for (TaskResponsable taskResponsable : responsablesToDelete) {
-            System.out.println("delete1");
             task.getTaskResponsables().remove(taskResponsable);
             taskResponsable.setTask(null);
             taskResponsablesRepository.delete(taskResponsable);
         }
         for (Group group : groupsToDelete) {
-            System.out.println("delete2");
             task.getGroups().remove(group);
             group.setTasks(null);
         }

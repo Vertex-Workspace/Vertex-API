@@ -1,16 +1,12 @@
 package com.vertex.vertex.team.relations.group.service;
 
-import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.entity.Team;
-import com.vertex.vertex.team.relations.group.model.DTO.AddUsersDTO;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.group.repository.GroupRepository;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.repository.TeamRepository;
-import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.user.model.entity.User;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -52,6 +48,7 @@ public class GroupService {
     }
 
     public void deleteUserFromGroup(Long userId, Long teamId, Long groupId) {
+        System.out.println("entrei");
         Group group = findById(groupId);
         for (UserTeam userTeam : group.getUserTeams()) {
             if ((userTeam.getUser().getId().equals(userId)) && (userTeam.getTeam().getId().equals(teamId))) {
@@ -75,12 +72,11 @@ public class GroupService {
         return users;
     }
 
-    public void addParticipants(Long id, AddUsersDTO addUsersDTO) {
-        Group group = findById(id);
+    public void addParticipants(Long groupId, Long userId) {
+        Group group = findById(groupId);
         Team team = group.getTeam();
-        for (User user : addUsersDTO.getUsers()) {
             for (UserTeam userTeam : team.getUserTeams()) {
-                if (userTeam.getUser().getId().equals(user.getId())) {
+                if (userTeam.getUser().getId().equals(userId)) {
                     if (userTeam.getGroups().contains(group)){
                         throw new RuntimeException("Esse userTeam já está no grupo");
                     } else {
@@ -91,6 +87,5 @@ public class GroupService {
                     }
                 }
             }
-        }
     }
 }

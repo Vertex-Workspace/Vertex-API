@@ -2,16 +2,12 @@ package com.vertex.vertex.team.controller;
 
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
-import com.vertex.vertex.team.model.entity.Team;
-import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
-import com.vertex.vertex.team.relations.group.model.DTO.AddUsersDTO;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupEditUserDTO;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupRegisterDTO;
 import com.vertex.vertex.team.relations.group.service.GroupService;
 import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
 import com.vertex.vertex.team.service.TeamService;
-import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 
 @CrossOrigin
@@ -202,10 +197,10 @@ public class TeamController {
         }
     }
 
-    @PatchMapping("/group/{id}/addParticipants")
-    public ResponseEntity<?> addParticipants(@PathVariable Long id, @RequestBody AddUsersDTO addUsersDTO){
+    @PatchMapping("/group/{id}/addParticipants/{userId}")
+    public ResponseEntity<?> addParticipants(@PathVariable Long id, @PathVariable Long userId){
         try{
-            groupService.addParticipants(id, addUsersDTO);
+            groupService.addParticipants(id, userId);
             return new ResponseEntity<>(HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
