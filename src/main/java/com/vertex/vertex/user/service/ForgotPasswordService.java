@@ -1,13 +1,15 @@
+/*
 package com.vertex.vertex.user.service;
 
 
+import jakarta.activation.DataHandler;
+import jakarta.activation.DataSource;
 import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.stereotype.Service;
 
+
 import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -138,3 +140,4 @@ public class ForgotPasswordService {
         }
     }
 }
+*/

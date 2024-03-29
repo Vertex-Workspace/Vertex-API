@@ -2,8 +2,6 @@ package com.vertex.vertex.team.controller;
 
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
-import com.vertex.vertex.team.model.entity.Team;
-import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
 import com.vertex.vertex.team.relations.group.model.DTO.AddUsersDTO;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupEditUserDTO;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupRegisterDTO;
@@ -11,7 +9,6 @@ import com.vertex.vertex.team.relations.group.service.GroupService;
 import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
 import com.vertex.vertex.team.service.TeamService;
-import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 
 @CrossOrigin
@@ -102,9 +98,9 @@ public class TeamController {
     }
 
     @PatchMapping("/group")
-    public ResponseEntity<?> editGroup(@RequestBody GroupRegisterDTO groupRegisterDTO) {
+    public ResponseEntity<?> saveGroup(@RequestBody GroupRegisterDTO groupRegisterDTO) {
         try {
-            return new ResponseEntity<>(teamService.editGroup(groupRegisterDTO), HttpStatus.OK);
+            return new ResponseEntity<>(teamService.saveGroup(groupRegisterDTO), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
@@ -124,16 +120,6 @@ public class TeamController {
         return new ResponseEntity<>
                 (teamService.existsByIdAndUserBelongs(teamId, userId),
                         HttpStatus.OK);
-    }
-
-  
-    @PatchMapping("/group/user")
-    public ResponseEntity<?> editUserIntoGroup(@RequestBody GroupEditUserDTO groupEditUserDTO) {
-        try {
-            return new ResponseEntity<>(teamService.editUserIntoGroup(groupEditUserDTO), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        }
     }
 
     @DeleteMapping("/group/{groupId}")
@@ -166,15 +152,7 @@ public class TeamController {
         }
     }
 
-    @PatchMapping("/permission/{permissionId}/{userId}/{teamId}")
-    public ResponseEntity<?> giveAPermission(@PathVariable Long permissionId, @PathVariable Long userId, @PathVariable Long teamId){
-        try{
-            permissionService.changeEnabled(permissionId, userId, teamId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        }
-    }
+
 
     @GetMapping("/permission/{userId}/{teamId}")
     public ResponseEntity<?> getAllPermissions(@PathVariable Long userId, @PathVariable Long teamId) {

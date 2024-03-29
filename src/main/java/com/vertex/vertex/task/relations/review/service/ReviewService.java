@@ -1,5 +1,7 @@
 package com.vertex.vertex.task.relations.review.service;
 
+import com.vertex.vertex.notification.entity.model.Notification;
+import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.task.model.DTO.TaskWaitingToReviewDTO;
@@ -16,7 +18,6 @@ import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskRespo
 import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -32,6 +33,8 @@ public class ReviewService {
     private final TaskService taskService;
     private final ProjectService projectService;
     private final TaskHoursService taskHoursService;
+    private final NotificationService notificationService;
+
     public void finalReview(ReviewCheck reviewCheck) {
         Task task = taskService.findById(reviewCheck.getTaskID());
 
@@ -39,7 +42,7 @@ public class ReviewService {
                 .filter(review1 -> review1.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)).findFirst();
 
 
-        if(reviewOptional.isEmpty()){
+        if (reviewOptional.isEmpty()) {
             throw new RuntimeException("Nenhuma revisão em aberto!");
         }
 
@@ -54,23 +57,45 @@ public class ReviewService {
                 .stream().filter(
                         taskResponsable -> taskResponsable.getUserTeam().getUser().getId().equals(reviewCheck.getReviewerID()))
                 .findFirst();
-        if(creator.isEmpty()){
+        if (creator.isEmpty()) {
             throw new RuntimeException("Id do revisador errado!");
         }
-        review.setCreatorReviewer(creator.get());
+        review.setReviewer(creator.get());
         review.setApproveStatus(reviewCheck.getApproveStatus());
         reviewRepository.save(review);
+
+        if (review.getApproveStatus() == ApproveStatus.APPROVED) {
+            Task updateTask = review.getTask();
+            taskService.setAsDone(updateTask);
+        }
+
+        //Notifications
+        if (review.getUserThatSentReview().getUserTeam().getUser().getTaskReview()) {
+            String status = review.getApproveStatus() == ApproveStatus.APPROVED ? " aprovou " : " reprovou ";
+
+            String title =
+                    review.getReviewer().getUserTeam().getUser().getFullName()
+                            + " " + status + " " + task.getName() + " com a nota " + review.getGrade() + " (0-5)";
+
+            Notification notification = new Notification(
+                    task.getProject(),
+                    title,
+                    "projeto/" + task.getProject().getId() + "/tarefas?taskID=" + task.getId(),
+                    review.getUserThatSentReview().getUserTeam().getUser()
+            );
+            notificationService.save(notification);
+        }
     }
 
     public void sendToReview(SendToReviewDTO sendToReviewDTO) {
         Task task = taskService.findById(sendToReviewDTO.getTask().getId());
 
-        if(!task.isRevisable()){
+        if (!task.isRevisable()) {
             throw new RuntimeException("A Tarefa não exige entrega!");
         }
 
         //Validations
-        if (!task.isUnderAnalysis()) {
+        if (task.isNotUnderAnalysis()) {
             Review review = new Review();
             //Description
             review.setDescription(sendToReviewDTO.getDescription());
@@ -89,6 +114,21 @@ public class ReviewService {
             review.setSentDate(LocalDateTime.now());
             //Save the initial Review
             reviewRepository.save(review);
+
+
+            //Notifications
+            if (task.getCreator().getUser().getTaskReview()) {
+                String title =
+                        review.getUserThatSentReview().getUserTeam().getUser().getFullName()
+                                + " entregou " + task.getName();
+                Notification notification = new Notification(
+                        task.getProject(),
+                        title,
+                        "projeto/" + task.getProject().getId() + "/tarefas",
+                        task.getCreator().getUser()
+                );
+                notificationService.save(notification);
+            }
         } else {
             throw new RuntimeException("A tarefa já foi aprovada. Ela não pode voltar para análise");
         }
@@ -105,14 +145,14 @@ public class ReviewService {
                 .findFirst()
                 .get();
 
-        for (Task task : project.getTasks()){
-            if(task.getCreator().equals(loggedUser) && !task.isUnderAnalysis()){
+        for (Task task : project.getTasks()) {
+            if (task.getCreator().equals(loggedUser) && task.isNotUnderAnalysis()) {
                 TaskWaitingToReviewDTO taskWaitingToReviewDTO = new TaskWaitingToReviewDTO(task);
 
                 Optional<Review> currentReview = task.getReviews().stream()
                         .filter(review -> review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)).findFirst();
 
-                if(currentReview.isPresent()){
+                if (currentReview.isPresent()) {
                     Review review = currentReview.get();
 
                     taskWaitingToReviewDTO.setSender(
@@ -147,16 +187,16 @@ public class ReviewService {
         return reviewHoursDTOS;
     }
 
-    public Review findById(Long reviewID){
+    public Review findById(Long reviewID) {
         Optional<Review> review = reviewRepository.findById(reviewID);
-        if(review.isPresent()){
+        if (review.isPresent()) {
             return review.get();
         }
         throw new RuntimeException("Review não existe!");
 
     }
 
-    public void setRevisable(Long taskID, Boolean booleanState){
+    public void setRevisable(Long taskID, Boolean booleanState) {
         Task task = taskService.findById(taskID);
         task.setRevisable(booleanState);
         taskService.save(task);

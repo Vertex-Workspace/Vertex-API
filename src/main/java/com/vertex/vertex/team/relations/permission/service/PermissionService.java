@@ -1,5 +1,7 @@
 package com.vertex.vertex.team.relations.permission.service;
 
+import com.vertex.vertex.notification.entity.model.Notification;
+import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.permission.model.entity.Permission;
@@ -28,6 +30,7 @@ public class PermissionService {
     private final UserTeamService userTeamService;
     private final TeamRepository teamRepository;
     private final ProjectRepository projectRepository;
+    private final NotificationService notificationService;
 
     public void save(Long userId, Long teamId) {
         List<Permission> permissions;
@@ -64,10 +67,19 @@ public class PermissionService {
         UserTeam userTeam = getOneUserByTeam(userId, teamId);
         for(Permission permission : userTeam.getPermissionUser()){
             if(permissionId.equals(permission.getId())){
-                if(permission.getName() != TypePermissions.Visualizar){
-                    permission.setEnabled(!permission.isEnabled());
-                    permissionRepository.save(permission);
+                permission.setEnabled(!permission.isEnabled());
+                permissionRepository.save(permission);
+                //Notificaiton
+                if(userTeam.getUser().getPermissionsChanged()){
+                    String permissionString = permission.isEnabled() ? "Agora você pode " : "Você não pode mais ";
+                    notificationService.save(new Notification(
+                            userTeam.getTeam(),
+                            permissionString + permission.getName(),
+                            "team/" + teamId,
+                            userTeam.getUser()
+                    ));
                 }
+
             }
         }
     }

@@ -1,14 +1,15 @@
 package com.vertex.vertex.team.service;
+
 import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.chat.service.ChatService;
-import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
+import com.vertex.vertex.notification.entity.model.Notification;
+import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.project.model.DTO.ProjectViewListDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
-import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.DTO.TeamLinkDTO;
@@ -23,22 +24,16 @@ import com.vertex.vertex.team.relations.group.model.exception.GroupNotFoundExcep
 import com.vertex.vertex.team.relations.group.service.GroupService;
 import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
-import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.repository.TeamRepository;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.repository.UserRepository;
-import com.vertex.vertex.user.service.UserService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
-import org.apache.tomcat.util.http.fileupload.disk.DiskFileItem;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.*;
 
 @Service
@@ -55,6 +50,7 @@ public class TeamService {
     private final PermissionService permissionService;
     private final ProjectService projectService;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public Team save(TeamViewListDTO teamViewListDTO) {
         try {
@@ -66,8 +62,8 @@ public class TeamService {
             }
             team.setName(teamViewListDTO.getName());
             team.setDescription(teamViewListDTO.getDescription());
- 
-    
+
+
             String invitationCode = generateInvitationCode();
             team.setInvitationCode(invitationCode);
             Team savedTeam = teamRepository.save(team);
@@ -80,7 +76,7 @@ public class TeamService {
 
                 createChatForTeam(teamWithUserTeam);
 
-                if(teamViewListDTO.isDefaultTeam()) {
+                if (teamViewListDTO.isDefaultTeam()) {
                     System.out.println(teamWithUserTeam);
                     saveDefaultTasksAndProject(teamWithUserTeam);
                 }
@@ -133,7 +129,6 @@ public class TeamService {
     }
 
 
-
     public TeamInfoDTO findById(Long id) {
         TeamInfoDTO dto = new TeamInfoDTO(); //retorna as informações necessárias para a tela de equipe
         Team team = findTeamById(id);
@@ -161,8 +156,10 @@ public class TeamService {
         }
     }
 
-
-    public Team editGroup(GroupRegisterDTO groupRegisterDTO) {
+    //============================================================
+    //GROUPS WITH NOTIFICATION
+    //============================================================
+    public Team saveGroup(GroupRegisterDTO groupRegisterDTO) {
 
         List<UserTeam> userTeams = new ArrayList<>();
         Group group = new Group();
@@ -183,38 +180,17 @@ public class TeamService {
                     userTeams.add(userTeam);
                     userTeam.getGroups().add(group);
                     group.setUserTeams(userTeams);
+
+                    if (userTeam.getUser().getNewMembersAndGroups()) {
+                        notificationService.groupAndTeam("Você foi adicionado(a) ao grupo " + group.getName(), userTeam);
+                    }
                 }
             }
         }
-
         return teamRepository.save(team);
     }
 
-    public Group editUserIntoGroup(GroupEditUserDTO groupEditUserDTO) {
-        try {
-            Group group = groupService.findById(groupEditUserDTO.getGroupId());
-            UserTeam userTeam = userTeamService.findById(groupEditUserDTO.getUserTeam().getId());
-
-            if (userTeam.getTeam().getGroups().contains(group)) {
-                //This logic makes a validation to verify if the user is already associated with this group
-                //If it is, then the associated will be removed.
-                if (userTeam.getGroups().contains(group) || group.getUserTeams().contains(userTeam)) {
-                    userTeam.getGroups().remove(group);
-                    group.getUserTeams().remove(userTeam);
-                }
-                //Else, it will be associated and the user will be on the group.
-                else {
-                    userTeam.getGroups().add(group);
-                    group.getUserTeams().add(userTeam);
-                }
-                return groupService.edit(group);
-            } else {
-                throw new GroupNotFoundException(group.getId());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+    //===========================================================
 
 
     public Team editUserTeam(UserTeamAssociateDTO userTeam) {
@@ -225,6 +201,7 @@ public class TeamService {
             Team team = teamRepository.findById(userTeam.getTeam().getId()).get();
             UserTeam newUserTeam = new UserTeam(user, team);
 
+            //Set the Creator
             if (team.getUserTeams() == null) {
 
                 userTeams.add(newUserTeam);
@@ -235,18 +212,34 @@ public class TeamService {
                 }
                 //set the default permissions
                 permissionService.save(user.getId(), team.getId());
-            } else {
-                boolean userRemoved = false;
+            }
+            //
+            else {
+                boolean userIsOnTeam = false;
                 for (UserTeam userTeamFor : team.getUserTeams()) {
                     if (userTeamFor.getUser().equals(user)) {
-                        team.getUserTeams().remove(userTeamFor);
-                        userRemoved = true;
+                        userIsOnTeam = true;
                         break;
                     }
                 }
-                if (!userRemoved) {
+                if (!userIsOnTeam) {
                     team.getUserTeams().add(newUserTeam);
                     permissionService.save(user.getId(), team.getId());
+
+                    //Notifications
+                    //To the new user
+                    if (newUserTeam.getUser().getNewMembersAndGroups()) {
+                        notificationService.groupAndTeam("Você entrou em " + team.getName(), newUserTeam);
+                    }
+
+                    //To all users on team
+                    for (UserTeam userTeam1 : team.getUserTeams()) {
+                        if (!userTeam1.equals(newUserTeam)) {
+                            if (userTeam1.getUser().getNewMembersAndGroups()) {
+                                notificationService.groupAndTeam(newUserTeam.getUser().getFullName() + " entrou em " + team.getName(), userTeam1);
+                            }
+                        }
+                    }
                 }
             }
             teamRepository.save(team);
@@ -265,6 +258,28 @@ public class TeamService {
             return team;
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void deleteUserTeam(Long teamId, Long userId) {
+        Team team = findTeamById(teamId);
+        User user = userRepository.findById(userId).get();
+        UserTeam userTeam = null;
+        for (UserTeam userTeamFor : team.getUserTeams()) {
+            if (userTeamFor.getUser().equals(user)) {
+                userTeam = userTeamFor;
+                break;
+            }
+        }
+        if (userTeam != null) {
+            if (userTeam.getUser().getNewMembersAndGroups()) {
+                notificationService.groupAndTeam("Você foi removido(a) de " + team.getName(), userTeam);
+            }
+            team.getUserTeams().remove(userTeam);
+            userTeam.setTeam(null);
+            team.getChat().getUserTeams().remove(userTeam);
+            chatService.save(team.getChat());
+            userTeamService.delete(userTeam);
         }
     }
 
@@ -346,21 +361,7 @@ public class TeamService {
                 .toList();
     }
 
-    public void deleteUserTeam(Long teamId, Long userId) {
-        Team team = findTeamById(teamId);
-        User user = userRepository.findById(userId).get();
-        UserTeam userTeam = null;
-        for (UserTeam userTeamFor : team.getUserTeams()) {
-            if (userTeamFor.getUser().equals(user) && userTeamFor.getTeam().equals(team)) {
-                userTeam = userTeamFor;
-            }
-        }
-        if (userTeam != null) {
-            team.getUserTeams().remove(userTeam);
-            userTeam.setTeam(null);
-            teamRepository.save(team);
-        }
-    }
+
 
     public User teamCreatorId(Long teamId) {
         Team team = teamRepository.findById(teamId).get();
@@ -368,12 +369,12 @@ public class TeamService {
         return userTeam.getUser();
     }
 
-    public void saveDefaultTasksAndProject(Team team){
+    public void saveDefaultTasksAndProject(Team team) {
 
         Project projectDefault1 =
                 new Project("Projeto Pessoal", "Seu projeto pessoal padrão", team, team.getCreator(), List.of(team.getCreator()));
         Project projectDefault2 =
-                new Project("Projeto Profissional", "Seu projeto pessoal padrão", team, team.getCreator(),  List.of(team.getCreator()));
+                new Project("Projeto Profissional", "Seu projeto pessoal padrão", team, team.getCreator(), List.of(team.getCreator()));
 
         TaskCreateDTO taskCreateDTO1 =
                 new TaskCreateDTO("Lavar a louça", "Sua tarefa é lavar a louça", team.getCreator().getUser(), projectDefault1);
@@ -396,6 +397,7 @@ public class TeamService {
                 .map(ProjectViewListDTO::new)
                 .toList();
     }
+
     public List<Task> getAllTasksByTeam(Long id) {
         try {
             return findTeamById(id)

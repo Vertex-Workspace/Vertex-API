@@ -10,9 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Entity
@@ -35,7 +33,7 @@ public class Review {
     @JsonIgnore
     @ToString.Exclude
     //Can be null
-    private TaskResponsable creatorReviewer;
+    private TaskResponsable reviewer;
 
     @ManyToOne
     @JsonIgnore

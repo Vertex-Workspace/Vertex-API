@@ -25,7 +25,6 @@ public class File {
 
     private String name;
     private String type;
-    private String codeAWS;
 
     @Lob
     @Column(columnDefinition = "LONGBLOB")

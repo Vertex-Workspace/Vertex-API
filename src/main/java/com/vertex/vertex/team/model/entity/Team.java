@@ -47,7 +47,7 @@ public class Team {
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL , orphanRemoval = true)
     private List<Group> groups;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Chat chat;
 
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)

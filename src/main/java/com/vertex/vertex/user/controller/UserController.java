@@ -1,12 +1,12 @@
 package com.vertex.vertex.user.controller;
 
+import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.user.model.DTO.UserDTO;
 import com.vertex.vertex.user.model.DTO.UserEditionDTO;
 import com.vertex.vertex.user.model.DTO.UserLoginDTO;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.exception.*;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
-import com.vertex.vertex.user.relations.personalization.service.PersonalizationService;
 import com.vertex.vertex.user.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @CrossOrigin
@@ -136,4 +137,50 @@ public class UserController {
     }
 
 
+    //======================================================
+    //NOTIFICATIONS
+    //======================================================
+
+    @GetMapping("/{userID}/notification")
+    public ResponseEntity<?> getNotifications(@PathVariable Long userID){
+        try {
+            return new ResponseEntity<>(userService.getUserNotifications(userID), HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        }
+    }
+
+
+    @PatchMapping("/{userID}/notification/delete")
+    public ResponseEntity<?> deleteNotifications(@PathVariable Long userID, @RequestBody List<Notification> notifications){
+        try {
+            userService.deleteNotifications(userID, notifications);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
+        }
+    }
+
+    @PatchMapping("/{userID}/notification/read")
+    public ResponseEntity<?> readNotifications(@PathVariable Long userID, @RequestBody List<Notification> notifications){
+        try {
+            userService.readNotifications(userID, notifications);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
+        }
+    }
+
+
+    @PatchMapping("/{userID}/notification/settings/{settingID}")
+    public ResponseEntity<?> notificationSettings(@PathVariable Long userID, @PathVariable Integer settingID){
+        try {
+
+            return new ResponseEntity<>(userService.changeNotificationSettings(userID, settingID), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        }
+    }
+
+    //======================================================
 }
