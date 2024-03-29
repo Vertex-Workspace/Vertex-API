@@ -40,7 +40,6 @@ public class UsedWebSocketHandler extends AbstractWebSocketHandler {
     }
 
     public void sendNotification(Long userID) throws IOException {
-        System.out.println(webSocketSessions);
         for (WebSocketSession webSocketSession : webSocketSessions) {
             if(Objects.requireNonNull(webSocketSession.getUri()).getPath().contains("notifications")){
                 webSocketSession.sendMessage(new TextMessage(userID.toString()));

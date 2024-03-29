@@ -239,4 +239,17 @@ public class TeamController {
         }
     }
 
+    @GetMapping("/query/{query}/{userId}")
+    public ResponseEntity<?> findAllByUserAndQuery(
+            @PathVariable Long userId, @PathVariable String query) {
+        try {
+            return new ResponseEntity<>
+                    (teamService.findAllByUserAndQuery(userId, query),
+                            HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>
+                    (HttpStatus.CONFLICT);
+        }
+    }
+
 }

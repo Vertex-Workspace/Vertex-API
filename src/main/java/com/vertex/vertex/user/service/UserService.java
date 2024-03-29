@@ -1,25 +1,29 @@
 package com.vertex.vertex.user.service;
 
-import com.vertex.vertex.FunctionUser;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
+import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.group.service.GroupService;
+import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.user.model.DTO.UserDTO;
 import com.vertex.vertex.user.model.DTO.UserEditionDTO;
 import com.vertex.vertex.user.model.DTO.UserLoginDTO;
+import com.vertex.vertex.user.model.DTO.UserSearchDTO;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.exception.*;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import com.vertex.vertex.user.relations.personalization.service.PersonalizationService;
 import com.vertex.vertex.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -201,6 +205,18 @@ public class UserService {
         }
 
         throw new RuntimeException();
+    }
+
+    public List<UserSearchDTO> findAllByUserAndQuery(Long userId, String query) {
+        return teamService
+                .findAllLoggedUserTeams(userId)
+                .stream()
+                .map(UserTeam::getUser)
+                .filter(u -> (u.getFirstName().toLowerCase().contains(query.toLowerCase())
+                                || u.getLastName().toLowerCase().contains(query.toLowerCase()))
+                                    && !Objects.equals(u.getId(), userId))
+                .map(UserSearchDTO::new)
+                .toList();
     }
 
     public List<Notification> getUserNotifications(Long userID){
