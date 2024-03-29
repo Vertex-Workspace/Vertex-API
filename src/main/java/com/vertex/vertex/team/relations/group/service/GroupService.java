@@ -88,4 +88,9 @@ public class GroupService {
                 }
             }
     }
+
+    public Group editGroupName(Group group){
+        group.setName(group.getName());
+        return group;
+    }
 }

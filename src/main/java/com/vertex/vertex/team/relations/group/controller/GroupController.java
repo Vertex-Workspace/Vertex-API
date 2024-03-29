@@ -27,4 +27,13 @@ public class GroupController {
         }
     }
 
+    @PatchMapping("/edit")
+    public ResponseEntity<?> editGroup(@RequestBody Group group){
+        try {
+            return new ResponseEntity<>(groupService.editGroupName(group), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
 }
