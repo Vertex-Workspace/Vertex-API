@@ -37,6 +37,8 @@ public class User{
 
     private String location;
 
+    private boolean firstAccess;
+
     @Lob
     @Column(name = "image",
             columnDefinition = "BLOB")
