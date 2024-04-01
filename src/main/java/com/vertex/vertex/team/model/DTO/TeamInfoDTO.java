@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
@@ -19,5 +21,8 @@ public class TeamInfoDTO extends TeamViewListDTO{
     private List<ProjectViewListDTO> projects;
     private List<Group> groups;
     private Chat chat;
+
+
+    private List<Integer> tasksPerformances = new ArrayList<>();
 
 }

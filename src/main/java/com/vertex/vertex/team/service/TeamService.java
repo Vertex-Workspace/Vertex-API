@@ -7,6 +7,9 @@ import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.project.model.DTO.ProjectViewListDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
+import com.vertex.vertex.property.model.ENUM.PropertyKind;
+import com.vertex.vertex.property.model.ENUM.PropertyListKind;
+import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
@@ -138,6 +141,18 @@ public class TeamService {
         dto.setUsers(getUsersByTeam(dto.getId())); //adiciona os usuários ao grupo com base no userTeam, para utilização no fe
         dto.setProjects(projectList);
         dto.setImage(team.getImage());
+
+        List<PropertyListKind> listKinds = List.of(PropertyListKind.TODO, PropertyListKind.DOING, PropertyListKind.DONE);
+        // Performance Graphics
+        for (PropertyListKind propertyListKind : listKinds){
+            dto.getTasksPerformances().add(
+                    team.getProjects().stream()
+                    .flatMap(p -> p.getTasks().stream())
+                    .flatMap(t -> t.getValues().stream())
+                    .filter(value -> value.getProperty().getKind().equals(PropertyKind.STATUS)
+                            && ((PropertyList) value.getValue()).getPropertyListKind().equals(propertyListKind))
+                    .toList().size());
+        }
         return dto;
     }
 
