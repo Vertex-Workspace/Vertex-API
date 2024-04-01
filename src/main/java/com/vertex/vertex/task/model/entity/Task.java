@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.model.FileSupporter;
+import com.vertex.vertex.notification.entity.model.LogRecord;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
@@ -68,8 +69,11 @@ public class Task implements FileSupporter {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "task", orphanRemoval = true)
     private List<Value> values;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    List<File> files;
+    @OneToMany
+    private List<File> files;
+
+    @OneToMany
+    private List<LogRecord> log;
 
     public boolean isUnderAnalysis(){
         if(this.getReviews() != null){
