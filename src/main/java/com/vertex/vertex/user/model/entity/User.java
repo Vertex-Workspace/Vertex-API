@@ -1,11 +1,13 @@
 package com.vertex.vertex.user.model.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -45,16 +47,22 @@ public class User{
 
     private Boolean showCharts;
 
-    @OneToMany(cascade = CascadeType.ALL,orphanRemoval = true)
-    private List<Notification> notificationList;
+    @OneToMany(orphanRemoval = true, mappedBy ="user")
+    @JsonIgnore
+    @ToString.Exclude
+    private List<Notification> notifications;
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
     private Personalization personalization;
-//
-//    @Override
-//    public int hashCode() {
-//        return Objects.hash(id, firstName, lastName, email, password, description, location, publicProfile, showCharts);
-//    }
+
+    //Notifications
+    private Boolean taskReview;
+    private Boolean newMembersAndGroups;
+    private Boolean permissionsChanged;
+    private Boolean responsibleInProjectOrTask;
+    private Boolean anyUpdateOnTask;
+    private Boolean sendToEmail;
+
 
     public String getFullName(){
         return this.firstName + " " + this.lastName;

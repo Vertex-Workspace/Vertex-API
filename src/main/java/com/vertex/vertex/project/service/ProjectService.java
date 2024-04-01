@@ -2,6 +2,8 @@ package com.vertex.vertex.project.service;
 
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
+import com.vertex.vertex.notification.entity.model.Notification;
+import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
 import com.vertex.vertex.project.model.DTO.ProjectEditDTO;
 import com.vertex.vertex.project.model.DTO.ProjectOneDTO;
@@ -42,7 +44,7 @@ public class ProjectService {
     private final ValueService valueService;
     private final FileService fileService;
     private final TaskRepository taskRepository;
-
+    private final NotificationService notificationService;
     public Project save(ProjectCreateDTO projectCreateDTO, Long teamId) {
         UserTeam userTeam;
         Team team;
@@ -56,6 +58,15 @@ public class ProjectService {
                 UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(teamId, user.getId());
                 if (!collaborators.contains(userTeam1)) {
                     collaborators.add(userTeam1);
+
+                    if(userTeam1.getUser().getResponsibleInProjectOrTask()){
+                        notificationService.save(new Notification(
+                                project,
+                                "Você foi adicionado(a) como responsável do projeto " + project.getName(),
+                                "projeto/" + project.getId() + "/tarefas",
+                                userTeam1.getUser()
+                        ));
+                    }
                 }
             }
         }
@@ -75,36 +86,10 @@ public class ProjectService {
         if (!collaborators.contains(project.getCreator())) {
             collaborators.add(project.getCreator());
         }
-        return save(project, teamId);
-    }
-
-    public Project save(Project project, Long teamId) {
-
-        //Default properties of a project
-        List<Property> properties = new ArrayList<>();
-        properties.add(new Property(PropertyKind.STATUS, "Status", true, null, PropertyStatus.FIXED));
-        properties.add(new Property(PropertyKind.DATE, "Data", true, null, PropertyStatus.FIXED));
-        properties.add(new Property(PropertyKind.LIST, "Dificuldade", false, null, PropertyStatus.VISIBLE));
-        properties.add(new Property(PropertyKind.NUMBER, "Número", false, null, PropertyStatus.VISIBLE));
-        properties.add(new Property(PropertyKind.TEXT, "Palavra-Chave", false, null, PropertyStatus.INVISIBLE));
-
-        for (Property property : properties) {
-            if (property.getKind() == PropertyKind.STATUS) {
-                property.setPropertyLists(defaultStatus(property));
-            }
-            if (property.getKind() == PropertyKind.LIST) {
-                List<PropertyList> propertiesList = new ArrayList<>();
-                propertiesList.add(new PropertyList("Fácil", Color.GREEN, property, PropertyListKind.VISIBLE, false));
-                propertiesList.add(new PropertyList("Médio", Color.YELLOW, property, PropertyListKind.VISIBLE, true));
-                propertiesList.add(new PropertyList("Díficil", Color.RED, property, PropertyListKind.VISIBLE, true));
-                propertiesList.add(new PropertyList("Não validado", Color.BLUE, property, PropertyListKind.INVISIBLE, true));
-                property.setPropertyLists(propertiesList);
-            }
-            property.setProject(project);
-            project.addProperty(property);
-        }
+        defaultProperties(project);
         return projectRepository.save(project);
     }
+
 
 //    public Project updateImage(MultipartFile file, Long projectId) {
 //        try {
@@ -269,6 +254,14 @@ public class ProjectService {
                     while (collaboratorsIterator.hasNext()) {
                         UserTeam userTeam = collaboratorsIterator.next();
                         if (userTeam != null && userTeam.getUser().equals(user)) {
+                            if(userTeam.getUser().getResponsibleInProjectOrTask()){
+                                notificationService.save(new Notification(
+                                        project,
+                                        "Você não é mais responsável do projeto " + project.getName(),
+                                        "projeto/" + project.getId() + "/tarefas",
+                                        userTeam1.getUser()
+                                ));
+                            }
                             userTeam.setProject(null);
                             userTeamService.save(userTeam);
                             collaboratorsIterator.remove();

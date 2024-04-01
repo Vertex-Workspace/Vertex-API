@@ -65,16 +65,15 @@ public class ChatController {
     }
 
     @PatchMapping("patchFile/{chatId}")
-    public Message patchFileOnChat(
+    public ResponseEntity<?> patchFileOnChat(
             @PathVariable Long chatId,
             @RequestParam MultipartFile file,
             @RequestParam String user
-//            @RequestParam LocalDateTime time
     ) throws IOException {
         if (file.isEmpty()) {
-            throw new RuntimeException();
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
-        return chatService.saveFile(chatId,file,user);
+        return new ResponseEntity<>(chatService.saveFile(chatId,file,user), HttpStatus.OK);
     }
 
     @GetMapping()

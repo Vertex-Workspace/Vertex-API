@@ -81,4 +81,8 @@ public class UserTeamService {
     }
 
 
+    public void delete(UserTeam userTeam){
+        userTeamRepository.delete(userTeam);
+    }
+
 }

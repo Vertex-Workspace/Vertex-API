@@ -2,7 +2,6 @@ package com.vertex.vertex.task.controller;
 
 import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.chat.service.ChatService;
-import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.DTO.TaskEditDTO;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
@@ -13,7 +12,7 @@ import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
-import org.hibernate.Remove;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -175,13 +174,14 @@ public class TaskController {
         this.chatService.create(chat);
         return task;
     }
-    @PatchMapping("/{id}/upload")
+    @PatchMapping("/{id}/upload/{userID}")
     public ResponseEntity<?> uploadFile(
             @PathVariable Long id,
+            @PathVariable Long userID,
             @RequestParam MultipartFile file) {
         try {
             return new ResponseEntity<>
-                    (taskService.uploadFile(file, id),
+                    (taskService.uploadFile(file, id, userID),
                         HttpStatus.OK);
 
         } catch (EntityNotFoundException e) {
@@ -191,7 +191,7 @@ public class TaskController {
     }
 
     @DeleteMapping("/{taskId}/remove-file/{fileId}")
-    public ResponseEntity<?> uploadFile(
+    public ResponseEntity<?> deleteFile(
             @PathVariable Long taskId,
             @PathVariable Long fileId) {
         try {

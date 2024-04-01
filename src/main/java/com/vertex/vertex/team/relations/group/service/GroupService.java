@@ -1,5 +1,6 @@
 package com.vertex.vertex.team.relations.group.service;
 
+import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.group.model.DTO.AddUsersDTO;
@@ -24,6 +25,7 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final TeamRepository teamRepository;
     private final UserTeamService userTeamService;
+    private final NotificationService notificationService;
 
     public Group edit(Group group) {
         return groupRepository.save(group);
@@ -55,8 +57,12 @@ public class GroupService {
         Group group = findById(groupId);
         for (UserTeam userTeam : group.getUserTeams()) {
             if ((userTeam.getUser().getId().equals(userId)) && (userTeam.getTeam().getId().equals(teamId))) {
+                if(userTeam.getUser().getNewMembersAndGroups()){
+                    notificationService.groupAndTeam("Você foi removido(a) do grupo " + group.getName(), userTeam);
+                }
                 userTeam.getGroups().remove(group);
                 userTeamService.save(userTeam);
+
             }
         }
     }
@@ -88,6 +94,9 @@ public class GroupService {
                         userTeam.getGroups().add(group);
                         groupRepository.save(group);
                         userTeamService.save(userTeam);
+                        if(userTeam.getUser().getNewMembersAndGroups()){
+                            notificationService.groupAndTeam("Você foi adicionado(a) ao grupo " + group.getName(), userTeam);
+                        }
                     }
                 }
             }

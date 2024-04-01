@@ -1,5 +1,7 @@
 package com.vertex.vertex.user.service;
 
+import com.vertex.vertex.notification.entity.model.Notification;
+import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
@@ -25,8 +27,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 @Data
@@ -40,6 +45,10 @@ public class UserService {
     private final PersonalizationService personalizationService;
     @NonNull
     private final GroupService groupService;
+    @NonNull
+    private final NotificationService notificationService;
+
+
     private final TeamService teamService;
 
     public User save(UserDTO userDTO) {
@@ -80,6 +89,14 @@ public class UserService {
 
         user.setLocation("Jaraguá do Sul - SC");
         user.setPersonalization(personalizationService.defaultSave(user));
+        //
+        user.setTaskReview(true);
+        user.setNewMembersAndGroups(true);
+        user.setPermissionsChanged(true);
+        user.setSendToEmail(true);
+        user.setAnyUpdateOnTask(true);
+        user.setResponsibleInProjectOrTask(true);
+
         userRepository.save(user);
 
         byte[] data = Base64.getDecoder().decode(userDTO.getImage());
@@ -200,6 +217,64 @@ public class UserService {
                                     && !Objects.equals(u.getId(), userId))
                 .map(UserSearchDTO::new)
                 .toList();
+    }
+
+    public List<Notification> getUserNotifications(Long userID){
+        User user = findById(userID);
+        return notificationService.getNotificationsByUser(userID);
+    }
+
+    public void readNotifications(Long userID, List<Notification> notifications){
+        User user = findById(userID);
+        for (Notification notification : notifications) {
+            notification.setIsRead(!notification.getIsRead());
+            notification.setUser(user);
+            notificationService.update(notification);
+        }
+        notificationService.webSocket(userID);
+    }
+
+    public void deleteNotifications(Long userID, List<Notification> notifications){
+        User user = findById(userID);
+        for (Notification notification : notifications) {
+            for (Notification userNotification : user.getNotifications()){
+                if(notification.getId().equals(userNotification.getId())){
+                    notificationService.delete(notification);
+                }
+            }
+        }
+        notificationService.webSocket(userID);
+    }
+    public User changeNotificationSettings(Long userID, Integer notificationID) throws NoSuchMethodException {
+        User user = findById(userID);
+
+        List<String> methods = List.of(
+                "TaskReview",
+                "NewMembersAndGroups",
+                "PermissionsChanged",
+                "ResponsibleInProjectOrTask",
+                "AnyUpdateOnTask",
+                "SendToEmail");
+
+        Function<String, Void> variable = method -> {
+            try {
+                Method setMethod = user.getClass().getMethod("set" + method, Boolean.class);
+                Method getMethod = user.getClass().getMethod("get" + method);
+
+                //Get the current boolean value
+                Boolean currentValue = (Boolean) getMethod.invoke(user);
+
+                //Invoke the choice value
+                setMethod.invoke(user, !currentValue);
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+            return null;
+        };
+
+        variable.apply(methods.get(notificationID-1));
+
+        return userRepository.save(user);
     }
 
 }

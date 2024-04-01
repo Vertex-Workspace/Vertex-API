@@ -25,7 +25,7 @@ public class Chat{
 
     private String name;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany
     private List<UserTeam> userTeams;
 
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL)
