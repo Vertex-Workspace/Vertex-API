@@ -48,7 +48,6 @@ public class GroupService {
     }
 
     public void deleteUserFromGroup(Long userId, Long teamId, Long groupId) {
-        System.out.println("entrei");
         Group group = findById(groupId);
         for (UserTeam userTeam : group.getUserTeams()) {
             if ((userTeam.getUser().getId().equals(userId)) && (userTeam.getTeam().getId().equals(teamId))) {
@@ -63,9 +62,7 @@ public class GroupService {
         Team team = teamRepository.findById(teamId).get();
         Group group = findById(groupId);
         for (UserTeam userTeam : team.getUserTeams()) {
-            if (group.getUserTeams().contains(userTeam)) {
-                System.out.println("This user is already in the group");
-            } else {
+            if (!group.getUserTeams().contains(userTeam)) {
                 users.add(userTeam.getUser());
             }
         }
@@ -89,8 +86,10 @@ public class GroupService {
             }
     }
 
-    public Group editGroupName(Group group){
-        group.setName(group.getName());
+    public Group editGroupName(Group group, Long teamId){
+        Team team = teamRepository.findById(teamId).get();
+        group.setTeam(team);
+        groupRepository.save(group);
         return group;
     }
 }

@@ -327,6 +327,8 @@ public class TaskService {
     }
 
     public Task editTaskResponsables(UpdateTaskResponsableDTO updateTaskResponsableDTO) {
+        System.out.println("g " + updateTaskResponsableDTO.getGroup());
+        System.out.println("u " + updateTaskResponsableDTO.getUser());
         Task task = findById(updateTaskResponsableDTO.getTaskId());
         List<TaskResponsable> responsablesToDelete = new ArrayList<>();
         List<Group> groupsToDelete = new ArrayList<>();
@@ -340,17 +342,21 @@ public class TaskService {
         }
 
         for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
+            if(updateTaskResponsableDTO.getUser() != null){
             if (taskResponsable.getUserTeam().getUser().getId().equals(updateTaskResponsableDTO.getUser().getId())) {
                 responsablesToDelete.add(taskResponsable);
                 canDeleteUser = true;
+            }
             }
         }
 
         if (updateTaskResponsableDTO.getGroup() != null) {
             for (Group group : task.getGroups()) {
+                if(updateTaskResponsableDTO.getGroup() !=null){
                 if (group.getId().equals(updateTaskResponsableDTO.getGroup().getId())) {
                     groupsToDelete.add(group);
                     canDeleteGroup = true;
+                }
                 }
             }
         }
