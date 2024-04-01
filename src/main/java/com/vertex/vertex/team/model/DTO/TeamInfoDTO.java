@@ -2,6 +2,7 @@ package com.vertex.vertex.team.model.DTO;
 
 import com.vertex.vertex.project.model.DTO.ProjectViewListDTO;
 import com.vertex.vertex.chat.model.Chat;
+import com.vertex.vertex.task.relations.review.model.DTO.ReviewHoursDTO;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.user.model.entity.User;
 import lombok.AllArgsConstructor;
@@ -24,5 +25,6 @@ public class TeamInfoDTO extends TeamViewListDTO{
 
 
     private List<Integer> tasksPerformances = new ArrayList<>();
+    private List<ReviewHoursDTO> reviewHoursDTOS = new ArrayList<>();
 
 }

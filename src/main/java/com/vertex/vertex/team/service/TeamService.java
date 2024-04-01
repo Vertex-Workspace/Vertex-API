@@ -12,6 +12,8 @@ import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.relations.review.model.DTO.ReviewHoursDTO;
+import com.vertex.vertex.task.relations.task_hours.service.TaskHoursService;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
@@ -38,6 +40,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.*;
 
 @Service
@@ -55,7 +59,7 @@ public class TeamService {
     private final ProjectService projectService;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
-
+    private final TaskHoursService taskHoursService;
     public Team save(TeamViewListDTO teamViewListDTO) {
         try {
             Team team = new Team();
@@ -153,6 +157,28 @@ public class TeamService {
                             && ((PropertyList) value.getValue()).getPropertyListKind().equals(propertyListKind))
                     .toList().size());
         }
+
+        for(UserTeam userTeam : team.getUserTeams()){
+            List<TaskResponsable> tasksResponsible = team.getProjects().stream()
+                    .flatMap(p -> p.getTasks().stream())
+                    .flatMap(t -> t.getTaskResponsables().stream())
+                    .filter(taskResponsable -> taskResponsable.getUserTeam().equals(userTeam))
+                    .toList();
+
+            Duration duration = Duration.ZERO;
+
+            for(TaskResponsable taskResponsable : tasksResponsible){
+                duration = duration.plus(taskHoursService.calculateTimeOnTask(taskResponsable));
+            }
+
+            dto.getReviewHoursDTOS().add(new ReviewHoursDTO(
+                    userTeam.getId(),
+                    userTeam.getUser().getFullName(),
+                    LocalTime.MIDNIGHT.plus(duration)
+            ));
+
+        }
+
         return dto;
     }
 
@@ -182,7 +208,7 @@ public class TeamService {
 
         Team team = findTeamById(groupRegisterDTO.getTeam().getId());
 
-        if (groupRegisterDTO.getName().length() < 1) {
+        if (groupRegisterDTO.getName().isEmpty()) {
             throw new GroupNameInvalidException();
         }
 
