@@ -89,7 +89,6 @@ public class GroupService {
     public Group editGroupName(Group group, Long teamId){
         Team team = teamRepository.findById(teamId).get();
         group.setTeam(team);
-        groupRepository.save(group);
-        return group;
+        return groupRepository.save(group);
     }
 }
