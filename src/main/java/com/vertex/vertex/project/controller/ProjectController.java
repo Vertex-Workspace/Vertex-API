@@ -153,4 +153,13 @@ public class ProjectController {
         }
     }
 
+    @GetMapping("/groups/users/{projectId}")
+    public ResponseEntity<?> getUsersOfGroups(@PathVariable Long projectId){
+        try {
+            return new ResponseEntity<>(projectService.getUsersOfGroup(projectId), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
+
 }

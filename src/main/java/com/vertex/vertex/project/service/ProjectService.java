@@ -265,6 +265,20 @@ public class ProjectService {
         return users;
     }
 
+    public List<User> getUsersOfGroup(Long projectId){
+        List<User> users = new ArrayList<>();
+        Project project = findById(projectId);
+        Team team = project.getTeam();
+        for(Group group : team.getGroups()){
+            for(UserTeam userTeam : project.getCollaborators()){
+                if(group.getUserTeams().contains(userTeam)){
+                    users.add(userTeam.getUser());
+                }
+            }
+        }
+        return users;
+    }
+
 
     public Project updateProjectCollaborators(ProjectEditDTO projectEditDTO) {
         Project project = projectRepository.findById(projectEditDTO.getId())
