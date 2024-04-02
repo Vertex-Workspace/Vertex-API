@@ -248,9 +248,18 @@ public class ProjectService {
 
         List<User> users = new ArrayList<>();
         Project project = projectRepository.findById(projectId).get();
+        Team team = project.getTeam();
 
         for (UserTeam userTeam : project.getCollaborators()) {
-            users.add(userTeam.getUser());
+            if(!team.getGroups().isEmpty()){
+                for(Group group: team.getGroups()){
+                    if(!group.getUserTeams().contains(userTeam)){
+                        users.add(userTeam.getUser());
+                    }
+                }
+            }else {
+                users.add(userTeam.getUser());
+            }
         }
 
         return users;

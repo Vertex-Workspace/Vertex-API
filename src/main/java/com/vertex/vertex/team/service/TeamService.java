@@ -333,6 +333,25 @@ public class TeamService {
         }
     }
 
+    public List<User> getUsersByTeamAndGroup(Long teamId) {
+        List<User> users = new ArrayList<>();
+        Team team = findTeamById(teamId);
+        if (!team.getGroups().isEmpty()) {
+            for(UserTeam userTeam : team.getUserTeams()) {
+                for (Group group : team.getGroups()) {
+                    if(!group.getUserTeams().contains(userTeam)){
+                        users.add(userTeam.getUser());
+                    }
+                }
+            }
+        }else {
+            for(UserTeam userTeam : team.getUserTeams()) {
+                users.add(userTeam.getUser());
+            }
+        }
+        return users;
+    }
+
     public List<User> getUsersByTeam(Long teamId) {
         return findTeamById(teamId)
                 .getUserTeams()
@@ -340,6 +359,7 @@ public class TeamService {
                 .map(UserTeam::getUser)
                 .toList();
     }
+
 
     public void deleteUserTeam(Long teamId, Long userId) {
         Team team = findTeamById(teamId);

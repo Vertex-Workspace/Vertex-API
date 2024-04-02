@@ -327,8 +327,6 @@ public class TaskService {
     }
 
     public Task editTaskResponsables(UpdateTaskResponsableDTO updateTaskResponsableDTO) {
-        System.out.println("g " + updateTaskResponsableDTO.getGroup());
-        System.out.println("u " + updateTaskResponsableDTO.getUser());
         Task task = findById(updateTaskResponsableDTO.getTaskId());
         List<TaskResponsable> responsablesToDelete = new ArrayList<>();
         List<Group> groupsToDelete = new ArrayList<>();

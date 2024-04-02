@@ -142,6 +142,15 @@ public class TeamController {
     }
 
     @GetMapping("/usersByTeam/{teamId}")
+    public ResponseEntity<?> findUsersAndGroupsByTeam(@PathVariable Long teamId) {
+        try {
+            return new ResponseEntity<>(teamService.getUsersByTeamAndGroup(teamId), HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/users/{teamId}")
     public ResponseEntity<?> findByTeam(@PathVariable Long teamId) {
         try {
             return new ResponseEntity<>(teamService.getUsersByTeam(teamId), HttpStatus.OK);
