@@ -23,7 +23,6 @@ import java.util.List;
 @Data
 @Entity
 @AllArgsConstructor
-@NoArgsConstructor
 public class Task implements FileSupporter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -69,10 +68,11 @@ public class Task implements FileSupporter {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "task", orphanRemoval = true)
     private List<Value> values;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<File> files;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<LogRecord> log;
 
     public boolean isNotUnderAnalysis(){
@@ -83,5 +83,11 @@ public class Task implements FileSupporter {
                     .isParallel();
         }
         return true;
+    }
+
+    public Task() {
+        setLog(List.of
+                (new LogRecord(this,
+                        "A tarefa foi criada")));
     }
 }

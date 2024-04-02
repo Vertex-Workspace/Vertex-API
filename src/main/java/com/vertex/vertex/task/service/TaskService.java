@@ -28,6 +28,7 @@ import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
+import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
@@ -106,7 +107,10 @@ public class TaskService {
         //Set if the task is revisable or no...
         task.setRevisable(project.getProjectReviewENUM().equals(ProjectReviewENUM.MANDATORY));
 
+
         Task finalTask = taskRepository.save(task);
+//        notificationService.saveLogRecord(finalTask,
+//                "criou a tarefa", task.getCreator());
 
         //Notifications
         for (TaskResponsable taskResponsable : finalTask.getTaskResponsables()) {
@@ -117,8 +121,13 @@ public class TaskService {
                         "projeto/" + project.getId() + "/tarefas?taskID=" + finalTask.getId(),
                         taskResponsable.getUserTeam().getUser()
                 ));
+
+                notificationService.saveLogRecord(task,
+                        "foi adicionado à lista de responsáveis pela tarefa",
+                        taskResponsable.getUserTeam());
             }
         }
+
         return task;
     }
 
@@ -189,7 +198,7 @@ public class TaskService {
                 break;
             }
         }
-        Task taskTest =  taskRepository.save(task);
+        Task taskTest = taskRepository.save(task);
 
         //Notifications
         for (TaskResponsable taskResponsableFor : task.getTaskResponsables()) {
@@ -203,6 +212,11 @@ public class TaskService {
             }
         }
 
+        notificationService.saveLogRecord(task,
+                ("O valor da propriedade "
+                        + property.getName()
+                        + " foi definido como "
+                        + ((PropertyList) task.getValues().get(0).getValue()).getValue()));
         return taskTest;
     }
 
@@ -236,6 +250,11 @@ public class TaskService {
                     ));
                 }
             }
+
+            notificationService.saveLogRecord(task,
+                    "adicionou um comentário à tarefa",
+                    taskResponsable.getUserTeam());
+
             return taskRepository.save(task);
         } else {
             throw new RuntimeException("O usuário não é um dos responsáveis pela tarefa.");
@@ -299,6 +318,10 @@ public class TaskService {
                         taskResponsable.getUserTeam().getUser()
                 ));
             }
+
+            notificationService.saveLogRecord(task,
+                    "adicionou um responsável à tarefa",
+                    taskResponsable.getUserTeam());
 
             return taskRepository.save(task);
         } else {
