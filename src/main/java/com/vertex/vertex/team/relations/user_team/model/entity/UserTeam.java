@@ -33,8 +33,8 @@ public class UserTeam {
 
     @ManyToOne
     @JsonIgnore
-    @ToString.Exclude
     @EqualsAndHashCode.Include
+    @ToString.Exclude
     private Team team;
 
     @ManyToOne

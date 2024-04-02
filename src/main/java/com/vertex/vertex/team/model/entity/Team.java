@@ -35,6 +35,7 @@ public class Team {
     private byte[] image;
 
     @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ToString.Exclude
     private UserTeam creator;
 
     private String description;
@@ -51,6 +52,7 @@ public class Team {
     private Chat chat;
 
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @ToString.Exclude
     private List<UserTeam> userTeams;
 
 

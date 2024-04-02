@@ -27,4 +27,8 @@ public class TeamInfoDTO extends TeamViewListDTO{
     private List<Integer> tasksPerformances = new ArrayList<>();
     private List<ReviewHoursDTO> reviewHoursDTOS = new ArrayList<>();
 
+    private Integer reprovedReviews;
+    private Integer approvedReviews;
+    private Double averageReviews;
+
 }

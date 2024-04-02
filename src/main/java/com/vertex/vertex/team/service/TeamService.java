@@ -12,7 +12,10 @@ import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
 import com.vertex.vertex.task.relations.review.model.DTO.ReviewHoursDTO;
+import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
+import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.task_hours.service.TaskHoursService;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.service.TaskService;
@@ -60,6 +63,7 @@ public class TeamService {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final TaskHoursService taskHoursService;
+
     public Team save(TeamViewListDTO teamViewListDTO) {
         try {
             Team team = new Team();
@@ -148,17 +152,21 @@ public class TeamService {
 
         List<PropertyListKind> listKinds = List.of(PropertyListKind.TODO, PropertyListKind.DOING, PropertyListKind.DONE);
         // Performance Graphics
-        for (PropertyListKind propertyListKind : listKinds){
+        for (PropertyListKind propertyListKind : listKinds) {
+
+            //[0] - TODO
+            //[1] - DOING
+            //[2] - DONE
             dto.getTasksPerformances().add(
                     team.getProjects().stream()
-                    .flatMap(p -> p.getTasks().stream())
-                    .flatMap(t -> t.getValues().stream())
-                    .filter(value -> value.getProperty().getKind().equals(PropertyKind.STATUS)
-                            && ((PropertyList) value.getValue()).getPropertyListKind().equals(propertyListKind))
-                    .toList().size());
+                            .flatMap(p -> p.getTasks().stream())
+                            .flatMap(t -> t.getValues().stream())
+                            .filter(value -> value.getProperty().getKind().equals(PropertyKind.STATUS)
+                                    && ((PropertyList) value.getValue()).getPropertyListKind().equals(propertyListKind))
+                            .toList().size());
         }
 
-        for(UserTeam userTeam : team.getUserTeams()){
+        for (UserTeam userTeam : team.getUserTeams()) {
             List<TaskResponsable> tasksResponsible = team.getProjects().stream()
                     .flatMap(p -> p.getTasks().stream())
                     .flatMap(t -> t.getTaskResponsables().stream())
@@ -167,7 +175,7 @@ public class TeamService {
 
             Duration duration = Duration.ZERO;
 
-            for(TaskResponsable taskResponsable : tasksResponsible){
+            for (TaskResponsable taskResponsable : tasksResponsible) {
                 duration = duration.plus(taskHoursService.calculateTimeOnTask(taskResponsable));
             }
 
@@ -179,6 +187,29 @@ public class TeamService {
 
         }
 
+        List<Review> reviews = team.getProjects().stream()
+                .flatMap(p -> p.getTasks().stream())
+                .flatMap(t -> t.getReviews().stream())
+                .toList();
+
+        dto.setReprovedReviews(
+                reviews.stream()
+                        .filter(r -> r.getApproveStatus().equals(ApproveStatus.DISAPPROVED)).toList().size());
+
+        dto.setApprovedReviews(
+                reviews.stream()
+                        .filter(r -> r.getApproveStatus().equals(ApproveStatus.APPROVED)).toList().size());
+
+        double finalSumGrade = reviews.stream()
+                .filter(r -> r.getGrade() != null)
+                .mapToDouble(Review::getGrade)
+                .sum();
+
+        int amountOfGradeReview = reviews.stream().filter(r -> r.getGrade() != null).toList().size();
+        dto.setAverageReviews(0.0);
+        if(finalSumGrade > 0 && amountOfGradeReview > 0){
+            dto.setAverageReviews(finalSumGrade / amountOfGradeReview);
+        }
         return dto;
     }
 
@@ -241,6 +272,8 @@ public class TeamService {
 
             User user = userRepository.findById(userTeam.getUser().getId()).get();
             Team team = teamRepository.findById(userTeam.getTeam().getId()).get();
+
+
             UserTeam newUserTeam = new UserTeam(user, team);
 
             //Set the Creator
@@ -257,46 +290,28 @@ public class TeamService {
             }
             //
             else {
-                boolean userIsOnTeam = false;
-                for (UserTeam userTeamFor : team.getUserTeams()) {
-                    if (userTeamFor.getUser().equals(user)) {
-                        userIsOnTeam = true;
-                        break;
-                    }
+                team.getUserTeams().add(newUserTeam);
+                permissionService.save(user.getId(), team.getId());
+
+                UserTeam savedUserTeam = userTeamService.save(newUserTeam);
+                System.out.println(savedUserTeam);
+                //Notifications
+                //To the new user
+                if (newUserTeam.getUser().getNewMembersAndGroups()) {
+                    notificationService.groupAndTeam("Você entrou em " + team.getName(), savedUserTeam);
                 }
-                if (!userIsOnTeam) {
-                    team.getUserTeams().add(newUserTeam);
-                    permissionService.save(user.getId(), team.getId());
 
-                    //Notifications
-                    //To the new user
-                    if (newUserTeam.getUser().getNewMembersAndGroups()) {
-                        notificationService.groupAndTeam("Você entrou em " + team.getName(), newUserTeam);
-                    }
-
-                    //To all users on team
-                    for (UserTeam userTeam1 : team.getUserTeams()) {
-                        if (!userTeam1.equals(newUserTeam)) {
-                            if (userTeam1.getUser().getNewMembersAndGroups()) {
-                                notificationService.groupAndTeam(newUserTeam.getUser().getFullName() + " entrou em " + team.getName(), userTeam1);
-                            }
+                //To all users on team
+                for (UserTeam userTeam1 : team.getUserTeams()) {
+                    if (!userTeam1.equals(savedUserTeam)) {
+                        if (userTeam1.getUser().getNewMembersAndGroups()) {
+                            notificationService.groupAndTeam(savedUserTeam.getUser().getFullName() + " entrou em " + team.getName(), userTeam1);
                         }
                     }
                 }
+
             }
             teamRepository.save(team);
-
-            UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(team.getId(), user.getId());
-
-            if (team.getProjects() != null) {
-                for (Project project : team.getProjects()) {
-                    for (Task task : project.getTasks()) {
-                        task.getTaskResponsables().add(new TaskResponsable(userTeam1, task));
-                        taskService.save(task);
-                    }
-                }
-            }
-
             return team;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -305,14 +320,8 @@ public class TeamService {
 
     public void deleteUserTeam(Long teamId, Long userId) {
         Team team = findTeamById(teamId);
-        User user = userRepository.findById(userId).get();
-        UserTeam userTeam = null;
-        for (UserTeam userTeamFor : team.getUserTeams()) {
-            if (userTeamFor.getUser().equals(user)) {
-                userTeam = userTeamFor;
-                break;
-            }
-        }
+        UserTeam userTeam = userTeamService.findUserTeamByComposeId(teamId, userId);
+
         if (userTeam != null) {
             if (userTeam.getUser().getNewMembersAndGroups()) {
                 notificationService.groupAndTeam("Você foi removido(a) de " + team.getName(), userTeam);
@@ -402,7 +411,6 @@ public class TeamService {
                 .map(UserTeam::getUser)
                 .toList();
     }
-
 
 
     public User teamCreatorId(Long teamId) {

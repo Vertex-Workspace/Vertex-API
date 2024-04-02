@@ -110,7 +110,8 @@ public class TaskService {
 
         //Notifications
         for (TaskResponsable taskResponsable : finalTask.getTaskResponsables()) {
-            if (taskResponsable.getUserTeam().getUser().getResponsibleInProjectOrTask() && !taskResponsable.getUserTeam().equals(task.getCreator())) {
+            if (taskResponsable.getUserTeam().getUser().getResponsibleInProjectOrTask()
+                    && !taskResponsable.getUserTeam().equals(task.getCreator())) {
                 notificationService.save(new Notification(
                         project,
                         "Você foi adicionado como responsável da tarefa " + task.getName(),
@@ -119,6 +120,7 @@ public class TaskService {
                 ));
             }
         }
+
         return task;
     }
 

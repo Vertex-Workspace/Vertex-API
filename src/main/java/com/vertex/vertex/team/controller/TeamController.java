@@ -192,7 +192,7 @@ public class TeamController {
     }
 
     @DeleteMapping("/user-team/{teamId}/{userId}")
-    public ResponseEntity<?> deleteUserFromGroup(@PathVariable Long userId, @PathVariable Long teamId){
+    public ResponseEntity<?> deleteUserTeam(@PathVariable Long userId, @PathVariable Long teamId){
         try{
             teamService.deleteUserTeam(teamId, userId);
             return new ResponseEntity<>(HttpStatus.OK);
