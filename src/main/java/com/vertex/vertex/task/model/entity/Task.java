@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.model.FileSupporter;
+import com.vertex.vertex.notification.entity.model.LogRecord;
+import com.vertex.vertex.task.model.DTO.TaskEditDTO;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
@@ -18,11 +20,11 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @Entity
 @AllArgsConstructor
-@NoArgsConstructor
 public class Task implements FileSupporter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -69,7 +71,18 @@ public class Task implements FileSupporter {
     private List<Value> values;
 
     @OneToMany(cascade = CascadeType.ALL)
-    List<File> files;
+    private List<File> files;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<LogRecord> log;
+
+    public String getModifiedAttributeDescription
+            (TaskEditDTO dto) {
+        if (!Objects.equals(this.name, dto.getName()))
+            return "O nome da tarefa foi alterado para " + dto.getName();
+        else return "A descrição da tarefa foi alterada";
+    }
 
     public boolean isNotUnderAnalysis(){
         if(this.getReviews() != null){
@@ -79,5 +92,11 @@ public class Task implements FileSupporter {
                     .isParallel();
         }
         return true;
+    }
+
+    public Task() {
+        setLog(List.of
+                (new LogRecord(this,
+                        "A tarefa foi criada")));
     }
 }
