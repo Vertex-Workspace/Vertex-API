@@ -1,5 +1,6 @@
 package com.vertex.vertex.user.service;
 
+import com.vertex.vertex.log.model.exception.EntityDoesntExistException;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
@@ -119,13 +120,8 @@ public class UserService {
     }
 
     public User findById(Long id) {
-        Optional<User> userOpt = userRepository.findById(id);
-
-        if (userOpt.isPresent()) {
-            return userOpt.get();
-        }
-
-        throw new EntityNotFoundException();
+        return userRepository.findById(id)
+                .orElseThrow(EntityDoesntExistException::new);
     }
 
     public User findByEmail(String email) {
