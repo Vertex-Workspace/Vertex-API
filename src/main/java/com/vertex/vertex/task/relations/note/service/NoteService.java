@@ -3,6 +3,7 @@ package com.vertex.vertex.task.relations.note.service;
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.repository.FileRepository;
 import com.vertex.vertex.file.service.FileService;
+import com.vertex.vertex.log.model.exception.EntityDoesntExistException;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.task.relations.note.model.dto.NoteDTO;
@@ -44,7 +45,7 @@ public class NoteService {
 
     public Note findById(Long id) {
         return noteRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(EntityDoesntExistException::new);
     }
 
     public Note editPatch(NoteEditDTO dto) {

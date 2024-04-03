@@ -3,6 +3,7 @@ package com.vertex.vertex.file.service;
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.model.FileSupporter;
 import com.vertex.vertex.file.repository.FileRepository;
+import com.vertex.vertex.log.model.exception.EntityDoesntExistException;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.note.model.entity.Note;
 import jakarta.persistence.EntityNotFoundException;
@@ -39,7 +40,7 @@ public class FileService {
 
     public void delete(Long id) {
         if (!fileRepository.existsById(id)) {
-            throw new EntityNotFoundException();
+            throw new EntityDoesntExistException();
         }
         fileRepository.deleteById(id);
     }
