@@ -1,4 +1,4 @@
-package com.vertex.vertex.log.model;
+package com.vertex.vertex.log.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

@@ -1,6 +1,6 @@
 package com.vertex.vertex.log.service;
 
-import com.vertex.vertex.log.model.ExceptionLog;
+import com.vertex.vertex.log.model.entity.ExceptionLog;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
