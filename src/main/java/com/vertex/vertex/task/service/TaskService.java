@@ -225,7 +225,6 @@ public class TaskService {
                         + property.getName()
                         + " foi definido como "
                         + propertyValue));
-//                        + ((PropertyList) task.getValues().get(0).getValue()).getValue()));
         return taskTest;
     }
 
