@@ -140,9 +140,9 @@ public class ProjectService {
     }
 
     public ProjectOneDTO findProjectById(Long id) {
-        ProjectOneDTO projectOneDTO = new ProjectOneDTO();
-        Project project = projectRepository.findById(id).get();
-        BeanUtils.copyProperties(project, projectOneDTO);
+        Project project = findById(id);
+        ProjectOneDTO projectOneDTO = new ProjectOneDTO(project);
+
 
         //To Set as null
         projectOneDTO.setTasks(new ArrayList<>());
