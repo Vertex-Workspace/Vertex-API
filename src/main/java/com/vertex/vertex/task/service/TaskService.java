@@ -135,6 +135,12 @@ public class TaskService {
     public Task edit(TaskEditDTO taskEditDTO) {
         try {
             Task task = findById(taskEditDTO.getId());
+
+            String modifiedAttributeDescription
+                    = task.getModifiedAttributeDescription(taskEditDTO);
+            notificationService.saveLogRecord(task,
+                    modifiedAttributeDescription);
+
             modelMapper.map(taskEditDTO, task);
             return taskRepository.save(task);
         } catch (Exception e) {
@@ -212,12 +218,35 @@ public class TaskService {
             }
         }
 
+        String propertyValue = getPropertyValue(property, task);
+
         notificationService.saveLogRecord(task,
                 ("O valor da propriedade "
                         + property.getName()
                         + " foi definido como "
-                        + ((PropertyList) task.getValues().get(0).getValue()).getValue()));
+                        + propertyValue));
+//                        + ((PropertyList) task.getValues().get(0).getValue()).getValue()));
         return taskTest;
+    }
+
+    private String getPropertyValue(Property property, Task task) {
+        Value value = task.getValues()
+                .stream()
+                .filter(v -> Objects.equals(property.getId(), v.getProperty().getId()))
+                .findFirst()
+                .get();
+
+        if (property.getKind() == PropertyKind.STATUS
+                || property.getKind() == PropertyKind.LIST) {
+            PropertyList pl = (PropertyList) value.getValue();
+            return pl.getValue();
+        }
+
+        if (value instanceof ValueDate) {
+            return ((ValueDate) value).format();
+        }
+
+        return value.getValue().toString();
     }
 
     //verify if the taskresponsable belongs to the task and if it is, save the comment
@@ -374,6 +403,13 @@ public class TaskService {
         try {
             Task task = findById(id);
             File file = fileService.save(multipartFile, task);
+            UserTeam ut = userTeamService
+                    .findUserTeamByComposeId(
+                            task.getProject().getTeam().getId(),
+                            userThatSentID
+                    );
+            notificationService.saveLogRecord(task,
+                    "adicionou um anexo à tarefa", ut);
 
             if (Objects.isNull(task.getFiles())) task.setFiles(List.of(file));
             else task.getFiles().add(file);
