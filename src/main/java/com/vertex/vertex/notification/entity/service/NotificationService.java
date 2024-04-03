@@ -7,7 +7,9 @@ import com.vertex.vertex.notification.entity.model.LogRecord;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.repository.LogRepository;
 import com.vertex.vertex.notification.repository.NotificationRepository;
+import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -74,6 +76,23 @@ public class NotificationService {
         } catch (IOException ignored) {}
     }
 
+    public void sendNotificationAndSaveLog(Task task, Project project) {
+        for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
+            if (taskResponsable.getUserTeam().getUser().getResponsibleInProjectOrTask() && !taskResponsable.getUserTeam().equals(task.getCreator())) {
+                save(new Notification(
+                        project,
+                        "Você foi adicionado como responsável da tarefa " + task.getName(),
+                        "projeto/" + project.getId() + "/tarefas?taskID=" + task.getId(),
+                        taskResponsable.getUserTeam().getUser()
+                ));
+
+                saveLogRecord(task,
+                        "foi adicionado à lista de responsáveis pela tarefa",
+                        taskResponsable.getUserTeam());
+            }
+        }
+    }
+
     private void sendToEmail(Notification notification) {
 //        try {
 //
@@ -137,6 +156,5 @@ public class NotificationService {
 //        }
 
     }
-
 
 }

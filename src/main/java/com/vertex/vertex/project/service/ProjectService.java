@@ -136,7 +136,13 @@ public class ProjectService {
     }
 
     public Project findById(Long id) {
-        return projectRepository.findById(id).get();
+        Optional<Project> p = projectRepository.findById(id);
+
+        if (p.isPresent()) {
+            return p.get();
+        }
+
+        throw new RuntimeException("There isn't a project with this id is not linked with the current team!");
     }
 
     public ProjectOneDTO findProjectById(Long id) {

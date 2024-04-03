@@ -5,6 +5,8 @@ import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.model.FileSupporter;
 import com.vertex.vertex.notification.entity.model.LogRecord;
+import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
+import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.DTO.TaskEditDTO;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
 import com.vertex.vertex.project.model.entity.Project;
@@ -18,6 +20,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.beans.BeanUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -25,6 +28,7 @@ import java.util.Objects;
 @Data
 @Entity
 @AllArgsConstructor
+@NoArgsConstructor
 public class Task implements FileSupporter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -94,9 +98,20 @@ public class Task implements FileSupporter {
         return true;
     }
 
-    public Task() {
+    public Task(TaskCreateDTO dto, Project project, UserTeam creator) {
+        BeanUtils.copyProperties(dto, this);
+
+        //Set if the task is revisable or no...
+        this.setRevisable(project.getProjectReviewENUM()
+                .equals(ProjectReviewENUM.MANDATORY));
+
+        this.creator = creator;
+        this.taskResponsables
+                = List.of(new TaskResponsable(creator, this));
+
         setLog(List.of
                 (new LogRecord(this,
                         "A tarefa foi criada")));
     }
+
 }

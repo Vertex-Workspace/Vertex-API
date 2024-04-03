@@ -25,6 +25,7 @@ import com.vertex.vertex.task.model.exceptions.TaskDoesNotExistException;
 import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
 import com.vertex.vertex.task.relations.value.model.entity.ValueDate;
+import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
@@ -61,73 +62,21 @@ public class TaskService {
     private final ReviewRepository reviewRepository;
     private final FileService fileService;
     private final NotificationService notificationService;
+    private final ValueService valueService;
 
 
     public Task save(TaskCreateDTO taskCreateDTO) {
-        Task task = new Task();
-        BeanUtils.copyProperties(taskCreateDTO, task);
-        Project project;
-        List<Value> values = new ArrayList<>();
-        try {
-            project = projectService.findById(taskCreateDTO.getProject().getId());
-        } catch (Exception e) {
-            throw new RuntimeException("There isn't a project with this id is not linked with the current team!");
-        }
+        Project project = projectService.findById(taskCreateDTO.getProject().getId());
+
+        UserTeam creator = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), taskCreateDTO.getCreator().getId());
+        //create, copy attributes, set if is revisable, set creator and 1st responsible and start log
+        Task task = new Task(taskCreateDTO, project, creator);
+
         //When the task is created, every property is associated with a null value, unless it has a default value
-        for (Property property : project.getProperties()) {
-            Value currentValue = property.getKind().getValue();
-            currentValue.setProperty(property);
-            currentValue.setTask(task);
-            values.add(currentValue);
+        valueService.setTaskDefaultValues(task, project.getProperties());
 
-            if (property.getKind() == PropertyKind.STATUS) {
-                //Get the first element, how the three are fixed, it always will be TO DO "Não Iniciado"
-                currentValue.setValue(property.getPropertyLists().get(0));
-            }
-            if (property.getKind() == PropertyKind.DATE) {
-                ((ValueDate) currentValue).setValue();
-            }
-            if (property.getKind() == PropertyKind.TEXT) {
-                currentValue.setValue(property.getDefaultValue());
-            }
-        }
-        task.setValues(values);
-        //Add the taskResponsables on task list of taskResponsables
-        task.setCreator(userTeamService.findUserTeamByComposeId(project.getTeam().getId(), taskCreateDTO.getCreator().getId()));
-        for (UserTeam userTeam : project.getTeam().getUserTeams()) {
-            TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
-            if (task.getTaskResponsables() == null) {
-                ArrayList<TaskResponsable> taskResponsibleList = new ArrayList<>();
-                taskResponsibleList.add(taskResponsable1);
-                task.setTaskResponsables(taskResponsibleList);
-            } else {
-                task.getTaskResponsables().add(taskResponsable1);
-            }
-        }
-
-        //Set if the task is revisable or no...
-        task.setRevisable(project.getProjectReviewENUM().equals(ProjectReviewENUM.MANDATORY));
-
-
-        Task finalTask = taskRepository.save(task);
-//        notificationService.saveLogRecord(finalTask,
-//                "criou a tarefa", task.getCreator());
-
-        //Notifications
-        for (TaskResponsable taskResponsable : finalTask.getTaskResponsables()) {
-            if (taskResponsable.getUserTeam().getUser().getResponsibleInProjectOrTask() && !taskResponsable.getUserTeam().equals(task.getCreator())) {
-                notificationService.save(new Notification(
-                        project,
-                        "Você foi adicionado como responsável da tarefa " + task.getName(),
-                        "projeto/" + project.getId() + "/tarefas?taskID=" + finalTask.getId(),
-                        taskResponsable.getUserTeam().getUser()
-                ));
-
-                notificationService.saveLogRecord(task,
-                        "foi adicionado à lista de responsáveis pela tarefa",
-                        taskResponsable.getUserTeam());
-            }
-        }
+        //Notifications and task log
+        notificationService.sendNotificationAndSaveLog(taskRepository.save(task), project);
 
         return task;
     }
@@ -137,10 +86,8 @@ public class TaskService {
         try {
             Task task = findById(taskEditDTO.getId());
 
-            String modifiedAttributeDescription
-                    = task.getModifiedAttributeDescription(taskEditDTO);
             notificationService.saveLogRecord(task,
-                    modifiedAttributeDescription);
+                    task.getModifiedAttributeDescription(taskEditDTO));
 
             modelMapper.map(taskEditDTO, task);
             return taskRepository.save(task);
