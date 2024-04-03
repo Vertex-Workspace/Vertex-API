@@ -41,8 +41,8 @@ public class TeamController {
     @PutMapping
     public ResponseEntity<?> update(@RequestBody TeamViewListDTO team) {
         try {
-            teamService.save(team);
-            return new ResponseEntity<>(HttpStatus.OK);
+
+            return new ResponseEntity<>(teamService.save(team), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }

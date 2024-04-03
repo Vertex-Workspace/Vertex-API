@@ -103,7 +103,8 @@ public class UserService {
         user.setImage(data);
         //creation of the default team
         TeamViewListDTO teamViewListDTO =
-                new TeamViewListDTO("Equipe " + user.getFirstName(), user, null, "Sua equipe padrão", null, true);
+                new TeamViewListDTO("Equipe " + user.getFirstName(), user, null,
+                        "“As boas equipes incorporam o trabalho em equipe na sua cultura, criando os elementos essenciais ao sucesso.” — Ted Sundquist, jogador de futebol americano.", null, true);
         teamService.save(teamViewListDTO);
         return userRepository.save(user);
     }

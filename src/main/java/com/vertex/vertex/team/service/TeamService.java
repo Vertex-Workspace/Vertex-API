@@ -2,7 +2,6 @@ package com.vertex.vertex.team.service;
 
 import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.chat.service.ChatService;
-import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.project.model.DTO.ProjectViewListDTO;
 import com.vertex.vertex.project.model.entity.Project;
@@ -12,7 +11,6 @@ import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.entity.Task;
-import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
 import com.vertex.vertex.task.relations.review.model.DTO.ReviewHoursDTO;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
@@ -25,11 +23,9 @@ import com.vertex.vertex.team.model.DTO.TeamSearchDTO;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
-import com.vertex.vertex.team.relations.group.model.DTO.GroupEditUserDTO;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupRegisterDTO;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.group.model.exception.GroupNameInvalidException;
-import com.vertex.vertex.team.relations.group.model.exception.GroupNotFoundException;
 import com.vertex.vertex.team.relations.group.service.GroupService;
 import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
@@ -74,12 +70,11 @@ public class TeamService {
             }
             team.setName(teamViewListDTO.getName());
             team.setDescription(teamViewListDTO.getDescription());
-
-
-            String invitationCode = generateInvitationCode();
-            team.setInvitationCode(invitationCode);
+            System.out.println(team);
             Team savedTeam = teamRepository.save(team);
             if (teamViewListDTO.getId() == null) {
+                String invitationCode = generateInvitationCode();
+                team.setInvitationCode(invitationCode);
                 UserTeamAssociateDTO userTeamAssociateDTO = new UserTeamAssociateDTO();
                 userTeamAssociateDTO.setTeam(savedTeam);
                 userTeamAssociateDTO.setUser(teamViewListDTO.getCreator());
@@ -89,7 +84,6 @@ public class TeamService {
                 createChatForTeam(teamWithUserTeam);
 
                 if (teamViewListDTO.isDefaultTeam()) {
-                    System.out.println(teamWithUserTeam);
                     saveDefaultTasksAndProject(teamWithUserTeam);
                 }
             }
@@ -149,67 +143,7 @@ public class TeamService {
         dto.setUsers(getUsersByTeam(dto.getId())); //adiciona os usuários ao grupo com base no userTeam, para utilização no fe
         dto.setProjects(projectList);
         dto.setImage(team.getImage());
-
-        List<PropertyListKind> listKinds = List.of(PropertyListKind.TODO, PropertyListKind.DOING, PropertyListKind.DONE);
-        // Performance Graphics
-        for (PropertyListKind propertyListKind : listKinds) {
-
-            //[0] - TODO
-            //[1] - DOING
-            //[2] - DONE
-            dto.getTasksPerformances().add(
-                    team.getProjects().stream()
-                            .flatMap(p -> p.getTasks().stream())
-                            .flatMap(t -> t.getValues().stream())
-                            .filter(value -> value.getProperty().getKind().equals(PropertyKind.STATUS)
-                                    && ((PropertyList) value.getValue()).getPropertyListKind().equals(propertyListKind))
-                            .toList().size());
-        }
-
-        for (UserTeam userTeam : team.getUserTeams()) {
-            List<TaskResponsable> tasksResponsible = team.getProjects().stream()
-                    .flatMap(p -> p.getTasks().stream())
-                    .flatMap(t -> t.getTaskResponsables().stream())
-                    .filter(taskResponsable -> taskResponsable.getUserTeam().equals(userTeam))
-                    .toList();
-
-            Duration duration = Duration.ZERO;
-
-            for (TaskResponsable taskResponsable : tasksResponsible) {
-                duration = duration.plus(taskHoursService.calculateTimeOnTask(taskResponsable));
-            }
-
-            dto.getReviewHoursDTOS().add(new ReviewHoursDTO(
-                    userTeam.getId(),
-                    userTeam.getUser().getFullName(),
-                    LocalTime.MIDNIGHT.plus(duration)
-            ));
-
-        }
-
-        List<Review> reviews = team.getProjects().stream()
-                .flatMap(p -> p.getTasks().stream())
-                .flatMap(t -> t.getReviews().stream())
-                .toList();
-
-        dto.setReprovedReviews(
-                reviews.stream()
-                        .filter(r -> r.getApproveStatus().equals(ApproveStatus.DISAPPROVED)).toList().size());
-
-        dto.setApprovedReviews(
-                reviews.stream()
-                        .filter(r -> r.getApproveStatus().equals(ApproveStatus.APPROVED)).toList().size());
-
-        double finalSumGrade = reviews.stream()
-                .filter(r -> r.getGrade() != null)
-                .mapToDouble(Review::getGrade)
-                .sum();
-
-        int amountOfGradeReview = reviews.stream().filter(r -> r.getGrade() != null).toList().size();
-        dto.setAverageReviews(0.0);
-        if(finalSumGrade > 0 && amountOfGradeReview > 0){
-            dto.setAverageReviews(finalSumGrade / amountOfGradeReview);
-        }
+        calculatePerformance(dto, team);
         return dto;
     }
 
@@ -475,5 +409,81 @@ public class TeamService {
                 .findAllByUser(userId);
     }
 
+
+    private void calculatePerformance(TeamInfoDTO dto, Team team){
+        List<PropertyListKind> listKinds = List.of(PropertyListKind.TODO, PropertyListKind.DOING, PropertyListKind.DONE);
+        // Performance Graphics
+        for (PropertyListKind propertyListKind : listKinds) {
+
+            //[0] - TODO
+            //[1] - DOING
+            //[2] - DONE
+            dto.getTasksPerformances().add(
+                    team.getProjects().stream()
+                            .flatMap(p -> p.getTasks().stream())
+                            .flatMap(t -> t.getValues().stream())
+                            .filter(value -> value.getProperty().getKind().equals(PropertyKind.STATUS)
+                                    && ((PropertyList) value.getValue()).getPropertyListKind().equals(propertyListKind))
+                            .toList().size());
+        }
+        int todoTasks = dto.getTasksPerformances().get(0);
+        int doingTasks = dto.getTasksPerformances().get(1);
+        int doneTasks = dto.getTasksPerformances().get(2);
+        if(doneTasks > 0){
+            if(todoTasks > 0 || doingTasks > 0){
+                dto.setPercentage((double) (doneTasks * 100) / (doneTasks + todoTasks + doingTasks));
+            } else {
+                dto.setPercentage(100.0);
+            }
+        } else {
+            dto.setPercentage(0.0);
+        }
+
+        for (UserTeam userTeam : team.getUserTeams()) {
+            List<TaskResponsable> tasksResponsible = team.getProjects().stream()
+                    .flatMap(p -> p.getTasks().stream())
+                    .flatMap(t -> t.getTaskResponsables().stream())
+                    .filter(taskResponsable -> taskResponsable.getUserTeam().equals(userTeam))
+                    .toList();
+
+            Duration duration = Duration.ZERO;
+
+            for (TaskResponsable taskResponsable : tasksResponsible) {
+                duration = duration.plus(taskHoursService.calculateTimeOnTask(taskResponsable));
+            }
+
+            dto.getReviewHoursDTOS().add(new ReviewHoursDTO(
+                    userTeam.getId(),
+                    userTeam.getUser().getFullName(),
+                    LocalTime.MIDNIGHT.plus(duration)
+            ));
+
+        }
+
+        List<Review> reviews = team.getProjects().stream()
+                .flatMap(p -> p.getTasks().stream())
+                .flatMap(t -> t.getReviews().stream())
+                .toList();
+
+        dto.setReprovedReviews(
+                reviews.stream()
+                        .filter(r -> r.getApproveStatus().equals(ApproveStatus.DISAPPROVED)).toList().size());
+
+        dto.setApprovedReviews(
+                reviews.stream()
+                        .filter(r -> r.getApproveStatus().equals(ApproveStatus.APPROVED)).toList().size());
+
+        double finalSumGrade = reviews.stream()
+                .filter(r -> r.getGrade() != null)
+                .mapToDouble(Review::getGrade)
+                .sum();
+
+        int amountOfGradeReview = reviews.stream().filter(r -> r.getGrade() != null).toList().size();
+        dto.setAverageReviews(0.0);
+        if(finalSumGrade > 0 && amountOfGradeReview > 0){
+            dto.setAverageReviews(finalSumGrade / amountOfGradeReview);
+        }
+
+    }
 
 }

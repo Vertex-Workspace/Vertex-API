@@ -38,6 +38,7 @@ public class Team {
     @ToString.Exclude
     private UserTeam creator;
 
+    @Column(length = 2000)
     private String description;
 
     private LocalDateTime creationDate;

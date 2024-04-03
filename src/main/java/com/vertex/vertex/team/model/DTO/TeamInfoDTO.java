@@ -31,4 +31,6 @@ public class TeamInfoDTO extends TeamViewListDTO{
     private Integer approvedReviews;
     private Double averageReviews;
 
+    private Double percentage;
+
 }
