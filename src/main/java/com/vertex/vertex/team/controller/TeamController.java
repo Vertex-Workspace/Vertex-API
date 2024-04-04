@@ -248,4 +248,9 @@ public class TeamController {
         }
     }
 
+    @GetMapping("/exc")
+    public ResponseEntity<?> throwException() {
+        throw new RuntimeException("Erro");
+    }
+
 }
