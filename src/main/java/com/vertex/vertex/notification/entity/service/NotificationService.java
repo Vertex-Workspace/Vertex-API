@@ -31,7 +31,9 @@ public class NotificationService {
         if(notification.getUser().getSendToEmail()){
             sendToEmail(notificationSaved);
         }
-        webSocket(notification.getUser().getId());
+        try {
+            webSocket(notification.getUser().getId());
+        } catch (Exception ignored) {}
         return notificationSaved;
     }
 
@@ -59,6 +61,7 @@ public class NotificationService {
     }
 
     public void groupAndTeam(String title, UserTeam userTeam) {
+        System.out.println(userTeam);
         Notification notification = new Notification(
                 userTeam.getTeam(),
                 title,

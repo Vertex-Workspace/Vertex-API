@@ -25,8 +25,8 @@ public class UserTeamService {
 
     private final UserTeamRepository userTeamRepository;
 
-    public void save(UserTeam userTeam){
-        userTeamRepository.save(userTeam);
+    public UserTeam save(UserTeam userTeam){
+        return userTeamRepository.save(userTeam);
     }
 
     public UserTeam findUserTeamByComposeId(Long teamId, Long userId){

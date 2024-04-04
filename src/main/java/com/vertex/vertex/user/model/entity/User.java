@@ -39,7 +39,7 @@ public class User{
 
     @Lob
     @Column(name = "image",
-            columnDefinition = "BLOB")
+            columnDefinition = "LONGBLOB")
     @ToString.Exclude
     private byte[] image;
 

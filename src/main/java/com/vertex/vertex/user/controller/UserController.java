@@ -78,6 +78,15 @@ public class UserController {
         }
     }
 
+    @GetMapping("/{id}/informations/{loggedUserID}")
+    public ResponseEntity<?> findInformationsByID(@PathVariable Long id, @PathVariable Long loggedUserID) {
+        try {
+            return new ResponseEntity<>(userService.findUserInformations(id, loggedUserID), HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<User> deleteById(@PathVariable Long id) {
         try {

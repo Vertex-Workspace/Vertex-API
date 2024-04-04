@@ -41,8 +41,8 @@ public class TeamController {
     @PutMapping
     public ResponseEntity<?> update(@RequestBody TeamViewListDTO team) {
         try {
-            teamService.save(team);
-            return new ResponseEntity<>(HttpStatus.OK);
+
+            return new ResponseEntity<>(teamService.save(team), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
@@ -192,7 +192,7 @@ public class TeamController {
     }
 
     @DeleteMapping("/user-team/{teamId}/{userId}")
-    public ResponseEntity<?> deleteUserFromGroup(@PathVariable Long userId, @PathVariable Long teamId){
+    public ResponseEntity<?> deleteUserTeam(@PathVariable Long userId, @PathVariable Long teamId){
         try{
             teamService.deleteUserTeam(teamId, userId);
             return new ResponseEntity<>(HttpStatus.OK);
@@ -206,13 +206,9 @@ public class TeamController {
             @PathVariable Long teamId,
             @RequestParam MultipartFile file) {
         try {
-            teamService.updateImage(file, teamId);
-            return new ResponseEntity<>
-                    (HttpStatus.OK);
-
+            return new ResponseEntity<>(teamService.updateImage(file, teamId), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>
-                    (HttpStatus.CONFLICT);
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 

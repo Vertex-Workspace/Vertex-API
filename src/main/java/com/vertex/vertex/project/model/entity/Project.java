@@ -53,6 +53,7 @@ public class Project {
     private File file;
 
     @ManyToMany(cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<UserTeam> collaborators;
 
     @Enumerated(EnumType.STRING)
