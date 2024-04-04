@@ -3,8 +3,11 @@ package com.vertex.vertex.notification.entity.service;
 
 import com.vertex.vertex.config.handler.UsedWebSocketHandler;
 import com.vertex.vertex.notification.entity.NotificationWebSocketDTO;
+import com.vertex.vertex.notification.entity.model.LogRecord;
 import com.vertex.vertex.notification.entity.model.Notification;
+import com.vertex.vertex.notification.repository.LogRepository;
 import com.vertex.vertex.notification.repository.NotificationRepository;
+import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -17,9 +20,12 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 public class NotificationService {
+
     private final NotificationRepository notificationRepository;
     private final UsedWebSocketHandler usedWebSocketHandler;
+    private final LogRepository logRepository;
     private final ModelMapper mapper;
+
     public Notification save(Notification notification) {
         Notification notificationSaved = notificationRepository.save(notification);
         if(notification.getUser().getSendToEmail()){
@@ -29,6 +35,16 @@ public class NotificationService {
             webSocket(notification.getUser().getId());
         } catch (Exception ignored) {}
         return notificationSaved;
+    }
+
+    public LogRecord saveLogRecord(Task task, String description, UserTeam ut) {
+        return logRepository.save(
+                new LogRecord(task, description, ut));
+
+    }
+    public LogRecord saveLogRecord(Task task, String description) {
+        return logRepository.save(
+                new LogRecord(task, description));
     }
 
     public Notification update(Notification notification){

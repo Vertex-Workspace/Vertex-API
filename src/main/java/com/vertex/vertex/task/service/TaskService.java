@@ -2,6 +2,7 @@ package com.vertex.vertex.task.service;
 
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
+import com.vertex.vertex.log.model.exception.EntityDoesntExistException;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
@@ -28,6 +29,7 @@ import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
+import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
@@ -108,7 +110,10 @@ public class TaskService {
         //Set if the task is revisable or no...
         task.setRevisable(project.getProjectReviewENUM().equals(ProjectReviewENUM.MANDATORY));
 
+
         Task finalTask = taskRepository.save(task);
+//        notificationService.saveLogRecord(finalTask,
+//                "criou a tarefa", task.getCreator());
 
         //Notifications
         for (TaskResponsable taskResponsable : finalTask.getTaskResponsables()) {
@@ -120,6 +125,10 @@ public class TaskService {
                         "projeto/" + project.getId() + "/tarefas?taskID=" + finalTask.getId(),
                         taskResponsable.getUserTeam().getUser()
                 ));
+
+                notificationService.saveLogRecord(task,
+                        "foi adicionado à lista de responsáveis pela tarefa",
+                        taskResponsable.getUserTeam());
             }
         }
 
@@ -130,6 +139,12 @@ public class TaskService {
     public Task edit(TaskEditDTO taskEditDTO) {
         try {
             Task task = findById(taskEditDTO.getId());
+
+            String modifiedAttributeDescription
+                    = task.getModifiedAttributeDescription(taskEditDTO);
+            notificationService.saveLogRecord(task,
+                    modifiedAttributeDescription);
+
             modelMapper.map(taskEditDTO, task);
             return taskRepository.save(task);
         } catch (Exception e) {
@@ -144,7 +159,7 @@ public class TaskService {
 
     public Task findById(Long id) {
         return taskRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(EntityDoesntExistException::new);
     }
 
     public void deleteById(Long id) {
@@ -193,7 +208,7 @@ public class TaskService {
                 break;
             }
         }
-        Task taskTest =  taskRepository.save(task);
+        Task taskTest = taskRepository.save(task);
 
         //Notifications
         for (TaskResponsable taskResponsableFor : task.getTaskResponsables()) {
@@ -207,7 +222,34 @@ public class TaskService {
             }
         }
 
+        String propertyValue = getPropertyValue(property, task);
+
+        notificationService.saveLogRecord(task,
+                ("O valor da propriedade "
+                        + property.getName()
+                        + " foi definido como "
+                        + propertyValue));
         return taskTest;
+    }
+
+    private String getPropertyValue(Property property, Task task) {
+        Value value = task.getValues()
+                .stream()
+                .filter(v -> Objects.equals(property.getId(), v.getProperty().getId()))
+                .findFirst()
+                .get();
+
+        if (property.getKind() == PropertyKind.STATUS
+                || property.getKind() == PropertyKind.LIST) {
+            PropertyList pl = (PropertyList) value.getValue();
+            return pl.getValue();
+        }
+
+        if (value instanceof ValueDate) {
+            return ((ValueDate) value).format();
+        }
+
+        return value.getValue().toString();
     }
 
     //verify if the taskresponsable belongs to the task and if it is, save the comment
@@ -240,6 +282,11 @@ public class TaskService {
                     ));
                 }
             }
+
+            notificationService.saveLogRecord(task,
+                    "adicionou um comentário à tarefa",
+                    taskResponsable.getUserTeam());
+
             return taskRepository.save(task);
         } else {
             throw new RuntimeException("O usuário não é um dos responsáveis pela tarefa.");
@@ -304,6 +351,10 @@ public class TaskService {
                 ));
             }
 
+            notificationService.saveLogRecord(task,
+                    "adicionou um responsável à tarefa",
+                    taskResponsable.getUserTeam());
+
             return taskRepository.save(task);
         } else {
             throw new RuntimeException("Erro na exclusão de um participante");
@@ -355,6 +406,13 @@ public class TaskService {
         try {
             Task task = findById(id);
             File file = fileService.save(multipartFile, task);
+            UserTeam ut = userTeamService
+                    .findUserTeamByComposeId(
+                            task.getProject().getTeam().getId(),
+                            userThatSentID
+                    );
+            notificationService.saveLogRecord(task,
+                    "adicionou um anexo à tarefa", ut);
 
             if (Objects.isNull(task.getFiles())) task.setFiles(List.of(file));
             else task.getFiles().add(file);

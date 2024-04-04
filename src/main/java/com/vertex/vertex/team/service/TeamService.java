@@ -2,6 +2,9 @@ package com.vertex.vertex.team.service;
 
 import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.chat.service.ChatService;
+
+import com.vertex.vertex.log.model.exception.EntityDoesntExistException;
+import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.project.model.DTO.ProjectViewListDTO;
 import com.vertex.vertex.project.model.entity.Project;
@@ -321,11 +324,8 @@ public class TeamService {
     }
 
     public Team findTeamById(Long id) {
-        try {
-            return teamRepository.findById(id).get();
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
+        return teamRepository.findById(id)
+                .orElseThrow(EntityDoesntExistException::new);
     }
 
     public TeamInfoDTO updateImage(MultipartFile file, Long teamId) {
