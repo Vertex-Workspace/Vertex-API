@@ -6,6 +6,7 @@ import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
 import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.PropertyList;
+import com.vertex.vertex.task.model.DTO.TaskSearchDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_hours.service.TaskHoursService;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
@@ -95,7 +96,7 @@ public class UserService {
             throw new InvalidPasswordException();
         }
 
-        user.setLocation("Jaraguá do Sul - SC");
+        user.setLocation("Brazil");
         user.setPersonalization(personalizationService.defaultSave(user));
         //
         user.setTaskReview(true);
@@ -176,13 +177,16 @@ public class UserService {
         User loggedUser = findById(loggedUserID);
 
         if(!loggedUser.equals(user)){
-//            List<Task> tasks = tasksResponsible.stream().map(TaskResponsable::getTask).toList();
-//            dto.setTasksInCommon(
-//                    tasks.stream()
-//                            .flatMap(task -> task.getTaskResponsables().stream())
-//                            .filter(taskResponsable -> taskResponsable.getUserTeam().getUser().getId().equals(loggedUserID))
-//                            .toList()
-//            );
+
+            //Refatorar obrigatoriamente - ass. Otávio
+            List<Task> tasks = tasksResponsible.stream().map(TaskResponsable::getTask).toList();
+            List<TaskResponsable> taskResponsables = tasks.stream()
+                    .flatMap(task -> task.getTaskResponsables().stream())
+                    .filter(taskResponsable -> taskResponsable.getUserTeam().getUser().getId().equals(loggedUserID))
+                    .toList();
+            dto.setTasksInCommon(taskResponsables.stream()
+                    .map(TaskResponsable::getTask)
+                    .map(TaskSearchDTO::new).toList());
         }
 
         return dto;
