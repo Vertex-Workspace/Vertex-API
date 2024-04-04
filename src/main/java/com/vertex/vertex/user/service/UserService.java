@@ -2,33 +2,39 @@ package com.vertex.vertex.user.service;
 
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.entity.service.NotificationService;
+import com.vertex.vertex.project.model.entity.Project;
+import com.vertex.vertex.property.model.ENUM.PropertyKind;
+import com.vertex.vertex.property.model.ENUM.PropertyListKind;
+import com.vertex.vertex.property.model.entity.PropertyList;
+import com.vertex.vertex.task.model.DTO.TaskSearchDTO;
+import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.relations.task_hours.service.TaskHoursService;
+import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
+import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
-import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.group.service.GroupService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.service.TeamService;
-import com.vertex.vertex.user.model.DTO.UserDTO;
-import com.vertex.vertex.user.model.DTO.UserEditionDTO;
-import com.vertex.vertex.user.model.DTO.UserLoginDTO;
-import com.vertex.vertex.user.model.DTO.UserSearchDTO;
+import com.vertex.vertex.user.model.DTO.*;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.exception.*;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import com.vertex.vertex.user.relations.personalization.service.PersonalizationService;
 import com.vertex.vertex.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.*;
 import java.util.function.Function;
@@ -48,8 +54,11 @@ public class UserService {
     @NonNull
     private final NotificationService notificationService;
 
+    private final ModelMapper mapper;
 
     private final TeamService teamService;
+
+    private final TaskHoursService taskHoursService;
 
     public User save(UserDTO userDTO) {
         User user = new User();
@@ -87,7 +96,7 @@ public class UserService {
             throw new InvalidPasswordException();
         }
 
-        user.setLocation("Jaraguá do Sul - SC");
+        user.setLocation("Brazil");
         user.setPersonalization(personalizationService.defaultSave(user));
         //
         user.setTaskReview(true);
@@ -103,7 +112,8 @@ public class UserService {
         user.setImage(data);
         //creation of the default team
         TeamViewListDTO teamViewListDTO =
-                new TeamViewListDTO("Equipe " + user.getFirstName(), user, null, "Sua equipe padrão", null, true);
+                new TeamViewListDTO("Equipe " + user.getFirstName(), user, null,
+                        "“As boas equipes incorporam o trabalho em equipe na sua cultura, criando os elementos essenciais ao sucesso.” — Ted Sundquist, jogador de futebol americano.", null, true);
         teamService.save(teamViewListDTO);
         return userRepository.save(user);
     }
@@ -126,6 +136,60 @@ public class UserService {
         }
 
         throw new EntityNotFoundException();
+    }
+
+    public UserPublicProfileDTO findUserInformations(Long id, Long loggedUserID) {
+        User user = findById(id);
+        UserPublicProfileDTO dto = new UserPublicProfileDTO();
+        mapper.map(user, dto);
+        dto.setFullname(user.getFullName());
+
+        //All tasks that the user is responsible
+        List<TaskResponsable> tasksResponsible =
+                teamService.findAllUserTeamByUser(user.getId()).stream()
+                        .flatMap(userTeam -> userTeam.getTeam().getProjects().stream())
+                        .flatMap(project ->  project.getTasks().stream())
+                        .flatMap(task -> task.getTaskResponsables().stream())
+                        .filter(taskResponsable -> taskResponsable.getUserTeam().getUser().getId().equals(id))
+                        .toList();
+
+
+        List<PropertyListKind> listKinds = List.of(PropertyListKind.TODO, PropertyListKind.DOING, PropertyListKind.DONE);
+        for (PropertyListKind propertyListKind : listKinds){
+            int sumFinal = 0;
+            for (TaskResponsable taskResponsable : tasksResponsible){
+                sumFinal += taskResponsable.getTask().getValues()
+                        .stream()
+                        .filter(value -> value.getProperty().getKind().equals(PropertyKind.STATUS)
+                                && ((PropertyList) value.getValue()).getPropertyListKind().equals(propertyListKind))
+                        .toList().size();
+            }
+            dto.getTasksPerformances().add(sumFinal);
+        }
+
+        Duration duration = Duration.ZERO;
+        for (TaskResponsable taskResponsable : tasksResponsible){
+            duration = duration.plus(taskHoursService.calculateTimeOnTask(taskResponsable));
+        }
+        dto.setTime(LocalTime.MIDNIGHT.plus(duration));
+
+
+        User loggedUser = findById(loggedUserID);
+
+        if(!loggedUser.equals(user)){
+
+            //Refatorar obrigatoriamente - ass. Otávio
+            List<Task> tasks = tasksResponsible.stream().map(TaskResponsable::getTask).toList();
+            List<TaskResponsable> taskResponsables = tasks.stream()
+                    .flatMap(task -> task.getTaskResponsables().stream())
+                    .filter(taskResponsable -> taskResponsable.getUserTeam().getUser().getId().equals(loggedUserID))
+                    .toList();
+            dto.setTasksInCommon(taskResponsables.stream()
+                    .map(TaskResponsable::getTask)
+                    .map(TaskSearchDTO::new).toList());
+        }
+
+        return dto;
     }
 
     public User findByEmail(String email) {

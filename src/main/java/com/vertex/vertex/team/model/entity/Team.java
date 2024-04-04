@@ -30,13 +30,15 @@ public class Team {
 
     @Lob
     @Column(name = "image",
-            columnDefinition = "BLOB")
+            columnDefinition = "LONGBLOB")
     @ToString.Exclude
     private byte[] image;
 
     @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ToString.Exclude
     private UserTeam creator;
 
+    @Column(length = 2000)
     private String description;
 
     private LocalDateTime creationDate;
@@ -51,6 +53,7 @@ public class Team {
     private Chat chat;
 
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @ToString.Exclude
     private List<UserTeam> userTeams;
 
 

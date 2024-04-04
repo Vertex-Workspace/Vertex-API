@@ -32,6 +32,7 @@ public class ValueDeserializer extends StdDeserializer<Value> {
 
         property = propertyService.findById(property.getId());
 
+        //Inversão de Dependência
         Value valueKind = property.getKind().getValue();
         valueKind.setProperty(property);
         if (node.get("value") != null) {
