@@ -125,6 +125,12 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public User patchUserFirstAccess(UserLoginDTO userLoginDTO) {
+        User user = userRepository.findByEmail(userLoginDTO.getEmail());
+        user.setFirstAccess(false);
+        return userRepository.save(user);
+    }
+
     public Collection<User> findAll() {
         return userRepository.findAll();
     }

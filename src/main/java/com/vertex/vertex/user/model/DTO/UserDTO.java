@@ -16,6 +16,7 @@ public class UserDTO {
     private String email;
     private String password;
     private String passwordConf;
+    private boolean firstAccess;
     private String image;
 
 }

@@ -48,6 +48,15 @@ public class UserController {
         }
     }
 
+    @PatchMapping("/first-access")
+    public ResponseEntity<User> patchFirstAccess(@RequestBody UserLoginDTO userLoginDTO) {
+        try {
+            return new ResponseEntity<>(userService.patchUserFirstAccess(userLoginDTO), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
+
     @PutMapping
     public ResponseEntity<User> edit(@RequestBody UserEditionDTO userEditionDTO) {
         try {
