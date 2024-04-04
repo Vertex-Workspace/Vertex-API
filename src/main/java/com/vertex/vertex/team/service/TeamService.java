@@ -328,11 +328,16 @@ public class TeamService {
         }
     }
 
-    public void updateImage(MultipartFile file, Long teamId) {
+    public TeamInfoDTO updateImage(MultipartFile file, Long teamId) {
         try {
             Team team = findTeamById(teamId);
+            if(!file.getContentType().contains("image")){
+                throw new RuntimeException();
+            }
             team.setImage(file.getBytes());
             teamRepository.save(team);
+            //Return some aggregates attributes
+            return findById(teamId);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -409,6 +414,15 @@ public class TeamService {
                 .findAllByUser(userId);
     }
 
+    public List<UserTeam> findAllUserTeamByUser(Long userID){
+        List<Team> teams = teamRepository.findAll();
+
+        return teams.stream()
+                .flatMap(t -> t.getUserTeams().stream())
+                .filter(userTeam -> userTeam.getUser().getId().equals(userID))
+                .toList();
+    }
+
 
     private void calculatePerformance(TeamInfoDTO dto, Team team){
         List<PropertyListKind> listKinds = List.of(PropertyListKind.TODO, PropertyListKind.DOING, PropertyListKind.DONE);
@@ -426,17 +440,19 @@ public class TeamService {
                                     && ((PropertyList) value.getValue()).getPropertyListKind().equals(propertyListKind))
                             .toList().size());
         }
+
+
         int todoTasks = dto.getTasksPerformances().get(0);
         int doingTasks = dto.getTasksPerformances().get(1);
         int doneTasks = dto.getTasksPerformances().get(2);
         if(doneTasks > 0){
             if(todoTasks > 0 || doingTasks > 0){
-                dto.setPercentage((double) (doneTasks * 100) / (doneTasks + todoTasks + doingTasks));
+                dto.setPercentage((doneTasks * 100) / (doneTasks + todoTasks + doingTasks));
             } else {
-                dto.setPercentage(100.0);
+                dto.setPercentage(100);
             }
         } else {
-            dto.setPercentage(0.0);
+            dto.setPercentage(0);
         }
 
         for (UserTeam userTeam : team.getUserTeams()) {
@@ -447,10 +463,10 @@ public class TeamService {
                     .toList();
 
             Duration duration = Duration.ZERO;
-
             for (TaskResponsable taskResponsable : tasksResponsible) {
                 duration = duration.plus(taskHoursService.calculateTimeOnTask(taskResponsable));
             }
+
 
             dto.getReviewHoursDTOS().add(new ReviewHoursDTO(
                     userTeam.getId(),
@@ -459,6 +475,8 @@ public class TeamService {
             ));
 
         }
+
+
 
         List<Review> reviews = team.getProjects().stream()
                 .flatMap(p -> p.getTasks().stream())
@@ -485,5 +503,6 @@ public class TeamService {
         }
 
     }
+
 
 }

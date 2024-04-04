@@ -206,13 +206,9 @@ public class TeamController {
             @PathVariable Long teamId,
             @RequestParam MultipartFile file) {
         try {
-            teamService.updateImage(file, teamId);
-            return new ResponseEntity<>
-                    (HttpStatus.OK);
-
+            return new ResponseEntity<>(teamService.updateImage(file, teamId), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>
-                    (HttpStatus.CONFLICT);
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 

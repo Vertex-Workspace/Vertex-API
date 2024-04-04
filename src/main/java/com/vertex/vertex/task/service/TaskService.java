@@ -92,14 +92,16 @@ public class TaskService {
         task.setValues(values);
         //Add the taskResponsables on task list of taskResponsables
         task.setCreator(userTeamService.findUserTeamByComposeId(project.getTeam().getId(), taskCreateDTO.getCreator().getId()));
+
+
         for (UserTeam userTeam : project.getTeam().getUserTeams()) {
-            TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
+            TaskResponsable newTaskResponsable = new TaskResponsable(userTeam, task);
             if (task.getTaskResponsables() == null) {
                 ArrayList<TaskResponsable> taskResponsibleList = new ArrayList<>();
-                taskResponsibleList.add(taskResponsable1);
+                taskResponsibleList.add(newTaskResponsable);
                 task.setTaskResponsables(taskResponsibleList);
             } else {
-                task.getTaskResponsables().add(taskResponsable1);
+                task.getTaskResponsables().add(newTaskResponsable);
             }
         }
 
