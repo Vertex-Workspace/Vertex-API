@@ -134,8 +134,7 @@ public class TaskService {
     }
 
     public Task findById(Long id) {
-        return taskRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+        return taskRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     }
 
     public void deleteById(Long id) {
@@ -165,8 +164,7 @@ public class TaskService {
                     if (!userTeam.equals(task.getCreator()) && task.isRevisable()) {
                         PropertyList propertyList = (PropertyList) editValueDTO.getValue().getValue();
                         if (propertyList.getPropertyListKind().equals(PropertyListKind.DONE)) {
-                            throw new RuntimeException("Não é possível definir como concluído, " +
-                                    "pois a tarefa deve passar por uma revisão do criador!");
+                            throw new RuntimeException("Não é possível definir como concluído, " + "pois a tarefa deve passar por uma revisão do criador!");
                         }
 
 //                        PropertyList propertyListCurrent = (PropertyList) currentValue.getValue();
@@ -270,21 +268,14 @@ public class TaskService {
     public TaskOpenDTO getTaskInfos(Long taskID) {
         Task task = findById(taskID);
         String fullName = task.getCreator().getUser().getFirstName() + " " + task.getCreator().getUser().getLastName();
-        return new TaskOpenDTO(task.getProject().getTeam().getName()
-                , task.getProject().getName()
-                , fullName
-                , task.getCreator().getUser().getEmail());
+        return new TaskOpenDTO(task.getProject().getTeam().getName(), task.getProject().getName(), fullName, task.getCreator().getUser().getEmail());
     }
 
     public List<Task> getAllByUser(Long id) {
         try {
             List<UserTeam> uts = userTeamService.findAll(id);
 
-            return uts.stream()
-                    .flatMap(ut -> ut.getTeam()
-                            .getProjects().stream()
-                            .flatMap(p -> p.getTasks().stream()))
-                    .toList();
+            return uts.stream().flatMap(ut -> ut.getTeam().getProjects().stream().flatMap(p -> p.getTasks().stream())).toList();
 
         } catch (Exception e) {
             throw new RuntimeException();
@@ -320,8 +311,21 @@ public class TaskService {
     public List<User> getTaskResponsables(Long taskId) {
         Task task = findById(taskId);
         List<User> users = new ArrayList<>();
-        for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
-            users.add(taskResponsable.getUserTeam().getUser());
+        List<UserTeam> userGroups = new ArrayList<>();
+
+        if (!task.getGroups().isEmpty()) {
+            for (Group group : task.getGroups()) {
+                userGroups = group.getUserTeams();
+            }
+            for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
+                if (!userGroups.contains(taskResponsable.getUserTeam())) {
+                    users.add(taskResponsable.getUserTeam().getUser());
+                }
+            }
+        } else {
+            for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
+                users.add(taskResponsable.getUserTeam().getUser());
+            }
         }
         return users;
     }
@@ -340,21 +344,21 @@ public class TaskService {
         }
 
         for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
-            if(updateTaskResponsableDTO.getUser() != null){
-            if (taskResponsable.getUserTeam().getUser().getId().equals(updateTaskResponsableDTO.getUser().getId())) {
-                responsablesToDelete.add(taskResponsable);
-                canDeleteUser = true;
-            }
+            if (updateTaskResponsableDTO.getUser() != null) {
+                if (taskResponsable.getUserTeam().getUser().getId().equals(updateTaskResponsableDTO.getUser().getId())) {
+                    responsablesToDelete.add(taskResponsable);
+                    canDeleteUser = true;
+                }
             }
         }
 
         if (updateTaskResponsableDTO.getGroup() != null) {
             for (Group group : task.getGroups()) {
-                if(updateTaskResponsableDTO.getGroup() !=null){
-                if (group.getId().equals(updateTaskResponsableDTO.getGroup().getId())) {
-                    groupsToDelete.add(group);
-                    canDeleteGroup = true;
-                }
+                if (updateTaskResponsableDTO.getGroup() != null) {
+                    if (group.getId().equals(updateTaskResponsableDTO.getGroup().getId())) {
+                        groupsToDelete.add(group);
+                        canDeleteGroup = true;
+                    }
                 }
             }
         }
@@ -368,7 +372,7 @@ public class TaskService {
                     groups.add(updateTaskResponsableDTO.getGroup());
                     task.setGroups(groups);
                 }
-            }else {
+            } else {
                 UserTeam userTeam = userTeamService.findUserTeamByComposeId(updateTaskResponsableDTO.getTeamId(), updateTaskResponsableDTO.getUser().getId());
                 TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
                 taskResponsablesRepository.save(taskResponsable1);
@@ -396,8 +400,8 @@ public class TaskService {
     public Task setDependency(Long taskId, Long taskDependencyId) {
         Task task = findById(taskId);
         Task tDependency = findById(taskDependencyId);
-        if(tDependency.getTaskDependency() != null){
-            if(tDependency.getTaskDependency().getId().equals(taskId)){
+        if (tDependency.getTaskDependency() != null) {
+            if (tDependency.getTaskDependency().getId().equals(taskId)) {
                 throw new RuntimeException("A outra tarefa já está associada a essa");
             }
         } else {

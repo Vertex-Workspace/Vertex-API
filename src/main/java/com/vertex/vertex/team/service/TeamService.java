@@ -335,13 +335,16 @@ public class TeamService {
 
     public List<User> getUsersByTeamAndGroup(Long teamId) {
         List<User> users = new ArrayList<>();
+        List<UserTeam> userGroups = new ArrayList<>();
         Team team = findTeamById(teamId);
         if (!team.getGroups().isEmpty()) {
-            for(UserTeam userTeam : team.getUserTeams()) {
-                for (Group group : team.getGroups()) {
-                    if(!group.getUserTeams().contains(userTeam)){
-                        users.add(userTeam.getUser());
-                    }
+            List<UserTeam> userTeams = new ArrayList<>(team.getUserTeams());
+            for(Group group : team.getGroups()){
+                userGroups = group.getUserTeams();
+            }
+            for(UserTeam userTeam: userTeams){
+                if(!userGroups.contains(userTeam)){
+                    users.add(userTeam.getUser());
                 }
             }
         }else {

@@ -2,6 +2,7 @@ package com.vertex.vertex.project.service;
 
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
+import com.vertex.vertex.project.model.DTO.ProjectCollaborators;
 import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
 import com.vertex.vertex.project.model.DTO.ProjectEditDTO;
 import com.vertex.vertex.project.model.DTO.ProjectOneDTO;
@@ -42,16 +43,16 @@ public class ProjectService {
     private final FileService fileService;
 
     public Project save(ProjectCreateDTO projectCreateDTO, Long teamId) {
-        System.out.println(projectCreateDTO.getGroups());
         UserTeam userTeam;
         Team team;
         Project project = new Project();
         BeanUtils.copyProperties(projectCreateDTO, project);
 
         List<UserTeam> collaborators = new ArrayList<>();
+        System.out.println(projectCreateDTO.getUsers());
 
-        if (projectCreateDTO.getListOfResponsibles() != null) {
-            for (User user : projectCreateDTO.getListOfResponsibles()) {
+        if (projectCreateDTO.getUsers() != null) {
+            for (User user : projectCreateDTO.getUsers()) {
                 UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(teamId, user.getId());
                 if (!collaborators.contains(userTeam1)) {
                     collaborators.add(userTeam1);
@@ -265,21 +266,6 @@ public class ProjectService {
         return users;
     }
 
-    public List<User> getUsersOfGroup(Long projectId){
-        List<User> users = new ArrayList<>();
-        Project project = findById(projectId);
-        Team team = project.getTeam();
-        for(Group group : team.getGroups()){
-            for(UserTeam userTeam : project.getCollaborators()){
-                if(group.getUserTeams().contains(userTeam)){
-                    users.add(userTeam.getUser());
-                }
-            }
-        }
-        return users;
-    }
-
-
     public Project updateProjectCollaborators(ProjectEditDTO projectEditDTO) {
         Project project = projectRepository.findById(projectEditDTO.getId())
                 .orElseThrow(() -> new RuntimeException("Project not found"));
@@ -311,5 +297,38 @@ public class ProjectService {
         return project.getGroups();
     }
 
+
+    public ProjectCollaborators returnAllCollaborators(Long projectId){
+        Project project = findById(projectId);
+        ProjectCollaborators projectCollaborators = new ProjectCollaborators();
+        List<User> users = new ArrayList<>();
+        List<Group> groups = new ArrayList<>();
+        List<User> userInGroup = new ArrayList<>();
+
+        for(UserTeam userTeam : project.getCollaborators()){
+            users.add(userTeam.getUser());
+        }
+        if(project.getGroups() != null) {
+            for (Group group : project.getGroups()) {
+                groups.add(group);
+            }
+        }
+
+        if(project.getTeam().getGroups() != null){
+            for(Group group : project.getTeam().getGroups()){
+                for(UserTeam userTeam : group.getUserTeams()){
+                    if(users.contains(userTeam.getUser())){
+                        userInGroup.add(userTeam.getUser());
+                        users.remove(userTeam.getUser());
+                    }
+                }
+            }
+        }
+
+        projectCollaborators.setUserInGroups(userInGroup);
+        projectCollaborators.setGroups(groups);
+        projectCollaborators.setUsers(users);
+        return projectCollaborators;
+    }
 
 }
