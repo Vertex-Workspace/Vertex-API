@@ -76,7 +76,19 @@ public class TaskService {
         valueService.setTaskDefaultValues(task, project.getProperties());
 
         //Notifications and task log
-        notificationService.sendNotificationAndSaveLog(taskRepository.save(task), project);
+        for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
+            if (taskResponsable.getUserTeam().getUser().getResponsibleInProjectOrTask() && !taskResponsable.getUserTeam().equals(task.getCreator())) {
+                notificationService.save(new Notification(
+                        project,
+                        "Você foi adicionado como responsável da tarefa " + task.getName(),
+                        "projeto/" + project.getId() + "/tarefas?taskID=" + task.getId(),
+                        taskResponsable.getUserTeam().getUser()
+                ));
+            }
+            notificationService.saveLogRecord(task,
+                    "foi adicionado à lista de responsáveis pela tarefa",
+                    taskResponsable.getUserTeam());
+        }
 
         return task;
     }
@@ -127,14 +139,19 @@ public class TaskService {
         valueService.updateTaskValues(task, editValueDTO, property, userTeam);
 
         //Notifications
-        notificationService.sendNotification(
-                taskRepository.save(task), userTeam,
-                "Valor da propriedade " + property.getName()
-                        + " alterado em " + task.getName());
+        for (TaskResponsable taskResponsableFor : task.getTaskResponsables()) {
+            if (!taskResponsableFor.getUserTeam().equals(userTeam) && taskResponsableFor.getUserTeam().getUser().getAnyUpdateOnTask()) {
+                notificationService.save(new Notification(
+                        task.getProject(),
+                        "Valor da propriedade " + property.getName() + " alterado em " + task.getName(),
+                                "projeto/" + task.getProject().getId() + "/tarefas?taskID=" + task.getId(),
+                        taskResponsableFor.getUserTeam().getUser()
+                ));
+            }
+        }
 
         //find the specific value inside the task and return the final value as string
         String propertyValue = propertyService.getPropertyValueAsString(property, task);
-
         notificationService.saveLogRecord(task,
                 ("O valor da propriedade " + property.getName()
                         + " foi definido como " + propertyValue));
@@ -187,18 +204,10 @@ public class TaskService {
 
     //add responsables to the task
     public Task saveResponsables(TaskResponsablesDTO taskResponsableDTO) {
-        Task task;
+        Task task = findById(taskResponsableDTO.getTask().getId());
         TaskResponsable taskResponsable;
-        try {
-            task = findById(taskResponsableDTO.getTask().getId());
-        } catch (Exception e) {
-            throw new TaskDoesNotExistException();
-        }
-        try {
-            taskResponsableDTO.setUserTeam(userTeamService.findById(taskResponsableDTO.getUserTeam().getId()));
-        } catch (Exception e) {
-            throw new RuntimeException("Não há um usuário com esse id");
-        }
+        taskResponsableDTO.setUserTeam(userTeamService.findById(taskResponsableDTO.getUserTeam().getId()));
+
 
         for (TaskResponsable taskResponsableFor : task.getTaskResponsables()) {
             if (taskResponsableFor.getId().equals(taskResponsableDTO.getId())) {
@@ -210,16 +219,12 @@ public class TaskService {
                             taskResponsableFor.getUserTeam().getUser()
                     ));
                 }
-                taskResponsable = taskResponsableFor;
-                task.getTaskResponsables().remove(taskResponsable);
+                task.getTaskResponsables().remove(taskResponsableFor);
                 return taskRepository.save(task);
             }
         }
         if (taskResponsableDTO.getId() == null) {
-            taskResponsable = new TaskResponsable();
-            BeanUtils.copyProperties(taskResponsableDTO, taskResponsable);
-            taskResponsableDTO.setTask(task);
-            task.getTaskResponsables().add(taskResponsable);
+            taskResponsable = new TaskResponsable(taskResponsableDTO, task);
 
             //Notifications
             if (taskResponsable.getUserTeam().getUser().getResponsibleInProjectOrTask()) {
@@ -285,25 +290,18 @@ public class TaskService {
     public Task uploadFile(MultipartFile multipartFile, Long id, Long userThatSentID) {
         try {
             Task task = findById(id);
-            File file = fileService.save(multipartFile, task);
-            UserTeam ut = userTeamService
-                    .findUserTeamByComposeId(
-                            task.getProject().getTeam().getId(),
-                            userThatSentID
-                    );
-            notificationService.saveLogRecord(task,
-                    "adicionou um anexo à tarefa", ut);
-
-            if (Objects.isNull(task.getFiles())) task.setFiles(List.of(file));
-            else task.getFiles().add(file);
+            fileService.save(multipartFile, task);
+            UserTeam ut = userTeamService.findUserTeamByComposeId(
+                    task.getProject().getTeam().getId(),
+                    userThatSentID
+            );
+            notificationService.saveLogRecord(task, "adicionou um anexo à tarefa", ut);
 
             //Notifications
             for (TaskResponsable taskResponsibleFor : task.getTaskResponsables()) {
                 User user = taskResponsibleFor.getUserTeam().getUser();
 
-                if (!user.getId().equals(userThatSentID)
-                        && user.getAnyUpdateOnTask()) {
-
+                if (!user.getId().equals(userThatSentID) && user.getAnyUpdateOnTask()) {
                     notificationService.save(new Notification(
                             task.getProject(),
                             "Novo anexo adicionado em " + task.getName(),
@@ -331,9 +329,7 @@ public class TaskService {
         }
     }
 
-    public List<TaskSearchDTO> findAllByUserAndQuery(
-            Long userId, String query) {
-
+    public List<TaskSearchDTO> findAllByUserAndQuery(Long userId, String query) {
         return userTeamService.findAllByUser(userId)
                 .stream()
                 .map(UserTeam::getTeam)
@@ -362,6 +358,5 @@ public class TaskService {
         }
         return save(task);
     }
-
 
 }

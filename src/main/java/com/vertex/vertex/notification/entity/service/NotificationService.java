@@ -77,33 +77,8 @@ public class NotificationService {
         } catch (IOException ignored) {}
     }
 
-    public void sendNotificationAndSaveLog(Task task, Project project) {
-        for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
-            if (taskResponsable.getUserTeam().getUser().getResponsibleInProjectOrTask() && !taskResponsable.getUserTeam().equals(task.getCreator())) {
-                save(new Notification(
-                        project,
-                        "Você foi adicionado como responsável da tarefa " + task.getName(),
-                        "projeto/" + project.getId() + "/tarefas?taskID=" + task.getId(),
-                        taskResponsable.getUserTeam().getUser()
-                ));
-                saveLogRecord(task,
-                        "foi adicionado à lista de responsáveis pela tarefa",
-                        taskResponsable.getUserTeam());
-            }
-        }
-    }
+    public void sendNotification(Task task, UserTeam userTeam, String title, String link) {
 
-    public void sendNotification(Task task, UserTeam userTeam, String title) {
-        for (TaskResponsable taskResponsableFor : task.getTaskResponsables()) {
-            if (!taskResponsableFor.getUserTeam().equals(userTeam) && taskResponsableFor.getUserTeam().getUser().getAnyUpdateOnTask()) {
-                save(new Notification(
-                        task.getProject(),
-                        title,
-                        "projeto/" + task.getProject().getId() + "/tarefas?taskID=" + task.getId(),
-                        taskResponsableFor.getUserTeam().getUser()
-                ));
-            }
-        }
     }
 
     private void sendToEmail(Notification notification) {

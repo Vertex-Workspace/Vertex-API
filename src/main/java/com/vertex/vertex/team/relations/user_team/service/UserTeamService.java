@@ -63,7 +63,13 @@ public class UserTeamService {
     }
 
     public UserTeam findById(Long userTeamId){
-        return userTeamRepository.findById(userTeamId).get();
+        Optional<UserTeam> ut = userTeamRepository.findById(userTeamId);
+
+        if (ut.isPresent()) {
+            return ut.get();
+        }
+
+        throw new RuntimeException("Não existe um usuário com esse ID!");
     }
 
     public List<UserTeam> findAll(Long id){
