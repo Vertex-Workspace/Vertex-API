@@ -35,7 +35,7 @@ public class PersonalizationService {
         personalization.setFontFamily("Inter");
         personalization.setFontSize(14);
         personalization.setTheme(0);
-        personalization.setVoiceCommand(false);
+        personalization.setSignLanguage(false);
         personalization.setListeningText(false);
         personalization.setUser(user);
 
