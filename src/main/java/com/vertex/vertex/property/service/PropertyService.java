@@ -16,11 +16,14 @@ import com.vertex.vertex.property.model.exceptions.PropertyIsNotAListException;
 import com.vertex.vertex.property.repository.PropertyListRepository;
 import com.vertex.vertex.property.repository.PropertyRepository;
 import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
+import com.vertex.vertex.task.relations.value.model.entity.ValueDate;
 import com.vertex.vertex.task.relations.value.model.entity.ValueText;
 import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.service.TaskService;
+import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
@@ -29,6 +32,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 import static com.vertex.vertex.property.model.ENUM.PropertyKind.*;
 
@@ -181,4 +185,36 @@ public class PropertyService {
         }
         return null;
     }
+
+    public String getPropertyValueAsString(Property property, Task task) {
+        Value value = task.getValues()
+                .stream()
+                .filter(v -> Objects.equals(property.getId(), v.getProperty().getId()))
+                .findFirst()
+                .get();
+
+        if (property.getKind() == PropertyKind.STATUS
+                || property.getKind() == PropertyKind.LIST) {
+            PropertyList pl = (PropertyList) value.getValue();
+            return pl.getValue();
+        }
+
+        if (value instanceof ValueDate) {
+            return ((ValueDate) value).format();
+        }
+
+        return value.getValue().toString();
+    }
+
+    public Property findByIdAndProjectContains(Long id, Project project) {
+        Property property = findById(id);
+
+        if (!project.getProperties().contains(property)) {
+            throw new RuntimeException("Property doesn't exist in this project");
+        }
+
+        return property;
+    }
+
+
 }

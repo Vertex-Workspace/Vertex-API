@@ -81,7 +81,6 @@ public class TaskService {
         return task;
     }
 
-
     public Task edit(TaskEditDTO taskEditDTO) {
         try {
             Task task = findById(taskEditDTO.getId());
@@ -102,8 +101,13 @@ public class TaskService {
     }
 
     public Task findById(Long id) {
-        return taskRepository.findById(id)
-                .orElseThrow(EntityDoesntExistException::new);
+        Optional<Task> t = taskRepository.findById(id);
+
+        if (t.isPresent()) {
+            return t.get();
+        }
+
+        throw new TaskDoesNotExistException();
     }
 
     public void deleteById(Long id) {
@@ -111,109 +115,41 @@ public class TaskService {
     }
 
     public Task save(EditValueDTO editValueDTO) throws Exception {
-        Task task;
-        try {
-            task = findById(editValueDTO.getId());
-        } catch (Exception e) {
-            throw new TaskDoesNotExistException();
-        }
-        Property property = propertyService.findById(editValueDTO.getValue().getProperty().getId());
-        if (!task.getProject().getProperties().contains(property)) {
-            throw new RuntimeException("There isn't a property with this id on the project : " + task.getProject().getName());
-        }
-        UserTeam userTeam = userTeamService.findUserTeamByComposeId(task.getProject().getTeam().getId(), editValueDTO.getUserID());
+        Task task = findById(editValueDTO.getId());
 
+        Property property = propertyService.findByIdAndProjectContains(
+                editValueDTO.getValue().getProperty().getId(), task.getProject());
 
-        for (int i = 0; i < task.getValues().size(); i++) {
-            if (task.getValues().get(i).getId().equals(editValueDTO.getValue().getId())) {
-                Value currentValue = property.getKind().getValue();
-                currentValue.setId(editValueDTO.getValue().getId());
-                currentValue.setTask(task);
-                currentValue.setProperty(property);
-                if (property.getKind() == PropertyKind.STATUS) {
-                    if (!userTeam.equals(task.getCreator()) && task.isRevisable()) {
+        UserTeam userTeam = userTeamService.findUserTeamByComposeId(
+                task.getProject().getTeam().getId(), editValueDTO.getUserID());
 
-                        // Validates another -> done
-                        PropertyList propertyList = (PropertyList) editValueDTO.getValue().getValue();
-                        if (propertyList.getPropertyListKind().equals(PropertyListKind.DONE)) {
-                            throw new RuntimeException("Não é possível definir como concluído, " +
-                                    "pois a tarefa deve passar por uma revisão do criador!");
-                        }
-
-                        // Validates done -> another
-                        PropertyList propertyListCurrent = (PropertyList) task.getValues().get(i).getValue();
-                        if (propertyListCurrent.getPropertyListKind().equals(PropertyListKind.DONE)) {
-                            throw new RuntimeException("Apenas o criador da tarefa pode remover dos concluídos!");
-                        }
-                    }
-                }
-                currentValue.setValue(editValueDTO.getValue().getValue());
-                task.getValues().set(i, currentValue);
-                break;
-            }
-        }
-        Task taskTest = taskRepository.save(task);
+        //update the specific value, validate rules
+        valueService.updateTaskValues(task, editValueDTO, property, userTeam);
 
         //Notifications
-        for (TaskResponsable taskResponsableFor : task.getTaskResponsables()) {
-            if (!taskResponsableFor.getUserTeam().equals(userTeam) && taskResponsableFor.getUserTeam().getUser().getAnyUpdateOnTask()) {
-                notificationService.save(new Notification(
-                        task.getProject(),
-                        "Valor da propriedade " + property.getName() + " alterado em " + taskTest.getName(),
-                        "projeto/" + task.getProject().getId() + "/tarefas?taskID=" + task.getId(),
-                        taskResponsableFor.getUserTeam().getUser()
-                ));
-            }
-        }
+        notificationService.sendNotification(
+                taskRepository.save(task), userTeam,
+                "Valor da propriedade " + property.getName()
+                        + " alterado em " + task.getName());
 
-        String propertyValue = getPropertyValue(property, task);
+        //find the specific value inside the task and return the final value as string
+        String propertyValue = propertyService.getPropertyValueAsString(property, task);
 
         notificationService.saveLogRecord(task,
-                ("O valor da propriedade "
-                        + property.getName()
-                        + " foi definido como "
-                        + propertyValue));
-        return taskTest;
+                ("O valor da propriedade " + property.getName()
+                        + " foi definido como " + propertyValue));
+
+        return taskRepository.save(task);
     }
 
-    private String getPropertyValue(Property property, Task task) {
-        Value value = task.getValues()
-                .stream()
-                .filter(v -> Objects.equals(property.getId(), v.getProperty().getId()))
-                .findFirst()
-                .get();
-
-        if (property.getKind() == PropertyKind.STATUS
-                || property.getKind() == PropertyKind.LIST) {
-            PropertyList pl = (PropertyList) value.getValue();
-            return pl.getValue();
-        }
-
-        if (value instanceof ValueDate) {
-            return ((ValueDate) value).format();
-        }
-
-        return value.getValue().toString();
-    }
 
     //verify if the taskresponsable belongs to the task and if it is, save the comment
     public Task saveComment(CommentDTO commentDTO) {
-        Task task;
-        Comment comment = new Comment();
         TaskResponsable taskResponsable = taskResponsablesRepository.findById(commentDTO.getTaskResponsableID()).get();
-
-        try {
-            task = findById(commentDTO.getTaskID());
-        } catch (Exception e) {
-            throw new TaskDoesNotExistException();
-        }
+        Task task = findById(commentDTO.getTaskID());
 
         if (taskResponsable.getTask().getId().equals(commentDTO.getTaskID())) {
-            comment.setTask(task);
-            comment.setTaskResponsable(taskResponsable);
-            comment.setComment(commentDTO.getComment());
-            comment.setDate(LocalDateTime.now());
-            task.getComments().add(comment);
+            new Comment(commentDTO, task, taskResponsable);
 
             //Notifications
             for (TaskResponsable taskResponsableFor : task.getTaskResponsables()) {

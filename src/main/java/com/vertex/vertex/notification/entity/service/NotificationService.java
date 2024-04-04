@@ -8,6 +8,7 @@ import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.repository.LogRepository;
 import com.vertex.vertex.notification.repository.NotificationRepository;
 import com.vertex.vertex.project.model.entity.Project;
+import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
@@ -85,10 +86,22 @@ public class NotificationService {
                         "projeto/" + project.getId() + "/tarefas?taskID=" + task.getId(),
                         taskResponsable.getUserTeam().getUser()
                 ));
-
                 saveLogRecord(task,
                         "foi adicionado à lista de responsáveis pela tarefa",
                         taskResponsable.getUserTeam());
+            }
+        }
+    }
+
+    public void sendNotification(Task task, UserTeam userTeam, String title) {
+        for (TaskResponsable taskResponsableFor : task.getTaskResponsables()) {
+            if (!taskResponsableFor.getUserTeam().equals(userTeam) && taskResponsableFor.getUserTeam().getUser().getAnyUpdateOnTask()) {
+                save(new Notification(
+                        task.getProject(),
+                        title,
+                        "projeto/" + task.getProject().getId() + "/tarefas?taskID=" + task.getId(),
+                        taskResponsableFor.getUserTeam().getUser()
+                ));
             }
         }
     }
