@@ -231,7 +231,7 @@ public class TeamService {
                 permissionService.save(user.getId(), team.getId());
 
                 UserTeam savedUserTeam = userTeamService.save(newUserTeam);
-                System.out.println(savedUserTeam);
+                team.getChat().getUserTeams().add(savedUserTeam);
                 //Notifications
                 //To the new user
                 if (newUserTeam.getUser().getNewMembersAndGroups()) {
