@@ -24,7 +24,7 @@ public class Personalization {
     private Integer fontSize;
     private String fontFamily;
     private Integer theme;
-    private Boolean voiceCommand;
+    private Boolean signLanguage;
     private Boolean listeningText;
 
     @OneToOne
