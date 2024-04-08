@@ -48,7 +48,7 @@ public class TaskHoursService {
         if (taskResponsable.getTask().getId().equals(idTask)) {
 
 
-            for (UserTeam userTeam : userTeamService.findAll(taskResponsable.getUserTeam().getUser().getId())) {
+            for (UserTeam userTeam : userTeamService.findAllUserTeamByUserId(taskResponsable.getUserTeam().getUser().getId())) {
                 for (int i = 0; i < userTeam.getTaskResponsables().size(); i++) {
                     for (int j = 0; j < userTeam.getTaskResponsables().get(i).getTaskHours().size(); j++) {
                         if (userTeam.getTaskResponsables().get(i).getTaskHours().get(j).getFinalDate() == null) {

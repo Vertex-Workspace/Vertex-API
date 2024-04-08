@@ -1,20 +1,21 @@
 package com.vertex.vertex.team.relations.user_team.service;
 
-import com.vertex.vertex.project.model.entity.Project;
-import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
+import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.model.entity.Team;
+import com.vertex.vertex.team.relations.permission.model.entity.Permission;
+import com.vertex.vertex.team.relations.permission.service.PermissionService;
+import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
 import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
-import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
+import com.vertex.vertex.team.repository.TeamRepository;
 import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.stereotype.Service;
 
 
-import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +24,14 @@ import java.util.Optional;
 @Service
 public class UserTeamService {
 
+    //Repositories
     private final UserTeamRepository userTeamRepository;
+    private final UserRepository userRepository;
+    private final TeamRepository teamRepository;
+
+    //Services
+    private final PermissionService permissionService;
+    private final NotificationService notificationService;
 
     public UserTeam save(UserTeam userTeam){
         return userTeamRepository.save(userTeam);
@@ -35,16 +43,6 @@ public class UserTeamService {
             return userTeam.get();
         }
         throw new RuntimeException("User Team Not Found!");
-    }
-
-    public Boolean findUserInTeam(Team team, Long userId) {
-        UserTeam userTeam = null;
-        try {
-            findUserTeamByComposeId(team.getId(), userId);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
     }
 
     public List<TeamViewListDTO> findTeamsByUser(Long userID){
@@ -63,26 +61,71 @@ public class UserTeamService {
     }
 
     public UserTeam findById(Long userTeamId){
-        return userTeamRepository.findById(userTeamId).get();
+        Optional<UserTeam> userTeamOptional = userTeamRepository.findById(userTeamId);
+        if(userTeamOptional.isPresent()){
+            return userTeamOptional.get();
+        }
+        throw new RuntimeException("User team não encontrado!");
     }
 
-    public List<UserTeam> findAll(Long id){
-        return userTeamRepository.findAllByUser_Id(id);
+    public void delete(Long teamID, Long userID){
+        UserTeam userTeam = findUserTeamByComposeId(teamID, userID);
+        if (userTeam.getUser().getNewMembersAndGroups()) {
+            notificationService.groupAndTeam("Você foi removido(a) de " + userTeam.getTeam().getName(), userTeam);
+        }
+        userTeamRepository.delete(findUserTeamByComposeId(teamID, userID));
     }
+
 
     public List<UserTeam> findAllByUserAndQuery(Long userId, String query) {
         return userTeamRepository
                 .findAllByUser_IdAndTeam_NameContainingIgnoreCase(userId, query);
     }
 
-    public List<UserTeam> findAllByUser(Long userId) {
+    public List<UserTeam> findAllUserTeamByUserId(Long userId) {
         return userTeamRepository
                 .findAllByUser_Id(userId);
     }
 
 
-    public void delete(UserTeam userTeam){
-        userTeamRepository.delete(userTeam);
+    public List<Permission> getAllPermissionOfAUserTeam(Long userId, Long teamId) {
+        return findUserTeamByComposeId(teamId, userId).getPermissionUser();
+    }
+
+    public Team saveNewUserTeam(UserTeamAssociateDTO userTeam) {
+        try {
+            //Find User and Team
+            User user = userRepository.findById(userTeam.getUser().getId()).get();
+            Team team = teamRepository.findById(userTeam.getTeam().getId()).get();
+
+            //Save new User Team
+            UserTeam savedUserTeam = save(new UserTeam(user, team));
+
+            team.getUserTeams().add(savedUserTeam);
+
+            //Set the Creator
+            if (team.getCreator() == null && userTeam.isCreator()) {
+                team.setCreator(savedUserTeam);
+            }
+            //Permissions Default
+            permissionService.save(savedUserTeam);
+            team.getChat().getUserTeams().add(savedUserTeam);
+
+            //Notifications
+            //To the new user
+            if (savedUserTeam.getUser().getNewMembersAndGroups()) {
+                notificationService.groupAndTeam("Você entrou em " + team.getName(), savedUserTeam);
+            }
+            //To all users on team
+            for (UserTeam userTeamFor : team.getUserTeams()) {
+                if (!userTeamFor.equals(savedUserTeam) && userTeamFor.getUser().getNewMembersAndGroups()) {
+                    notificationService.groupAndTeam(savedUserTeam.getUser().getFullName() + " entrou em " + team.getName(), userTeamFor);
+                }
+            }
+            return teamRepository.save(team);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

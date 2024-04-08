@@ -3,7 +3,6 @@ package com.vertex.vertex.user.service;
 import com.vertex.vertex.log.model.exception.EntityDoesntExistException;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.entity.service.NotificationService;
-import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
 import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.PropertyList;
@@ -11,7 +10,6 @@ import com.vertex.vertex.task.model.DTO.TaskSearchDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_hours.service.TaskHoursService;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
-import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.group.service.GroupService;
@@ -23,7 +21,6 @@ import com.vertex.vertex.user.model.exception.*;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import com.vertex.vertex.user.relations.personalization.service.PersonalizationService;
 import com.vertex.vertex.user.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -148,7 +145,7 @@ public class UserService {
 
         //All tasks that the user is responsible
         List<TaskResponsable> tasksResponsible =
-                teamService.findAllUserTeamByUser(user.getId()).stream()
+                teamService.findAllUserTeamsByUserID(user.getId()).stream()
                         .flatMap(userTeam -> userTeam.getTeam().getProjects().stream())
                         .flatMap(project ->  project.getTasks().stream())
                         .flatMap(task -> task.getTaskResponsables().stream())
@@ -275,7 +272,7 @@ public class UserService {
 
     public List<UserSearchDTO> findAllByUserAndQuery(Long userId, String query) {
         return teamService
-                .findAllLoggedUserTeams(userId)
+                .findAllUserTeamsByUserID(userId)
                 .stream()
                 .map(UserTeam::getUser)
                 .filter(u -> (u.getFirstName().toLowerCase().contains(query.toLowerCase())

@@ -94,7 +94,6 @@ public class PropertyService {
         Project project = projectService.findById(projectId);
 
         if (property.getPropertyStatus() != PropertyStatus.FIXED) {
-
             this.deleteValuesCascade(project, property);
             propertyRepository.delete(property);
             return projectService.findById(projectId);
@@ -109,7 +108,6 @@ public class PropertyService {
                 if (value.getProperty().getId().equals(property.getId())) {
                     task.getValues().remove(value);
                     taskRepository.save(task);
-                    break;
                 }
             }
         }

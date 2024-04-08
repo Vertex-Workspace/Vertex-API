@@ -2,7 +2,6 @@ package com.vertex.vertex.task.controller;
 
 import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.chat.service.ChatService;
-import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.DTO.TaskEditDTO;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
@@ -13,7 +12,6 @@ import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
-import org.hibernate.Remove;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -128,12 +126,12 @@ public class TaskController {
         }
     }
 
-    @GetMapping("/user/{id}")
+    @GetMapping("/user/{userID}")
     public ResponseEntity<?> findAllByUser(
-            @PathVariable Long id) {
+            @PathVariable Long userID) {
         try {
             return new ResponseEntity<>(
-                    taskService.getAllByUser(id),
+                    taskService.getAllByUser(userID),
                         HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(
@@ -204,7 +202,7 @@ public class TaskController {
         chat.setMessages(new ArrayList<>());
         task.setChatCreated(true);
         task.setChat(chat);
-        this.chatService.create(chat);
+        this.chatService.save(chat);
         return task;
     }
 

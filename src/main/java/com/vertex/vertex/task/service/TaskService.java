@@ -29,7 +29,6 @@ import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
-import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
@@ -387,9 +386,9 @@ public class TaskService {
                 , task.getProject().getProjectReviewENUM());
     }
 
-    public List<Task> getAllByUser(Long id) {
+    public List<Task> getAllByUser(Long userID) {
         try {
-            List<UserTeam> uts = userTeamService.findAll(id);
+            List<UserTeam> uts = userTeamService.findAllUserTeamByUserId(userID);
 
             return uts.stream()
                     .flatMap(ut -> ut.getTeam()
@@ -454,7 +453,7 @@ public class TaskService {
     public List<TaskSearchDTO> findAllByUserAndQuery(
             Long userId, String query) {
 
-        return userTeamService.findAllByUser(userId)
+        return userTeamService.findAllUserTeamByUserId(userId)
                 .stream()
                 .map(UserTeam::getTeam)
                 .flatMap(t -> t.getProjects().stream())

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Data
 @AllArgsConstructor
@@ -27,100 +28,42 @@ import java.util.List;
 public class PermissionService {
 
     private final PermissionRepository permissionRepository;
-    private final UserTeamService userTeamService;
     private final TeamRepository teamRepository;
     private final ProjectRepository projectRepository;
     private final NotificationService notificationService;
 
-    public void save(Long userId, Long teamId) {
-        List<Permission> permissions;
-        UserTeam userTeam = getOneUserByTeam(userId,
-                teamId);
+    public void save(UserTeam userTeam) {
+        userTeam.setPermissionUser
+                (new Permission()
+                        .createBasicPermissions(userTeam, userTeam.getTeam().getCreator().equals(userTeam)));
+    }
 
-        Permission permission2 = new Permission();
-        permission2.setName(TypePermissions.Criar);
-        Permission permission3 = new Permission();
-        permission3.setName(TypePermissions.Deletar);
-        Permission permission4 = new Permission();
-        permission4.setName(TypePermissions.Editar);
+    public void changeEnabled(Long permissionId){
+        Permission permission = findById(permissionId);
 
-        if(userTeam.getTeam().getCreator().equals(userTeam)){
-            permission2.setEnabled(true);
-            permission3.setEnabled(true);
-            permission4.setEnabled(true);
-        }else {
-            permission2.setEnabled(false);
-            permission3.setEnabled(false);
-            permission4.setEnabled(false);
-        }
+        permission.setEnabled(!permission.isEnabled());
+        permissionRepository.save(permission);
 
-
-        permissions = List.of(permission2, permission3, permission4);
-
-        userTeam.setPermissionUser(permissions);
-        for (Permission permission : permissions) {
-            permission.setUserTeam(userTeam);
+        //Notification
+        if(permission.getUserTeam().getUser().getPermissionsChanged()){
+            String permissionString = permission.isEnabled() ? "Agora você pode " : "Você não pode mais ";
+            notificationService.save(new Notification(
+                    permission.getUserTeam().getTeam(),
+                    permissionString + permission.getName(),
+                    "team/" + permission.getUserTeam().getTeam().getId(),
+                    permission.getUserTeam().getUser()
+            ));
         }
     }
 
-    public void changeEnabled(Long permissionId, Long userId, Long teamId){
-        UserTeam userTeam = getOneUserByTeam(userId, teamId);
-        for(Permission permission : userTeam.getPermissionUser()){
-            if(permissionId.equals(permission.getId())){
-                permission.setEnabled(!permission.isEnabled());
-                permissionRepository.save(permission);
-                //Notificaiton
-                if(userTeam.getUser().getPermissionsChanged()){
-                    String permissionString = permission.isEnabled() ? "Agora você pode " : "Você não pode mais ";
-                    notificationService.save(new Notification(
-                            userTeam.getTeam(),
-                            permissionString + permission.getName(),
-                            "team/" + teamId,
-                            userTeam.getUser()
-                    ));
-                }
-
-            }
-        }
-    }
-
-    public List<Permission> findAll() {
-        return permissionRepository.findAll();
-    }
 
     public Permission findById(Long id) {
-        if (permissionRepository.existsById(id)) {
-            return permissionRepository.findById(id).get();
+        Optional<Permission> permissionOptional = permissionRepository.findById(id);
+        if (permissionOptional.isPresent()) {
+            return permissionOptional.get();
         }
-        throw new EntityNotFoundException();
+        throw new RuntimeException("Permissão não encontrada");
     }
 
-    public void deleteById(Long id) {
-        if (permissionRepository.existsById(id)) {
-            permissionRepository.deleteById(id);
-        } else {
-            throw new EntityNotFoundException();
-        }
-    }
-
-    public UserTeam getOneUserByTeam(Long userId, Long teamId) {
-        Team team = teamRepository.findById(teamId).get();
-        for (UserTeam userTeam : team.getUserTeams()) {
-            if (userTeam.getTeam().getId().equals(teamId) && userTeam.getUser().getId().equals(userId)) {
-                return userTeam;
-            }
-        }
-        return null;
-    }
-
-    public List<Permission> getAllPermissionOfAUserTeam(Long userId, Long teamId) {
-        UserTeam userTeam = getOneUserByTeam(userId, teamId);
-        return userTeam.getPermissionUser();
-    }
-    public List<Permission> hasPermission(Long projectId, Long userId){
-        Team team = projectRepository.findById(projectId).get().getTeam();
-        UserTeam userTeam = getOneUserByTeam(userId, team.getId());
-        return userTeam.getPermissionUser();
-    }
 
 }

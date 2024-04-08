@@ -33,4 +33,5 @@ public class Chat{
 
     private boolean conversationOpened;
 
+
 }

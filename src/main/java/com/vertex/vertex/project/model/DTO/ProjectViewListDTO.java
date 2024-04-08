@@ -3,8 +3,10 @@ package com.vertex.vertex.project.model.DTO;
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.project.model.entity.Project;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class ProjectViewListDTO {
 
     private Long id;

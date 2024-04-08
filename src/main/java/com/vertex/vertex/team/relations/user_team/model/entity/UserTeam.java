@@ -12,6 +12,7 @@ import com.vertex.vertex.user.model.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -53,7 +54,7 @@ public class UserTeam {
     @ManyToMany(mappedBy = "userTeams")
     @JsonIgnore
     @ToString.Exclude
-    private List<Chat> chats;
+    private List<Chat> chats = new ArrayList<>();
 
 
     @OneToMany(mappedBy = "userTeam", orphanRemoval = true)

@@ -5,19 +5,15 @@ import com.vertex.vertex.chat.relations.message.Message;
 import com.vertex.vertex.chat.relations.message.MessageRepository;
 import com.vertex.vertex.chat.repository.ChatRepository;
 import com.vertex.vertex.file.model.File;
+import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
-import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.socket.WebSocketMessage;
-import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -32,11 +28,8 @@ public class ChatService {
     private final UserRepository userRepository;
 
 
-    public List<Chat> findAll() {
-        return chatRepository.findAll();
-    }
 
-    public Chat create(Chat chat) {
+    public Chat save(Chat chat) {
         return chatRepository.save(chat);
     }
 
@@ -88,7 +81,23 @@ public class ChatService {
         }
     }
 
-    public Chat save(Chat chat){
-        return chatRepository.save(chat);
+
+    public Chat saveNewTeamChat(Team team){
+        Chat chat = new Chat();
+        chat.setUserTeams(team.getUserTeams());
+        chat.setName(team.getName());
+
+        try {
+            Chat chatSaved = save(chat);
+            //Add chat for user teams
+            for (UserTeam userTeam : team.getUserTeams()) {
+                userTeam.getChats().add(chatSaved);
+                userTeamService.save(userTeam);
+            }
+
+            return chatSaved;
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao criar um chat!");
+        }
     }
 }

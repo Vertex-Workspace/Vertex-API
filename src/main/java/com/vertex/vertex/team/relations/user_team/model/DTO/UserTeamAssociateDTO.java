@@ -10,10 +10,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserTeamAssociateDTO {
-
-
     private Long id;
     private Team team;
     private User user;
     private boolean creator;
+
+    public UserTeamAssociateDTO(Team team, User user, boolean creator) {
+        this.team = team;
+        this.user = user;
+        this.creator = creator;
+    }
 }

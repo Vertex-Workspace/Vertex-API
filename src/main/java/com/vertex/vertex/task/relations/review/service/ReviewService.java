@@ -201,4 +201,11 @@ public class ReviewService {
         task.setRevisable(booleanState);
         taskService.save(task);
     }
+
+    public List<Review> getReviewsByProjects(List<Project> projects){
+        return projects.stream()
+                .flatMap(p -> p.getTasks().stream())
+                .flatMap(t -> t.getReviews().stream())
+                .toList();
+    }
 }
