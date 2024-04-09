@@ -9,7 +9,6 @@ import com.vertex.vertex.team.relations.permission.model.enums.TypePermissions;
 import com.vertex.vertex.team.relations.permission.repository.PermissionRepository;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
-import com.vertex.vertex.team.repository.TeamRepository;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.repository.UserRepository;
 import com.vertex.vertex.user.service.UserService;
@@ -28,7 +27,6 @@ import java.util.Optional;
 public class PermissionService {
 
     private final PermissionRepository permissionRepository;
-    private final TeamRepository teamRepository;
     private final ProjectRepository projectRepository;
     private final NotificationService notificationService;
 

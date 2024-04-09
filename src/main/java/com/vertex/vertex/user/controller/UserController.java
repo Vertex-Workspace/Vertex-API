@@ -31,10 +31,8 @@ public class UserController {
     public ResponseEntity<?> save(@RequestBody UserDTO userDTO) {
         try {
             return new ResponseEntity<>(userService.save(userDTO), HttpStatus.CREATED);
-        } catch (EmailAlreadyExistsException
-                | InvalidEmailException
-                | InvalidPasswordException
-                | UnsafePasswordException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }

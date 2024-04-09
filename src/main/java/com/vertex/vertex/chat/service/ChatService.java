@@ -82,22 +82,4 @@ public class ChatService {
     }
 
 
-    public Chat saveNewTeamChat(Team team){
-        Chat chat = new Chat();
-        chat.setUserTeams(team.getUserTeams());
-        chat.setName(team.getName());
-
-        try {
-            Chat chatSaved = save(chat);
-            //Add chat for user teams
-            for (UserTeam userTeam : team.getUserTeams()) {
-                userTeam.getChats().add(chatSaved);
-                userTeamService.save(userTeam);
-            }
-
-            return chatSaved;
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao criar um chat!");
-        }
-    }
 }

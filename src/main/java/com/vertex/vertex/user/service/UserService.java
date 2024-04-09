@@ -104,15 +104,13 @@ public class UserService {
         user.setAnyUpdateOnTask(true);
         user.setResponsibleInProjectOrTask(true);
 
-        userRepository.save(user);
-
         byte[] data = Base64.getDecoder().decode(userDTO.getImage());
         user.setImage(data);
         //creation of the default team
-        TeamViewListDTO teamViewListDTO =
-                new TeamViewListDTO("Equipe " + user.getFirstName(), user, null,
-                        "“As boas equipes incorporam o trabalho em equipe na sua cultura, criando os elementos essenciais ao sucesso.” — Ted Sundquist, jogador de futebol americano.", null, true);
-        teamService.save(teamViewListDTO);
+//        TeamViewListDTO teamViewListDTO =
+//                new TeamViewListDTO("Equipe " + user.getFirstName(), user, null,
+//                        "“As boas equipes incorporam o trabalho em equipe na sua cultura, criando os elementos essenciais ao sucesso.” — Ted Sundquist, jogador de futebol americano.", null, true);
+//        teamService.save(teamViewListDTO);
         return userRepository.save(user);
     }
 

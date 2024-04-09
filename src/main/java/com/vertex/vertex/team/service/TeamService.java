@@ -58,10 +58,9 @@ public class TeamService {
     //Services
     private final TaskService taskService;
     private final UserTeamService userTeamService;
-    private final ChatService chatService;
     private final ProjectService projectService;
     private final ReviewService reviewService;
-
+    private final PermissionService permissionService;
     //Model Mapper
     private final ModelMapper mapper;
 
@@ -79,24 +78,25 @@ public class TeamService {
             //name and description
             mapper.map(teamViewListDTO, team);
 
-            Team savedTeam = teamRepository.save(team);
-
-            if (teamViewListDTO.getId() == null) {
                 team.setInvitationCode(RandomCodeUtils.generateInvitationCode());
 
-                Team teamWithUserTeam = userTeamService.saveNewUserTeam(new UserTeamAssociateDTO(
-                        savedTeam,
-                        savedTeam.getCreator().getUser(),
-                        true
-                ));
+//                userTeamService.saveNewUserTeam(new UserTeamAssociateDTO(
+//                        savedTeam,
+//                        savedTeam.getCreator().getUser(),
+//                        true
+//                ));
+            UserTeam userTeam = new UserTeam(teamViewListDTO.getCreator(), team);
 
-                team.setChat(chatService.saveNewTeamChat(team));
+            team.setCreator(userTeam);
+            team.getUserTeams().add(userTeam);
+            permissionService.save(userTeam);
+            team.setChat(new Chat(team));
 
-                if (teamViewListDTO.isDefaultTeam()) {
-                    saveDefaultTasksAndProject(teamWithUserTeam);
-                }
-            }
-            return findTeamById(team.getId());
+//                if (teamViewListDTO.isDefaultTeam()) {
+////                    saveDefaultTasksAndProject(teamWithUserTeam);
+//                }
+            System.out.println(team);
+            return teamRepository.save(team);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -5,6 +5,7 @@ import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.project.model.DTO.*;
+import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.property.model.ENUM.Color;
@@ -76,7 +77,8 @@ public class ProjectService {
 
 
         project.setCreator(userTeam);
-        project.setProjectReviewENUM(projectCreateDTO.getProjectReviewENUM());
+        if(projectCreateDTO.getProjectReviewENUM() != null) project.setProjectReviewENUM(projectCreateDTO.getProjectReviewENUM());
+        else project.setProjectReviewENUM(ProjectReviewENUM.EMPTY);
 
         if (!collaborators.contains(project.getCreator())) {
             collaborators.add(project.getCreator());
