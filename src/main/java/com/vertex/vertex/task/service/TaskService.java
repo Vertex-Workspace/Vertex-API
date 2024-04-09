@@ -135,8 +135,8 @@ public class TaskService {
         UserTeam userTeam = userTeamService.findUserTeamByComposeId(
                 task.getProject().getTeam().getId(), editValueDTO.getUserID());
 
-        //update the specific value, validate rules
-        valueService.updateTaskValues(task, editValueDTO, property, userTeam);
+        //update the specific value, validate rules and save
+        save(valueService.updateTaskValues(task, editValueDTO, property, userTeam));
 
         //Notifications
         for (TaskResponsable taskResponsableFor : task.getTaskResponsables()) {
@@ -205,10 +205,13 @@ public class TaskService {
     //add responsables to the task
     public Task saveResponsables(TaskResponsablesDTO taskResponsableDTO) {
         Task task = findById(taskResponsableDTO.getTask().getId());
-        TaskResponsable taskResponsable;
         taskResponsableDTO.setUserTeam(userTeamService.findById(taskResponsableDTO.getUserTeam().getId()));
 
+        //update responsibles, send notifications and return saved task
+        return updateResponsiblesSendNotifications(taskResponsableDTO, task);
+    }
 
+    private Task updateResponsiblesSendNotifications(TaskResponsablesDTO taskResponsableDTO, Task task) {
         for (TaskResponsable taskResponsableFor : task.getTaskResponsables()) {
             if (taskResponsableFor.getId().equals(taskResponsableDTO.getId())) {
                 if (taskResponsableFor.getUserTeam().getUser().getResponsibleInProjectOrTask()) {
@@ -220,11 +223,11 @@ public class TaskService {
                     ));
                 }
                 task.getTaskResponsables().remove(taskResponsableFor);
-                return taskRepository.save(task);
+                return save(task);
             }
         }
         if (taskResponsableDTO.getId() == null) {
-            taskResponsable = new TaskResponsable(taskResponsableDTO, task);
+            TaskResponsable taskResponsable = new TaskResponsable(taskResponsableDTO, task);
 
             //Notifications
             if (taskResponsable.getUserTeam().getUser().getResponsibleInProjectOrTask()) {
@@ -240,7 +243,7 @@ public class TaskService {
                     "adicionou um responsável à tarefa",
                     taskResponsable.getUserTeam());
 
-            return taskRepository.save(task);
+            return save(task);
         } else {
             throw new RuntimeException("Erro na exclusão de um participante");
         }

@@ -52,6 +52,7 @@ public class TaskController {
         try{
             return new ResponseEntity<>(taskService.save(taskCreateDTO), HttpStatus.OK);
         }catch(Exception e){
+            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
         }
     }
@@ -62,6 +63,7 @@ public class TaskController {
             taskService.deleteById(id);
             return new ResponseEntity<>(true, HttpStatus.OK);
         } catch (Exception e){
+
             return new ResponseEntity<>(false, HttpStatus.CONFLICT);
         }
     }
@@ -71,6 +73,7 @@ public class TaskController {
         try{
             return new ResponseEntity<>(taskService.edit(taskEditDTO), HttpStatus.OK);
         }catch(Exception e){
+            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
@@ -80,6 +83,7 @@ public class TaskController {
         try{
             return new ResponseEntity<>(taskService.save(editValueDTO), HttpStatus.OK);
         }catch(Exception e){
+            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
@@ -121,6 +125,7 @@ public class TaskController {
         try{
             return new ResponseEntity<>(taskService.saveResponsables(taskResponsable), HttpStatus.OK);
         }catch(Exception e){
+            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }

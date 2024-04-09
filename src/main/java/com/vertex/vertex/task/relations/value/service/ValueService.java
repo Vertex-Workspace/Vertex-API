@@ -62,7 +62,7 @@ public class ValueService {
         task.setValues(values);
     }
 
-    public void updateTaskValues(Task task, EditValueDTO editValueDTO,
+    public Task updateTaskValues(Task task, EditValueDTO editValueDTO,
                                  Property property, UserTeam userTeam) {
 
         for (Value value : task.getValues()) {
@@ -82,6 +82,7 @@ public class ValueService {
                 }
             }
         }
+        return task;
     }
 
     public boolean validPropertyValueModification(
