@@ -1,24 +1,18 @@
 package com.vertex.vertex.team.service;
-
 import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.chat.service.ChatService;
-
 import com.vertex.vertex.log.model.exception.EntityDoesntExistException;
-import com.vertex.vertex.notification.entity.service.NotificationService;
+import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
 import com.vertex.vertex.project.model.DTO.ProjectViewListDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
-import com.vertex.vertex.property.model.ENUM.PropertyKind;
-import com.vertex.vertex.property.model.ENUM.PropertyListKind;
-import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.entity.Task;
-import com.vertex.vertex.task.relations.review.model.DTO.ReviewHoursDTO;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.review.service.ReviewService;
-import com.vertex.vertex.task.relations.task_hours.service.TaskHoursService;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
+import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.DTO.TeamLinkDTO;
@@ -26,28 +20,33 @@ import com.vertex.vertex.team.model.DTO.TeamSearchDTO;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
+import com.vertex.vertex.team.relations.group.model.DTO.GroupEditUserDTO;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupRegisterDTO;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.group.model.exception.GroupNameInvalidException;
+import com.vertex.vertex.team.relations.group.model.exception.GroupNotFoundException;
 import com.vertex.vertex.team.relations.group.service.GroupService;
 import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
+import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.repository.TeamRepository;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.repository.UserRepository;
+import com.vertex.vertex.user.service.UserService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.utils.PerformanceUtils;
 import com.vertex.vertex.utils.RandomCodeUtils;
 import lombok.AllArgsConstructor;
+import org.apache.tomcat.util.http.fileupload.disk.DiskFileItem;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.Duration;
-import java.time.LocalTime;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.*;
 
 @Service
@@ -135,6 +134,19 @@ public class TeamService {
     }
 
 
+
+
+    public List<TeamInfoDTO> findAll() {
+        List<TeamInfoDTO> teamHomeDTOS = new ArrayList<>();
+
+        for (Team team : teamRepository.findAll()) {
+            TeamInfoDTO dto = new TeamInfoDTO();
+            BeanUtils.copyProperties(team, dto);
+            teamHomeDTOS.add(dto);
+        }
+        return teamHomeDTOS;
+    }
+
     public List<Group> findGroupsByTeamId(Long idTeam) {
         try {
             return findById(idTeam).getGroups();
@@ -161,6 +173,28 @@ public class TeamService {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public List<User> getUsersByTeamAndGroup(Long teamId) {
+        List<User> users = new ArrayList<>();
+        List<UserTeam> userGroups = new ArrayList<>();
+        Team team = findTeamById(teamId);
+        if (!team.getGroups().isEmpty()) {
+            List<UserTeam> userTeams = new ArrayList<>(team.getUserTeams());
+            for(Group group : team.getGroups()){
+                userGroups = group.getUserTeams();
+            }
+            for(UserTeam userTeam: userTeams){
+                if(!userGroups.contains(userTeam)){
+                    users.add(userTeam.getUser());
+                }
+            }
+        }else {
+            for(UserTeam userTeam : team.getUserTeams()) {
+                users.add(userTeam.getUser());
+            }
+        }
+        return users;
     }
 
     public List<User> getUsersByTeam(Long teamId) {

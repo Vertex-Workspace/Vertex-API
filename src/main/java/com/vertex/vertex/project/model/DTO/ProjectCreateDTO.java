@@ -23,10 +23,9 @@ public class ProjectCreateDTO {
     private String description;
     private byte[] image;
     private UserTeam creator;
-    private Team team;
     private Project projectDependency;
-//    private File file;
-    private List<User> listOfResponsibles;
+    private List<User> users;
+    private List<Group> groups;
 
     private ProjectReviewENUM projectReviewENUM;
 

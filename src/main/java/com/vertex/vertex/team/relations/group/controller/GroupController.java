@@ -1,6 +1,5 @@
 package com.vertex.vertex.team.relations.group.controller;
 
-import com.vertex.vertex.team.relations.group.model.DTO.AddUsersDTO;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupRegisterDTO;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.group.service.GroupService;
@@ -56,10 +55,10 @@ public class GroupController {
         }
     }
 
-    @PatchMapping("/team/group/{id}/addParticipants")
-    public ResponseEntity<?> addParticipants(@PathVariable Long id, @RequestBody AddUsersDTO addUsersDTO){
+    @PatchMapping("/team/group/{id}/addParticipants/{userId}")
+    public ResponseEntity<?> addParticipants(@PathVariable Long id, @PathVariable Long userId){
         try{
-            groupService.addParticipants(id, addUsersDTO);
+            groupService.addParticipants(id, userId);
             return new ResponseEntity<>(HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
@@ -72,6 +71,15 @@ public class GroupController {
             groupService.delete(groupId);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @PatchMapping("/edit/{teamId}")
+    public ResponseEntity<?> editGroup(@RequestBody Group group, @PathVariable Long teamId){
+        try {
+            return new ResponseEntity<>(groupService.editGroupName(group, teamId), HttpStatus.OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }

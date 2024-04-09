@@ -31,7 +31,6 @@ public class TeamController {
     @PutMapping
     public ResponseEntity<?> update(@RequestBody TeamViewListDTO team) {
         try {
-
             return new ResponseEntity<>(teamService.save(team), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
@@ -79,7 +78,16 @@ public class TeamController {
 
 
     @GetMapping("/usersByTeam/{teamId}")
-    public ResponseEntity<?> findUserByTeam(@PathVariable Long teamId) {
+    public ResponseEntity<?> findUsersAndGroupsByTeam(@PathVariable Long teamId) {
+        try {
+            return new ResponseEntity<>(teamService.getUsersByTeamAndGroup(teamId), HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/users/{teamId}")
+    public ResponseEntity<?> findByTeam(@PathVariable Long teamId) {
         try {
             return new ResponseEntity<>(teamService.getUsersByTeam(teamId), HttpStatus.OK);
         } catch (NoSuchElementException e) {

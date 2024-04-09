@@ -49,6 +49,7 @@ public class UserTeam {
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonIgnore
+    @ToString.Exclude
     private List<Group> groups;
 
     @ManyToMany(mappedBy = "userTeams")

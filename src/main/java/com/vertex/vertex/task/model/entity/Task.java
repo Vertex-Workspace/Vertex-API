@@ -12,6 +12,7 @@ import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
+import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -19,6 +20,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -53,7 +55,8 @@ public class Task implements FileSupporter {
     @ToString.Exclude
     private Project project;
 
-    @OneToOne
+    @ManyToOne
+    @ToString.Exclude
     private Task taskDependency;
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -75,7 +78,11 @@ public class Task implements FileSupporter {
 
     @OneToMany(cascade = CascadeType.ALL)
     @ToString.Exclude
-    private List<LogRecord> log;
+    private List<LogRecord> log = new ArrayList<>();
+
+    @ManyToMany
+    @JsonIgnore
+    List<Group> groups;
 
     public String getModifiedAttributeDescription
             (TaskEditDTO dto) {
@@ -98,5 +105,6 @@ public class Task implements FileSupporter {
         setLog(List.of
                 (new LogRecord(this,
                         "A tarefa foi criada")));
+
     }
 }

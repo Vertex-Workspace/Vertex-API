@@ -13,10 +13,7 @@ import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.property.service.PropertyService;
-import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
-import com.vertex.vertex.task.model.DTO.TaskEditDTO;
-import com.vertex.vertex.task.model.DTO.TaskOpenDTO;
-import com.vertex.vertex.task.model.DTO.TaskSearchDTO;
+import com.vertex.vertex.task.model.DTO.*;
 import com.vertex.vertex.task.relations.review.repository.ReviewRepository;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.relations.task_responsables.model.DTOs.TaskResponsablesDTO;
@@ -29,6 +26,7 @@ import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
+import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
@@ -93,8 +91,6 @@ public class TaskService {
         task.setValues(values);
         //Add the taskResponsables on task list of taskResponsables
         task.setCreator(userTeamService.findUserTeamByComposeId(project.getTeam().getId(), taskCreateDTO.getCreator().getId()));
-
-
         for (UserTeam userTeam : project.getTeam().getUserTeams()) {
             TaskResponsable newTaskResponsable = new TaskResponsable(userTeam, task);
             if (task.getTaskResponsables() == null) {
@@ -107,31 +103,26 @@ public class TaskService {
         }
 
         //Set if the task is revisable or no...
+        task.setTaskDependency(null);
         task.setRevisable(project.getProjectReviewENUM().equals(ProjectReviewENUM.MANDATORY));
 
 
         Task finalTask = taskRepository.save(task);
-//        notificationService.saveLogRecord(finalTask,
-//                "criou a tarefa", task.getCreator());
 
         //Notifications
         for (TaskResponsable taskResponsable : finalTask.getTaskResponsables()) {
             if (taskResponsable.getUserTeam().getUser().getResponsibleInProjectOrTask()
                     && !taskResponsable.getUserTeam().equals(task.getCreator())) {
+
                 notificationService.save(new Notification(
                         project,
                         "Você foi adicionado como responsável da tarefa " + task.getName(),
                         "projeto/" + project.getId() + "/tarefas?taskID=" + finalTask.getId(),
                         taskResponsable.getUserTeam().getUser()
                 ));
-
-                notificationService.saveLogRecord(task,
-                        "foi adicionado à lista de responsáveis pela tarefa",
-                        taskResponsable.getUserTeam());
             }
         }
-
-        return task;
+        return finalTask;
     }
 
 
@@ -480,6 +471,113 @@ public class TaskService {
             }
         }
         return save(task);
+    }
+    public List<User> getTaskResponsables(Long taskId) {
+        Task task = findById(taskId);
+        List<User> users = new ArrayList<>();
+        List<UserTeam> userGroups = new ArrayList<>();
+
+        if (!task.getGroups().isEmpty()) {
+            for (Group group : task.getGroups()) {
+                userGroups = group.getUserTeams();
+            }
+            for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
+                if (!userGroups.contains(taskResponsable.getUserTeam())) {
+                    users.add(taskResponsable.getUserTeam().getUser());
+                }
+            }
+        } else {
+            for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
+                users.add(taskResponsable.getUserTeam().getUser());
+            }
+        }
+        return users;
+    }
+
+    public Task editTaskResponsables(UpdateTaskResponsableDTO updateTaskResponsableDTO) {
+        Task task = findById(updateTaskResponsableDTO.getTaskId());
+        List<TaskResponsable> responsablesToDelete = new ArrayList<>();
+        List<Group> groupsToDelete = new ArrayList<>();
+        boolean canDeleteUser = false;
+        boolean canDeleteGroup = false;
+
+        if (task.getTaskResponsables().isEmpty()) {
+            UserTeam userTeam = userTeamService.findUserTeamByComposeId(updateTaskResponsableDTO.getTeamId(), updateTaskResponsableDTO.getUser().getId());
+            TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
+            taskResponsablesRepository.save(taskResponsable1);
+        }
+
+        for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
+            if (updateTaskResponsableDTO.getUser() != null) {
+                if (taskResponsable.getUserTeam().getUser().getId().equals(updateTaskResponsableDTO.getUser().getId())) {
+                    responsablesToDelete.add(taskResponsable);
+                    canDeleteUser = true;
+                }
+            }
+        }
+
+        if (updateTaskResponsableDTO.getGroup() != null) {
+            for (Group group : task.getGroups()) {
+                if (group.getId().equals(updateTaskResponsableDTO.getGroup().getId())) {
+                    groupsToDelete.add(group);
+                    canDeleteGroup = true;
+                }
+            }
+        }
+
+        if (!canDeleteUser && !canDeleteGroup) {
+            if (updateTaskResponsableDTO.getGroup() != null) {
+                task.getGroups().add(updateTaskResponsableDTO.getGroup());
+            } else {
+                UserTeam userTeam = userTeamService.findUserTeamByComposeId(updateTaskResponsableDTO.getTeamId(), updateTaskResponsableDTO.getUser().getId());
+                TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
+                taskResponsablesRepository.save(taskResponsable1);
+            }
+        }
+
+        for (TaskResponsable taskResponsable : responsablesToDelete) {
+            task.getTaskResponsables().remove(taskResponsable);
+            taskResponsable.setTask(null);
+            taskResponsablesRepository.delete(taskResponsable);
+        }
+        for (Group group : groupsToDelete) {
+            task.getGroups().remove(group);
+            group.setTasks(null);
+        }
+
+        return taskRepository.save(task);
+    }
+
+    public List<Group> getGroupsByTask(Long taskId) {
+        Task task = findById(taskId);
+        return task.getGroups();
+    }
+
+    public Task setDependency(Long taskId, Long taskDependencyId) {
+        Task task = findById(taskId);
+        Task tDependency = findById(taskDependencyId);
+        if (tDependency.getTaskDependency() != null) {
+            if (tDependency.getTaskDependency().getId().equals(taskId)) {
+                throw new RuntimeException("A outra tarefa já está associada a essa");
+            }
+        } else {
+            Task taskDependency = findById(taskDependencyId);
+            task.setTaskDependency(taskDependency);
+            return taskRepository.save(task);
+        }
+        return null;
+    }
+
+    public void setDependencyByTask(Long taskId) {
+        Task task = findById(taskId);
+        for (Task taskDependents : taskRepository.findAll()) {
+            if (taskDependents.getTaskDependency() != null) {
+                if (task.getId().equals(taskDependents.getTaskDependency().getId())) {
+                    taskDependents.setTaskDependency(null);
+                    taskRepository.save(taskDependents);
+                }
+            }
+        }
     }
 
 
