@@ -51,7 +51,7 @@ public class ProjectService {
         UserTeam userTeam = userTeamService
                 .findUserTeamByComposeId(
                         teamId, project.getCreator().getUser().getId());
-       Team team = userTeam.getTeam();
+        Team team = userTeam.getTeam();
         project.setTeam(team);
 
         if (projectCreateDTO.getUsers() != null) {
@@ -256,12 +256,12 @@ public class ProjectService {
                     .toList()
                     .forEach(userTeam -> {
                         notificationService.save(new Notification(
-                            project,
+                                project,
                                 title + project.getName(),
-                            "projeto/" + project.getId() + "/tarefas",
-                            userTeam.getUser()
-                    ));
-            });
+                                "projeto/" + project.getId() + "/tarefas",
+                                userTeam.getUser()
+                        ));
+                    });
         }
         project.setCollaborators(userTeamsToAdd);
         project.setGroups(projectEditDTO.getGroups());
