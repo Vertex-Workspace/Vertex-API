@@ -5,6 +5,5 @@ public enum TypePermissions {
     Criar(),
     Deletar(),
     Editar(),
-    Visualizar()
 
 }

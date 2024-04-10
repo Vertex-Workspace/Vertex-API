@@ -80,11 +80,6 @@ public class TeamService {
 
                 team.setInvitationCode(RandomCodeUtils.generateInvitationCode());
 
-//                userTeamService.saveNewUserTeam(new UserTeamAssociateDTO(
-//                        savedTeam,
-//                        savedTeam.getCreator().getUser(),
-//                        true
-//                ));
             UserTeam userTeam = new UserTeam(teamViewListDTO.getCreator(), team);
 
             team.setCreator(userTeam);
@@ -92,10 +87,6 @@ public class TeamService {
             permissionService.save(userTeam);
             team.setChat(new Chat(team));
 
-//                if (teamViewListDTO.isDefaultTeam()) {
-////                    saveDefaultTasksAndProject(teamWithUserTeam);
-//                }
-            System.out.println(team);
             return teamRepository.save(team);
         } catch (Exception e) {
             throw new RuntimeException(e);

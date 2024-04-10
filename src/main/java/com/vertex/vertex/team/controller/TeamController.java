@@ -25,7 +25,6 @@ public class TeamController {
         try {
             return new ResponseEntity<>(teamService.save(team), HttpStatus.CREATED);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }

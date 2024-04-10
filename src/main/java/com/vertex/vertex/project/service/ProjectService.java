@@ -92,11 +92,11 @@ public class ProjectService {
         return projectRepository.findAllByTeam_Id(teamId);
     }
 
-    public void updateImage(MultipartFile file, Long projectId) throws IOException {
+    public Project updateImage(MultipartFile file, Long projectId) throws IOException {
         Project project = projectRepository.findById(projectId).get();
         File file1 = fileService.save(file);
         project.setFile(file1);
-        projectRepository.save(project);
+        return projectRepository.save(project);
     }
 
     public Boolean existsByIdAndUserBelongs(Long projectId, Long userId) {

@@ -91,9 +91,8 @@ public class ProjectController {
             @PathVariable Long projectId,
             @RequestParam MultipartFile file) {
         try {
-            projectService.updateImage(file, projectId);
             return new ResponseEntity<>
-                    (HttpStatus.OK);
+                    (projectService.updateImage(file, projectId), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>
                     (HttpStatus.CONFLICT);

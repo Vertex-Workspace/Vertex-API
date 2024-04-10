@@ -39,7 +39,6 @@ public class Permission {
         return List.of(
                 new Permission(TypePermissions.Criar, userTeam, isCreator),
                 new Permission(TypePermissions.Editar, userTeam, isCreator),
-                new Permission(TypePermissions.Visualizar, userTeam, isCreator),
                 new Permission(TypePermissions.Deletar, userTeam, isCreator)
         );
     }
