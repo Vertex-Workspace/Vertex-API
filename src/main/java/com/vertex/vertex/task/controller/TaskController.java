@@ -189,15 +189,6 @@ public class TaskController {
         }
     }
 
-    @GetMapping("/taskResponsables/{taskId}")
-    public ResponseEntity<?> getTaskResponsables(@PathVariable Long taskId){
-        try{
-            return new ResponseEntity<>(taskService.getTaskResponsables(taskId), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-    }
-
     @PatchMapping("/taskResponsables")
     public ResponseEntity<?> updateParticipants(@RequestBody UpdateTaskResponsableDTO updateTaskResponsableDTO){
         try{
@@ -243,15 +234,6 @@ public class TaskController {
                     (HttpStatus.CONFLICT);
         }
     }
-    @GetMapping("/groups/{taskId}")
-    public ResponseEntity<?> getGroupsByTask(@PathVariable Long taskId){
-        try{
-            return new ResponseEntity<>(taskService.getGroupsByTask(taskId), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-    }
-
     @PatchMapping("/taskDependency/{taskId}/{taskdependencyId}")
     public ResponseEntity<?> setTaskDependency(@PathVariable Long taskId, @PathVariable Long taskdependencyId){
         try{
@@ -270,5 +252,25 @@ public class TaskController {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
+
+    @GetMapping("/doneTask/{projectDependencyId}")
+    public ResponseEntity<?> getTasksDone(@PathVariable Long projectDependencyId){
+        try {
+            return new ResponseEntity<>(taskService.getTasksDone(projectDependencyId), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping("/taskResponsables/{taskId}")
+    public ResponseEntity<?> returnResponsables(@PathVariable Long taskId){
+        try {
+            return new ResponseEntity<>(taskService.returnAllResponsables(taskId), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
+
+
 
 }

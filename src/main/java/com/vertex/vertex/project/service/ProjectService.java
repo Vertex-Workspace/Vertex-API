@@ -1,7 +1,5 @@
 package com.vertex.vertex.project.service;
 
-import com.vertex.vertex.file.model.File;
-import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.project.model.DTO.*;
@@ -24,7 +22,6 @@ import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,7 +35,6 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final UserTeamService userTeamService;
     private final ValueService valueService;
-    private final FileService fileService;
     private final NotificationService notificationService;
     private final ModelMapper mapper;
 
@@ -146,6 +142,20 @@ public class ProjectService {
         //Delete every value of tasks on project
         project.getTasks().forEach(task -> task.getValues().forEach(valueService::delete));
 
+        if(project.getProjectDependency() != null){
+            project.setProjectDependency(null);
+            save(project);
+        }
+
+        for(Project projectFor : projectRepository.findAll()){
+            if(projectFor.getProjectDependency() !=null) {
+                if (projectFor.getProjectDependency().getId().equals(id)) {
+                    projectFor.setProjectDependency(null);
+                    save(projectFor);
+                }
+            }
+        }
+
         projectRepository.deleteById(id);
     }
 
@@ -207,6 +217,7 @@ public class ProjectService {
         project.setCollaborators(userTeamsToAdd);
         project.setGroups(projectEditDTO.getGroups());
         project.setProjectReviewENUM(projectEditDTO.getProjectReviewENUM());
+        project.setProjectDependency(projectEditDTO.getProjectDependency());
         return projectRepository.save(project);
     }
 
@@ -241,9 +252,10 @@ public class ProjectService {
         Project project = findById(projectId);
         ProjectCollaborators projectCollaborators = new ProjectCollaborators();
         List<User> users = new ArrayList<>();
-        List<Group> groups = new ArrayList<>();
 
-        for(UserTeam userTeam : project.getCollaborators()){
+        List<Group> groups = new ArrayList<>(project.getGroups());
+
+        for(UserTeam userTeam : project.getCollaborators()) {
             users.add(userTeam.getUser());
         }
 

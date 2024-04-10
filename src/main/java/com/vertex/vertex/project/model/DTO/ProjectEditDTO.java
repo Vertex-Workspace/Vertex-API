@@ -1,6 +1,7 @@
 package com.vertex.vertex.project.model.DTO;
 
 import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
+import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.user.model.entity.User;
@@ -16,6 +17,7 @@ public class ProjectEditDTO {
     private Long id;
     private String name;
     private String description;
+    private Project projectDependency;
     private List<User> listOfResponsibles;
     private ProjectReviewENUM projectReviewENUM;
     private List<User> users;

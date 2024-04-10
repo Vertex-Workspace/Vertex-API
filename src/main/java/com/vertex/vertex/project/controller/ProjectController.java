@@ -59,6 +59,7 @@ public class ProjectController {
             projectService.deleteById(id);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.CONFLICT);
 
         }
@@ -140,5 +141,6 @@ public class ProjectController {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
+
 
 }
