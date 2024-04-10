@@ -38,14 +38,17 @@ public class NotificationService {
         return notificationSaved;
     }
 
-    public LogRecord saveLogRecord(Task task, String description, UserTeam ut) {
-        return logRepository.save(
-                new LogRecord(task, description, ut));
-
+    public void saveLogRecord(Task task, String description, UserTeam ut) {
+        LogRecord rc = new LogRecord(task, description, ut);
+//        task.getLog().add(rc);
+        rc.setTask(task);
+        logRepository.save(rc);
     }
-    public LogRecord saveLogRecord(Task task, String description) {
-        return logRepository.save(
-                new LogRecord(task, description));
+    public void saveLogRecord(Task task, String description) {
+        LogRecord rc = new LogRecord(task, description);
+//        task.getLog().add(rc);
+        rc.setTask(task);
+        logRepository.save(rc);
     }
 
     public Notification update(Notification notification){

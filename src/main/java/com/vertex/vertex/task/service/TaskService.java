@@ -3,6 +3,7 @@ package com.vertex.vertex.task.service;
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.log.model.exception.EntityDoesntExistException;
+import com.vertex.vertex.notification.entity.model.LogRecord;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
@@ -75,7 +76,7 @@ public class TaskService {
         //When the task is created, every property is associated with a null value, unless it has a default value
         valueService.setTaskDefaultValues(task, project.getProperties());
 
-        //Notifications and task log
+        //Notifications
         for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
             if (taskResponsable.getUserTeam().getUser().getResponsibleInProjectOrTask() && !taskResponsable.getUserTeam().equals(task.getCreator())) {
                 notificationService.save(new Notification(
@@ -85,12 +86,9 @@ public class TaskService {
                         taskResponsable.getUserTeam().getUser()
                 ));
             }
-            notificationService.saveLogRecord(task,
-                    "foi adicionado à lista de responsáveis pela tarefa",
-                    taskResponsable.getUserTeam());
         }
 
-        return task;
+        return save(task);
     }
 
     public Task edit(TaskEditDTO taskEditDTO) {

@@ -1,4 +1,4 @@
-package com.vertex.vertex;
+package com.vertex.vertex.user.service;
 
 import com.vertex.vertex.user.model.entity.User;
 import lombok.AllArgsConstructor;

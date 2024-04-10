@@ -109,9 +109,10 @@ public class Task implements FileSupporter {
         this.taskResponsables
                 = List.of(new TaskResponsable(creator, this));
 
-        setLog(List.of
+        this.log = (List.of
                 (new LogRecord(this,
                         "A tarefa foi criada")));
+
     }
 
 }
