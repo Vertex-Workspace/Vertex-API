@@ -78,7 +78,7 @@ public class ProjectService {
 
         project.setCreator(userTeam);
         if(projectCreateDTO.getProjectReviewENUM() != null) project.setProjectReviewENUM(projectCreateDTO.getProjectReviewENUM());
-        else project.setProjectReviewENUM(ProjectReviewENUM.EMPTY);
+        else project.setProjectReviewENUM(ProjectReviewENUM.OPTIONAL);
 
         if (!collaborators.contains(project.getCreator())) {
             collaborators.add(project.getCreator());
@@ -90,15 +90,6 @@ public class ProjectService {
 
     public Set<Project> findAllByTeam(Long teamId) {
         return projectRepository.findAllByTeam_Id(teamId);
-    }
-
-    public boolean existsById(Long projectId) {
-        try {
-            findById(projectId);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
     }
 
     public void updateImage(MultipartFile file, Long projectId) throws IOException {

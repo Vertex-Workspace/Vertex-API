@@ -1,5 +1,6 @@
 package com.vertex.vertex.project.model.DTO;
 
+import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.property.model.entity.Property;
@@ -10,6 +11,7 @@ import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 
 import java.util.ArrayList;
@@ -25,12 +27,13 @@ public class ProjectOneDTO {
     private Long idTeam;
     private List<Property> properties;
     private UserTeam creator;
+    private File file;
     private List<Task> tasks = new ArrayList<>();
     private List<NoteDTO> notes;
     private ProjectReviewENUM projectReviewENUM;
 
     public ProjectOneDTO(Project project) {
-        BeanUtils.copyProperties(project, this);
+        new ModelMapper().map(project, this);
         this.notes = project.getNotes()
                 .stream()
                 .map(NoteDTO::new)
