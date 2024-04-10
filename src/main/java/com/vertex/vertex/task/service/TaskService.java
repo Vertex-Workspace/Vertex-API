@@ -27,9 +27,11 @@ import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
+import com.vertex.vertex.team.relations.permission.model.entity.Permission;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user.model.exception.UserNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -578,6 +580,17 @@ public class TaskService {
                 }
             }
         }
+    }
+
+    public List<Permission> getTaskPermissions(Long taskID, Long userID){
+        Task task = findById(taskID);
+        //Get all users teams of an user
+        for (UserTeam userteamFor : userTeamService.findAllUserTeamByUserId(userID)){
+            if(userteamFor.getTeam().equals(task.getProject().getTeam())){
+                return  userteamFor.getPermissionUser();
+            }
+        }
+        throw new UserNotFoundException();
     }
 
 

@@ -53,7 +53,6 @@ public class TaskController {
         try{
             return new ResponseEntity<>(taskService.save(taskCreateDTO), HttpStatus.OK);
         }catch(Exception e){
-            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
         }
     }
@@ -112,6 +111,15 @@ public class TaskController {
     public ResponseEntity<?> deleteComment(@PathVariable Long taskID, @PathVariable Long commentID){
         try{
             return new ResponseEntity<>(taskService.deleteComment(taskID, commentID), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping("/{taskID}/task-permission/{userID}")
+    public ResponseEntity<?> getTaskPermissions(@PathVariable Long taskID, @PathVariable Long userID){
+        try{
+            return new ResponseEntity<>(taskService.getTaskPermissions(taskID, userID), HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
