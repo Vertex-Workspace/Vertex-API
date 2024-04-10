@@ -221,6 +221,10 @@ public class ProjectService {
         }
         notificationOfUpdateCollaborators(userTeamsToAdd, project);
 
+        if(!userTeamsToAdd.contains(project.getCreator())){
+            userTeamsToAdd.add(project.getCreator());
+        }
+
         project.setCollaborators(userTeamsToAdd);
         project.setGroups(projectEditDTO.getGroups());
         project.setProjectReviewENUM(projectEditDTO.getProjectReviewENUM());
