@@ -1,4 +1,4 @@
-package com.vertex.vertex.project.model.DTO;
+package com.vertex.vertex.task.model.DTO;
 
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.user.model.entity.User;
@@ -11,10 +11,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class ProjectCollaborators {
+public class ReturnTaskResponsablesDTO {
 
     private List<User> users;
     private List<Group> groups;
-
-
 }

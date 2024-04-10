@@ -43,48 +43,50 @@ public class ProjectService {
     private final NotificationService notificationService;
     private final ModelMapper mapper;
 
-    public Project save(ProjectCreateDTO projectCreateDTO, Long teamId) {
+    public Project saveWithRelationOfProject(ProjectCreateDTO projectCreateDTO, Long teamId) {
         Project project = new Project();
         mapper.map(projectCreateDTO, project);
 
-        List<UserTeam> collaborators = new ArrayList<>();
+        createUserTeamAndSetCreator(teamId, project);
+        setCollaboratorsAndVerifyCreator(projectCreateDTO.getUsers(), project);
+        project.setProjectReviewENUM(projectCreateDTO.getProjectReviewENUM());
+        defaultPropertyList(project);
+
+        return save(project);
+    }
+
+    public void createUserTeamAndSetCreator(Long teamId, Project project){
+        List<UserTeam> users = new ArrayList<>();
         UserTeam userTeam = userTeamService
                 .findUserTeamByComposeId(
                         teamId, project.getCreator().getUser().getId());
-       Team team = userTeam.getTeam();
-        project.setTeam(team);
+        project.setTeam(userTeam.getTeam());
+        project.setCreator(userTeam);
+        users.add(userTeam);
+        project.setCollaborators(users);
+    }
 
-        if (projectCreateDTO.getUsers() != null) {
-            for (User user : projectCreateDTO.getUsers()) {
-                UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(teamId, user.getId());
-                if (!collaborators.contains(userTeam1)) {
-                    collaborators.add(userTeam1);
-
-                    if(userTeam1.getUser().getResponsibleInProjectOrTask()){
-                        notificationService.save(new Notification(
-                                project,
-                                "Você foi adicionado(a) como responsável do projeto " + project.getName(),
-                                "projeto/" + project.getId() + "/tarefas",
-                                userTeam1.getUser()
-                        ));
-                    }
+    public void setCollaboratorsAndVerifyCreator(List<User> users, Project project){
+        if (users != null) {
+            for (User user : users) {
+                UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), user.getId());
+                if (!project.getCollaborators().contains(userTeam1) && !project.getCreator().equals(userTeam1)) {
+                    project.getCollaborators().add(userTeam1);
+                    notificationOfCollaborators(userTeam1, project);
                 }
             }
         }
+    }
 
-        project.setGroups(projectCreateDTO.getGroups());
-        project.setCollaborators(collaborators);
-
-
-        project.setCreator(userTeam);
-        if(projectCreateDTO.getProjectReviewENUM() != null) project.setProjectReviewENUM(projectCreateDTO.getProjectReviewENUM());
-        else project.setProjectReviewENUM(ProjectReviewENUM.OPTIONAL);
-
-        if (!collaborators.contains(project.getCreator())) {
-            collaborators.add(project.getCreator());
+    public void notificationOfCollaborators(UserTeam userTeam, Project project){
+        if(userTeam.getUser().getResponsibleInProjectOrTask()){
+            notificationService.save(new Notification(
+                    project,
+                    "Você foi adicionado(a) como responsável do projeto " + project.getName(),
+                    "projeto/" + project.getId() + "/tarefas",
+                    userTeam.getUser()
+            ));
         }
-        defaultProperties(project);
-        return projectRepository.save(project);
     }
 
 
@@ -93,9 +95,8 @@ public class ProjectService {
     }
 
     public Project updateImage(MultipartFile file, Long projectId) throws IOException {
-        Project project = projectRepository.findById(projectId).get();
-        File file1 = fileService.save(file);
-        project.setFile(file1);
+        Project project = findById(projectId);
+        project.setFile(fileService.save(file));
         return projectRepository.save(project);
     }
 
@@ -146,6 +147,20 @@ public class ProjectService {
         //Delete every value of tasks on project
         project.getTasks().forEach(task -> task.getValues().forEach(valueService::delete));
 
+        if(project.getProjectDependency() != null){
+            project.setProjectDependency(null);
+            save(project);
+        }
+
+        for(Project projectFor : projectRepository.findAll()){
+            if(projectFor.getProjectDependency() !=null) {
+                if (projectFor.getProjectDependency().getId().equals(id)) {
+                    projectFor.setProjectDependency(null);
+                    save(projectFor);
+                }
+            }
+        }
+
         projectRepository.deleteById(id);
     }
 
@@ -153,17 +168,27 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
-    public void defaultProperties(Project project) {
+    public List<PropertyList> defaultStatus(Property property) {
+        List<PropertyList> propertiesList = new ArrayList<>();
+        propertiesList.add(new PropertyList("Não Iniciado", Color.RED, property, PropertyListKind.TODO, true));
+        propertiesList.add(new PropertyList("Em Andamento", Color.YELLOW, property, PropertyListKind.DOING, true));
+        propertiesList.add(new PropertyList("Pausado", Color.BLUE, property, PropertyListKind.DOING, false));
+        propertiesList.add(new PropertyList("Concluído", Color.GREEN, property, PropertyListKind.DONE, true));
+        return propertiesList;
+    }
 
-        //Default properties of a project
+    public List<Property> defaultProperties(){
         List<Property> properties = new ArrayList<>();
         properties.add(new Property(PropertyKind.STATUS, "Status", true, null, PropertyStatus.FIXED));
         properties.add(new Property(PropertyKind.DATE, "Data", true, null, PropertyStatus.FIXED));
         properties.add(new Property(PropertyKind.LIST, "Dificuldade", false, null, PropertyStatus.VISIBLE));
         properties.add(new Property(PropertyKind.NUMBER, "Número", false, null, PropertyStatus.VISIBLE));
         properties.add(new Property(PropertyKind.TEXT, "Palavra-Chave", false, null, PropertyStatus.INVISIBLE));
+        return properties;
+    }
 
-        for (Property property : properties) {
+    public void defaultPropertyList(Project project){
+        for (Property property : defaultProperties()) {
             if (property.getKind() == PropertyKind.STATUS) {
                 property.setPropertyLists(defaultStatus(property));
             }
@@ -180,14 +205,58 @@ public class ProjectService {
         }
     }
 
+    public Project updateProjectCollaborators(ProjectEditDTO projectEditDTO) {
+        Project project = findById(projectEditDTO.getId());
 
-    public List<PropertyList> defaultStatus(Property property) {
-        List<PropertyList> propertiesList = new ArrayList<>();
-        propertiesList.add(new PropertyList("Não Iniciado", Color.RED, property, PropertyListKind.TODO, true));
-        propertiesList.add(new PropertyList("Em Andamento", Color.YELLOW, property, PropertyListKind.DOING, true));
-        propertiesList.add(new PropertyList("Pausado", Color.BLUE, property, PropertyListKind.DOING, false));
-        propertiesList.add(new PropertyList("Concluído", Color.GREEN, property, PropertyListKind.DONE, true));
-        return propertiesList;
+        project.setName(projectEditDTO.getName());
+        project.setDescription(projectEditDTO.getDescription());
+
+        List<UserTeam> userTeamsToAdd = new ArrayList<>();
+
+        for (User user : projectEditDTO.getUsers()) {
+            UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), user.getId());
+            userTeamsToAdd.add(userTeam1);
+        }
+        notificationOfUpdateCollaborators(userTeamsToAdd, project);
+
+        project.setCollaborators(userTeamsToAdd);
+        project.setGroups(projectEditDTO.getGroups());
+        project.setProjectReviewENUM(projectEditDTO.getProjectReviewENUM());
+        project.setProjectDependency(projectEditDTO.getProjectDependency());
+        return projectRepository.save(project);
+    }
+
+    public void notificationOfUpdateCollaborators(List<UserTeam> userTeamsToAdd, Project project){
+        for (Boolean bool : List.of(false, true)){
+            String title = bool ? "Agora você é responsável do projeto " : "Você não é responsável do projeto ";
+            userTeamsToAdd.stream()
+                    .filter(userTeam -> project.getCollaborators().contains(userTeam) == bool)
+                    .toList()
+                    .forEach(userTeam -> {
+                        notificationService.save(new Notification(
+                                project,
+                                title + project.getName(),
+                                "projeto/" + project.getId() + "/tarefas",
+                                userTeam.getUser()
+                        ));
+                    });
+        }
+    }
+
+    public List<ProjectSearchDTO> findAllByUserAndQuery(Long userId, String query) {
+        return userTeamService.findAllUserTeamByUserId(userId)
+                .stream()
+                .map(UserTeam::getTeam)
+                .flatMap(ut -> ut.getProjects().stream())
+                .filter(ut -> ut.getName().toLowerCase().contains(query.toLowerCase()))
+                .map(ProjectSearchDTO::new)
+                .toList();
+    }
+
+    public ProjectCollaborators returnAllCollaborators(Long projectId){
+        Project project = findById(projectId);
+        return new ProjectCollaborators(
+                project.getCollaborators().stream().map(UserTeam::getUser).toList(), project.getGroups());
     }
 
     public List<Project> getAllByTeamAndCollaborators(Long teamId, Long userId) {
@@ -203,110 +272,6 @@ public class ProjectService {
             }
         }
         return projects;
-    }
-
-    public List<User> getUsersByProject(Long projectId) {
-
-        List<User> users = new ArrayList<>();
-        Project project = findById(projectId);;
-        Team team = project.getTeam();
-
-        for (UserTeam userTeam : project.getCollaborators()) {
-            if(!team.getGroups().isEmpty()){
-                for(Group group: team.getGroups()){
-                    if(!group.getUserTeams().contains(userTeam)){
-                        users.add(userTeam.getUser());
-                    }
-                }
-            }else {
-                users.add(userTeam.getUser());
-            }
-        }
-
-        return users;
-    }
-
-
-    public Project updateProjectCollaborators(ProjectEditDTO projectEditDTO) {
-        Project project = findById(projectEditDTO.getId());
-
-        project.setName(projectEditDTO.getName());
-        project.setDescription(projectEditDTO.getDescription());
-
-        List<UserTeam> userTeamsToAdd = new ArrayList<>();
-
-        for (User user : projectEditDTO.getUsers()) {
-            UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), user.getId());
-            userTeamsToAdd.add(userTeam1);
-        }
-
-        for (Boolean bool : List.of(false, true)){
-            String title = bool ? "Agora você é responsável do projeto " : "Você não é responsável do projeto ";
-            userTeamsToAdd.stream()
-                    .filter(userTeam -> project.getCollaborators().contains(userTeam) == bool)
-                    .toList()
-                    .forEach(userTeam -> {
-                        notificationService.save(new Notification(
-                            project,
-                                title + project.getName(),
-                            "projeto/" + project.getId() + "/tarefas",
-                            userTeam.getUser()
-                    ));
-            });
-        }
-        project.setCollaborators(userTeamsToAdd);
-        project.setGroups(projectEditDTO.getGroups());
-        project.setProjectReviewENUM(projectEditDTO.getProjectReviewENUM());
-        return projectRepository.save(project);
-    }
-
-    public List<ProjectSearchDTO> findAllByUserAndQuery(Long userId, String query) {
-        return userTeamService.findAllUserTeamByUserId(userId)
-                .stream()
-                .map(UserTeam::getTeam)
-                .flatMap(ut -> ut.getProjects().stream())
-                .filter(ut -> ut.getName().toLowerCase().contains(query.toLowerCase()))
-                .map(ProjectSearchDTO::new)
-                .toList();
-    }
-
-
-
-    public List<Group> getGroupsByProject(Long projectId) {
-        Project project = projectRepository.findById(projectId).get();
-        return project.getGroups();
-    }
-
-
-    public ProjectCollaborators returnAllCollaborators(Long projectId){
-        Project project = findById(projectId);
-        ProjectCollaborators projectCollaborators = new ProjectCollaborators();
-        List<User> users = new ArrayList<>();
-        List<Group> groups = new ArrayList<>();
-        List<User> userInGroup = new ArrayList<>();
-
-        for(UserTeam userTeam : project.getCollaborators()){
-            users.add(userTeam.getUser());
-        }
-        if(project.getGroups() != null) {
-            groups.addAll(project.getGroups());
-        }
-
-        if(project.getTeam().getGroups() != null){
-            for(Group group : project.getTeam().getGroups()){
-                for(UserTeam userTeam : group.getUserTeams()){
-                    if(users.contains(userTeam.getUser())){
-                        userInGroup.add(userTeam.getUser());
-                        users.remove(userTeam.getUser());
-                    }
-                }
-            }
-        }
-
-        projectCollaborators.setUserInGroups(userInGroup);
-        projectCollaborators.setGroups(groups);
-        projectCollaborators.setUsers(users);
-        return projectCollaborators;
     }
 
 }

@@ -93,7 +93,7 @@ public class TaskService {
         task.setValues(values);
         //Add the taskResponsables on task list of taskResponsables
         task.setCreator(userTeamService.findUserTeamByComposeId(project.getTeam().getId(), taskCreateDTO.getCreator().getId()));
-        for (UserTeam userTeam : project.getTeam().getUserTeams()) {
+        for (UserTeam userTeam : project.getCollaborators()) {
             TaskResponsable newTaskResponsable = new TaskResponsable(userTeam, task);
             if (task.getTaskResponsables() == null) {
                 ArrayList<TaskResponsable> taskResponsibleList = new ArrayList<>();
@@ -102,6 +102,11 @@ public class TaskService {
             } else {
                 task.getTaskResponsables().add(newTaskResponsable);
             }
+        }
+
+        if(project.getGroups() != null){
+            List<Group> groups = new ArrayList<>(project.getGroups());
+            task.setGroups(groups);
         }
 
         //Set if the task is revisable or no...
@@ -474,27 +479,6 @@ public class TaskService {
         }
         return save(task);
     }
-    public List<User> getTaskResponsables(Long taskId) {
-        Task task = findById(taskId);
-        List<User> users = new ArrayList<>();
-        List<UserTeam> userGroups = new ArrayList<>();
-
-        if (!task.getGroups().isEmpty()) {
-            for (Group group : task.getGroups()) {
-                userGroups = group.getUserTeams();
-            }
-            for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
-                if (!userGroups.contains(taskResponsable.getUserTeam())) {
-                    users.add(taskResponsable.getUserTeam().getUser());
-                }
-            }
-        } else {
-            for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
-                users.add(taskResponsable.getUserTeam().getUser());
-            }
-        }
-        return users;
-    }
 
     public Task editTaskResponsables(UpdateTaskResponsableDTO updateTaskResponsableDTO) {
         Task task = findById(updateTaskResponsableDTO.getTaskId());
@@ -550,11 +534,6 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    public List<Group> getGroupsByTask(Long taskId) {
-        Task task = findById(taskId);
-        return task.getGroups();
-    }
-
     public Task setDependency(Long taskId, Long taskDependencyId) {
         Task task = findById(taskId);
         Task tDependency = findById(taskDependencyId);
@@ -591,6 +570,39 @@ public class TaskService {
             }
         }
         throw new UserNotFoundException();
+    }
+
+    public boolean getTasksDone(Long projectId){
+        Project project = projectService.findById(projectId);
+        //[0] - TODO
+        //[1] - DOING
+        //[2] - DONE
+        List<Integer> tasksCategory = new ArrayList<>();
+        List<PropertyListKind> listKinds = List.of(PropertyListKind.TODO, PropertyListKind.DOING, PropertyListKind.DONE);
+
+        for (PropertyListKind propertyListKind : listKinds) {
+            tasksCategory.add(project.getTasks().stream()
+                    .flatMap(t -> t.getValues().stream())
+                    .filter(value -> value.getProperty().getKind().equals(PropertyKind.STATUS)
+                            && ((PropertyList) value.getValue()).getPropertyListKind().equals(propertyListKind))
+                    .toList().size());
+        }
+
+        return tasksCategory.get(2) == project.getTasks().size();
+    }
+
+    public ReturnTaskResponsablesDTO returnAllResponsables(Long taskId){
+        ReturnTaskResponsablesDTO returnTaskResponsablesDTO = new ReturnTaskResponsablesDTO();
+        List<User> users = new ArrayList<>();
+        Task task = findById(taskId);
+
+        for(TaskResponsable taskResponsable: task.getTaskResponsables()){
+            users.add(taskResponsable.getUserTeam().getUser());
+        }
+
+        returnTaskResponsablesDTO.setGroups(new ArrayList<>(task.getGroups()));
+        returnTaskResponsablesDTO.setUsers(users);
+        return returnTaskResponsablesDTO;
     }
 
 

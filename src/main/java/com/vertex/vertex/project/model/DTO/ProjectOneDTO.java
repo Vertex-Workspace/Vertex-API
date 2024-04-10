@@ -25,6 +25,7 @@ public class ProjectOneDTO {
     private String name;
     private String description;
     private Long idTeam;
+    private Project projectDependency;
     private List<Property> properties;
     private UserTeam creator;
     private File file;

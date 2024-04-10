@@ -47,7 +47,7 @@ public class Project {
     @OneToMany(mappedBy = "project", orphanRemoval = true)
     private List<Note> notes;
 
-    @OneToOne
+    @ManyToOne
     private Project projectDependency;
 
     @OneToOne(cascade = CascadeType.ALL)

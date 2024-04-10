@@ -33,19 +33,19 @@ public class UserTeamService {
     private final PermissionService permissionService;
     private final NotificationService notificationService;
 
-    public UserTeam save(UserTeam userTeam){
+    public UserTeam save(UserTeam userTeam) {
         return userTeamRepository.save(userTeam);
     }
 
-    public UserTeam findUserTeamByComposeId(Long teamId, Long userId){
+    public UserTeam findUserTeamByComposeId(Long teamId, Long userId) {
         Optional<UserTeam> userTeam = userTeamRepository.findByTeam_IdAndUser_Id(teamId, userId);
-        if(userTeam.isPresent()){
+        if (userTeam.isPresent()) {
             return userTeam.get();
         }
         throw new RuntimeException("User Team Not Found!");
     }
 
-    public List<TeamViewListDTO> findTeamsByUser(Long userID){
+    public List<TeamViewListDTO> findTeamsByUser(Long userID) {
         List<TeamViewListDTO> teams = new ArrayList<>();
         for (UserTeam userTeam : userTeamRepository.findAllByUser_Id(userID)) {
             TeamViewListDTO dto = new TeamViewListDTO();
@@ -56,19 +56,19 @@ public class UserTeamService {
         return teams;
     }
 
-    public List<UserTeam> findAllByTeam(Long teamId){
+    public List<UserTeam> findAllByTeam(Long teamId) {
         return userTeamRepository.findAllByTeam_Id(teamId);
     }
 
-    public UserTeam findById(Long userTeamId){
+    public UserTeam findById(Long userTeamId) {
         Optional<UserTeam> userTeamOptional = userTeamRepository.findById(userTeamId);
-        if(userTeamOptional.isPresent()){
+        if (userTeamOptional.isPresent()) {
             return userTeamOptional.get();
         }
         throw new RuntimeException("User team não encontrado!");
     }
 
-    public void delete(Long teamID, Long userID){
+    public void delete(Long teamID, Long userID) {
         UserTeam userTeam = findUserTeamByComposeId(teamID, userID);
         if (userTeam.getUser().getNewMembersAndGroups()) {
             notificationService.groupAndTeam("Você foi removido(a) de " + userTeam.getTeam().getName(), userTeam);
@@ -103,7 +103,7 @@ public class UserTeamService {
 
             team.getUserTeams().add(savedUserTeam);
 
-            //Set the Creator
+//            Set the Creator
             if (team.getCreator() == null && userTeam.isCreator()) {
                 team.setCreator(savedUserTeam);
             }
@@ -124,7 +124,7 @@ public class UserTeamService {
             }
             return teamRepository.save(team);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 
