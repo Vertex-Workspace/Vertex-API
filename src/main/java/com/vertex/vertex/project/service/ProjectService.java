@@ -213,9 +213,11 @@ public class ProjectService {
 
         List<UserTeam> userTeamsToAdd = new ArrayList<>();
 
+        if(projectEditDTO.getUsers()!=null){
         for (User user : projectEditDTO.getUsers()) {
             UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), user.getId());
             userTeamsToAdd.add(userTeam1);
+        }
         }
         notificationOfUpdateCollaborators(userTeamsToAdd, project);
 
