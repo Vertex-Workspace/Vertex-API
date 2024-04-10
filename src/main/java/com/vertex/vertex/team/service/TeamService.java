@@ -209,24 +209,24 @@ public class TeamService {
     //Refatorar Depois de finalizar o projeto...
     public void saveDefaultTasksAndProject(Team team) {
 
-        Project projectDefault1 =
-                new Project("Projeto Pessoal", "Seu projeto pessoal padrão", team, team.getCreator(), List.of(team.getCreator()));
-        Project projectDefault2 =
-                new Project("Projeto Profissional", "Seu projeto pessoal padrão", team, team.getCreator(), List.of(team.getCreator()));
-
-        TaskCreateDTO taskCreateDTO1 =
-                new TaskCreateDTO("Lavar a louça", "Sua tarefa é lavar a louça", team.getCreator().getUser(), projectDefault1);
-        TaskCreateDTO taskCreateDTO2 =
-                new TaskCreateDTO("Apresentar seminário", "Sua tarefa é lavar a louça", team.getCreator().getUser(), projectDefault2);
-
-        projectService.defaultProperties(projectDefault1);
-        projectService.defaultProperties(projectDefault2);
-
-        projectService.save(projectDefault1);
-        projectService.save(projectDefault2);
-
-        taskService.save(taskCreateDTO1);
-        taskService.save(taskCreateDTO2);
+//        Project projectDefault1 =
+//                new Project("Projeto Pessoal", "Seu projeto pessoal padrão", team, team.getCreator(), List.of(team.getCreator()));
+//        Project projectDefault2 =
+//                new Project("Projeto Profissional", "Seu projeto pessoal padrão", team, team.getCreator(), List.of(team.getCreator()));
+//
+//        TaskCreateDTO taskCreateDTO1 =
+//                new TaskCreateDTO("Lavar a louça", "Sua tarefa é lavar a louça", team.getCreator().getUser(), projectDefault1);
+//        TaskCreateDTO taskCreateDTO2 =
+//                new TaskCreateDTO("Apresentar seminário", "Sua tarefa é lavar a louça", team.getCreator().getUser(), projectDefault2);
+//
+//        projectService.defaultProperties(projectDefault1);
+//        projectService.defaultProperties(projectDefault2);
+//
+//        projectService.save(projectDefault1);
+//        projectService.save(projectDefault2);
+//
+//        taskService.save(taskCreateDTO1);
+//        taskService.save(taskCreateDTO2);
     }
 
     public List<ProjectViewListDTO> convertTeamProjectsToDto(Team team) {

@@ -12,13 +12,13 @@ public class ProjectViewListDTO {
     private Long id;
     private String name;
     private String description;
-    private File file;
+    private byte[] file;
 
     public ProjectViewListDTO(Project project) {
         this.id = project.getId();
         this.name = project.getName();
         this.description = project.getDescription();
-        this.file = project.getFile();
+        this.file = project.getImage();
     }
 
 }

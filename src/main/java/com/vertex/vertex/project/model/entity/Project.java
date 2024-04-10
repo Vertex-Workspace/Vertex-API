@@ -47,11 +47,14 @@ public class Project {
     @OneToMany(mappedBy = "project", orphanRemoval = true)
     private List<Note> notes;
 
-    @OneToOne
+    @ManyToOne
     private Project projectDependency;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    private File file;
+    @Lob
+    @Column(name = "image",
+            columnDefinition = "LONGBLOB")
+    @ToString.Exclude
+    private byte[] image;
 
     @ManyToMany(cascade = CascadeType.ALL)
     @ToString.Exclude

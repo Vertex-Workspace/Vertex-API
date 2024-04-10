@@ -26,7 +26,7 @@ public class ProjectSearchDTO {
         this.name = project.getName();
         this.description = project.getDescription();
 
-        if (!Objects.isNull(project.getFile())) this.image = project.getFile().getFile();
+        if (!Objects.isNull(project.getImage())) this.image = project.getImage();
 
         this.kindAsString = "Projeto";
     }

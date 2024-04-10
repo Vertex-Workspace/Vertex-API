@@ -23,8 +23,9 @@ public class ProjectController {
     @PostMapping("/{teamId}")
     public ResponseEntity<?> save(@RequestBody ProjectCreateDTO project, @PathVariable Long teamId){
         try {
-            return new ResponseEntity<>(projectService.save(project, teamId), HttpStatus.CREATED);
+            return new ResponseEntity<>(projectService.saveWithRelationOfProject(project, teamId), HttpStatus.CREATED);
         }catch(Exception e){
+            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
@@ -100,33 +101,6 @@ public class ProjectController {
         }
     }
 
-    @GetMapping("/{teamId}/{userId}")
-    public ResponseEntity<?> getProjectsByCollaborators(@PathVariable Long teamId, @PathVariable Long userId){
-        try {
-            return new ResponseEntity<>(projectService.getAllByTeamAndCollaborators(teamId, userId), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-    }
-
-    @GetMapping("/users/{projectId}")
-    public ResponseEntity<?> getCollaborators(@PathVariable Long projectId){
-        try {
-            return new ResponseEntity<>(projectService.getUsersByProject(projectId), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-    }
-
-    @GetMapping("/groups/{projectId}")
-    public ResponseEntity<?> getGroups(@PathVariable Long projectId){
-        try {
-            return new ResponseEntity<>(projectService.getGroupsByProject(projectId), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-    }
-
     @PatchMapping("/update")
     public ResponseEntity<?> updateProject (@RequestBody ProjectEditDTO projectEditDTO){
         try {
@@ -155,6 +129,15 @@ public class ProjectController {
         } catch (Exception e) {
             return new ResponseEntity<>
                     (HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping("/{teamId}/{userId}")
+    public ResponseEntity<?> getProjectsByCollaborators(@PathVariable Long teamId, @PathVariable Long userId){
+        try {
+            return new ResponseEntity<>(projectService.getAllByTeamAndCollaborators(teamId, userId), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 
