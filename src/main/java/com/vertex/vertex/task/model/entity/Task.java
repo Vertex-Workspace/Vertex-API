@@ -59,7 +59,7 @@ public class Task implements FileSupporter {
     @ToString.Exclude
     private Task taskDependency;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Chat chat;
 
     boolean chatCreated;
@@ -73,7 +73,7 @@ public class Task implements FileSupporter {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "task", orphanRemoval = true)
     private List<Value> values;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files;
 
     @OneToMany(cascade = CascadeType.ALL)

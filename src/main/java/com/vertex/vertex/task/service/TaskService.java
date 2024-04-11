@@ -3,8 +3,10 @@ package com.vertex.vertex.task.service;
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.log.model.exception.EntityDoesntExistException;
+import com.vertex.vertex.notification.entity.model.LogRecord;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.entity.service.NotificationService;
+import com.vertex.vertex.notification.repository.LogRepository;
 import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
@@ -60,7 +62,7 @@ public class TaskService {
     private final ReviewRepository reviewRepository;
     private final FileService fileService;
     private final NotificationService notificationService;
-
+    private final LogRepository logRepository;
 
     public Task save(TaskCreateDTO taskCreateDTO) {
         Task task = new Task();
@@ -160,6 +162,13 @@ public class TaskService {
     }
 
     public void deleteById(Long id) {
+        Task task = findById(id);
+        for(LogRecord logRecord: task.getLog()){
+            task.setLog(null);
+            logRecord.setTask(null);
+            logRepository.delete(logRecord);
+        }
+
         taskRepository.deleteById(id);
     }
 

@@ -2,8 +2,10 @@ package com.vertex.vertex.project.service;
 
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
+import com.vertex.vertex.notification.entity.model.LogRecord;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.entity.service.NotificationService;
+import com.vertex.vertex.notification.repository.LogRepository;
 import com.vertex.vertex.project.model.DTO.*;
 import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
@@ -15,6 +17,7 @@ import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.relations.comment.model.entity.Comment;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.value.service.ValueService;
@@ -42,6 +45,7 @@ public class ProjectService {
     private final FileService fileService;
     private final NotificationService notificationService;
     private final ModelMapper mapper;
+    private final LogRepository logRepository;
 
     public Project saveWithRelationOfProject(ProjectCreateDTO projectCreateDTO, Long teamId) {
         Project project = new Project();
