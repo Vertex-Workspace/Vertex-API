@@ -87,11 +87,10 @@ public class TaskController {
 
     @GetMapping("/info/{taskID}")
     public ResponseEntity<?> getTaskInfos(@PathVariable Long taskID) {
-        try
-        {
+        try {
             return new ResponseEntity<>
                     (taskService.getTaskInfos(taskID), HttpStatus.OK);
-        }catch (Exception e){
+        } catch (Exception e){
             return new ResponseEntity<>
                     (e.getMessage(),
                             HttpStatus.NOT_FOUND);

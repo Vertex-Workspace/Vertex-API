@@ -16,7 +16,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @Inheritance(strategy = InheritanceType.JOINED)
 @JsonDeserialize(using = ValueDeserializer.class)
-public abstract class Value{
+public abstract class Value {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
