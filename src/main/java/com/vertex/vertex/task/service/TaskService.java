@@ -291,11 +291,12 @@ public class TaskService {
     public Task uploadFile(MultipartFile multipartFile, Long id, Long userThatSentID) {
         try {
             Task task = findById(id);
-            fileService.save(multipartFile, task);
+            File file = fileService.save(multipartFile, task);
             UserTeam ut = userTeamService.findUserTeamByComposeId(
                     task.getProject().getTeam().getId(),
                     userThatSentID
             );
+            task.getFiles().add(file);
             notificationService.saveLogRecord(task, "adicionou um anexo à tarefa", ut);
 
             //Notifications

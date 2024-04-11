@@ -82,11 +82,11 @@ public class Task implements FileSupporter {
 
     @OneToMany(cascade = CascadeType.ALL)
     @ToString.Exclude
-    private List<LogRecord> log = new ArrayList<>();
+    private List<LogRecord> log;
 
     @ManyToMany
     @JsonIgnore
-    List<Group> groups;
+    private List<Group> groups;
 
     public String getModifiedAttributeDescription
             (TaskEditDTO dto) {
@@ -116,6 +116,7 @@ public class Task implements FileSupporter {
         this.taskResponsables
                 = List.of(new TaskResponsable(creator, this));
 
+        this.files = new ArrayList<>();
         this.log = (List.of
                 (new LogRecord(this,
                         "A tarefa foi criada")));
