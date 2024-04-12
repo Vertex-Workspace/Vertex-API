@@ -61,7 +61,7 @@ public class UserService {
     public User save(UserDTO userDTO) {
         User user = new User();
         BeanUtils.copyProperties(userDTO, user);
-        User userEmailWithNoEdition = userRepository.findByEmail(user.getEmail());
+        User userEmailWithNoEdition = findByEmail(user.getEmail());
 
         boolean validEmail = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
                 .matcher(user.getEmail())
@@ -74,7 +74,7 @@ public class UserService {
         if (userEmailWithNoEdition != null && user.getEmail().equals(userEmailWithNoEdition.getEmail())) {
             user.setEmail(userEmailWithNoEdition.getEmail());
 
-            User userFind = userRepository.findByEmail(userEmailWithNoEdition.getEmail());
+            User userFind = findByEmail(userEmailWithNoEdition.getEmail());
 
             if (userFind != null && user.getEmail().equals(userFind.getEmail())) {
                 throw new EmailAlreadyExistsException();
@@ -114,6 +114,14 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public User findByEmail(String email){
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if(userOptional.isPresent()){
+            return userOptional.get();
+        }
+        throw new RuntimeException("E-mail inexistente!");
+    }
+
     public User edit(UserEditionDTO userEditionDTO) throws Exception {
         User user = userRepository.findById(userEditionDTO.getId()).get();
         BeanUtils.copyProperties(userEditionDTO, user);
@@ -121,7 +129,7 @@ public class UserService {
     }
 
     public User patchUserFirstAccess(UserLoginDTO userLoginDTO) {
-        User user = userRepository.findByEmail(userLoginDTO.getEmail());
+        User user = findByEmail(userLoginDTO.getEmail());
         user.setFirstAccess(false);
         return userRepository.save(user);
     }
@@ -189,9 +197,6 @@ public class UserService {
         return dto;
     }
 
-    public User findByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
 
     public void deleteById(Long id) {
         if (!getUserRepository().existsById(id)) {
@@ -204,8 +209,7 @@ public class UserService {
     public User authenticate(UserLoginDTO dto) {
         if (userRepository.existsByEmail
                 (dto.getEmail())) {
-            User user =
-                    userRepository.findByEmail(dto.getEmail());
+            User user = findByEmail(dto.getEmail());
             if (user.getPassword()
                     .equals(dto.getPassword())) {
                 return user;
