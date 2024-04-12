@@ -151,21 +151,22 @@ public class TaskController {
         }
     }
 
-    @GetMapping("/project/{id}")
-    public ResponseEntity<?> findAllByProject(
-            @PathVariable Long id) {
-        try {
-            return new ResponseEntity<>(
-                    taskService.getAllByProject(id),
-                        HttpStatus.OK);
-
-        } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>(
-                    "Projeto não encontrado!",
-                        HttpStatus.NOT_FOUND
-            );
-        }
-    }
+//    @GetMapping("/project/{id}/user/{userID}")
+//    public ResponseEntity<?> findAllByProject(
+//            @PathVariable Long id,
+//            @PathVariable Long userID) {
+//        try {
+//            return new ResponseEntity<>(
+//                    taskService.getAllByProject(id, userID),
+//                        HttpStatus.OK);
+//
+//        } catch (EntityNotFoundException e) {
+//            return new ResponseEntity<>(
+//                    "Projeto não encontrado!",
+//                        HttpStatus.NOT_FOUND
+//            );
+//        }
+//    }
 
     @PatchMapping("/{id}/upload/{userID}")
     public ResponseEntity<?> uploadFile(
