@@ -63,7 +63,7 @@ public class Task implements FileSupporter {
     @ToString.Exclude
     private Task taskDependency;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Chat chat;
 
     boolean chatCreated;
@@ -77,7 +77,7 @@ public class Task implements FileSupporter {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "task", orphanRemoval = true)
     private List<Value> values;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files;
 
     @OneToMany(cascade = CascadeType.ALL)
@@ -113,9 +113,6 @@ public class Task implements FileSupporter {
                 .equals(ProjectReviewENUM.MANDATORY));
 
         this.creator = creator;
-        this.taskResponsables
-                = List.of(new TaskResponsable(creator, this));
-
         this.files = new ArrayList<>();
         this.log = (List.of
                 (new LogRecord(this,

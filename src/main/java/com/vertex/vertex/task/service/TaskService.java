@@ -6,6 +6,7 @@ import com.vertex.vertex.log.model.exception.EntityDoesntExistException;
 import com.vertex.vertex.notification.entity.model.LogRecord;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.entity.service.NotificationService;
+import com.vertex.vertex.notification.repository.LogRepository;
 import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
@@ -72,6 +73,8 @@ public class TaskService {
         UserTeam creator = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), taskCreateDTO.getCreator().getId());
         //create, copy attributes, set if is revisable, set creator and 1st responsible and start log
         Task task = new Task(taskCreateDTO, project, creator);
+        setResponsablesInTask(project, task);
+
 
         //When the task is created, every property is associated with a null value, unless it has a default value
         valueService.setTaskDefaultValues(task, project.getProperties());
@@ -89,6 +92,14 @@ public class TaskService {
         }
 
         return save(task);
+
+
+    public void setResponsablesInTask(Project project, Task task){
+        List<TaskResponsable> taskResponsables = new ArrayList<>();
+        for(UserTeam userTeam : project.getCollaborators()){
+            taskResponsables.add(new TaskResponsable(userTeam, task));
+        }
+        task.setTaskResponsables(taskResponsables);
     }
 
 
@@ -205,7 +216,6 @@ public class TaskService {
     public Task saveResponsables(TaskResponsablesDTO taskResponsableDTO) {
         Task task = findById(taskResponsableDTO.getTask().getId());
         taskResponsableDTO.setUserTeam(userTeamService.findById(taskResponsableDTO.getUserTeam().getId()));
-
         //update responsibles, send notifications and return saved task
         return updateResponsiblesSendNotifications(taskResponsableDTO, task);
     }
@@ -289,11 +299,14 @@ public class TaskService {
         try {
             Task task = findById(id);
             File file = fileService.save(multipartFile, task);
+
             UserTeam ut = userTeamService.findUserTeamByComposeId(
                     task.getProject().getTeam().getId(),
                     userThatSentID
             );
+
             task.getFiles().add(file);
+
             notificationService.saveLogRecord(task, "adicionou um anexo à tarefa", ut);
 
             //Notifications

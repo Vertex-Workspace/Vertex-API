@@ -6,6 +6,7 @@ import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.model.entity.Team;
+import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.permission.model.entity.Permission;
 import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
@@ -75,12 +76,25 @@ public class UserTeamService {
         throw new RuntimeException("Não existe um usuário com esse ID!");
     }
 
-    public void delete(Long teamID, Long userID) {
+    public Team delete(Long teamID, Long userID) {
         UserTeam userTeam = findUserTeamByComposeId(teamID, userID);
         if (userTeam.getUser().getNewMembersAndGroups()) {
             notificationService.groupAndTeam("Você foi removido(a) de " + userTeam.getTeam().getName(), userTeam);
         }
-        userTeamRepository.delete(findUserTeamByComposeId(teamID, userID));
+        removeUserTeamDependencies(userTeam);
+        return teamRepository.save(userTeam.getTeam());
+    }
+
+    public void removeUserTeamDependencies(UserTeam userTeam){
+        for (Group group : userTeam.getTeam().getGroups()){
+            if(userTeam.getGroups().contains(group)){
+                group.getUserTeams().remove(userTeam);
+            }
+        }
+        Team team = userTeam.getTeam();
+        team.getUserTeams().remove(userTeam);
+        team.getChat().getUserTeams().remove(userTeam);
+        userTeam.getChats().forEach(chat -> chat.getUserTeams().remove(userTeam));
     }
 
     public List<UserTeam> findAllByUserAndQuery(Long userId, String query) {
