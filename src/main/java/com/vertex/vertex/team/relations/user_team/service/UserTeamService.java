@@ -3,6 +3,7 @@ package com.vertex.vertex.team.relations.user_team.service;
 import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.model.entity.Team;
+import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.permission.model.entity.Permission;
 import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
@@ -16,6 +17,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -60,22 +62,36 @@ public class UserTeamService {
         return userTeamRepository.findAllByTeam_Id(teamId);
     }
 
-    public UserTeam findById(Long userTeamId) {
-        Optional<UserTeam> userTeamOptional = userTeamRepository.findById(userTeamId);
-        if (userTeamOptional.isPresent()) {
-            return userTeamOptional.get();
+    public UserTeam findById(Long userTeamId){
+        Optional<UserTeam> ut = userTeamRepository.findById(userTeamId);
+
+        if (ut.isPresent()) {
+            return ut.get();
         }
-        throw new RuntimeException("User team não encontrado!");
+
+        throw new RuntimeException("Não existe um usuário com esse ID!");
     }
 
-    public void delete(Long teamID, Long userID) {
+    public Team delete(Long teamID, Long userID) {
         UserTeam userTeam = findUserTeamByComposeId(teamID, userID);
         if (userTeam.getUser().getNewMembersAndGroups()) {
             notificationService.groupAndTeam("Você foi removido(a) de " + userTeam.getTeam().getName(), userTeam);
         }
-        userTeamRepository.delete(findUserTeamByComposeId(teamID, userID));
+        removeUserTeamDependencies(userTeam);
+        return teamRepository.save(userTeam.getTeam());
     }
 
+    public void removeUserTeamDependencies(UserTeam userTeam){
+        for (Group group : userTeam.getTeam().getGroups()){
+            if(userTeam.getGroups().contains(group)){
+                group.getUserTeams().remove(userTeam);
+            }
+        }
+        Team team = userTeam.getTeam();
+        team.getUserTeams().remove(userTeam);
+        team.getChat().getUserTeams().remove(userTeam);
+        userTeam.getChats().forEach(chat -> chat.getUserTeams().remove(userTeam));
+    }
 
     public List<UserTeam> findAllByUserAndQuery(Long userId, String query) {
         return userTeamRepository
@@ -83,6 +99,11 @@ public class UserTeamService {
     }
 
     public List<UserTeam> findAllUserTeamByUserId(Long userId) {
+        return userTeamRepository
+                .findAllByUser_Id(userId);
+    }
+
+    public List<UserTeam> findAllByUser(Long userId) {
         return userTeamRepository
                 .findAllByUser_Id(userId);
     }

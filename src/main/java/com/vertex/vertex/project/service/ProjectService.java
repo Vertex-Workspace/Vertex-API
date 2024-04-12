@@ -21,6 +21,7 @@ import com.vertex.vertex.task.relations.comment.model.entity.Comment;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.value.service.ValueService;
+import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
@@ -113,11 +114,13 @@ public class ProjectService {
     }
 
     public Project findById(Long id) {
-        Optional<Project> optionalProject = projectRepository.findById(id);
-        if(optionalProject.isPresent()){
-            return optionalProject.get();
+        Optional<Project> p = projectRepository.findById(id);
+
+        if (p.isPresent()) {
+            return p.get();
         }
-        throw new RuntimeException("Project not found");
+
+        throw new RuntimeException("There isn't a project with this id is not linked with the current team!");
     }
 
     public ProjectOneDTO findProjectById(Long id) {
