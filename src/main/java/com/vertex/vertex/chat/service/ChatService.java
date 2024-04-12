@@ -5,12 +5,15 @@ import com.vertex.vertex.chat.relations.message.Message;
 import com.vertex.vertex.chat.relations.message.MessageRepository;
 import com.vertex.vertex.chat.repository.ChatRepository;
 import com.vertex.vertex.file.model.File;
+import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.repository.UserRepository;
+import com.vertex.vertex.user.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +24,7 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,11 +33,20 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
     private final UserTeamService userTeamService;
-    private final UserRepository userRepository;
+    private final TaskService taskService;
 
-
-    public List<Chat> findAll() {
-        return chatRepository.findAll();
+    public List<Chat> findAllByUser(User user) {
+        List<Chat> allChatsOfUser = new ArrayList<>();
+        chatRepository.findAll().forEach(chat -> {
+            chat.getUserTeams().forEach(userTeam -> {
+                if (userTeam.getUser().getId() == user.getId()){
+                    if (chat.getUserTeams().size() > 1){
+                        allChatsOfUser.add(chat);
+                    }
+                }
+            });
+        });
+        return allChatsOfUser;
     }
 
     public Chat create(Chat chat) {
@@ -51,9 +64,9 @@ public class ChatService {
         return chatRepository.save(chat);
     }
 
-    public Chat patchMessages(Long idChat, Long idUser, Message message) {
+    public Chat patchMessages(Long idChat, User user, Message message) {
         Chat chat = chatRepository.findById(idChat).get();
-        User user = userRepository.findById(idUser).get();
+
 
 
         Message message1 = new Message();
@@ -86,6 +99,24 @@ public class ChatService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public Task createChatOfTask(Long idTask){
+        Task task = taskService.findById(idTask);
+        List<UserTeam> userTeamsList = new ArrayList<>();
+        task.getTaskResponsables().forEach(taskResponsable ->{
+            userTeamsList.add(taskResponsable.getUserTeam());
+        });
+
+        Chat chat = new Chat();
+        chat.setName(task.getName());
+        chat.setUserTeams(userTeamsList);
+        chat.setMessages(new ArrayList<>());
+        task.setChatCreated(true);
+        task.setChat(chat);
+        create(chat);
+
+        return task;
     }
 
     public Chat save(Chat chat){

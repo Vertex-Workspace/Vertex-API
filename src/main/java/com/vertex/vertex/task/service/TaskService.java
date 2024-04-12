@@ -4,7 +4,7 @@ import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.log.model.exception.EntityDoesntExistException;
 import com.vertex.vertex.notification.entity.model.Notification;
-import com.vertex.vertex.notification.entity.service.NotificationService;
+import com.vertex.vertex.notification.service.NotificationService;
 import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
@@ -29,7 +29,6 @@ import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
-import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
@@ -211,7 +210,7 @@ public class TaskService {
         Task taskTest = taskRepository.save(task);
 
         //Notifications
-        for (TaskResponsable taskResponsableFor : task.getTaskResponsables()) {
+        for (TaskResponsable taskResponsableFor : taskTest.getTaskResponsables()) {
             if (!taskResponsableFor.getUserTeam().equals(userTeam) && taskResponsableFor.getUserTeam().getUser().getAnyUpdateOnTask()) {
                 notificationService.save(new Notification(
                         task.getProject(),

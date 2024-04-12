@@ -1,7 +1,6 @@
 package com.vertex.vertex.team.relations.group.service;
 
-import com.vertex.vertex.notification.entity.service.NotificationService;
-import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
+import com.vertex.vertex.notification.service.NotificationService;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.group.model.DTO.AddUsersDTO;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
@@ -9,9 +8,7 @@ import com.vertex.vertex.team.relations.group.repository.GroupRepository;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.repository.TeamRepository;
-import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.user.model.entity.User;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

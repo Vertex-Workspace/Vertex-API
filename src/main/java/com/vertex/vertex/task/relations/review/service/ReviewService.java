@@ -1,7 +1,7 @@
 package com.vertex.vertex.task.relations.review.service;
 
 import com.vertex.vertex.notification.entity.model.Notification;
-import com.vertex.vertex.notification.entity.service.NotificationService;
+import com.vertex.vertex.notification.service.NotificationService;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.task.model.DTO.TaskWaitingToReviewDTO;

@@ -1,4 +1,4 @@
-package com.vertex.vertex.notification.entity.service;
+package com.vertex.vertex.notification.service;
 
 
 import com.vertex.vertex.config.handler.UsedWebSocketHandler;
@@ -9,13 +9,19 @@ import com.vertex.vertex.notification.repository.LogRepository;
 import com.vertex.vertex.notification.repository.NotificationRepository;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
+import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user.repository.UserRepository;
+import com.vertex.vertex.user.service.UserService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
+import java.util.function.Function;
 
 @Service
 @AllArgsConstructor
@@ -24,6 +30,7 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final UsedWebSocketHandler usedWebSocketHandler;
     private final LogRepository logRepository;
+    private final UserRepository userRepository;
     private final ModelMapper mapper;
 
     public Notification save(Notification notification) {
@@ -55,7 +62,6 @@ public class NotificationService {
         notificationRepository.delete(notification);
     }
 
-
     public List<Notification> getNotificationsByUser(Long userID) {
         return notificationRepository.findAllByUser_IdOrderByIdDesc(userID);
     }
@@ -75,6 +81,59 @@ public class NotificationService {
         try {
             usedWebSocketHandler.sendNotification(userID);
         } catch (IOException ignored) {}
+    }
+
+// =============================================================
+// Refactored
+    public List<Notification> getUserNotifications(Long userID){
+        User user = userRepository.findById(userID).get();
+        return getNotificationsByUser(userID);
+    }
+
+    public void readNotifications(Long userID, List<Notification> notifications){
+        User user = userRepository.findById(userID).get();
+        for (Notification notification : notifications) {
+            notification.setIsRead(!notification.getIsRead());
+            notification.setUser(user);
+            update(notification);
+        }
+        webSocket(userID);
+    }
+
+    public void deleteNotifications(Long userID, List<Notification> notifications){
+        User user = userRepository.findById(userID).get();
+        for (Notification notification : notifications) {
+            for (Notification userNotification : user.getNotifications()){
+                if(notification.getId().equals(userNotification.getId())){
+                    delete(notification);
+                }
+            }
+        }
+        webSocket(userID);
+    }
+    public User changeNotificationSettings(Long userID, Integer notificationID) throws NoSuchMethodException {
+        User user = userRepository.findById(userID).get();
+
+        List<String> methods = List.of(
+                "TaskReview","NewMembersAndGroups","PermissionsChanged",
+                "ResponsibleInProjectOrTask","AnyUpdateOnTask","SendToEmail"
+        );
+
+        Function<String, Void> variable = method -> {
+            try {
+                Method setMethod = user.getClass().getMethod("set" + method, Boolean.class);
+                Method getMethod = user.getClass().getMethod("get" + method);
+                //Get the current boolean value
+                Boolean currentValue = (Boolean) getMethod.invoke(user);
+                //Invoke the choice value
+                setMethod.invoke(user, !currentValue);
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+            return null;
+        };
+        variable.apply(methods.get(notificationID-1));
+        return userRepository.save(user);
     }
 
     private void sendToEmail(Notification notification) {

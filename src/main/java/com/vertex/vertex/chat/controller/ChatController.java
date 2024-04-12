@@ -4,6 +4,8 @@ import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.chat.relations.message.Message;
 import com.vertex.vertex.chat.service.ChatService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
+import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.http.HttpStatus;
@@ -24,12 +26,13 @@ import java.util.List;
 public class ChatController {
 
     private final ChatService chatService;
+    private final UserService userService;
 
     @PatchMapping("/chat/{idChat}")
     public ResponseEntity<Chat> patchChat(@PathVariable Long idChat, @RequestBody UserTeamAssociateDTO userTeam){
         try {
             System.out.println(userTeam);
-            this.chatService.patchUserTeams(idChat,userTeam);
+            chatService.patchUserTeams(idChat,userTeam);
             return new ResponseEntity<>( HttpStatus.CREATED);
         }catch (Exception e){
             e.printStackTrace();
@@ -57,7 +60,7 @@ public class ChatController {
                                               @RequestBody Message message){
         System.out.println("a"+idChat);
         try {
-            return new ResponseEntity<>(chatService.patchMessages(idChat,idUser,message),HttpStatus.OK);
+            return new ResponseEntity<>(chatService.patchMessages(idChat,userService.findById(idUser),message),HttpStatus.OK);
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.CONFLICT);
@@ -76,10 +79,11 @@ public class ChatController {
         return new ResponseEntity<>(chatService.saveFile(chatId,file,user), HttpStatus.OK);
     }
 
-    @GetMapping()
-    public ResponseEntity<List<Chat>> findAllChats(){
+    @GetMapping("/allChatsOfUser/{id}")
+    public ResponseEntity<List<Chat>> findAllChatsByUser(@PathVariable Long id){
+
         try {
-            return new ResponseEntity<>(this.chatService.findAll(),HttpStatus.OK);
+            return new ResponseEntity<>(chatService.findAllByUser(userService.findById(id)),HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
