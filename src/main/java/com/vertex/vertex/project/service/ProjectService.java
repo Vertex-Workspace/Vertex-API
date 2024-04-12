@@ -19,6 +19,7 @@ import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.relations.value.service.ValueService;
+import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
@@ -110,11 +111,13 @@ public class ProjectService {
     }
 
     public Project findById(Long id) {
-        Optional<Project> optionalProject = projectRepository.findById(id);
-        if(optionalProject.isPresent()){
-            return optionalProject.get();
+        Optional<Project> p = projectRepository.findById(id);
+
+        if (p.isPresent()) {
+            return p.get();
         }
-        throw new RuntimeException("Project not found");
+
+        throw new RuntimeException("There isn't a project with this id is not linked with the current team!");
     }
 
     public ProjectOneDTO findProjectById(Long id, Long userID) {
@@ -213,11 +216,17 @@ public class ProjectService {
 
         List<UserTeam> userTeamsToAdd = new ArrayList<>();
 
+        if(projectEditDTO.getUsers()!=null){
         for (User user : projectEditDTO.getUsers()) {
             UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), user.getId());
             userTeamsToAdd.add(userTeam1);
         }
+        }
         notificationOfUpdateCollaborators(userTeamsToAdd, project);
+
+        if(!userTeamsToAdd.contains(project.getCreator())){
+            userTeamsToAdd.add(project.getCreator());
+        }
 
         project.setCollaborators(userTeamsToAdd);
         project.setGroups(projectEditDTO.getGroups());
