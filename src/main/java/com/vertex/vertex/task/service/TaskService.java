@@ -91,6 +91,7 @@ public class TaskService {
         }
 
         return save(task);
+    }
 
 
     public void setResponsablesInTask(Project project, Task task){
