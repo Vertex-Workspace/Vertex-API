@@ -20,6 +20,7 @@ import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
+import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.team.model.entity.Team;
@@ -123,30 +124,29 @@ public class ProjectService {
         throw new RuntimeException("There isn't a project with this id is not linked with the current team!");
     }
 
-    public ProjectOneDTO findProjectById(Long id) {
+    public ProjectOneDTO findProjectById(Long id, Long userID) {
         Project project = findById(id);
         ProjectOneDTO projectOneDTO = new ProjectOneDTO(project);
 
-        //To Set as null
-        projectOneDTO.setTasks(new ArrayList<>());
-
         //Pass through all tasks of the project and validates if task has an opened review (UNDERANALYSIS)
         //If it has, It won't be included into list
-        for (Task task : project.getTasks()) {
-            boolean isReviewed = false;
-            for (Review review : task.getReviews()) {
-                if (review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)
-                ) {
-                    isReviewed = true;
-                    break;
-                }
-            }
-            if (!isReviewed) {
-                projectOneDTO.getTasks().add(task);
-            }
-        }
+        projectOneDTO.setTasks(getTasksProjectByResponsibility(projectOneDTO.getTasks(),
+                userTeamService.findUserTeamByComposeId(project.getTeam().getId(), userID)));
+
         projectOneDTO.setIdTeam(project.getTeam().getId());
         return projectOneDTO;
+    }
+
+    private List<Task> getTasksProjectByResponsibility(List<Task> tasks, UserTeam userTeam){
+        return tasks
+                .stream()
+                .flatMap(task -> task.getTaskResponsables().stream())
+                .filter(tr -> tr.getUserTeam().equals(userTeam))
+                .map(TaskResponsable::getTask)
+                .flatMap(task -> task.getReviews().stream())
+                .filter(review -> !review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS))
+                .map(Review::getTask)
+                .toList();
     }
 
     public void deleteById(Long id) {

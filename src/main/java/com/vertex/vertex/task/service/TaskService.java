@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -90,7 +91,7 @@ public class TaskService {
         }
 
         return save(task);
-    }
+
 
     public void setResponsablesInTask(Project project, Task task){
         List<TaskResponsable> taskResponsables = new ArrayList<>();
@@ -214,7 +215,6 @@ public class TaskService {
     public Task saveResponsables(TaskResponsablesDTO taskResponsableDTO) {
         Task task = findById(taskResponsableDTO.getTask().getId());
         taskResponsableDTO.setUserTeam(userTeamService.findById(taskResponsableDTO.getUserTeam().getId()));
-
         //update responsibles, send notifications and return saved task
         return updateResponsiblesSendNotifications(taskResponsableDTO, task);
     }
@@ -262,17 +262,6 @@ public class TaskService {
     }
 
 
-    public List<Task> getAllByProject(Long id) {
-        try {
-            Project project = projectService.findById(id);
-            return project.getTasks();
-
-        } catch (Exception e) {
-            throw new EntityNotFoundException();
-        }
-
-    }
-
     public TaskOpenDTO getTaskInfos(Long taskID) {
         Task task = findById(taskID);
         String fullName = task.getCreator().getUser().getFirstName() + " " + task.getCreator().getUser().getLastName();
@@ -283,16 +272,23 @@ public class TaskService {
                 , task.getProject().getProjectReviewENUM());
     }
 
+    private List<Task> filterTasksByResponsible(List<Task> tasks, UserTeam userTeam){
+        return tasks.stream()
+                .flatMap(task -> task.getTaskResponsables()
+                        .stream()
+                                .filter(tr -> tr.getUserTeam().equals(userTeam))
+                ).map(TaskResponsable::getTask)
+                .toList();
+    }
+
     public List<Task> getAllByUser(Long userID) {
         try {
-            List<UserTeam> uts = userTeamService.findAllUserTeamByUserId(userID);
-
-            return uts.stream()
-                    .flatMap(ut -> ut.getTeam()
-                            .getProjects().stream()
-                            .flatMap(p -> p.getTasks().stream()))
+            return userTeamService.findAllUserTeamByUserId(userID)
+                    .stream()
+                    .flatMap(ut -> ut.getTeam().getProjects().stream()
+                            .flatMap(p -> filterTasksByResponsible(p.getTasks(), ut).stream())
+                            )
                     .toList();
-
         } catch (Exception e) {
             throw new RuntimeException();
         }
@@ -301,11 +297,15 @@ public class TaskService {
     public Task uploadFile(MultipartFile multipartFile, Long id, Long userThatSentID) {
         try {
             Task task = findById(id);
-            fileService.save(multipartFile, task);
+            File file = fileService.save(multipartFile, task);
+
             UserTeam ut = userTeamService.findUserTeamByComposeId(
                     task.getProject().getTeam().getId(),
                     userThatSentID
             );
+
+            task.getFiles().add(file);
+
             notificationService.saveLogRecord(task, "adicionou um anexo à tarefa", ut);
 
             //Notifications
