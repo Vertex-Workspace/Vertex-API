@@ -127,12 +127,14 @@ public class UserTeamService {
             UserTeam savedUserTeam = save(new UserTeam(user, team));
 
             team.getUserTeams().add(savedUserTeam);
-
-//            Set the Creator
+//
+////            Set the Creator
             if (team.getCreator() == null && userTeam.isCreator()) {
                 team.setCreator(savedUserTeam);
             }
-            //Permissions Default
+
+//            //Permissions Default
+            teamRepository.save(team);
             permissionService.save(savedUserTeam);
             team.getChat().getUserTeams().add(savedUserTeam);
 
@@ -147,7 +149,8 @@ public class UserTeamService {
                     notificationService.groupAndTeam(savedUserTeam.getUser().getFullName() + " entrou em " + team.getName(), userTeamFor);
                 }
             }
-            return teamRepository.save(team);
+
+            return team;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
