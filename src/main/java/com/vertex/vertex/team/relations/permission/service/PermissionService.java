@@ -31,9 +31,13 @@ public class PermissionService {
     private final NotificationService notificationService;
 
     public void save(UserTeam userTeam) {
-        userTeam.setPermissionUser
-                (new Permission()
-                        .createBasicPermissions(userTeam, userTeam.getTeam().getCreator().equals(userTeam)));
+        try {
+            userTeam.setPermissionUser
+                    (new Permission()
+                            .createBasicPermissions(userTeam, userTeam.getTeam().getCreator().equals(userTeam)));
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
     public void changeEnabled(Long permissionId){

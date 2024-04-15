@@ -72,11 +72,7 @@ public class TaskService {
         UserTeam creator = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), taskCreateDTO.getCreator().getId());
         //create, copy attributes, set if is revisable, set creator and 1st responsible and start log
         Task task = new Task(taskCreateDTO, project, creator);
-        List<TaskResponsable> taskResponsables = new ArrayList<>();
-        for(UserTeam userTeam : project.getCollaborators()){
-            taskResponsables.add(new TaskResponsable(userTeam, task));
-        }
-        task.setTaskResponsables(taskResponsables);
+        setResponsablesInTask(project, task);
 
         //When the task is created, every property is associated with a null value, unless it has a default value
         valueService.setTaskDefaultValues(task, project.getProperties());

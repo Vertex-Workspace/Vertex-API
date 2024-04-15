@@ -63,14 +63,7 @@ public class UserService {
         BeanUtils.copyProperties(userDTO, user);
         User userEmailWithNoEdition = userRepository.findByEmail(user.getEmail());
 
-        boolean validEmail = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
-                .matcher(user.getEmail())
-                .find();
-
-        if (!validEmail) {
-            throw new InvalidEmailException();
-        }
-
+        emailValidation(user);
         if (userEmailWithNoEdition != null && user.getEmail().equals(userEmailWithNoEdition.getEmail())) {
             user.setEmail(userEmailWithNoEdition.getEmail());
 
@@ -114,9 +107,20 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    private void emailValidation(User user){
+        boolean validEmail = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+                .matcher(user.getEmail())
+                .find();
+
+        if (!validEmail) {
+            throw new InvalidEmailException();
+        }
+    }
+
     public User edit(UserEditionDTO userEditionDTO) throws Exception {
         User user = userRepository.findById(userEditionDTO.getId()).get();
         BeanUtils.copyProperties(userEditionDTO, user);
+        emailValidation(user);
         return userRepository.save(user);
     }
 
