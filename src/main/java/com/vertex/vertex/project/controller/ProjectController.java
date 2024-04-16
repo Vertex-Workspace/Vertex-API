@@ -25,16 +25,16 @@ public class ProjectController {
         try {
             return new ResponseEntity<>(projectService.saveWithRelationOfProject(project, teamId), HttpStatus.CREATED);
         }catch(Exception e){
-            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> findProjectById(@PathVariable Long id){
+    @GetMapping("/{id}/user/{userID}")
+    public ResponseEntity<?> findProjectById(@PathVariable Long id, @PathVariable Long userID){
         try{
-            return new ResponseEntity<>(projectService.findProjectById(id), HttpStatus.OK);
+            return new ResponseEntity<>(projectService.findProjectById(id, userID), HttpStatus.OK);
         }catch(Exception e){
+            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
@@ -106,6 +106,7 @@ public class ProjectController {
         try {
             return new ResponseEntity<>(projectService.updateProjectCollaborators(projectEditDTO), HttpStatus.OK);
         }catch(Exception e){
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }

@@ -23,7 +23,6 @@ public class File {
     private Long id;
 
     private String name;
-
     private String type;
 
     @Lob

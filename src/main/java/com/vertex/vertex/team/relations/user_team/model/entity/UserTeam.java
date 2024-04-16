@@ -47,7 +47,7 @@ public class UserTeam {
     @ToString.Exclude
     private List<Permission> permissionUser;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JsonIgnore
     @ToString.Exclude
     private List<Group> groups;

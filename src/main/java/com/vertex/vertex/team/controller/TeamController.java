@@ -106,12 +106,13 @@ public class TeamController {
         }
     }
 
-    @GetMapping("/tasks/{id}")
+    @GetMapping("/tasks/{id}/user/{userID}")
     public ResponseEntity<?> findAllTasksByTeam(
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            @PathVariable Long userID) {
         try {
             return new ResponseEntity<>(
-                    teamService.getAllTasksByTeam(id),
+                    teamService.getAllTasksByTeam(id, userID),
                     HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(
