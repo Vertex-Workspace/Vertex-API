@@ -22,14 +22,9 @@ public class NoteController {
     @GetMapping("/{projectId}")
     public ResponseEntity<List<NoteDTO>> findAllByProject(
             Long projectId) {
-        try {
-            return new ResponseEntity<>
-                    (noteService.findAllByProject(projectId),
-                            HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>
-                    (HttpStatus.CONFLICT);
-        }
+        return new ResponseEntity<>
+                (noteService.findAllByProject(projectId),
+                        HttpStatus.OK);
     }
 
     @PostMapping("/{projectId}/{userId}")

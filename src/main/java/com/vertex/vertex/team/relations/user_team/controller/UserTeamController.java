@@ -47,9 +47,9 @@ public class UserTeamController {
     @DeleteMapping("/team/user-team/{teamId}/{userId}")
     public ResponseEntity<?> deleteUserTeam(@PathVariable Long userId, @PathVariable Long teamId){
         try{
-            return new ResponseEntity<>(userTeamService.delete(teamId, userId), HttpStatus.OK);
+            userTeamService.delete(teamId, userId);
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch(Exception e){
-            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }

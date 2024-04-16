@@ -53,7 +53,6 @@ public class TaskController {
         try{
             return new ResponseEntity<>(taskService.save(taskCreateDTO), HttpStatus.OK);
         }catch(Exception e){
-            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
         }
     }
@@ -64,7 +63,6 @@ public class TaskController {
             taskService.deleteById(id);
             return new ResponseEntity<>(true, HttpStatus.OK);
         } catch (Exception e){
-            e.printStackTrace();
             return new ResponseEntity<>(false, HttpStatus.CONFLICT);
         }
     }
@@ -89,10 +87,11 @@ public class TaskController {
 
     @GetMapping("/info/{taskID}")
     public ResponseEntity<?> getTaskInfos(@PathVariable Long taskID) {
-        try {
+        try
+        {
             return new ResponseEntity<>
                     (taskService.getTaskInfos(taskID), HttpStatus.OK);
-        } catch (Exception e){
+        }catch (Exception e){
             return new ResponseEntity<>
                     (e.getMessage(),
                             HttpStatus.NOT_FOUND);
@@ -151,22 +150,21 @@ public class TaskController {
         }
     }
 
-//    @GetMapping("/project/{id}/user/{userID}")
-//    public ResponseEntity<?> findAllByProject(
-//            @PathVariable Long id,
-//            @PathVariable Long userID) {
-//        try {
-//            return new ResponseEntity<>(
-//                    taskService.getAllByProject(id, userID),
-//                        HttpStatus.OK);
-//
-//        } catch (EntityNotFoundException e) {
-//            return new ResponseEntity<>(
-//                    "Projeto não encontrado!",
-//                        HttpStatus.NOT_FOUND
-//            );
-//        }
-//    }
+    @GetMapping("/project/{id}")
+    public ResponseEntity<?> findAllByProject(
+            @PathVariable Long id) {
+        try {
+            return new ResponseEntity<>(
+                    taskService.getAllByProject(id),
+                        HttpStatus.OK);
+
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(
+                    "Projeto não encontrado!",
+                        HttpStatus.NOT_FOUND
+            );
+        }
+    }
 
     @PatchMapping("/{id}/upload/{userID}")
     public ResponseEntity<?> uploadFile(
@@ -204,7 +202,6 @@ public class TaskController {
         try{
             return new ResponseEntity<>(taskService.editTaskResponsables(updateTaskResponsableDTO), HttpStatus.OK);
         }catch(Exception e){
-            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
