@@ -34,6 +34,7 @@ public class ProjectController {
         try{
             return new ResponseEntity<>(projectService.findProjectById(id, userID), HttpStatus.OK);
         }catch(Exception e){
+            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }

@@ -4,11 +4,13 @@ import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.task.relations.note.model.entity.Note;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class NoteDTO {
 
     private Long id;

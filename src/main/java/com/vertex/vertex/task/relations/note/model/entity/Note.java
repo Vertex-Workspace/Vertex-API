@@ -60,7 +60,6 @@ public class Note implements FileSupporter {
         if (Objects.isNull(project.getNotes())) project.setNotes(List.of(this));
         else project.getNotes().add(this);
 
-        System.out.println(this);
     }
 
 }
