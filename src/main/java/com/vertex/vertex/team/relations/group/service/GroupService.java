@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import javax.swing.text.html.Option;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,14 +39,7 @@ public class GroupService {
 
 
     public void delete(Long id) {
-        Group group = findById(id);
-        List<UserTeam> userTeamToRemove = new ArrayList<>(group.getUserTeams());
-        for(UserTeam userTeam : userTeamToRemove){
-            group.getUserTeams().remove(userTeam);
-            userTeam.getGroups().remove(group);
-            userTeamService.save(userTeam);
-        }
-        groupRepository.deleteById(id);
+        groupRepository.delete(findById(id));
     }
 
     public void deleteUserFromGroup(Long userId, Long teamId, Long groupId) {

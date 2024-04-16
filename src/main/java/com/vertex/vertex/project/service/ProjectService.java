@@ -2,10 +2,8 @@ package com.vertex.vertex.project.service;
 
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
-import com.vertex.vertex.notification.entity.model.LogRecord;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.entity.service.NotificationService;
-import com.vertex.vertex.notification.repository.LogRepository;
 import com.vertex.vertex.project.model.DTO.*;
 import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
@@ -17,12 +15,9 @@ import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.task.model.entity.Task;
-import com.vertex.vertex.task.relations.comment.model.entity.Comment;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
-import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.relations.value.service.ValueService;
-import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
@@ -47,7 +42,6 @@ public class ProjectService {
     private final FileService fileService;
     private final NotificationService notificationService;
     private final ModelMapper mapper;
-    private final LogRepository logRepository;
 
     public Project saveWithRelationOfProject(ProjectCreateDTO projectCreateDTO, Long teamId) {
         Project project = new Project();
@@ -115,35 +109,37 @@ public class ProjectService {
     }
 
     public Project findById(Long id) {
-        Optional<Project> p = projectRepository.findById(id);
-
-        if (p.isPresent()) {
-            return p.get();
+        Optional<Project> optionalProject = projectRepository.findById(id);
+        if(optionalProject.isPresent()){
+            return optionalProject.get();
         }
-
-        throw new RuntimeException("There isn't a project with this id is not linked with the current team!");
+        throw new RuntimeException("Project not found");
     }
 
-    public ProjectOneDTO findProjectById(Long id, Long userID) {
+    public ProjectOneDTO findProjectById(Long id) {
         Project project = findById(id);
         ProjectOneDTO projectOneDTO = new ProjectOneDTO(project);
 
+        //To Set as null
+        projectOneDTO.setTasks(new ArrayList<>());
+
         //Pass through all tasks of the project and validates if task has an opened review (UNDERANALYSIS)
         //If it has, It won't be included into list
-        projectOneDTO.setTasks(getTasksProjectByResponsibility(projectOneDTO.getTasks(),
-                userTeamService.findUserTeamByComposeId(project.getTeam().getId(), userID)));
-
+        for (Task task : project.getTasks()) {
+            boolean isReviewed = false;
+            for (Review review : task.getReviews()) {
+                if (review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)
+                ) {
+                    isReviewed = true;
+                    break;
+                }
+            }
+            if (!isReviewed) {
+                projectOneDTO.getTasks().add(task);
+            }
+        }
         projectOneDTO.setIdTeam(project.getTeam().getId());
         return projectOneDTO;
-    }
-
-    private List<Task> getTasksProjectByResponsibility(List<Task> tasks, UserTeam userTeam){
-        return tasks
-                .stream()
-                .flatMap(task -> task.getTaskResponsables().stream())
-                .filter(tr -> tr.getUserTeam().equals(userTeam))
-                .map(TaskResponsable::getTask)
-                .toList();
     }
 
     public void deleteById(Long id) {
@@ -217,17 +213,11 @@ public class ProjectService {
 
         List<UserTeam> userTeamsToAdd = new ArrayList<>();
 
-        if(projectEditDTO.getUsers()!=null){
         for (User user : projectEditDTO.getUsers()) {
             UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), user.getId());
             userTeamsToAdd.add(userTeam1);
         }
-        }
         notificationOfUpdateCollaborators(userTeamsToAdd, project);
-
-        if(!userTeamsToAdd.contains(project.getCreator())){
-            userTeamsToAdd.add(project.getCreator());
-        }
 
         project.setCollaborators(userTeamsToAdd);
         project.setGroups(projectEditDTO.getGroups());

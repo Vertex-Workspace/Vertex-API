@@ -5,8 +5,6 @@ import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.model.FileSupporter;
 import com.vertex.vertex.notification.entity.model.LogRecord;
-import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
-import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.DTO.TaskEditDTO;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
 import com.vertex.vertex.project.model.entity.Project;
@@ -21,7 +19,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.springframework.beans.BeanUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +27,6 @@ import java.util.Objects;
 @Data
 @Entity
 @AllArgsConstructor
-@NoArgsConstructor
 public class Task implements FileSupporter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,7 +50,7 @@ public class Task implements FileSupporter {
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne
     @JsonIgnore
     @ToString.Exclude
     private Project project;
@@ -63,7 +59,7 @@ public class Task implements FileSupporter {
     @ToString.Exclude
     private Task taskDependency;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL)
     private Chat chat;
 
     boolean chatCreated;
@@ -77,16 +73,16 @@ public class Task implements FileSupporter {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "task", orphanRemoval = true)
     private List<Value> values;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL)
     private List<File> files;
 
     @OneToMany(cascade = CascadeType.ALL)
     @ToString.Exclude
-    private List<LogRecord> log;
+    private List<LogRecord> log = new ArrayList<>();
 
     @ManyToMany
     @JsonIgnore
-    private List<Group> groups;
+    List<Group> groups;
 
     public String getModifiedAttributeDescription
             (TaskEditDTO dto) {
@@ -105,25 +101,10 @@ public class Task implements FileSupporter {
         return true;
     }
 
-    public Task(TaskCreateDTO dto, Project project, UserTeam creator) {
-        BeanUtils.copyProperties(dto, this);
-
-        //Set if the task is revisable or no...
-        this.setRevisable(project.getProjectReviewENUM()
-                .equals(ProjectReviewENUM.MANDATORY));
-
-        this.creator = creator;
-        this.files = new ArrayList<>();
-        this.log = (List.of
+    public Task() {
+        setLog(List.of
                 (new LogRecord(this,
                         "A tarefa foi criada")));
 
-        this.project = project;
-        if (Objects.isNull(project.getTasks())) project.setTasks(List.of(this));
-        else project.getTasks().add(this);
-
-        System.out.println(project.getTasks());
-
     }
-
 }
