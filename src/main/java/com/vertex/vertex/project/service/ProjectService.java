@@ -143,9 +143,6 @@ public class ProjectService {
                 .flatMap(task -> task.getTaskResponsables().stream())
                 .filter(tr -> tr.getUserTeam().equals(userTeam))
                 .map(TaskResponsable::getTask)
-                .flatMap(task -> task.getReviews().stream())
-                .filter(review -> !review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS))
-                .map(Review::getTask)
                 .toList();
     }
 

@@ -54,7 +54,7 @@ public class Task implements FileSupporter {
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JsonIgnore
     @ToString.Exclude
     private Project project;
@@ -117,6 +117,12 @@ public class Task implements FileSupporter {
         this.log = (List.of
                 (new LogRecord(this,
                         "A tarefa foi criada")));
+
+        this.project = project;
+        if (Objects.isNull(project.getTasks())) project.setTasks(List.of(this));
+        else project.getTasks().add(this);
+
+        System.out.println(project.getTasks());
 
     }
 

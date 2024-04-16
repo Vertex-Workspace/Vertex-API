@@ -93,7 +93,6 @@ public class TaskService {
         return save(task);
     }
 
-
     public void setResponsablesInTask(Project project, Task task){
         List<TaskResponsable> taskResponsables = new ArrayList<>();
         for(UserTeam userTeam : project.getCollaborators()){
