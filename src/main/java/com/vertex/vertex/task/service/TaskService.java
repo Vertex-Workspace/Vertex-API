@@ -75,7 +75,6 @@ public class TaskService {
         Task task = new Task(taskCreateDTO, project, creator);
         setResponsablesInTask(project, task);
 
-
         //When the task is created, every property is associated with a null value, unless it has a default value
         valueService.setTaskDefaultValues(task, project.getProperties());
 
