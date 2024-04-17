@@ -3,6 +3,8 @@ package com.vertex.vertex.user.service;
 import com.vertex.vertex.log.model.exception.EntityDoesntExistException;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.entity.service.NotificationService;
+import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
+import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
 import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.PropertyList;
@@ -100,11 +102,10 @@ public class UserService {
         byte[] data = Base64.getDecoder().decode(userDTO.getImage());
         user.setImage(data);
         //creation of the default team
-//        TeamViewListDTO teamViewListDTO =
-//                new TeamViewListDTO("Equipe " + user.getFirstName(), user, null,
-//                        "“As boas equipes incorporam o trabalho em equipe na sua cultura, criando os elementos essenciais ao sucesso.” — Ted Sundquist, jogador de futebol americano.", null, true);
-//        teamService.save(teamViewListDTO);
-        return userRepository.save(user);
+        userRepository.save(user);
+        defaultTeams(user);
+
+        return user;
     }
 
     private void emailValidation(User user){
@@ -340,6 +341,23 @@ public class UserService {
         variable.apply(methods.get(notificationID-1));
 
         return userRepository.save(user);
+    }
+
+    public void defaultTeams(User user){
+        TeamViewListDTO teamViewListDTO =
+                new TeamViewListDTO("Equipe " + user.getFirstName(), user, null,
+                        "“As boas equipes incorporam o trabalho em equipe na sua cultura, criando os elementos essenciais ao sucesso.” — Ted Sundquist, jogador de futebol americano.", null, true);
+        teamService.save(teamViewListDTO);
+    }
+
+    public void setFirstAccessNull(Long userId){
+        try {
+            User user = findById(userId);
+            user.setFirstAccess(false);
+            userRepository.save(user);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
 }

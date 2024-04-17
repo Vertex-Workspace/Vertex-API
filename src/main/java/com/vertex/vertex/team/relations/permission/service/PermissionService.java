@@ -8,6 +8,7 @@ import com.vertex.vertex.team.relations.permission.model.entity.Permission;
 import com.vertex.vertex.team.relations.permission.model.enums.TypePermissions;
 import com.vertex.vertex.team.relations.permission.repository.PermissionRepository;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
+import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.repository.UserRepository;
@@ -29,12 +30,13 @@ public class PermissionService {
     private final PermissionRepository permissionRepository;
     private final ProjectRepository projectRepository;
     private final NotificationService notificationService;
+    private final UserTeamRepository userTeamRepository;
 
     public void save(UserTeam userTeam) {
         try {
-            userTeam.setPermissionUser
-                    (new Permission()
-                            .createBasicPermissions(userTeam, userTeam.getTeam().getCreator().equals(userTeam)));
+            List<Permission> permissions = new Permission()
+                    .createBasicPermissions(userTeam, userTeam.getTeam().getCreator().equals(userTeam));
+            userTeam.setPermissionUser(permissions);
         }catch(Exception e){
             e.printStackTrace();
         }

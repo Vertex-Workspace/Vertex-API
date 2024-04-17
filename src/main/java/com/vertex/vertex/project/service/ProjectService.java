@@ -47,7 +47,6 @@ public class ProjectService {
     private final FileService fileService;
     private final NotificationService notificationService;
     private final ModelMapper mapper;
-    private final LogRepository logRepository;
 
     public Project saveWithRelationOfProject(ProjectCreateDTO projectCreateDTO, Long teamId) {
         Project project = new Project();
@@ -130,10 +129,11 @@ public class ProjectService {
 
         //Pass through all tasks of the project and validates if task has an opened review (UNDERANALYSIS)
         //If it has, It won't be included into list
-        projectOneDTO.setTasks(getTasksProjectByResponsibility(projectOneDTO.getTasks(),
+        projectOneDTO.setTasks(getTasksProjectByResponsibility(project.getTasks(),
                 userTeamService.findUserTeamByComposeId(project.getTeam().getId(), userID)));
 
-        projectOneDTO.setIdTeam(project.getTeam().getId());
+        System.out.println(getTasksProjectByResponsibility(project.getTasks(),
+                userTeamService.findUserTeamByComposeId(project.getTeam().getId(), userID)));
         return projectOneDTO;
     }
 
@@ -143,9 +143,9 @@ public class ProjectService {
                 .flatMap(task -> task.getTaskResponsables().stream())
                 .filter(tr -> tr.getUserTeam().equals(userTeam))
                 .map(TaskResponsable::getTask)
-                .flatMap(task -> task.getReviews().stream())
-                .filter(review -> !review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS))
-                .map(Review::getTask)
+//                .flatMap(task -> task.getReviews().stream())
+//                .filter(review -> !review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS))
+//                .map(Review::getTask)
                 .toList();
     }
 

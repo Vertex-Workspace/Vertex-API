@@ -210,5 +210,15 @@ public class UserController {
         }
     }
 
+    @PatchMapping("/first-access/{userId}")
+    public ResponseEntity<?> firstAccess(@PathVariable Long userId){
+        try {
+            userService.setFirstAccessNull(userId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        }
+    }
+
     //======================================================
 }

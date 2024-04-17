@@ -29,5 +29,12 @@ public class ProjectCreateDTO {
 
     private ProjectReviewENUM projectReviewENUM;
 
+    public ProjectCreateDTO(String name, String description, UserTeam creator, List<User> users) {
+        this.name = name;
+        this.description = description;
+        this.creator = creator;
+        this.users = users;
+        this.projectReviewENUM = ProjectReviewENUM.EMPTY;
+    }
 }
 

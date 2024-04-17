@@ -93,6 +93,9 @@ public class UserTeamService {
         }
         Team team = userTeam.getTeam();
         team.getUserTeams().remove(userTeam);
+        if(team.getCreator().equals(userTeam)){
+            team.setCreator(null);
+        }
         team.getChat().getUserTeams().remove(userTeam);
         userTeam.getChats().forEach(chat -> chat.getUserTeams().remove(userTeam));
     }
@@ -119,6 +122,7 @@ public class UserTeamService {
 
     public Team saveNewUserTeam(UserTeamAssociateDTO userTeam) {
         try {
+
             //Find User and Team
             User user = userRepository.findById(userTeam.getUser().getId()).get();
             Team team = teamRepository.findById(userTeam.getTeam().getId()).get();
@@ -155,4 +159,5 @@ public class UserTeamService {
             throw new RuntimeException(e.getMessage());
         }
     }
+
 }

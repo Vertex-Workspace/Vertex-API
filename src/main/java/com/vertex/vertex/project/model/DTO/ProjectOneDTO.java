@@ -29,7 +29,7 @@ public class ProjectOneDTO {
     private List<Property> properties;
     private UserTeam creator;
     private File file;
-    private List<Task> tasks = new ArrayList<>();
+    private List<Task> tasks;
     private List<NoteDTO> notes;
     private ProjectReviewENUM projectReviewENUM;
 
