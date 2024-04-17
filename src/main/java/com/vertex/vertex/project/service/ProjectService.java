@@ -1,11 +1,9 @@
 package com.vertex.vertex.project.service;
 
-import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.project.model.DTO.*;
-import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.property.model.ENUM.Color;
@@ -14,20 +12,16 @@ import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
+import com.vertex.vertex.security.ValidationUtils;
 import com.vertex.vertex.task.model.entity.Task;
-import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
-import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.relations.value.service.ValueService;
-import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.team.model.entity.Team;
-import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -62,6 +56,7 @@ public class ProjectService {
         UserTeam userTeam = userTeamService
                 .findUserTeamByComposeId(
                         teamId, project.getCreator().getUser().getId());
+        ValidationUtils.validateUserLogged(userTeam.getUser().getEmail());
         project.setTeam(userTeam.getTeam());
         project.setCreator(userTeam);
         users.add(userTeam);
@@ -93,11 +88,13 @@ public class ProjectService {
 
 
     public Set<Project> findAllByTeam(Long teamId) {
+
         return projectRepository.findAllByTeam_Id(teamId);
     }
 
     public Project updateImage(MultipartFile file, Long projectId) throws IOException {
         Project project = findById(projectId);
+        ValidationUtils.loggedUserIsOnProject(project);
         project.setFile(fileService.save(file));
         return projectRepository.save(project);
     }
@@ -105,9 +102,9 @@ public class ProjectService {
     public Boolean existsByIdAndUserBelongs(Long projectId, Long userId) {
         if (projectRepository.existsById(projectId)) {
             Project project = findById(projectId);
-            return userTeamService.findUserTeamByComposeId(project.getTeam().getId(), userId) != null;
+            ValidationUtils.loggedUserIsOnProject(project);
         }
-        return false;
+        return true;
     }
 
     public Project findById(Long id) {
@@ -123,6 +120,7 @@ public class ProjectService {
     public ProjectOneDTO findProjectById(Long id, Long userID) {
         Project project = findById(id);
         ProjectOneDTO projectOneDTO = new ProjectOneDTO(project);
+        ValidationUtils.loggedUserIsOnProject(project);
 
         //Pass through all tasks of the project and validates if task has an opened review (UNDERANALYSIS)
         //If it has, It won't be included into list
@@ -139,9 +137,6 @@ public class ProjectService {
                 .flatMap(task -> task.getTaskResponsables().stream())
                 .filter(tr -> tr.getUserTeam().equals(userTeam))
                 .map(TaskResponsable::getTask)
-                .flatMap(task -> task.getReviews().stream())
-                .filter(review -> !review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS))
-                .map(Review::getTask)
                 .toList();
     }
 
@@ -149,6 +144,7 @@ public class ProjectService {
         Project project = findById(id);
         //Delete every value of tasks on project
         project.getTasks().forEach(task -> task.getValues().forEach(valueService::delete));
+        ValidationUtils.loggedUserIsOnProjectAndIsCreator(project);
 
         if(project.getProjectDependency() != null){
             project.setProjectDependency(null);
@@ -210,9 +206,10 @@ public class ProjectService {
 
     public Project updateProjectCollaborators(ProjectEditDTO projectEditDTO) {
         Project project = findById(projectEditDTO.getId());
-
+        ValidationUtils.loggedUserIsOnProjectAndIsCreator(project);
         project.setName(projectEditDTO.getName());
         project.setDescription(projectEditDTO.getDescription());
+
 
         List<UserTeam> userTeamsToAdd = new ArrayList<>();
 
@@ -253,6 +250,7 @@ public class ProjectService {
     }
 
     public List<ProjectSearchDTO> findAllByUserAndQuery(Long userId, String query) {
+
         return userTeamService.findAllUserTeamByUserId(userId)
                 .stream()
                 .map(UserTeam::getTeam)
@@ -272,6 +270,7 @@ public class ProjectService {
         List<Project> projects = new ArrayList<>();
         UserTeam userTeam = userTeamService.findUserTeamByComposeId(teamId, userId);
         Team team = userTeam.getTeam();
+        ValidationUtils.validateUserLogged(userTeam.getUser().getEmail());
 
         for (Project project : team.getProjects()) {
             for (UserTeam userTeamFor : project.getCollaborators()) {

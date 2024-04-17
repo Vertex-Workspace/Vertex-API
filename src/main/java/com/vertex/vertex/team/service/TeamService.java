@@ -1,18 +1,14 @@
 package com.vertex.vertex.team.service;
 import com.vertex.vertex.chat.model.Chat;
-import com.vertex.vertex.chat.service.ChatService;
 import com.vertex.vertex.log.model.exception.EntityDoesntExistException;
-import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
 import com.vertex.vertex.project.model.DTO.ProjectViewListDTO;
-import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
-import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
+import com.vertex.vertex.security.ValidationUtils;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.review.service.ReviewService;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
-import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
 import com.vertex.vertex.team.model.DTO.TeamLinkDTO;
@@ -20,33 +16,19 @@ import com.vertex.vertex.team.model.DTO.TeamSearchDTO;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
-import com.vertex.vertex.team.relations.group.model.DTO.GroupEditUserDTO;
-import com.vertex.vertex.team.relations.group.model.DTO.GroupRegisterDTO;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
-import com.vertex.vertex.team.relations.group.model.exception.GroupNameInvalidException;
-import com.vertex.vertex.team.relations.group.model.exception.GroupNotFoundException;
-import com.vertex.vertex.team.relations.group.service.GroupService;
 import com.vertex.vertex.team.relations.permission.service.PermissionService;
-import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
-import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.repository.TeamRepository;
 import com.vertex.vertex.user.model.entity.User;
-import com.vertex.vertex.user.repository.UserRepository;
-import com.vertex.vertex.user.service.UserService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.utils.PerformanceUtils;
 import com.vertex.vertex.utils.RandomCodeUtils;
 import lombok.AllArgsConstructor;
-import org.apache.tomcat.util.http.fileupload.disk.DiskFileItem;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.*;
 
 @Service
@@ -56,9 +38,7 @@ public class TeamService {
     private final TeamRepository teamRepository;
 
     //Services
-    private final TaskService taskService;
     private final UserTeamService userTeamService;
-    private final ProjectService projectService;
     private final ReviewService reviewService;
     private final PermissionService permissionService;
     //Model Mapper
@@ -78,7 +58,7 @@ public class TeamService {
             //name and description
             mapper.map(teamViewListDTO, team);
 
-                team.setInvitationCode(RandomCodeUtils.generateInvitationCode());
+            team.setInvitationCode(RandomCodeUtils.generateInvitationCode());
 
             UserTeam userTeam = new UserTeam(teamViewListDTO.getCreator(), team);
 
@@ -98,6 +78,9 @@ public class TeamService {
         TeamInfoDTO dto = new TeamInfoDTO(); //retorna as informações necessárias para a tela de equipe
         Team team = findTeamById(id);
         mapper.map(team, dto);
+        ValidationUtils.validateUserLogged(
+                team.getUserTeams().stream().map(UserTeam::getUser).map(User::getEmail).toList());
+
         //Convert UserTeam -> User
         dto.setUsers(getUsersByTeam(dto.getId()));
         //Convert Project -> ProjectOneDTO
@@ -110,7 +93,9 @@ public class TeamService {
 
     public TeamLinkDTO findInvitationCodeById(Long id) {
         try {
-            return new TeamLinkDTO(findTeamById(id).getInvitationCode());
+            Team team = findTeamById(id);
+            ValidationUtils.validateUserLogged(team.getCreator().getUser().getEmail());
+            return new TeamLinkDTO(team.getInvitationCode());
         } catch (Exception e) {
             throw new TeamNotFoundException(id);
         }
@@ -118,6 +103,8 @@ public class TeamService {
 
     public void deleteById(Long id) {
         try {
+            Team team = findTeamById(id);
+            ValidationUtils.validateUserLogged(team.getCreator().getUser().getEmail());
             teamRepository.deleteById(id);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -134,13 +121,19 @@ public class TeamService {
     }
 
     public Team findTeamById(Long id) {
-        return teamRepository.findById(id)
+
+        Team team = teamRepository.findById(id)
                 .orElseThrow(EntityDoesntExistException::new);
+        ValidationUtils.validateUserLogged(
+                team.getUserTeams().stream().map(UserTeam::getUser).map(User::getEmail).toList());
+        return team;
     }
 
     public TeamInfoDTO updateImage(MultipartFile file, Long teamId) {
         try {
             Team team = findTeamById(teamId);
+            ValidationUtils.validateUserLogged(
+                    team.getUserTeams().stream().map(UserTeam::getUser).map(User::getEmail).toList());
             if (!Objects.requireNonNull(file.getContentType()).contains("image")) {
                 throw new RuntimeException("Arquvio deve ser imagem!");
             }
@@ -157,6 +150,8 @@ public class TeamService {
         List<User> users = new ArrayList<>();
         List<UserTeam> userGroups = new ArrayList<>();
         Team team = findTeamById(teamId);
+        ValidationUtils.validateUserLogged(
+                team.getUserTeams().stream().map(UserTeam::getUser).map(User::getEmail).toList());
         if (!team.getGroups().isEmpty()) {
             List<UserTeam> userTeams = new ArrayList<>(team.getUserTeams());
             for(Group group : team.getGroups()){
@@ -176,11 +171,15 @@ public class TeamService {
     }
 
     public List<User> getUsersByTeam(Long teamId) {
-        return findTeamById(teamId)
+        Team team = findTeamById(teamId);
+        List<User> users = team
                 .getUserTeams()
                 .stream()
                 .map(UserTeam::getUser)
                 .toList();
+        ValidationUtils.validateUserLogged(
+                users.stream().map(User::getEmail).toList());
+        return users;
     }
 
 

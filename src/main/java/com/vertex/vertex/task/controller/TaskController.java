@@ -13,7 +13,6 @@ import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
-import org.hibernate.Remove;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,21 +38,12 @@ public class TaskController {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
-    @GetMapping
-    public ResponseEntity<List<Task>> findAllByProject(){
-        try{
-            return new ResponseEntity<>(taskService.findAll(), HttpStatus.OK);
-        } catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-    }
 
     @PostMapping
     public ResponseEntity<?> save(@RequestBody TaskCreateDTO taskCreateDTO){
         try{
             return new ResponseEntity<>(taskService.save(taskCreateDTO), HttpStatus.OK);
         }catch(Exception e){
-            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
         }
     }
@@ -255,7 +245,7 @@ public class TaskController {
     @PatchMapping("/taskDependency/{taskId}")
     public ResponseEntity<?> setTaskDependencyNull(@PathVariable Long taskId){
         try{
-            taskService.setDependencyByTask(taskId);
+            taskService.setTaskDependencyNull(taskId);
             return new ResponseEntity<>(HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(HttpStatus.CONFLICT);

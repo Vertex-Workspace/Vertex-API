@@ -2,11 +2,8 @@ package com.vertex.vertex.task.service;
 
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
-import com.vertex.vertex.log.model.exception.EntityDoesntExistException;
-import com.vertex.vertex.notification.entity.model.LogRecord;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.entity.service.NotificationService;
-import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
@@ -14,6 +11,7 @@ import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.property.service.PropertyService;
+import com.vertex.vertex.security.ValidationUtils;
 import com.vertex.vertex.task.model.DTO.*;
 import com.vertex.vertex.task.relations.review.repository.ReviewRepository;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
@@ -22,7 +20,6 @@ import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.model.exceptions.TaskDoesNotExistException;
 import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
-import com.vertex.vertex.task.relations.value.model.entity.ValueDate;
 import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
@@ -30,24 +27,20 @@ import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskRespo
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.permission.model.entity.Permission;
+import com.vertex.vertex.team.relations.permission.model.enums.TypePermissions;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.exception.UserNotFoundException;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -69,8 +62,13 @@ public class TaskService {
     public Task save(TaskCreateDTO taskCreateDTO) {
         Project project = projectService.findById(taskCreateDTO.getProject().getId());
 
+
         UserTeam creator = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), taskCreateDTO.getCreator().getId());
-        //create, copy attributes, set if is revisable, set creator and 1st responsible and start log
+        ValidationUtils.validateUserLogged(creator.getUser().getEmail());
+
+        if(!Permission.hasPermission(creator.getPermissionUser(), TypePermissions.Criar)){
+            throw new RuntimeException("Você não tem permissão!");
+        }
         Task task = new Task(taskCreateDTO, project, creator);
 
         //When the task is created, every property is associated with a null value, unless it has a default value
@@ -96,6 +94,8 @@ public class TaskService {
         try {
             Task task = findById(taskEditDTO.getId());
 
+            validateUserLoggedIntoTask(task);
+
             notificationService.saveLogRecord(task,
                     task.getModifiedAttributeDescription(taskEditDTO));
 
@@ -107,21 +107,28 @@ public class TaskService {
 
     }
 
-    public List<Task> findAll() {
-        return taskRepository.findAll();
-    }
-
     public Task findById(Long id) {
-        Optional<Task> t = taskRepository.findById(id);
-
-        if (t.isPresent()) {
-            return t.get();
+        Optional<Task> taskOptional = taskRepository.findById(id);
+        if (taskOptional.isPresent()) {
+            Task task = taskOptional.get();
+            validateUserLoggedIntoTask(task);
+            return task;
         }
 
         throw new TaskDoesNotExistException();
     }
+    private void validateUserLoggedIntoTask(Task task){
+        ValidationUtils.validateUserLogged(
+                task.getTaskResponsables()
+                        .stream()
+                        .map(TaskResponsable::getUserTeam)
+                        .map(UserTeam::getUser)
+                        .map(User::getEmail).toList());
+    }
 
     public void deleteById(Long id) {
+        Task task = findById(id);
+
         taskRepository.deleteById(id);
     }
 
@@ -133,7 +140,7 @@ public class TaskService {
 
         UserTeam userTeam = userTeamService.findUserTeamByComposeId(
                 task.getProject().getTeam().getId(), editValueDTO.getUserID());
-
+        ValidationUtils.validateUserLogged(userTeam.getUser().getEmail());
         //update the specific value, validate rules and save
         save(valueService.updateTaskValues(task, editValueDTO, property, userTeam));
 
@@ -163,6 +170,7 @@ public class TaskService {
     public Task saveComment(CommentDTO commentDTO) {
         TaskResponsable taskResponsable = taskResponsablesRepository.findById(commentDTO.getTaskResponsableID()).get();
         Task task = findById(commentDTO.getTaskID());
+        ValidationUtils.validateUserLogged(taskResponsable.getUserTeam().getUser().getEmail());
 
         if (taskResponsable.getTask().getId().equals(commentDTO.getTaskID())) {
             new Comment(commentDTO, task, taskResponsable);
@@ -191,6 +199,9 @@ public class TaskService {
 
     public Boolean deleteComment(Long taskID, Long commentID) {
         Task task = findById(taskID);
+
+        ValidationUtils.loggedUserIsOnTask(task);
+
         for (Comment comment : task.getComments()) {
             if (comment.getId().equals(commentID)) {
                 task.getComments().remove(comment);
@@ -255,6 +266,7 @@ public class TaskService {
 
     public TaskOpenDTO getTaskInfos(Long taskID) {
         Task task = findById(taskID);
+        ValidationUtils.loggedUserIsOnTask(task);
         String fullName = task.getCreator().getUser().getFirstName() + " " + task.getCreator().getUser().getLastName();
         return new TaskOpenDTO(task.getProject().getTeam().getName()
                 , task.getProject().getName()
@@ -274,6 +286,7 @@ public class TaskService {
 
     public List<Task> getAllByUser(Long userID) {
         try {
+
             return userTeamService.findAllUserTeamByUserId(userID)
                     .stream()
                     .flatMap(ut -> ut.getTeam().getProjects().stream()
@@ -293,6 +306,7 @@ public class TaskService {
                     task.getProject().getTeam().getId(),
                     userThatSentID
             );
+            ValidationUtils.validateUserLogged(ut.getUser().getEmail());
             task.getFiles().add(file);
             notificationService.saveLogRecord(task, "adicionou um anexo à tarefa", ut);
 
@@ -320,6 +334,7 @@ public class TaskService {
         try {
             Task task = findById(taskId);
             File file = fileService.findById(fileId);
+            ValidationUtils.loggedUserIsOnTask(task);
             task.getFiles().remove(file);
             fileService.delete(fileId);
             return taskRepository.save(task);
@@ -360,6 +375,9 @@ public class TaskService {
 
     public Task editTaskResponsables(UpdateTaskResponsableDTO updateTaskResponsableDTO) {
         Task task = findById(updateTaskResponsableDTO.getTaskId());
+
+        ValidationUtils.loggedUserIsOnTaskAndIsCreator(task);
+
         List<TaskResponsable> responsablesToDelete = new ArrayList<>();
         List<Group> groupsToDelete = new ArrayList<>();
         boolean canDeleteUser = false;
@@ -414,6 +432,8 @@ public class TaskService {
 
     public Task setDependency(Long taskId, Long taskDependencyId) {
         Task task = findById(taskId);
+        ValidationUtils.loggedUserIsOnTaskAndIsCreator(task);
+
         Task tDependency = findById(taskDependencyId);
         if (tDependency.getTaskDependency() != null) {
             if (tDependency.getTaskDependency().getId().equals(taskId)) {
@@ -427,8 +447,9 @@ public class TaskService {
         return null;
     }
 
-    public void setDependencyByTask(Long taskId) {
+    public void setTaskDependencyNull(Long taskId) {
         Task task = findById(taskId);
+        ValidationUtils.loggedUserIsOnTaskAndIsCreator(task);
         for (Task taskDependents : taskRepository.findAll()) {
             if (taskDependents.getTaskDependency() != null) {
                 if (task.getId().equals(taskDependents.getTaskDependency().getId())) {
@@ -441,6 +462,8 @@ public class TaskService {
 
     public List<Permission> getTaskPermissions(Long taskID, Long userID){
         Task task = findById(taskID);
+        ValidationUtils.loggedUserIsOnTask(task);
+
         //Get all users teams of an user
         for (UserTeam userteamFor : userTeamService.findAllUserTeamByUserId(userID)){
             if(userteamFor.getTeam().equals(task.getProject().getTeam())){

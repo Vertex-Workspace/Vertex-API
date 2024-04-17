@@ -10,7 +10,6 @@ import com.vertex.vertex.task.model.DTO.TaskSearchDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_hours.service.TaskHoursService;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
-import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.group.service.GroupService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
@@ -21,11 +20,11 @@ import com.vertex.vertex.user.model.exception.*;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import com.vertex.vertex.user.relations.personalization.service.PersonalizationService;
 import com.vertex.vertex.user.repository.UserRepository;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -39,17 +38,16 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 @Data
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Service
 public class UserService {
 
-    @NonNull
     private final UserRepository userRepository;
-    @NonNull
+
     private final PersonalizationService personalizationService;
-    @NonNull
+
     private final GroupService groupService;
-    @NonNull
+
     private final NotificationService notificationService;
 
     private final ModelMapper mapper;
@@ -60,8 +58,11 @@ public class UserService {
 
     public User save(UserDTO userDTO) {
         User user = new User();
-        BeanUtils.copyProperties(userDTO, user);
-        User userEmailWithNoEdition = findByEmail(user.getEmail());
+        mapper.map(userDTO, user);
+
+        if(existsByEmail(user.getEmail())){
+            throw new EmailAlreadyExistsException();
+        }
 
         boolean validEmail = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
                 .matcher(user.getEmail())
@@ -69,16 +70,6 @@ public class UserService {
 
         if (!validEmail) {
             throw new InvalidEmailException();
-        }
-
-        if (userEmailWithNoEdition != null && user.getEmail().equals(userEmailWithNoEdition.getEmail())) {
-            user.setEmail(userEmailWithNoEdition.getEmail());
-
-            User userFind = findByEmail(userEmailWithNoEdition.getEmail());
-
-            if (userFind != null && user.getEmail().equals(userFind.getEmail())) {
-                throw new EmailAlreadyExistsException();
-            }
         }
 
         boolean securePassword =
@@ -94,9 +85,9 @@ public class UserService {
             throw new InvalidPasswordException();
         }
 
-        user.setLocation("Brazil");
+        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+        user.setLocation("Brasil");
         user.setPersonalization(personalizationService.defaultSave(user));
-        //
         user.setTaskReview(true);
         user.setNewMembersAndGroups(true);
         user.setPermissionsChanged(true);
@@ -104,13 +95,9 @@ public class UserService {
         user.setAnyUpdateOnTask(true);
         user.setResponsibleInProjectOrTask(true);
 
-        byte[] data = Base64.getDecoder().decode(userDTO.getImage());
-        user.setImage(data);
+//        byte[] data = Base64.getDecoder().decode(userDTO.getImage());
+//        user.setImage(data);
         //creation of the default team
-//        TeamViewListDTO teamViewListDTO =
-//                new TeamViewListDTO("Equipe " + user.getFirstName(), user, null,
-//                        "“As boas equipes incorporam o trabalho em equipe na sua cultura, criando os elementos essenciais ao sucesso.” — Ted Sundquist, jogador de futebol americano.", null, true);
-//        teamService.save(teamViewListDTO);
         return userRepository.save(user);
     }
 
@@ -122,9 +109,14 @@ public class UserService {
         throw new RuntimeException("E-mail inexistente!");
     }
 
+    public boolean existsByEmail(String email){
+        return userRepository.findByEmail(email).isPresent();
+    }
+
     public User edit(UserEditionDTO userEditionDTO) throws Exception {
-        User user = userRepository.findById(userEditionDTO.getId()).get();
+        User user = findById(userEditionDTO.getId());
         BeanUtils.copyProperties(userEditionDTO, user);
+
         return userRepository.save(user);
     }
 
@@ -206,20 +198,20 @@ public class UserService {
         }
     }
 
-    public User authenticate(UserLoginDTO dto) {
-        if (userRepository.existsByEmail
-                (dto.getEmail())) {
-            User user = findByEmail(dto.getEmail());
-            if (user.getPassword()
-                    .equals(dto.getPassword())) {
-                return user;
-            }
-
-            throw new IncorrectPasswordException();
-        }
-
-        throw new UserNotFoundException();
-    }
+//    public User authenticate(UserLoginDTO dto) {
+//        if (userRepository.existsByEmail
+//                (dto.getEmail())) {
+//            User user = findByEmail(dto.getEmail());
+//            if (user.getPassword()
+//                    .equals(dto.getPassword())) {
+//                return user;
+//            }
+//
+//            throw new IncorrectPasswordException();
+//        }
+//
+//        throw new UserNotFoundException();
+//    }
 
     public void saveImage(MultipartFile imageFile, Long id) throws IOException {
 

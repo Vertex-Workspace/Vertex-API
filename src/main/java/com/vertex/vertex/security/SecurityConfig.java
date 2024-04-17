@@ -4,17 +4,17 @@ import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 
 @Configuration
 @AllArgsConstructor
@@ -22,14 +22,19 @@ public class SecurityConfig{
 
     private final FilterAuthentication filterAuthentication;
     private final SecurityContextRepository securityRepository;
-    private final AuthenticationService authenticationService;
+
     @Bean
     public SecurityFilterChain config(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable);
+        http.cors(httpSecurityCorsConfigurer ->
+            httpSecurityCorsConfigurer.configurationSource(BeansConfig.corsConfigurationSource())
+        );
 
         http.authorizeHttpRequests(authorizeRequests -> authorizeRequests
                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                .requestMatchers(HttpMethod.POST, "/register").permitAll()
+                .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
+                .requestMatchers(HttpMethod.POST, "/authenticate-user").permitAll()
+                .requestMatchers(WebSocketHttpHeaders.ALLOW, "/notifications", "/chat").permitAll()
                 .anyRequest().authenticated()
         );
 
@@ -45,22 +50,4 @@ public class SecurityConfig{
 
         return http.build();
     }
-
-    @Bean
-    public SecurityContextRepository securityContextRepository() {
-        return new HttpSessionSecurityContextRepository();
-    }
-
-
-    @Bean
-    public AuthenticationManager authenticationManager() {
-        //Forma de autenticação através do userDetailsService e do passwordEncoder
-        DaoAuthenticationProvider dao = new DaoAuthenticationProvider();
-        dao.setPasswordEncoder(new BCryptPasswordEncoder());
-        dao.setUserDetailsService(authenticationService);
-        return new ProviderManager(dao);
-    }
-
-
-
 }

@@ -6,8 +6,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
-import org.hibernate.cfg.Environment;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -23,7 +22,6 @@ import java.io.IOException;
 @Component
 public class FilterAuthentication extends OncePerRequestFilter {
 
-    @Autowired
     private final Environment environment;
     private final AuthenticationService authenticationService;
     private final SecurityContextRepository securityContextRepository;
@@ -66,7 +64,13 @@ public class FilterAuthentication extends OncePerRequestFilter {
     }
 
     private boolean isPublicRouter(HttpServletRequest request) {
-        return request.getRequestURI().equals("/login")
-                && (request.getMethod().equals("POST") || request.getMethod().equals("GET"));
+        return
+
+                        (request.getRequestURI().equals("/login")
+                        || request.getRequestURI().equals("/user/register"))
+                && ((request.getMethod().equals("POST")))
+                        || request.getRequestURI().equals("/notifications")
+                        || request.getRequestURI().equals("/chat")
+                                || request.getRequestURI().equals("/authenticate-user");
     }
 }
