@@ -93,7 +93,7 @@ public class TeamService {
             }
 
             //this part isn't working. check
-//            permissionService.save(userTeam);
+            permissionService.save(userTeam);
 
             return teamRepository.save(team);
         } catch (Exception e) {

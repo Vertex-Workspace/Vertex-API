@@ -48,6 +48,7 @@ public class Project {
     private List<Note> notes;
 
     @ManyToOne
+    @JsonIgnore
     private Project projectDependency;
 
     @OneToOne(cascade = CascadeType.ALL)

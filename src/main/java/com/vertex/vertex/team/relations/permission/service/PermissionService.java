@@ -33,13 +33,11 @@ public class PermissionService {
     private final UserTeamRepository userTeamRepository;
 
     public void save(UserTeam userTeam) {
-        try {
-            List<Permission> permissions = new Permission()
-                    .createBasicPermissions(userTeam, userTeam.getTeam().getCreator().equals(userTeam));
-            userTeam.setPermissionUser(permissions);
-        }catch(Exception e){
-            e.printStackTrace();
-        }
+        List<Permission> permissions = new Permission()
+                        .createBasicPermissions(userTeam, userTeam.getTeam().getCreator().equals(userTeam));
+
+        permissionRepository.saveAll(permissions);
+        userTeam.setPermissionUser(permissions);
     }
 
     public void changeEnabled(Long permissionId){

@@ -57,7 +57,10 @@ public class ProjectService {
         project.setProjectReviewENUM(projectCreateDTO.getProjectReviewENUM());
         defaultPropertyList(project);
 
+        save(project);
+        project.setProjectDependency(projectCreateDTO.getProjectDependency());
         return save(project);
+
     }
 
     public void createUserTeamAndSetCreator(Long teamId, Project project){
@@ -126,6 +129,7 @@ public class ProjectService {
     public ProjectOneDTO findProjectById(Long id, Long userID) {
         Project project = findById(id);
         ProjectOneDTO projectOneDTO = new ProjectOneDTO(project);
+        System.out.println(projectOneDTO);
 
         //Pass through all tasks of the project and validates if task has an opened review (UNDERANALYSIS)
         //If it has, It won't be included into list
@@ -214,6 +218,12 @@ public class ProjectService {
 
     public Project updateProjectCollaborators(ProjectEditDTO projectEditDTO) {
         Project project = findById(projectEditDTO.getId());
+
+        if(project.getProjectDependency() == null){
+            if(projectEditDTO.getProjectDependency() != null) {
+                project.setProjectDependency(projectEditDTO.getProjectDependency());
+            }
+        }
 
         project.setName(projectEditDTO.getName());
         project.setDescription(projectEditDTO.getDescription());
