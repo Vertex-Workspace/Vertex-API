@@ -33,7 +33,7 @@ public class SecurityConfig{
         http.authorizeHttpRequests(authorizeRequests -> authorizeRequests
                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
-                .requestMatchers(HttpMethod.POST, "/authenticate-user").permitAll()
+                .requestMatchers(HttpMethod.GET, "/authenticate-user").authenticated()
                 .requestMatchers(WebSocketHttpHeaders.ALLOW, "/notifications", "/chat").permitAll()
                 .anyRequest().authenticated()
         );

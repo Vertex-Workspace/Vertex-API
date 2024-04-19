@@ -71,7 +71,6 @@ public class AuthenticationController {
             UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return new ResponseEntity<>(userService.findByEmail(userDetails.getUsername()), HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
     }
