@@ -54,7 +54,7 @@ public class Task implements FileSupporter {
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JsonIgnore
     @ToString.Exclude
     private Project project;
@@ -63,7 +63,7 @@ public class Task implements FileSupporter {
     @ToString.Exclude
     private Task taskDependency;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Chat chat;
 
     boolean chatCreated;
@@ -77,7 +77,7 @@ public class Task implements FileSupporter {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "task", orphanRemoval = true)
     private List<Value> values;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files;
 
     @OneToMany(cascade = CascadeType.ALL)
@@ -113,13 +113,16 @@ public class Task implements FileSupporter {
                 .equals(ProjectReviewENUM.MANDATORY));
 
         this.creator = creator;
-        this.taskResponsables
-                = List.of(new TaskResponsable(creator, this));
-
         this.files = new ArrayList<>();
         this.log = (List.of
                 (new LogRecord(this,
                         "A tarefa foi criada")));
+
+        this.project = project;
+        if (Objects.isNull(project.getTasks())) project.setTasks(List.of(this));
+        else project.getTasks().add(this);
+
+        System.out.println(project.getTasks());
 
     }
 

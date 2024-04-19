@@ -22,7 +22,7 @@ public class CookieUtils {
         Cookie cookie =  new Cookie("JWT", token);
         //Onde o cookie pode ser acessado, nesse caso todos os endpoints
         cookie.setPath("/");
-        cookie.setMaxAge(300);
+        cookie.setMaxAge(18000);
         return cookie;
     }
 

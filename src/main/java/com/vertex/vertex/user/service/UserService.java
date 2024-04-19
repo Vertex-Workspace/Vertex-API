@@ -10,6 +10,7 @@ import com.vertex.vertex.task.model.DTO.TaskSearchDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_hours.service.TaskHoursService;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
+import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.group.service.GroupService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
@@ -22,6 +23,8 @@ import com.vertex.vertex.user.relations.personalization.service.PersonalizationS
 import com.vertex.vertex.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -64,14 +67,8 @@ public class UserService {
             throw new EmailAlreadyExistsException();
         }
 
-        boolean validEmail = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
-                .matcher(user.getEmail())
-                .find();
 
-        if (!validEmail) {
-            throw new InvalidEmailException();
-        }
-
+        emailValidation(user);
         boolean securePassword =
                 Pattern.compile("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$")
                         .matcher(user.getPassword())
@@ -95,28 +92,42 @@ public class UserService {
         user.setAnyUpdateOnTask(true);
         user.setResponsibleInProjectOrTask(true);
 
-//        byte[] data = Base64.getDecoder().decode(userDTO.getImage());
-//        user.setImage(data);
+        byte[] data = Base64.getDecoder().decode(userDTO.getImage());
+        user.setImage(data);
         //creation of the default team
         return userRepository.save(user);
     }
 
     public User findByEmail(String email){
-        Optional<User> userOptional = userRepository.findByEmail(email);
-        if(userOptional.isPresent()){
-            return userOptional.get();
+        Optional<User> user = userRepository.findByEmail(email);
+        if(user.isPresent()){
+            return user.get();
         }
-        throw new RuntimeException("E-mail inexistente!");
+        throw new InvalidEmailException();
     }
+
 
     public boolean existsByEmail(String email){
         return userRepository.findByEmail(email).isPresent();
     }
 
+    private void emailValidation(User user){
+        if(existsByEmail(user.getEmail())){
+            throw new EmailAlreadyExistsException();
+        }
+        boolean validEmail = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+                .matcher(user.getEmail())
+                .find();
+
+        if (!validEmail) {
+            throw new InvalidEmailException();
+        }
+    }
+
     public User edit(UserEditionDTO userEditionDTO) throws Exception {
         User user = findById(userEditionDTO.getId());
         BeanUtils.copyProperties(userEditionDTO, user);
-
+        emailValidation(user);
         return userRepository.save(user);
     }
 
@@ -198,20 +209,6 @@ public class UserService {
         }
     }
 
-//    public User authenticate(UserLoginDTO dto) {
-//        if (userRepository.existsByEmail
-//                (dto.getEmail())) {
-//            User user = findByEmail(dto.getEmail());
-//            if (user.getPassword()
-//                    .equals(dto.getPassword())) {
-//                return user;
-//            }
-//
-//            throw new IncorrectPasswordException();
-//        }
-//
-//        throw new UserNotFoundException();
-//    }
 
     public void saveImage(MultipartFile imageFile, Long id) throws IOException {
 

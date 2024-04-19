@@ -1,9 +1,12 @@
 package com.vertex.vertex.project.service;
 
+import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.entity.service.NotificationService;
+import com.vertex.vertex.notification.repository.LogRepository;
 import com.vertex.vertex.project.model.DTO.*;
+import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.property.model.ENUM.Color;
@@ -14,14 +17,19 @@ import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.security.ValidationUtils;
 import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
+import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.relations.value.service.ValueService;
+import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.team.model.entity.Team;
+import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,6 +46,7 @@ public class ProjectService {
     private final FileService fileService;
     private final NotificationService notificationService;
     private final ModelMapper mapper;
+    private final LogRepository logRepository;
 
     public Project saveWithRelationOfProject(ProjectCreateDTO projectCreateDTO, Long teamId) {
         Project project = new Project();
@@ -120,7 +129,6 @@ public class ProjectService {
     public ProjectOneDTO findProjectById(Long id, Long userID) {
         Project project = findById(id);
         ProjectOneDTO projectOneDTO = new ProjectOneDTO(project);
-        ValidationUtils.loggedUserIsOnProject(project);
 
         //Pass through all tasks of the project and validates if task has an opened review (UNDERANALYSIS)
         //If it has, It won't be included into list
@@ -250,7 +258,6 @@ public class ProjectService {
     }
 
     public List<ProjectSearchDTO> findAllByUserAndQuery(Long userId, String query) {
-
         return userTeamService.findAllUserTeamByUserId(userId)
                 .stream()
                 .map(UserTeam::getTeam)

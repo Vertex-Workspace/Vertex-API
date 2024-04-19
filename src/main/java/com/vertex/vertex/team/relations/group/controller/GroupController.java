@@ -71,6 +71,7 @@ public class GroupController {
             groupService.delete(groupId);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch(Exception e){
+            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }

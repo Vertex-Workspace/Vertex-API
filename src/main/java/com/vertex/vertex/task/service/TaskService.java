@@ -2,8 +2,11 @@ package com.vertex.vertex.task.service;
 
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
+import com.vertex.vertex.log.model.exception.EntityDoesntExistException;
+import com.vertex.vertex.notification.entity.model.LogRecord;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.entity.service.NotificationService;
+import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
@@ -20,6 +23,7 @@ import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.model.exceptions.TaskDoesNotExistException;
 import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
+import com.vertex.vertex.task.relations.value.model.entity.ValueDate;
 import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
@@ -32,15 +36,20 @@ import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.exception.UserNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -70,6 +79,7 @@ public class TaskService {
             throw new RuntimeException("Você não tem permissão!");
         }
         Task task = new Task(taskCreateDTO, project, creator);
+        setResponsablesInTask(project, task);
 
         //When the task is created, every property is associated with a null value, unless it has a default value
         valueService.setTaskDefaultValues(task, project.getProperties());
@@ -87,6 +97,14 @@ public class TaskService {
         }
 
         return save(task);
+    }
+
+    public void setResponsablesInTask(Project project, Task task){
+        List<TaskResponsable> taskResponsables = new ArrayList<>();
+        for(UserTeam userTeam : project.getCollaborators()){
+            taskResponsables.add(new TaskResponsable(userTeam, task));
+        }
+        task.setTaskResponsables(taskResponsables);
     }
 
 
@@ -128,7 +146,7 @@ public class TaskService {
 
     public void deleteById(Long id) {
         Task task = findById(id);
-
+        validateUserLoggedIntoTask(task);
         taskRepository.deleteById(id);
     }
 
@@ -216,7 +234,6 @@ public class TaskService {
     public Task saveResponsables(TaskResponsablesDTO taskResponsableDTO) {
         Task task = findById(taskResponsableDTO.getTask().getId());
         taskResponsableDTO.setUserTeam(userTeamService.findById(taskResponsableDTO.getUserTeam().getId()));
-
         //update responsibles, send notifications and return saved task
         return updateResponsiblesSendNotifications(taskResponsableDTO, task);
     }
@@ -302,12 +319,14 @@ public class TaskService {
         try {
             Task task = findById(id);
             File file = fileService.save(multipartFile, task);
+
             UserTeam ut = userTeamService.findUserTeamByComposeId(
                     task.getProject().getTeam().getId(),
                     userThatSentID
             );
             ValidationUtils.validateUserLogged(ut.getUser().getEmail());
             task.getFiles().add(file);
+
             notificationService.saveLogRecord(task, "adicionou um anexo à tarefa", ut);
 
             //Notifications

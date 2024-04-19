@@ -54,6 +54,7 @@ public class TaskController {
             taskService.deleteById(id);
             return new ResponseEntity<>(true, HttpStatus.OK);
         } catch (Exception e){
+            e.printStackTrace();
             return new ResponseEntity<>(false, HttpStatus.CONFLICT);
         }
     }
@@ -193,6 +194,7 @@ public class TaskController {
         try{
             return new ResponseEntity<>(taskService.editTaskResponsables(updateTaskResponsableDTO), HttpStatus.OK);
         }catch(Exception e){
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }

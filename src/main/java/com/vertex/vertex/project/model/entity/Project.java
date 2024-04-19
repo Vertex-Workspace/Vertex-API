@@ -84,4 +84,5 @@ public class Project {
         this.collaborators = collaborators;
         this.projectReviewENUM = ProjectReviewENUM.OPTIONAL;
     }
+
 }
