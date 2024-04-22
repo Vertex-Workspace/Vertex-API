@@ -104,7 +104,7 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
-    public Boolean existsByIdAndUserBelongs(Long projectId, Long userId) {
+    public Boolean existsByIdAndUserBelongs(Long projectId) {
         if (projectRepository.existsById(projectId)) {
             Project project = findById(projectId);
             ValidationUtils.loggedUserIsOnProject(project);

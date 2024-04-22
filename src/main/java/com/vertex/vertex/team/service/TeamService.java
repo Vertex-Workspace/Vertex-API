@@ -26,6 +26,8 @@ import com.vertex.vertex.utils.PerformanceUtils;
 import com.vertex.vertex.utils.RandomCodeUtils;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -114,16 +116,6 @@ public class TeamService {
 
 
 
-    public List<TeamInfoDTO> findAll() {
-        List<TeamInfoDTO> teamHomeDTOS = new ArrayList<>();
-
-        for (Team team : teamRepository.findAll()) {
-            TeamInfoDTO dto = new TeamInfoDTO();
-            BeanUtils.copyProperties(team, dto);
-            teamHomeDTOS.add(dto);
-        }
-        return teamHomeDTOS;
-    }
 
     public List<Group> findGroupsByTeamId(Long idTeam) {
         try {
@@ -196,28 +188,6 @@ public class TeamService {
     }
 
 
-    //Refatorar Depois de finalizar o projeto...
-    public void saveDefaultTasksAndProject(Team team) {
-
-//        Project projectDefault1 =
-//                new Project("Projeto Pessoal", "Seu projeto pessoal padrão", team, team.getCreator(), List.of(team.getCreator()));
-//        Project projectDefault2 =
-//                new Project("Projeto Profissional", "Seu projeto pessoal padrão", team, team.getCreator(), List.of(team.getCreator()));
-//
-//        TaskCreateDTO taskCreateDTO1 =
-//                new TaskCreateDTO("Lavar a louça", "Sua tarefa é lavar a louça", team.getCreator().getUser(), projectDefault1);
-//        TaskCreateDTO taskCreateDTO2 =
-//                new TaskCreateDTO("Apresentar seminário", "Sua tarefa é lavar a louça", team.getCreator().getUser(), projectDefault2);
-//
-//        projectService.defaultProperties(projectDefault1);
-//        projectService.defaultProperties(projectDefault2);
-//
-//        projectService.save(projectDefault1);
-//        projectService.save(projectDefault2);
-//
-//        taskService.save(taskCreateDTO1);
-//        taskService.save(taskCreateDTO2);
-    }
 
     public List<ProjectViewListDTO> convertTeamProjectsToDto(Team team) {
         return team.getProjects()
@@ -232,16 +202,22 @@ public class TeamService {
 
     public List<Task> getAllTasksByTeam(Long id) {
         try {
+            User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            UserTeam userTeam = userTeamService.findUserTeamByComposeId(id, user.getId());
             return findTeamById(id)
                     .getProjects()
                     .stream()
                     .flatMap(p -> p.getTasks().stream())
+                    .flatMap(t -> t.getTaskResponsables().stream())
+                    .filter(tr -> tr.getUserTeam().equals(userTeam))
+                    .map(TaskResponsable::getTask)
                     .toList();
 
         } catch (Exception e) {
             throw new RuntimeException();
         }
     }
+
 
     public List<TeamSearchDTO> findAllByUserAndQuery(Long userId, String query) {
         return userTeamService

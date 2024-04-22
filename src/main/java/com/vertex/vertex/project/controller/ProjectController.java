@@ -78,14 +78,19 @@ public class ProjectController {
         }
     }
 
-    @GetMapping("/exists/{projectId}/{userId}")
+    @GetMapping("/exists/{projectId}")
     public ResponseEntity<?> existsByIdAndUserBelongs(
-            @PathVariable Long projectId,
-            @PathVariable Long userId) {
-        return new ResponseEntity<>
-                (projectService.existsByIdAndUserBelongs
-                        (projectId, userId),
-                        HttpStatus.OK);
+            @PathVariable Long projectId) {
+        try{
+
+            return new ResponseEntity<>
+                    (projectService.existsByIdAndUserBelongs
+                            (projectId),
+                            HttpStatus.OK);
+        } catch (Exception e){
+            return new ResponseEntity<>
+                    (HttpStatus.UNAUTHORIZED);
+        }
     }
 
     @PatchMapping("/image/{projectId}")

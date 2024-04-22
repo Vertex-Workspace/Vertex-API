@@ -23,6 +23,7 @@ import com.vertex.vertex.task.model.exceptions.TaskDoesNotExistException;
 import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
 import com.vertex.vertex.task.relations.value.model.entity.ValueDate;
+import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
@@ -61,6 +62,7 @@ public class TaskService {
     private final ModelMapper modelMapper;
     private final ReviewRepository reviewRepository;
     private final FileService fileService;
+    private final ValueService valueService;
     private final NotificationService notificationService;
 
 
@@ -93,6 +95,13 @@ public class TaskService {
         }
 
         return save(task);
+    }
+    public void setResponsablesInTask(Project project, Task task){
+        List<TaskResponsable> taskResponsables = new ArrayList<>();
+        for(UserTeam userTeam : project.getCollaborators()){
+            taskResponsables.add(new TaskResponsable(userTeam, task));
+        }
+        task.setTaskResponsables(taskResponsables);
     }
 
 
@@ -157,42 +166,21 @@ public class TaskService {
             if (!taskResponsableFor.getUserTeam().equals(userTeam) && taskResponsableFor.getUserTeam().getUser().getAnyUpdateOnTask()) {
                 notificationService.save(new Notification(
                         task.getProject(),
-                        "Valor da propriedade " + property.getName() + " alterado em " + taskTest.getName(),
+                        "Valor da propriedade " + property.getName() + " alterado em " + task.getName(),
                         "projeto/" + task.getProject().getId() + "/tarefas?taskID=" + task.getId(),
                         taskResponsableFor.getUserTeam().getUser()
                 ));
             }
         }
 
-        String propertyValue = getPropertyValue(property, task);
-
+        //find the specific value inside the task and return the final value as string
+        String propertyValue = propertyService.getPropertyValueAsString(property, task);
         notificationService.saveLogRecord(task,
-                ("O valor da propriedade "
-                        + property.getName()
-                        + " foi definido como "
-                        + propertyValue));
-        return taskTest;
+                ("O valor da propriedade " + property.getName()
+                        + " foi definido como " + propertyValue));
+        return task;
     }
 
-    private String getPropertyValue(Property property, Task task) {
-        Value value = task.getValues()
-                .stream()
-                .filter(v -> Objects.equals(property.getId(), v.getProperty().getId()))
-                .findFirst()
-                .get();
-
-        if (property.getKind() == PropertyKind.STATUS
-                || property.getKind() == PropertyKind.LIST) {
-            PropertyList pl = (PropertyList) value.getValue();
-            return pl.getValue();
-        }
-
-        if (value instanceof ValueDate) {
-            return ((ValueDate) value).format();
-        }
-
-        return value.getValue().toString();
-    }
 
     //verify if the taskresponsable belongs to the task and if it is, save the comment
     public Task saveComment(CommentDTO commentDTO) {
@@ -341,6 +329,14 @@ public class TaskService {
             throw new RuntimeException();
         }
     }
+    private List<Task> filterTasksByResponsible(List<Task> tasks, UserTeam userTeam){
+        return tasks.stream()
+                .flatMap(task -> task.getTaskResponsables()
+                        .stream()
+                        .filter(tr -> tr.getUserTeam().equals(userTeam))
+                ).map(TaskResponsable::getTask)
+                .toList();
+    }
 
     public Task uploadFile(MultipartFile multipartFile, Long id, Long userThatSentID) {
         try {
@@ -351,13 +347,7 @@ public class TaskService {
                             task.getProject().getTeam().getId(),
                             userThatSentID
                     );
-            notificationService.saveLogRecord(task,
-                    "adicionou um anexo à tarefa", ut);
 
-            UserTeam ut = userTeamService.findUserTeamByComposeId(
-                    task.getProject().getTeam().getId(),
-                    userThatSentID
-            );
             ValidationUtils.validateUserLogged(ut.getUser().getEmail());
             task.getFiles().add(file);
 
@@ -469,8 +459,7 @@ public class TaskService {
                 task.getGroups().add(updateTaskResponsableDTO.getGroup());
             } else {
                 UserTeam userTeam = userTeamService.findUserTeamByComposeId(updateTaskResponsableDTO.getTeamId(), updateTaskResponsableDTO.getUser().getId());
-                TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
-                taskResponsablesRepository.save(taskResponsable1);
+                taskResponsablesRepository.save(new TaskResponsable(userTeam, task));
             }
         }
 
