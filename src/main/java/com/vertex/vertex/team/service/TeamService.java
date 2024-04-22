@@ -112,6 +112,19 @@ public class TeamService {
     }
 
 
+
+
+    public List<TeamInfoDTO> findAll() {
+        List<TeamInfoDTO> teamHomeDTOS = new ArrayList<>();
+
+        for (Team team : teamRepository.findAll()) {
+            TeamInfoDTO dto = new TeamInfoDTO();
+            BeanUtils.copyProperties(team, dto);
+            teamHomeDTOS.add(dto);
+        }
+        return teamHomeDTOS;
+    }
+
     public List<Group> findGroupsByTeamId(Long idTeam) {
         try {
             return findById(idTeam).getGroups();
@@ -217,16 +230,12 @@ public class TeamService {
         return teamRepository.save(team);
     }
 
-    public List<Task> getAllTasksByTeam(Long id, Long userID) {
+    public List<Task> getAllTasksByTeam(Long id) {
         try {
-            UserTeam userTeam = userTeamService.findUserTeamByComposeId(id, userID);
             return findTeamById(id)
                     .getProjects()
                     .stream()
                     .flatMap(p -> p.getTasks().stream())
-                    .flatMap(t -> t.getTaskResponsables().stream())
-                    .filter(tr -> tr.getUserTeam().equals(userTeam))
-                    .map(TaskResponsable::getTask)
                     .toList();
 
         } catch (Exception e) {

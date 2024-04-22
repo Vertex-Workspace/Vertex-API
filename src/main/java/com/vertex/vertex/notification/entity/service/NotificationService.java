@@ -7,10 +7,7 @@ import com.vertex.vertex.notification.entity.model.LogRecord;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.repository.LogRepository;
 import com.vertex.vertex.notification.repository.NotificationRepository;
-import com.vertex.vertex.project.model.entity.Project;
-import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.entity.Task;
-import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -42,17 +39,14 @@ public class NotificationService {
         return notificationSaved;
     }
 
-    public void saveLogRecord(Task task, String description, UserTeam ut) {
-        LogRecord rc = new LogRecord(task, description, ut);
-//        task.getLog().add(rc);
-        rc.setTask(task);
-        logRepository.save(rc);
+    public LogRecord saveLogRecord(Task task, String description, UserTeam ut) {
+        return logRepository.save(
+                new LogRecord(task, description, ut));
+
     }
-    public void saveLogRecord(Task task, String description) {
-        LogRecord rc = new LogRecord(task, description);
-//        task.getLog().add(rc);
-        rc.setTask(task);
-        logRepository.save(rc);
+    public LogRecord saveLogRecord(Task task, String description) {
+        return logRepository.save(
+                new LogRecord(task, description));
     }
 
     public Notification update(Notification notification){
@@ -83,10 +77,6 @@ public class NotificationService {
         try {
             usedWebSocketHandler.sendNotification(userID);
         } catch (IOException ignored) {}
-    }
-
-    public void sendNotification(Task task, UserTeam userTeam, String title, String link) {
-
     }
 
     private void sendToEmail(Notification notification) {
@@ -152,5 +142,6 @@ public class NotificationService {
 //        }
 
     }
+
 
 }
