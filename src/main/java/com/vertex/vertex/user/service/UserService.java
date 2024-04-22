@@ -21,11 +21,13 @@ import com.vertex.vertex.user.model.exception.*;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import com.vertex.vertex.user.relations.personalization.service.PersonalizationService;
 import com.vertex.vertex.user.repository.UserRepository;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -39,17 +41,16 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 @Data
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Service
 public class UserService {
 
-    @NonNull
     private final UserRepository userRepository;
-    @NonNull
+
     private final PersonalizationService personalizationService;
-    @NonNull
+
     private final GroupService groupService;
-    @NonNull
+
     private final NotificationService notificationService;
 
     private final ModelMapper mapper;
@@ -60,27 +61,14 @@ public class UserService {
 
     public User save(UserDTO userDTO) {
         User user = new User();
-        BeanUtils.copyProperties(userDTO, user);
-        User userEmailWithNoEdition = userRepository.findByEmail(user.getEmail());
+        mapper.map(userDTO, user);
 
-        boolean validEmail = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
-                .matcher(user.getEmail())
-                .find();
-
-        if (!validEmail) {
-            throw new InvalidEmailException();
+        if(existsByEmail(user.getEmail())){
+            throw new EmailAlreadyExistsException();
         }
 
-        if (userEmailWithNoEdition != null && user.getEmail().equals(userEmailWithNoEdition.getEmail())) {
-            user.setEmail(userEmailWithNoEdition.getEmail());
 
-            User userFind = userRepository.findByEmail(userEmailWithNoEdition.getEmail());
-
-            if (userFind != null && user.getEmail().equals(userFind.getEmail())) {
-                throw new EmailAlreadyExistsException();
-            }
-        }
-
+        emailValidation(user);
         boolean securePassword =
                 Pattern.compile("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$")
                         .matcher(user.getPassword())
@@ -94,9 +82,9 @@ public class UserService {
             throw new InvalidPasswordException();
         }
 
-        user.setLocation("Brazil");
+        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+        user.setLocation("Brasil");
         user.setPersonalization(personalizationService.defaultSave(user));
-        //
         user.setTaskReview(true);
         user.setNewMembersAndGroups(true);
         user.setPermissionsChanged(true);
@@ -107,21 +95,44 @@ public class UserService {
         byte[] data = Base64.getDecoder().decode(userDTO.getImage());
         user.setImage(data);
         //creation of the default team
-//        TeamViewListDTO teamViewListDTO =
-//                new TeamViewListDTO("Equipe " + user.getFirstName(), user, null,
-//                        "“As boas equipes incorporam o trabalho em equipe na sua cultura, criando os elementos essenciais ao sucesso.” — Ted Sundquist, jogador de futebol americano.", null, true);
-//        teamService.save(teamViewListDTO);
         return userRepository.save(user);
     }
 
+    public User findByEmail(String email){
+        Optional<User> user = userRepository.findByEmail(email);
+        if(user.isPresent()){
+            return user.get();
+        }
+        throw new InvalidEmailException();
+    }
+
+
+    public boolean existsByEmail(String email){
+        return userRepository.findByEmail(email).isPresent();
+    }
+
+    private void emailValidation(User user){
+        if(existsByEmail(user.getEmail())){
+            throw new EmailAlreadyExistsException();
+        }
+        boolean validEmail = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+                .matcher(user.getEmail())
+                .find();
+
+        if (!validEmail) {
+            throw new InvalidEmailException();
+        }
+    }
+
     public User edit(UserEditionDTO userEditionDTO) throws Exception {
-        User user = userRepository.findById(userEditionDTO.getId()).get();
+        User user = findById(userEditionDTO.getId());
         BeanUtils.copyProperties(userEditionDTO, user);
+        emailValidation(user);
         return userRepository.save(user);
     }
 
     public User patchUserFirstAccess(UserLoginDTO userLoginDTO) {
-        User user = userRepository.findByEmail(userLoginDTO.getEmail());
+        User user = findByEmail(userLoginDTO.getEmail());
         user.setFirstAccess(false);
         return userRepository.save(user);
     }
@@ -189,9 +200,6 @@ public class UserService {
         return dto;
     }
 
-    public User findByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
 
     public void deleteById(Long id) {
         if (!getUserRepository().existsById(id)) {
@@ -201,21 +209,6 @@ public class UserService {
         }
     }
 
-    public User authenticate(UserLoginDTO dto) {
-        if (userRepository.existsByEmail
-                (dto.getEmail())) {
-            User user =
-                    userRepository.findByEmail(dto.getEmail());
-            if (user.getPassword()
-                    .equals(dto.getPassword())) {
-                return user;
-            }
-
-            throw new IncorrectPasswordException();
-        }
-
-        throw new UserNotFoundException();
-    }
 
     public void saveImage(MultipartFile imageFile, Long id) throws IOException {
 

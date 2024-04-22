@@ -38,8 +38,10 @@ public class UserTeamController {
     @PatchMapping("/team/user")
     public ResponseEntity<?> saveUserTeam(@RequestBody UserTeamAssociateDTO userTeam) {
         try {
+            System.out.println("entrei");
             return new ResponseEntity<>(userTeamService.saveNewUserTeam(userTeam), HttpStatus.OK);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }

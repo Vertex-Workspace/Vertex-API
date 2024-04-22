@@ -27,7 +27,7 @@ public class UserController {
 
     private UserService userService;
 
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity<?> save(@RequestBody UserDTO userDTO) {
         try {
             return new ResponseEntity<>(userService.save(userDTO), HttpStatus.CREATED);
@@ -104,25 +104,6 @@ public class UserController {
         }
     }
 
-    @PostMapping("/authenticate")
-    public ResponseEntity<?> authenticate(
-            @RequestBody UserLoginDTO dto) {
-        try {
-            return new ResponseEntity<>
-                    (userService.authenticate(dto),
-                            HttpStatus.ACCEPTED);
-
-        } catch (UserNotFoundException | IncorrectPasswordException e) {
-            return new ResponseEntity<>
-                    ("E-mail ou senha inválidos!",
-                            HttpStatus.UNAUTHORIZED);
-
-        } catch (Exception e) {
-            return new ResponseEntity<>
-                    ("Outro erro!",
-                            HttpStatus.CONFLICT);
-        }
-    }
 
     @PatchMapping("/{id}/personalization")
     public ResponseEntity<?> patchControllerUser(@PathVariable Long id, @RequestBody Personalization personalization) {

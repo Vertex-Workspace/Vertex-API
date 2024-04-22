@@ -4,6 +4,7 @@ import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.entity.service.NotificationService;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
+import com.vertex.vertex.security.ValidationUtils;
 import com.vertex.vertex.task.model.DTO.TaskWaitingToReviewDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
@@ -57,10 +58,12 @@ public class ReviewService {
                 .stream().filter(
                         taskResponsable -> taskResponsable.getUserTeam().getUser().getId().equals(reviewCheck.getReviewerID()))
                 .findFirst();
+
         if (creator.isEmpty()) {
             throw new RuntimeException("Id do revisador errado!");
         }
         review.setReviewer(creator.get());
+        ValidationUtils.validateUserLogged(review.getReviewer().getUserTeam().getUser().getEmail());
         review.setApproveStatus(reviewCheck.getApproveStatus());
         reviewRepository.save(review);
 
@@ -93,6 +96,7 @@ public class ReviewService {
         if (!task.isRevisable()) {
             throw new RuntimeException("A Tarefa não exige entrega!");
         }
+        ValidationUtils.loggedUserIsOnTask(task);
 
         //Validations
         if (task.isNotUnderAnalysis()) {
@@ -145,6 +149,8 @@ public class ReviewService {
                 .findFirst()
                 .get();
 
+        ValidationUtils.validateUserLogged(loggedUser.getUser().getEmail());
+
         for (Task task : project.getTasks()) {
             if (task.getCreator().equals(loggedUser) && task.isNotUnderAnalysis()) {
                 TaskWaitingToReviewDTO taskWaitingToReviewDTO = new TaskWaitingToReviewDTO(task);
@@ -176,6 +182,7 @@ public class ReviewService {
 
     public List<ReviewHoursDTO> getPerformanceInTask(Long taskID) {
         Task task = taskService.findById(taskID);
+        ValidationUtils.loggedUserIsOnTask(task);
         List<ReviewHoursDTO> reviewHoursDTOS = new ArrayList<>();
         for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
 
@@ -187,17 +194,10 @@ public class ReviewService {
         return reviewHoursDTOS;
     }
 
-    public Review findById(Long reviewID) {
-        Optional<Review> review = reviewRepository.findById(reviewID);
-        if (review.isPresent()) {
-            return review.get();
-        }
-        throw new RuntimeException("Review não existe!");
-
-    }
 
     public void setRevisable(Long taskID, Boolean booleanState) {
         Task task = taskService.findById(taskID);
+        ValidationUtils.loggedUserIsOnTaskAndIsCreator(task);
         task.setRevisable(booleanState);
         taskService.save(task);
     }
