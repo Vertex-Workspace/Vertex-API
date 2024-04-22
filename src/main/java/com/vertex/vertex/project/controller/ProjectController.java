@@ -25,7 +25,6 @@ public class ProjectController {
         try {
             return new ResponseEntity<>(projectService.saveWithRelationOfProject(project, teamId), HttpStatus.CREATED);
         }catch(Exception e){
-            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
@@ -35,6 +34,7 @@ public class ProjectController {
         try{
             return new ResponseEntity<>(projectService.findProjectById(id), HttpStatus.OK);
         }catch(Exception e){
+            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
@@ -59,12 +59,9 @@ public class ProjectController {
             projectService.deleteById(id);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.CONFLICT);
-
         }
     }
-
 
     @GetMapping("/exists/{id}")
     public ResponseEntity<?> existsById(@PathVariable Long id) {
@@ -116,7 +113,7 @@ public class ProjectController {
     }
 
     @GetMapping("/getAll/{projectId}")
-    public ResponseEntity<?> returnAll(@PathVariable Long projectId){
+    public ResponseEntity<?> returnAllColaborators(@PathVariable Long projectId){
         try {
             return new ResponseEntity<>(projectService.returnAllCollaborators(projectId), HttpStatus.OK);
         }catch(Exception e){

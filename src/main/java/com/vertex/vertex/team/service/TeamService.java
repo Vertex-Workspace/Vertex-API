@@ -4,6 +4,7 @@ import com.vertex.vertex.log.model.exception.EntityDoesntExistException;
 import com.vertex.vertex.project.model.DTO.ProjectViewListDTO;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.security.ValidationUtils;
+import com.vertex.vertex.task.model.DTO.TaskModeViewDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
@@ -200,7 +201,7 @@ public class TeamService {
         return teamRepository.save(team);
     }
 
-    public List<Task> getAllTasksByTeam(Long id) {
+    public List<TaskModeViewDTO> getAllTasksByTeam(Long id) {
         try {
             User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             UserTeam userTeam = userTeamService.findUserTeamByComposeId(id, user.getId());
@@ -211,6 +212,7 @@ public class TeamService {
                     .flatMap(t -> t.getTaskResponsables().stream())
                     .filter(tr -> tr.getUserTeam().equals(userTeam))
                     .map(TaskResponsable::getTask)
+                    .map(TaskModeViewDTO::new)
                     .toList();
 
         } catch (Exception e) {
