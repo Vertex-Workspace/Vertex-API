@@ -1,5 +1,6 @@
 package com.vertex.vertex.property.service;
 
+import com.vertex.vertex.project.model.DTO.ProjectOneDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.project.service.ProjectService;
@@ -48,7 +49,7 @@ public class PropertyService {
     private final ModelMapper mapper;
 
 
-    public Project save(Long projectID, Property property) {
+    public ProjectOneDTO save(Long projectID, Property property) {
         Project project = projectService.findById(projectID);
         Property finalProperty = new Property();
 
@@ -89,30 +90,34 @@ public class PropertyService {
         finalProperty.setProject(project);
         propertyRepository.save(finalProperty);
 
-        return projectService.findById(projectID);
+        return new ProjectOneDTO(project);
     }
 
     //in this method, we need, firstly, remove the value, and then remove the property
-    public Project delete(Long projectId, Long propertyId) {
+    public ProjectOneDTO delete(Long projectId, Long propertyId) {
         Property property = findById(propertyId);
         Project project = projectService.findById(projectId);
 
         if (property.getPropertyStatus() != PropertyStatus.FIXED) {
             this.deleteValuesCascade(project, property);
             propertyRepository.delete(property);
-            return projectService.findById(projectId);
+            return new ProjectOneDTO(project);
         } else {
             throw new CantDeleteStatusException();
         }
     }
 
     private void deleteValuesCascade(Project project, Property property){
+        List<Value> values = new ArrayList<>();
         for (Task task : project.getTasks()) {
             for (Value value : task.getValues()) {
                 if (value.getProperty().getId().equals(property.getId())) {
-                    task.getValues().remove(value);
-                    taskRepository.save(task);
+                    values.add(value);
                 }
+            }
+            for(Value value : values){
+                task.getValues().remove(value);
+                taskRepository.save(task);
             }
         }
     }

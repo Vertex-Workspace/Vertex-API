@@ -475,7 +475,6 @@ public class TaskService {
                             && ((PropertyList) value.getValue()).getPropertyListKind().equals(propertyListKind))
                     .toList().size());
         }
-
         return tasksCategory.get(2) == project.getTasks().size();
     }
 

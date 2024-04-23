@@ -63,7 +63,7 @@ public class ProjectService {
 
     }
 
-    public void createUserTeamAndSetCreator(Long teamId, Project project){
+    public void createUserTeamAndSetCreator(Long teamId, Project project) {
         List<UserTeam> users = new ArrayList<>();
         UserTeam userTeam = userTeamService
                 .findUserTeamByComposeId(
@@ -74,7 +74,7 @@ public class ProjectService {
         project.setCollaborators(users);
     }
 
-    public void setCollaboratorsAndVerifyCreator(List<User> users, Project project){
+    public void setCollaboratorsAndVerifyCreator(List<User> users, Project project) {
         if (users != null) {
             for (User user : users) {
                 UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), user.getId());
@@ -86,8 +86,8 @@ public class ProjectService {
         }
     }
 
-    public void notificationOfCollaborators(UserTeam userTeam, Project project){
-        if(userTeam.getUser().getResponsibleInProjectOrTask()){
+    public void notificationOfCollaborators(UserTeam userTeam, Project project) {
+        if (userTeam.getUser().getResponsibleInProjectOrTask()) {
             notificationService.save(new Notification(
                     project,
                     "Você foi adicionado(a) como responsável do projeto " + project.getName(),
@@ -141,7 +141,7 @@ public class ProjectService {
         return projectOneDTO;
     }
 
-    private List<Task> getTasksProjectByResponsibility(List<Task> tasks, UserTeam userTeam){
+    private List<Task> getTasksProjectByResponsibility(List<Task> tasks, UserTeam userTeam) {
         return tasks
                 .stream()
                 .flatMap(task -> task.getTaskResponsables().stream())
@@ -158,13 +158,13 @@ public class ProjectService {
         //Delete every value of tasks on project
         project.getTasks().forEach(task -> task.getValues().forEach(valueService::delete));
 
-        if(project.getProjectDependency() != null){
+        if (project.getProjectDependency() != null) {
             project.setProjectDependency(null);
             save(project);
         }
 
-        for(Project projectFor : projectRepository.findAll()){
-            if(projectFor.getProjectDependency() !=null) {
+        for (Project projectFor : projectRepository.findAll()) {
+            if (projectFor.getProjectDependency() != null) {
                 if (projectFor.getProjectDependency().getId().equals(id)) {
                     projectFor.setProjectDependency(null);
                     save(projectFor);
@@ -188,7 +188,7 @@ public class ProjectService {
         return propertiesList;
     }
 
-    public List<Property> defaultProperties(){
+    public List<Property> defaultProperties() {
         List<Property> properties = new ArrayList<>();
         properties.add(new Property(PropertyKind.STATUS, "Status", true, null, PropertyStatus.FIXED));
         properties.add(new Property(PropertyKind.DATE, "Data", true, null, PropertyStatus.FIXED));
@@ -198,7 +198,7 @@ public class ProjectService {
         return properties;
     }
 
-    public void defaultPropertyList(Project project){
+    public void defaultPropertyList(Project project) {
         for (Property property : defaultProperties()) {
             if (property.getKind() == PropertyKind.STATUS) {
                 property.setPropertyLists(defaultStatus(property));
@@ -217,12 +217,14 @@ public class ProjectService {
     }
 
     public Project updateProjectCollaborators(ProjectEditDTO projectEditDTO) {
+        System.out.println(projectEditDTO);
         Project project = findById(projectEditDTO.getId());
 
-        if(project.getProjectDependency() == null){
-            if(projectEditDTO.getProjectDependency() != null) {
-                project.setProjectDependency(projectEditDTO.getProjectDependency());
-            }
+        if (projectEditDTO.getProjectDependency() != null) {
+            project.setProjectDependency(projectEditDTO.getProjectDependency());
+        }
+        if(projectEditDTO.getProjectReviewENUM() != null){
+            project.setProjectReviewENUM(projectEditDTO.getProjectReviewENUM());
         }
 
         project.setName(projectEditDTO.getName());
@@ -230,27 +232,25 @@ public class ProjectService {
 
         List<UserTeam> userTeamsToAdd = new ArrayList<>();
 
-        if(projectEditDTO.getUsers()!=null){
-        for (User user : projectEditDTO.getUsers()) {
-            UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), user.getId());
-            userTeamsToAdd.add(userTeam1);
-        }
+        if (projectEditDTO.getUsers() != null) {
+            for (User user : projectEditDTO.getUsers()) {
+                UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), user.getId());
+                userTeamsToAdd.add(userTeam1);
+            }
         }
         notificationOfUpdateCollaborators(userTeamsToAdd, project);
 
-        if(!userTeamsToAdd.contains(project.getCreator())){
+        if (!userTeamsToAdd.contains(project.getCreator())) {
             userTeamsToAdd.add(project.getCreator());
         }
 
         project.setCollaborators(userTeamsToAdd);
         project.setGroups(projectEditDTO.getGroups());
-        project.setProjectReviewENUM(projectEditDTO.getProjectReviewENUM());
-        project.setProjectDependency(projectEditDTO.getProjectDependency());
         return projectRepository.save(project);
     }
 
-    public void notificationOfUpdateCollaborators(List<UserTeam> userTeamsToAdd, Project project){
-        for (Boolean bool : List.of(false, true)){
+    public void notificationOfUpdateCollaborators(List<UserTeam> userTeamsToAdd, Project project) {
+        for (Boolean bool : List.of(false, true)) {
             String title = bool ? "Agora você é responsável do projeto " : "Você não é responsável do projeto ";
             userTeamsToAdd.stream()
                     .filter(userTeam -> project.getCollaborators().contains(userTeam) == bool)
@@ -276,7 +276,7 @@ public class ProjectService {
                 .toList();
     }
 
-    public ProjectCollaborators returnAllCollaborators(Long projectId){
+    public ProjectCollaborators returnAllCollaborators(Long projectId) {
         Project project = findById(projectId);
         return new ProjectCollaborators(
                 project.getCollaborators().stream().map(UserTeam::getUser).toList(), project.getGroups());

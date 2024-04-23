@@ -35,8 +35,10 @@ public class PropertyController {
     @DeleteMapping("{propertyID}/project/{projectID}")
     public ResponseEntity<?> deleteProperty(@PathVariable Long projectID, @PathVariable Long propertyID) {
         try {
+            System.out.println("entrei");
             return new ResponseEntity<>(propertyService.delete(projectID, propertyID), HttpStatus.OK);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
