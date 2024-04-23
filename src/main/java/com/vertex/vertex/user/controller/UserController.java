@@ -145,52 +145,5 @@ public class UserController {
                     (HttpStatus.CONFLICT);
         }
     }
-
-
-    //======================================================
-    //NOTIFICATIONS
-    //======================================================
-
-    @GetMapping("/{userID}/notification")
-    public ResponseEntity<?> getNotifications(@PathVariable Long userID){
-        try {
-            return new ResponseEntity<>(userService.getUserNotifications(userID), HttpStatus.OK);
-        } catch (NoSuchElementException e) {
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
-        }
-    }
-
-
-    @PatchMapping("/{userID}/notification/delete")
-    public ResponseEntity<?> deleteNotifications(@PathVariable Long userID, @RequestBody List<Notification> notifications){
-        try {
-            userService.deleteNotifications(userID, notifications);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
-        }
-    }
-
-    @PatchMapping("/{userID}/notification/read")
-    public ResponseEntity<?> readNotifications(@PathVariable Long userID, @RequestBody List<Notification> notifications){
-        try {
-            userService.readNotifications(userID, notifications);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
-        }
-    }
-
-
-    @PatchMapping("/{userID}/notification/settings/{settingID}")
-    public ResponseEntity<?> notificationSettings(@PathVariable Long userID, @PathVariable Integer settingID){
-        try {
-
-            return new ResponseEntity<>(userService.changeNotificationSettings(userID, settingID), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
-        }
-    }
-
     //======================================================
 }

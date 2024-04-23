@@ -2,10 +2,8 @@ package com.vertex.vertex.task.service;
 
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
-import com.vertex.vertex.log.model.exception.EntityDoesntExistException;
 import com.vertex.vertex.notification.entity.model.Notification;
-import com.vertex.vertex.notification.entity.service.NotificationService;
-import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
+import com.vertex.vertex.notification.service.NotificationService;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
@@ -22,7 +20,6 @@ import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.model.exceptions.TaskDoesNotExistException;
 import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
-import com.vertex.vertex.task.relations.value.model.entity.ValueDate;
 import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
@@ -322,7 +319,7 @@ public class TaskService {
                     .stream()
                     .flatMap(ut -> ut.getTeam().getProjects().stream()
                             .flatMap(p -> filterTasksByResponsible(p.getTasks(), ut).stream())
-                            )
+                    )
                     .toList();
 
         } catch (Exception e) {
@@ -399,7 +396,7 @@ public class TaskService {
                 .filter(task -> task.getTaskResponsables()
                         .stream()
                         .anyMatch(tr -> tr.getUserTeam().getUser().getId().equals(userId))
-                            && task.getName().toLowerCase().contains(query.toLowerCase()))
+                        && task.getName().toLowerCase().contains(query.toLowerCase()))
                 .map(TaskSearchDTO::new)
                 .toList();
     }

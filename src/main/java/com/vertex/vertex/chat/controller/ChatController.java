@@ -4,6 +4,8 @@ import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.chat.relations.message.Message;
 import com.vertex.vertex.chat.service.ChatService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
+import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.http.HttpStatus;
@@ -24,37 +26,41 @@ import java.util.List;
 public class ChatController {
 
     private final ChatService chatService;
+    private final UserService userService;
 
     @PatchMapping("/chat/{idChat}")
-    public ResponseEntity<Chat> patchChat(@PathVariable Long idChat, @RequestBody UserTeamAssociateDTO userTeam) {
+    public ResponseEntity<Chat> patchChat(@PathVariable Long idChat, @RequestBody UserTeamAssociateDTO userTeam){
         try {
             System.out.println(userTeam);
-            this.chatService.patchUserTeams(idChat, userTeam);
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (Exception e) {
+            chatService.patchUserTeams(idChat,userTeam);
+            return new ResponseEntity<>( HttpStatus.CREATED);
+        }catch (Exception e){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 
     @GetMapping("messagesByChatId/{idChat}")
-    public ResponseEntity<List<Message>> findAllMessagesByChatId(@PathVariable Long idChat) {
+    public ResponseEntity<List<Message>> findAllMessagesByChatId(@PathVariable Long idChat){
 
         try {
-            return new ResponseEntity<>(chatService.findMessagesByChatId(idChat), HttpStatus.OK);
-        } catch (Exception e) {
+            return new ResponseEntity<>(chatService.findMessagesByChatId(idChat),HttpStatus.OK);
+        }catch (Exception e){
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
 
     }
 
 
+    //    @MessageMapping("/{idChat}/{idUser}")
+//    @SendTo("/{idChat}")
     @PatchMapping("/messagePatch/{idChat}/{idUser}")
-    public ResponseEntity<Chat> patchMessages(@PathVariable Long idChat, @PathVariable Long idUser,
-                                              @RequestBody Message message) {
-        System.out.println("a" + idChat);
+    public ResponseEntity<Chat> patchMessages(@PathVariable Long idChat,@PathVariable Long idUser,
+                                              @RequestBody Message message){
+        System.out.println("a"+idChat);
         try {
-            return new ResponseEntity<>(chatService.patchMessages(idChat, idUser, message), HttpStatus.OK);
-        } catch (Exception e) {
+            return new ResponseEntity<>(chatService.patchMessages(idChat,userService.findById(idUser),message),HttpStatus.OK);
+        }catch (Exception e){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
@@ -64,11 +70,21 @@ public class ChatController {
             @PathVariable Long chatId,
             @RequestParam MultipartFile file,
             @RequestParam String user
-    ) {
+    ) throws IOException {
         if (file.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
-        return new ResponseEntity<>(chatService.saveFile(chatId, file, user), HttpStatus.OK);
+        return new ResponseEntity<>(chatService.saveFile(chatId,file,user), HttpStatus.OK);
+    }
+
+    @GetMapping("/allChatsOfUser/{id}")
+    public ResponseEntity<List<Chat>> findAllChatsByUser(@PathVariable Long id){
+
+        try {
+            return new ResponseEntity<>(chatService.findAllByUser(userService.findById(id)),HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
     }
 
 

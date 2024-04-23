@@ -198,21 +198,12 @@ public class TaskController {
     }
 
     @PostMapping("/{idTask}/chat")
-    public Task createChatOfTask(@PathVariable Long idTask){
-        Task task = taskService.findById(idTask);
-        List<UserTeam> userTeamsList = new ArrayList<>();
-        task.getTaskResponsables().forEach(taskResponsable ->{
-            userTeamsList.add(taskResponsable.getUserTeam());
-        });
-
-        Chat chat = new Chat();
-        chat.setName(task.getName());
-        chat.setUserTeams(userTeamsList);
-        chat.setMessages(new ArrayList<>());
-        task.setChatCreated(true);
-        task.setChat(chat);
-        chatService.save(chat);
-        return task;
+    public ResponseEntity<Task> createChatOfTask(@PathVariable Long idTask){
+        try{
+            return new ResponseEntity<>(chatService.createChatOfTask(idTask),HttpStatus.CREATED);
+        }catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
     }
 
     @GetMapping("/{idTask}/chat")

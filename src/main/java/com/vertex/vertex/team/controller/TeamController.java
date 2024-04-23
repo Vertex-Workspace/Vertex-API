@@ -28,6 +28,7 @@ public class TeamController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
+
     @PutMapping
     public ResponseEntity<?> update(@RequestBody TeamViewListDTO team) {
         try {
@@ -52,7 +53,7 @@ public class TeamController {
             return new ResponseEntity<>(teamService.findInvitationCodeById(id), HttpStatus.OK);
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -76,13 +77,12 @@ public class TeamController {
     }
 
 
-
     @GetMapping("/usersByTeam/{teamId}")
     public ResponseEntity<?> findUsersAndGroupsByTeam(@PathVariable Long teamId) {
         try {
             return new ResponseEntity<>(teamService.getUsersByTeamAndGroup(teamId), HttpStatus.OK);
         } catch (NoSuchElementException e) {
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -91,7 +91,7 @@ public class TeamController {
         try {
             return new ResponseEntity<>(teamService.getUsersByTeam(teamId), HttpStatus.OK);
         } catch (NoSuchElementException e) {
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 
