@@ -1,10 +1,7 @@
 package com.vertex.vertex.team.relations.user_team.service;
 
-import com.vertex.vertex.notification.entity.service.NotificationService;
-import com.vertex.vertex.project.model.entity.Project;
+import com.vertex.vertex.notification.service.NotificationService;
 import com.vertex.vertex.security.ValidationUtils;
-import com.vertex.vertex.task.model.entity.Task;
-import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.permission.model.entity.Permission;
@@ -15,8 +12,6 @@ import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.repository.TeamRepository;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.repository.UserRepository;
-import com.vertex.vertex.user.service.UserService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -36,7 +31,6 @@ public class UserTeamService {
     private final TeamRepository teamRepository;
 
     //Services
-//    private final UserService userService;
     private final PermissionService permissionService;
     private final NotificationService notificationService;
 

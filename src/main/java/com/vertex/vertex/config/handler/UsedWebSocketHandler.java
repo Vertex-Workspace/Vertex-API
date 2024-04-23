@@ -28,7 +28,7 @@ public class UsedWebSocketHandler extends AbstractWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         for (WebSocketSession webSocketSession : webSocketSessions) {
-            if(Objects.requireNonNull(webSocketSession.getUri()).getPath().contains("chat")) {
+            if (webSocketSession != null && webSocketSession.getUri() != null && webSocketSession.getUri().getPath().contains("chat")) {
                 webSocketSession.sendMessage(message);
             }
         }
@@ -41,7 +41,7 @@ public class UsedWebSocketHandler extends AbstractWebSocketHandler {
 
     public void sendNotification(Long userID) throws IOException {
         for (WebSocketSession webSocketSession : webSocketSessions) {
-            if(Objects.requireNonNull(webSocketSession.getUri()).getPath().contains("notifications")){
+            if (webSocketSession != null && webSocketSession.getUri() != null && webSocketSession.getUri().getPath().contains("chat")) {
                 webSocketSession.sendMessage(new TextMessage(userID.toString()));
             }
         }

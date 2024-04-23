@@ -1,11 +1,9 @@
 package com.vertex.vertex.project.service;
 
-import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.notification.entity.model.Notification;
-import com.vertex.vertex.notification.entity.service.NotificationService;
+import com.vertex.vertex.notification.service.NotificationService;
 import com.vertex.vertex.project.model.DTO.*;
-import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.property.model.ENUM.Color;
@@ -15,18 +13,13 @@ import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.security.ValidationUtils;
-import com.vertex.vertex.task.model.entity.Task;
-import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
-import com.vertex.vertex.task.relations.review.model.entity.Review;
+import com.vertex.vertex.task.model.DTO.TaskModeViewDTO;
 import com.vertex.vertex.task.relations.value.service.ValueService;
-import com.vertex.vertex.team.model.entity.Team;
-import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -93,7 +86,6 @@ public class ProjectService {
 
 
     public Set<Project> findAllByTeam(Long teamId) {
-
         return projectRepository.findAllByTeam_Id(teamId);
     }
 
@@ -104,7 +96,7 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
-    public Boolean existsByIdAndUserBelongs(Long projectId, Long userId) {
+    public Boolean existsByIdAndUserBelongs(Long projectId) {
         if (projectRepository.existsById(projectId)) {
             Project project = findById(projectId);
             ValidationUtils.loggedUserIsOnProject(project);
@@ -123,25 +115,16 @@ public class ProjectService {
     public ProjectOneDTO findProjectById(Long id) {
         Project project = findById(id);
         ProjectOneDTO projectOneDTO = new ProjectOneDTO(project);
+        ValidationUtils.loggedUserIsOnProject(project);
 
-        //To Set as null
-        projectOneDTO.setTasks(new ArrayList<>());
-
-        //Pass through all tasks of the project and validates if task has an opened review (UNDERANALYSIS)
-        //If it has, It won't be included into list
-        for (Task task : project.getTasks()) {
-            boolean isReviewed = false;
-            for (Review review : task.getReviews()) {
-                if (review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)
-                ) {
-                    isReviewed = true;
-                    break;
-                }
-            }
-            if (!isReviewed) {
-                projectOneDTO.getTasks().add(task);
-            }
-        }
+        projectOneDTO.setTasks(
+                project.getTasks().stream()
+//                        .flatMap(t -> t.getReviews().stream())
+//                        .filter(review -> !review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS))
+//                        .map(Review::getTask)
+                        .map(TaskModeViewDTO::new)
+                        .toList()
+        );
         projectOneDTO.setIdTeam(project.getTeam().getId());
         return projectOneDTO;
     }
@@ -265,20 +248,18 @@ public class ProjectService {
                 project.getCollaborators().stream().map(UserTeam::getUser).toList(), project.getGroups());
     }
 
-    public List<Project> getAllByTeamAndCollaborators(Long teamId, Long userId) {
-        List<Project> projects = new ArrayList<>();
+    /**
+     @apiNote Return every project DTO, it will increase the performance of front-end
+     the old is returning arround 10MB, now it's 2MB
+     */
+    public List<ProjectViewListDTO> getAllByTeamAndCollaborators(Long teamId, Long userId) {
         UserTeam userTeam = userTeamService.findUserTeamByComposeId(teamId, userId);
-        Team team = userTeam.getTeam();
         ValidationUtils.validateUserLogged(userTeam.getUser().getEmail());
-
-        for (Project project : team.getProjects()) {
-            for (UserTeam userTeamFor : project.getCollaborators()) {
-                if (userTeam.equals(userTeamFor)) {
-                    projects.add(project);
-                }
-            }
-        }
-        return projects;
+        return userTeam.getTeam().getProjects()
+                .stream()
+                .filter(p -> p.getCollaborators().contains(userTeam))
+                .map(ProjectViewListDTO::new)
+                .toList();
     }
 
 }

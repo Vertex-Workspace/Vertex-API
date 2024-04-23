@@ -1,6 +1,6 @@
 package com.vertex.vertex.team.relations.group.service;
 
-import com.vertex.vertex.notification.entity.service.NotificationService;
+import com.vertex.vertex.notification.service.NotificationService;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.group.model.DTO.GroupRegisterDTO;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
@@ -8,13 +8,11 @@ import com.vertex.vertex.team.relations.group.model.exception.GroupNameInvalidEx
 import com.vertex.vertex.team.relations.group.repository.GroupRepository;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
-import com.vertex.vertex.team.repository.TeamRepository;
 import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.user.model.entity.User;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -51,6 +49,7 @@ public class GroupService {
                 }
                 userTeam.getGroups().remove(group);
                 userTeamService.save(userTeam);
+
             }
         }
     }

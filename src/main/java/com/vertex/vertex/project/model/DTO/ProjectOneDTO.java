@@ -4,6 +4,7 @@ import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.property.model.entity.Property;
+import com.vertex.vertex.task.model.DTO.TaskModeViewDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.note.model.dto.NoteDTO;
 import com.vertex.vertex.task.relations.note.model.entity.Note;
@@ -29,12 +30,12 @@ public class ProjectOneDTO {
     private List<Property> properties;
     private UserTeam creator;
     private File file;
-    private List<Task> tasks = new ArrayList<>();
+    private List<TaskModeViewDTO> tasks = new ArrayList<>();
     private List<NoteDTO> notes;
     private ProjectReviewENUM projectReviewENUM;
 
     public ProjectOneDTO(Project project) {
-        new ModelMapper().map(project, this);
+        BeanUtils.copyProperties(project, this);
         this.notes = project.getNotes()
                 .stream()
                 .map(NoteDTO::new)
