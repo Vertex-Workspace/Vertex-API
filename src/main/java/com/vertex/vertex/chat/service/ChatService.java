@@ -1,6 +1,7 @@
 package com.vertex.vertex.chat.service;
 
 import com.vertex.vertex.chat.model.Chat;
+import com.vertex.vertex.chat.model.DTO.ChatListDTO;
 import com.vertex.vertex.chat.relations.message.Message;
 import com.vertex.vertex.chat.relations.message.MessageRepository;
 import com.vertex.vertex.chat.repository.ChatRepository;
@@ -36,10 +37,11 @@ public class ChatService {
     private final TaskService taskService;
 
 
-    public List<Chat> findAllByUser(User user) {
-        return userTeamService.findAllUserTeamByUserId(user.getId())
+    public List<ChatListDTO> findAllByUser(Long userID) {
+        return userTeamService.findAllUserTeamByUserId(userID)
                 .stream()
-                .map(userTeam -> (Chat) userTeam.getChats())
+                .flatMap(userTeam -> userTeam.getChats().stream())
+                .map(ChatListDTO::new)
                 .toList();
     }
 

@@ -1,6 +1,7 @@
 package com.vertex.vertex.chat.controller;
 
 import com.vertex.vertex.chat.model.Chat;
+import com.vertex.vertex.chat.model.DTO.ChatListDTO;
 import com.vertex.vertex.chat.relations.message.Message;
 import com.vertex.vertex.chat.service.ChatService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
@@ -52,8 +53,6 @@ public class ChatController {
     }
 
 
-    //    @MessageMapping("/{idChat}/{idUser}")
-//    @SendTo("/{idChat}")
     @PatchMapping("/messagePatch/{idChat}/{idUser}")
     public ResponseEntity<Chat> patchMessages(@PathVariable Long idChat,@PathVariable Long idUser,
                                               @RequestBody Message message){
@@ -78,10 +77,9 @@ public class ChatController {
     }
 
     @GetMapping("/allChatsOfUser/{id}")
-    public ResponseEntity<List<Chat>> findAllChatsByUser(@PathVariable Long id){
-
+    public ResponseEntity<List<ChatListDTO>> findAllChatsByUser(@PathVariable Long id){
         try {
-            return new ResponseEntity<>(chatService.findAllByUser(userService.findById(id)),HttpStatus.OK);
+            return new ResponseEntity<>(chatService.findAllByUser(id) ,HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }

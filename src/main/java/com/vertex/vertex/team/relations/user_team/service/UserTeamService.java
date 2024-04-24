@@ -88,17 +88,12 @@ public class UserTeamService {
     }
 
     public List<UserTeam> findAllUserTeamByUserId(Long userId) {
+        System.out.println(userRepository.findById(userId).get().getEmail());
         ValidationUtils.validateUserLogged(userRepository.findById(userId).get().getEmail());
         return userTeamRepository
                 .findAllByUser_Id(userId);
     }
 
-
-    public List<UserTeam> findAllByUser(Long userId) {
-        ValidationUtils.validateUserLogged(userRepository.findById(userId).get().getEmail());
-        return userTeamRepository
-                .findAllByUser_Id(userId);
-    }
 
 
     public List<Permission> getAllPermissionOfAUserTeam(Long userId, Long teamId) {
