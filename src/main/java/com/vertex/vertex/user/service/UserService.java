@@ -106,7 +106,7 @@ public class UserService {
         user.setAnyUpdateOnTask(true);
         user.setResponsibleInProjectOrTask(true);
         user.setDefaultSettings(true);
-        zdefaultTeams(save(user));
+        defaultTeams(save(user));
     }
 
     public User findByEmail(String email) {

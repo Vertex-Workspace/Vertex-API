@@ -1,5 +1,6 @@
 package com.vertex.vertex.property.service;
 
+import com.vertex.vertex.project.model.DTO.ProjectOneDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.project.service.ProjectService;
@@ -48,7 +49,7 @@ public class PropertyService {
     private final ModelMapper mapper;
 
 
-    public Project save(Long projectID, Property property) {
+    public ProjectOneDTO save(Long projectID, Property property) {
         Project project = projectService.findById(projectID);
         Property finalProperty = new Property();
 
@@ -89,32 +90,42 @@ public class PropertyService {
         finalProperty.setProject(project);
         propertyRepository.save(finalProperty);
 
-        return projectService.findById(projectID);
+        return new ProjectOneDTO(project);
     }
 
     //in this method, we need, firstly, remove the value, and then remove the property
-    public Project delete(Long projectId, Long propertyId) {
+    public ProjectOneDTO delete(Long projectId, Long propertyId) {
         Property property = findById(propertyId);
         Project project = projectService.findById(projectId);
+
+        if(!property.getProject().getId().equals(projectId)){
+            throw new RuntimeException("Propriedade não pertence ao projeto!");
+        }
 
         if (property.getPropertyStatus() != PropertyStatus.FIXED) {
             this.deleteValuesCascade(project, property);
             propertyRepository.delete(property);
-            return projectService.findById(projectId);
+            return new ProjectOneDTO(project);
         } else {
             throw new CantDeleteStatusException();
         }
     }
 
     private void deleteValuesCascade(Project project, Property property){
+        List<Task> tasksToBeSaved = new ArrayList<>();
+        List<Value> values = new ArrayList<>();
         for (Task task : project.getTasks()) {
             for (Value value : task.getValues()) {
                 if (value.getProperty().getId().equals(property.getId())) {
-                    task.getValues().remove(value);
-                    taskRepository.save(task);
+                    values.add(value);
                 }
             }
+            for(Value value : values){
+                task.getValues().remove(value);
+                tasksToBeSaved.add(task);
+            }
         }
+        taskRepository.saveAll(tasksToBeSaved);
     }
 
     public Property findById(Long id) {
@@ -138,13 +149,11 @@ public class PropertyService {
                     //Validates and find the value with property ID
                     if (value.getProperty().getId().equals(property.getId())) {
                         //Validates if the value that intend to be excluded, belongs to the current value
-                        if (value.getProperty().getPropertyLists().contains(propertyList)) {
-                            if (property.getKind() == STATUS) {
-                                PropertyList currentPropertyList = (PropertyList) value.getValue();
-                                //Set the value as the default for each task
-                                value.setValue(getFixedStatusValue(project, currentPropertyList));
-                                valueService.save(value);
-                            }
+                        if (value.getProperty().getPropertyLists().contains(propertyList) && property.getKind() == STATUS) {
+                            PropertyList currentPropertyList = (PropertyList) value.getValue();
+                            //Set the value as the default for each task
+                            value.setValue(getFixedStatusValue(project, currentPropertyList));
+                            valueService.save(value);
 //                            if(property.getKind() == LIST){
 //
 //                            }

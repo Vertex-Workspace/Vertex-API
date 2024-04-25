@@ -75,7 +75,7 @@ public class GroupController {
         }
     }
 
-    @PatchMapping("/edit/{teamId}")
+    @PatchMapping("group/edit/{teamId}")
     public ResponseEntity<?> editGroup(@RequestBody Group group, @PathVariable Long teamId){
         try {
             return new ResponseEntity<>(groupService.editGroupName(group, teamId), HttpStatus.OK);

@@ -4,6 +4,7 @@ import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.service.NotificationService;
 import com.vertex.vertex.project.model.DTO.*;
+import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.property.model.ENUM.Color;
@@ -47,6 +48,9 @@ public class ProjectService {
         createUserTeamAndSetCreator(teamId, project);
         setCollaboratorsAndVerifyCreator(projectCreateDTO.getUsers(), project);
         project.setProjectReviewENUM(projectCreateDTO.getProjectReviewENUM());
+        if(projectCreateDTO.getProjectReviewENUM() == null){
+            project.setProjectReviewENUM(ProjectReviewENUM.OPTIONAL);
+        }
         defaultPropertyList(project);
 
         project.setProjectDependency(projectCreateDTO.getProjectDependency());
@@ -63,7 +67,7 @@ public class ProjectService {
         project.setCollaborators(List.of(userTeam));
     }
 
-    public void setCollaboratorsAndVerifyCreator(List<User> users, Project project){
+    public void setCollaboratorsAndVerifyCreator(List<User> users, Project project) {
         if (users != null) {
             for (User user : users) {
                 UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), user.getId());
@@ -75,8 +79,8 @@ public class ProjectService {
         }
     }
 
-    public void notificationOfCollaborators(UserTeam userTeam, Project project){
-        if(userTeam.getUser().getResponsibleInProjectOrTask()){
+    public void notificationOfCollaborators(UserTeam userTeam, Project project) {
+        if (userTeam.getUser().getResponsibleInProjectOrTask()) {
             notificationService.save(new Notification(
                     project,
                     "Você foi adicionado(a) como responsável do projeto " + project.getName(),
@@ -151,13 +155,13 @@ public class ProjectService {
         project.getTasks().forEach(task -> task.getValues().forEach(valueService::delete));
         ValidationUtils.loggedUserIsOnProjectAndIsCreator(project);
 
-        if(project.getProjectDependency() != null){
+        if (project.getProjectDependency() != null) {
             project.setProjectDependency(null);
             save(project);
         }
 
-        for(Project projectFor : projectRepository.findAll()){
-            if(projectFor.getProjectDependency() !=null) {
+        for (Project projectFor : projectRepository.findAll()) {
+            if (projectFor.getProjectDependency() != null) {
                 if (projectFor.getProjectDependency().getId().equals(id)) {
                     projectFor.setProjectDependency(null);
                     save(projectFor);
@@ -181,7 +185,7 @@ public class ProjectService {
         return propertiesList;
     }
 
-    public List<Property> defaultProperties(){
+    public List<Property> defaultProperties() {
         List<Property> properties = new ArrayList<>();
         properties.add(new Property(PropertyKind.STATUS, "Status", true, null, PropertyStatus.FIXED));
         properties.add(new Property(PropertyKind.DATE, "Data", true, null, PropertyStatus.FIXED));
@@ -191,7 +195,7 @@ public class ProjectService {
         return properties;
     }
 
-    public void defaultPropertyList(Project project){
+    public void defaultPropertyList(Project project) {
         for (Property property : defaultProperties()) {
             if (property.getKind() == PropertyKind.STATUS) {
                 property.setPropertyLists(defaultStatus(property));
@@ -229,15 +233,17 @@ public class ProjectService {
         }
         notificationOfUpdateCollaborators(userTeamsToAdd, project);
 
+        if (!userTeamsToAdd.contains(project.getCreator())) {
+            userTeamsToAdd.add(project.getCreator());
+        }
+
         project.setCollaborators(userTeamsToAdd);
         project.setGroups(projectEditDTO.getGroups());
-        project.setProjectReviewENUM(projectEditDTO.getProjectReviewENUM());
-        project.setProjectDependency(projectEditDTO.getProjectDependency());
         return projectRepository.save(project);
     }
 
-    public void notificationOfUpdateCollaborators(List<UserTeam> userTeamsToAdd, Project project){
-        for (Boolean bool : List.of(false, true)){
+    public void notificationOfUpdateCollaborators(List<UserTeam> userTeamsToAdd, Project project) {
+        for (Boolean bool : List.of(false, true)) {
             String title = bool ? "Agora você é responsável do projeto " : "Você não é responsável do projeto ";
             userTeamsToAdd.stream()
                     .filter(userTeam -> project.getCollaborators().contains(userTeam) == bool)
@@ -263,7 +269,7 @@ public class ProjectService {
                 .toList();
     }
 
-    public ProjectCollaborators returnAllCollaborators(Long projectId){
+    public ProjectCollaborators returnAllCollaborators(Long projectId) {
         Project project = findById(projectId);
         return new ProjectCollaborators(
                 project.getCollaborators().stream().map(UserTeam::getUser).toList(), project.getGroups());
