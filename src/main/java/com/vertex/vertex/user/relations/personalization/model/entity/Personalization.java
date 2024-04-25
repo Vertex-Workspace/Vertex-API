@@ -26,6 +26,7 @@ public class Personalization {
     private Integer theme;
     private Boolean signLanguage;
     private Boolean listeningText;
+    private String language;
 
     @OneToOne
     @JsonIgnore

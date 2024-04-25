@@ -18,6 +18,7 @@ import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.user.model.DTO.*;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.exception.*;
+import com.vertex.vertex.user.relations.personalization.model.entity.LanguageDTO;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import com.vertex.vertex.user.relations.personalization.service.PersonalizationService;
 import com.vertex.vertex.user.repository.UserRepository;
@@ -227,6 +228,18 @@ public class UserService {
         user.setPersonalization(personalization);
         return userRepository.save(user);
     }
+
+    public User changeLanguage(LanguageDTO languageDTO,Long userId){
+        User user = findById(userId);
+
+        Personalization personalization = personalizationService.findById(user.getPersonalization().getId());
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.map(languageDTO,personalization);
+
+        user.setPersonalization(personalization);
+        return userRepository.save(user);
+    }
+
     public User patchUserPassword(UserLoginDTO userLoginDTO){
         User user = findByEmail(userLoginDTO.getEmail());
         user.setPassword(userLoginDTO.getPassword());
