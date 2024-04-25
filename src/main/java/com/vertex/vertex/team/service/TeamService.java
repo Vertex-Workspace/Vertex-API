@@ -1,11 +1,13 @@
 package com.vertex.vertex.team.service;
 import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.log.model.exception.EntityDoesntExistException;
+import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
 import com.vertex.vertex.project.model.DTO.ProjectViewListDTO;
+import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.security.ValidationUtils;
+import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.DTO.TaskModeViewDTO;
-import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.review.service.ReviewService;
@@ -28,7 +30,6 @@ import com.vertex.vertex.utils.RandomCodeUtils;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,6 +43,8 @@ public class TeamService {
 
     //Services
     private final UserTeamService userTeamService;
+    private final TaskService taskService;
+    private final ProjectService projectService;
     private final ReviewService reviewService;
     private final PermissionService permissionService;
     //Model Mapper
@@ -67,10 +70,15 @@ public class TeamService {
 
             team.setCreator(userTeam);
             team.getUserTeams().add(userTeam);
-            permissionService.save(userTeam);
             team.setChat(new Chat(team));
 
-            return teamRepository.save(team);
+            Team savedTeam = teamRepository.save(team);
+            permissionService.save(team.getCreator());
+            if(teamViewListDTO.isDefaultTeam()){
+                saveDefaultTasksAndProject(savedTeam);
+            }
+
+            return savedTeam;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -189,6 +197,24 @@ public class TeamService {
     }
 
 
+    //Refatorar Depois de finalizar o projeto...
+    public void saveDefaultTasksAndProject(Team team) {
+
+        User user = team.getCreator().getUser();
+
+        ProjectCreateDTO projectDefault1 =
+                new ProjectCreateDTO("Projeto Pessoal", "Seu projeto pessoal padrão", team.getCreator(), List.of(user));
+
+        Project project = projectService.saveWithRelationOfProject(projectDefault1, team.getId());
+
+        TaskCreateDTO taskCreateDTO1 =
+                new TaskCreateDTO("Tarefa 1", "Sua tarefa é lavar a louça", team.getCreator().getUser(), project);
+        TaskCreateDTO taskCreateDTO2 =
+                new TaskCreateDTO("Tarefa 2", "Sua tarefa é lavar a louça", team.getCreator().getUser(), project);
+
+        taskService.save(taskCreateDTO1);
+        taskService.save(taskCreateDTO2);
+    }
 
     public List<ProjectViewListDTO> convertTeamProjectsToDto(Team team) {
         return team.getProjects()

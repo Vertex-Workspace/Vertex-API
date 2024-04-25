@@ -14,12 +14,15 @@ import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.security.ValidationUtils;
 import com.vertex.vertex.task.model.DTO.TaskModeViewDTO;
+import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,19 +49,18 @@ public class ProjectService {
         project.setProjectReviewENUM(projectCreateDTO.getProjectReviewENUM());
         defaultPropertyList(project);
 
+        project.setProjectDependency(projectCreateDTO.getProjectDependency());
         return save(project);
+
     }
 
     public void createUserTeamAndSetCreator(Long teamId, Project project){
-        List<UserTeam> users = new ArrayList<>();
         UserTeam userTeam = userTeamService
                 .findUserTeamByComposeId(
                         teamId, project.getCreator().getUser().getId());
-        ValidationUtils.validateUserLogged(userTeam.getUser().getEmail());
         project.setTeam(userTeam.getTeam());
         project.setCreator(userTeam);
-        users.add(userTeam);
-        project.setCollaborators(users);
+        project.setCollaborators(List.of(userTeam));
     }
 
     public void setCollaboratorsAndVerifyCreator(List<User> users, Project project){
@@ -109,7 +111,7 @@ public class ProjectService {
         if(optionalProject.isPresent()){
             return optionalProject.get();
         }
-        throw new RuntimeException("Project not found");
+        throw new RuntimeException("Projeto não encontrado!");
     }
 
     public ProjectOneDTO findProjectById(Long id) {
@@ -117,16 +119,30 @@ public class ProjectService {
         ProjectOneDTO projectOneDTO = new ProjectOneDTO(project);
         ValidationUtils.loggedUserIsOnProject(project);
 
-        projectOneDTO.setTasks(
-                project.getTasks().stream()
-//                        .flatMap(t -> t.getReviews().stream())
-//                        .filter(review -> !review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS))
-//                        .map(Review::getTask)
-                        .map(TaskModeViewDTO::new)
-                        .toList()
-        );
+
         projectOneDTO.setIdTeam(project.getTeam().getId());
+        //Pass through all tasks of the project and validates if task has an opened review (UNDERANALYSIS)
+        //If it has, It won't be included into list
+
+
+        projectOneDTO.setTasks(getTasksProjectByResponsibility(project.getTasks(),
+                userTeamService.findUserTeamByComposeId(project.getTeam().getId()
+                        , ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId())));
+
         return projectOneDTO;
+    }
+
+    private List<TaskModeViewDTO> getTasksProjectByResponsibility(List<Task> tasks, UserTeam userTeam){
+        return tasks
+                .stream()
+                .flatMap(task -> task.getTaskResponsables().stream())
+                .filter(tr -> tr.getUserTeam().equals(userTeam))
+                .map(TaskResponsable::getTask)
+//                .flatMap(task -> task.getReviews().stream())
+//                .filter(review -> !review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS))
+//                .map(Review::getTask)
+                .map(TaskModeViewDTO::new)
+                .toList();
     }
 
     public void deleteById(Long id) {
@@ -196,6 +212,11 @@ public class ProjectService {
     public Project updateProjectCollaborators(ProjectEditDTO projectEditDTO) {
         Project project = findById(projectEditDTO.getId());
         ValidationUtils.loggedUserIsOnProjectAndIsCreator(project);
+
+        if(project.getProjectDependency() == null && projectEditDTO.getProjectDependency() != null){
+            project.setProjectDependency(projectEditDTO.getProjectDependency());
+        }
+
         project.setName(projectEditDTO.getName());
         project.setDescription(projectEditDTO.getDescription());
 

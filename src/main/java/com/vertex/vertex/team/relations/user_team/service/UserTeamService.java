@@ -4,6 +4,7 @@ import com.vertex.vertex.notification.service.NotificationService;
 import com.vertex.vertex.security.ValidationUtils;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.model.entity.Team;
+import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.permission.model.entity.Permission;
 import com.vertex.vertex.team.relations.permission.service.PermissionService;
 import com.vertex.vertex.team.relations.user_team.model.DTO.UserTeamAssociateDTO;
@@ -39,7 +40,10 @@ public class UserTeamService {
     }
 
     public UserTeam findUserTeamByComposeId(Long teamId, Long userID) {
-        ValidationUtils.validateUserLogged(userRepository.findById(userID).get().getEmail());
+        User user = userRepository.findById(userID).get();
+        if(!user.isDefaultSettings()){
+            ValidationUtils.validateUserLogged(user.getEmail());
+        }
         Optional<UserTeam> userTeam = userTeamRepository.findByTeam_IdAndUser_Id(teamId, userID);
         if (userTeam.isPresent()) {
             return userTeam.get();
@@ -81,6 +85,20 @@ public class UserTeamService {
         userTeamRepository.delete(findUserTeamByComposeId(teamID, userID));
     }
 
+    public void removeUserTeamDependencies(UserTeam userTeam){
+        for (Group group : userTeam.getTeam().getGroups()){
+            if(userTeam.getGroups().contains(group)){
+                group.getUserTeams().remove(userTeam);
+            }
+        }
+        Team team = userTeam.getTeam();
+        team.getUserTeams().remove(userTeam);
+        if(team.getCreator().equals(userTeam)){
+            team.setCreator(null);
+        }
+        team.getChat().getUserTeams().remove(userTeam);
+        userTeam.getChats().forEach(chat -> chat.getUserTeams().remove(userTeam));
+    }
 
     public List<UserTeam> findAllByUserAndQuery(Long userId, String query) {
         return userTeamRepository
@@ -88,7 +106,6 @@ public class UserTeamService {
     }
 
     public List<UserTeam> findAllUserTeamByUserId(Long userId) {
-        System.out.println(userRepository.findById(userId).get().getEmail());
         ValidationUtils.validateUserLogged(userRepository.findById(userId).get().getEmail());
         return userTeamRepository
                 .findAllByUser_Id(userId);

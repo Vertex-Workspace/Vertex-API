@@ -5,10 +5,12 @@ import com.vertex.vertex.notification.service.NotificationService;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
 import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.PropertyList;
+import com.vertex.vertex.security.AuthenticationService;
 import com.vertex.vertex.task.model.DTO.TaskSearchDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_hours.service.TaskHoursService;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
+import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.group.service.GroupService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
@@ -19,18 +21,29 @@ import com.vertex.vertex.user.model.exception.*;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import com.vertex.vertex.user.relations.personalization.service.PersonalizationService;
 import com.vertex.vertex.user.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collection;
 import java.util.*;
@@ -50,39 +63,41 @@ public class UserService {
     private final TeamService teamService;
     private final RegexValidate regexValidate;
     private final TaskHoursService taskHoursService;
-
-    public User save(User user){
+    private final AuthenticationService authenticationService;
+    private final SecurityContextRepository securityContextRepository;
+    public User save(User user) {
         return userRepository.save(user);
     }
 
-    public User save(UserDTO userDTO) {
+    public User save(UserDTO userDTO, HttpServletRequest request, HttpServletResponse response) {
         User user = new User();
         BeanUtils.copyProperties(userDTO, user);
 
-        if(existsByEmail(user.getEmail())){
+        if (existsByEmail(user.getEmail())) {
             throw new EmailAlreadyExistsException();
         }
 
         if (regexValidate.isEmailSecure(user.getEmail())) {
             user.setEmail(user.getEmail());
-        }
-        else {
+        } else {
             throw new InvalidEmailException();
         }
-        regexValidate.isPasswordSecure(user,userDTO);
+        regexValidate.isPasswordSecure(user, userDTO);
 
+
+
+        //Seta usuário como autenticado
         userSetDefaultInformations(user);
-
+        user.setDefaultSettings(false);
         byte[] data = Base64.getDecoder().decode(userDTO.getImage());
         user.setImage(data);
 
-        return userRepository.save(user);
+        return save(user);
     }
 
-    public void userSetDefaultInformations(User user){
+    public void userSetDefaultInformations(User user) {
         user.setLocation("Brasil");
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
-        user.setLocation("Brasil");
         user.setPersonalization(personalizationService.defaultSave(user));
         user.setTaskReview(true);
         user.setNewMembersAndGroups(true);
@@ -90,23 +105,25 @@ public class UserService {
         user.setSendToEmail(true);
         user.setAnyUpdateOnTask(true);
         user.setResponsibleInProjectOrTask(true);
+        user.setDefaultSettings(true);
+        zdefaultTeams(save(user));
     }
 
-    public User findByEmail(String email){
+    public User findByEmail(String email) {
         Optional<User> user = userRepository.findByEmail(email);
-        if(user.isPresent()){
+        if (user.isPresent()) {
             return user.get();
         }
         throw new InvalidEmailException();
     }
 
 
-    public boolean existsByEmail(String email){
+    public boolean existsByEmail(String email) {
         return userRepository.findByEmail(email).isPresent();
     }
 
-    private void emailValidation(User user){
-        if(existsByEmail(user.getEmail())){
+    private void emailValidation(User user) {
+        if (existsByEmail(user.getEmail())) {
             throw new EmailAlreadyExistsException();
         }
         boolean validEmail = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
@@ -150,16 +167,16 @@ public class UserService {
         List<TaskResponsable> tasksResponsible =
                 teamService.findAllUserTeamsByUserID(user.getId()).stream()
                         .flatMap(userTeam -> userTeam.getTeam().getProjects().stream())
-                        .flatMap(project ->  project.getTasks().stream())
+                        .flatMap(project -> project.getTasks().stream())
                         .flatMap(task -> task.getTaskResponsables().stream())
                         .filter(taskResponsable -> taskResponsable.getUserTeam().getUser().getId().equals(id))
                         .toList();
 
 
         List<PropertyListKind> listKinds = List.of(PropertyListKind.TODO, PropertyListKind.DOING, PropertyListKind.DONE);
-        for (PropertyListKind propertyListKind : listKinds){
+        for (PropertyListKind propertyListKind : listKinds) {
             int sumFinal = 0;
-            for (TaskResponsable taskResponsable : tasksResponsible){
+            for (TaskResponsable taskResponsable : tasksResponsible) {
                 sumFinal += taskResponsable.getTask().getValues()
                         .stream()
                         .filter(value -> value.getProperty().getKind().equals(PropertyKind.STATUS)
@@ -170,7 +187,7 @@ public class UserService {
         }
 
         Duration duration = Duration.ZERO;
-        for (TaskResponsable taskResponsable : tasksResponsible){
+        for (TaskResponsable taskResponsable : tasksResponsible) {
             duration = duration.plus(taskHoursService.calculateTimeOnTask(taskResponsable));
         }
         dto.setTime(LocalTime.MIDNIGHT.plus(duration));
@@ -178,7 +195,7 @@ public class UserService {
 
         User loggedUser = findById(loggedUserID);
 
-        if(!loggedUser.equals(user)){
+        if (!loggedUser.equals(user)) {
 
             //Refatorar obrigatoriamente - ass. Otávio
             List<Task> tasks = tasksResponsible.stream().map(TaskResponsable::getTask).toList();
@@ -204,58 +221,64 @@ public class UserService {
     }
 
 
-    public void saveImage(MultipartFile imageFile, Long id) throws IOException {
+    public void saveImage(MultipartFile imageFile, Long id) {
         try {
             User user = findById(id);
             user.setImage(imageFile.getBytes());
             userRepository.save(user);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
-    public User patchUserPersonalization(Long id, Personalization personalization){
+    public User patchUserPersonalization(Long id, Personalization personalization) {
         User user = findById(id);
         personalization.setId(user.getPersonalization().getId());
         personalization.setUser(user);
         user.setPersonalization(personalization);
         return userRepository.save(user);
     }
-    public User patchUserPassword(UserLoginDTO userLoginDTO){
+
+    public User patchUserPassword(UserLoginDTO userLoginDTO) {
         User user = findByEmail(userLoginDTO.getEmail());
         user.setPassword(userLoginDTO.getPassword());
         return userRepository.save(user);
     }
-    public List<User> getUsersByGroup(Long groupId){
+
+    public List<User> getUsersByGroup(Long groupId) {
         List<User> users = new ArrayList<>();
         Group group = groupService.findById(groupId);
 
         for (int i = 0; i < group.getUserTeams().size(); i++) {
-                users.add(group.getUserTeams().get(i).getUser());
+            users.add(group.getUserTeams().get(i).getUser());
         }
-       return users;
+        return users;
     }
-    public Boolean imageUpload(Long id, MultipartFile file){
-        User user;
-        try {
-            if (userRepository.existsById(id)) {
-                user = findById(id);
-                user.setImage(file.getBytes());
-                userRepository.save(user);
-                return true;
-            }
-        } catch (Exception ignored) {
-            throw new RuntimeException("Erro");
-        }
-        throw new RuntimeException();
-    }
+
+
     public List<UserSearchDTO> findAllByUserAndQuery(Long userId, String query) {
         return teamService
                 .findAllUserTeamsByUserID(userId)
                 .stream()
                 .map(UserTeam::getUser)
                 .filter(u -> (u.getFirstName().toLowerCase().contains(query.toLowerCase())
-                                || u.getLastName().toLowerCase().contains(query.toLowerCase()))
-                                    && !Objects.equals(u.getId(), userId))
+                        || u.getLastName().toLowerCase().contains(query.toLowerCase()))
+                        && !Objects.equals(u.getId(), userId))
                 .map(UserSearchDTO::new)
                 .toList();
     }
+
+    public void defaultTeams(User user) {
+        TeamViewListDTO teamViewListDTO =
+                new TeamViewListDTO("Equipe " + user.getFirstName(), user, null,
+                        "“As boas equipes incorporam o trabalho em equipe na sua cultura, criando os elementos essenciais ao sucesso.” — Ted Sundquist, jogador de futebol americano.", LocalDateTime.now(), true);
+        teamService.save(teamViewListDTO);
+    }
+
+    public void setFirstAccessNull(Long userId) {
+        User user = findById(userId);
+        user.setFirstAccess(false);
+        userRepository.save(user);
+    }
+
+
 }

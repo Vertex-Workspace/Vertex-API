@@ -6,11 +6,12 @@ import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.team.relations.permission.model.entity.Permission;
 import com.vertex.vertex.team.relations.permission.repository.PermissionRepository;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
+import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.stereotype.Service;
 
-
+import java.util.List;
 import java.util.Optional;
 
 @Data
@@ -21,11 +22,14 @@ public class PermissionService {
     private final PermissionRepository permissionRepository;
     private final ProjectRepository projectRepository;
     private final NotificationService notificationService;
+    private final UserTeamRepository userTeamRepository;
 
     public void save(UserTeam userTeam) {
-            userTeam.setPermissionUser
-                    (new Permission()
-                            .createBasicPermissions(userTeam, userTeam.getTeam().getCreator().equals(userTeam)));
+        List<Permission> permissions = new Permission()
+                        .createBasicPermissions(userTeam, userTeam.getTeam().getCreator().equals(userTeam));
+
+        permissionRepository.saveAll(permissions);
+        userTeam.setPermissionUser(permissions);
     }
 
     public void changeEnabled(Long permissionId){

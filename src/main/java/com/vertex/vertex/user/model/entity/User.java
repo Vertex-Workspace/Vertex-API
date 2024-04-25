@@ -42,6 +42,8 @@ public class User implements UserDetails {
 
     private boolean firstAccess;
 
+    private boolean defaultSettings;
+
     @Lob
     @Column(name = "image",
             columnDefinition = "LONGBLOB")

@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Entity
@@ -35,11 +37,14 @@ public class Permission {
     }
 
     public List<Permission> createBasicPermissions(UserTeam userTeam, boolean isCreator){
-        return List.of(
-                new Permission(TypePermissions.Criar, userTeam, isCreator),
-                new Permission(TypePermissions.Editar, userTeam, isCreator),
-                new Permission(TypePermissions.Deletar, userTeam, isCreator)
-        );
+        List<Permission> permissions1 = new ArrayList<>();
+        Permission permission1 = new Permission(TypePermissions.Criar, userTeam, isCreator);
+        Permission permission2 = new Permission(TypePermissions.Editar, userTeam, isCreator);
+        Permission permission3 = new Permission(TypePermissions.Deletar, userTeam, isCreator);
+        permissions1.add(permission1);
+        permissions1.add(permission2);
+        permissions1.add(permission3);
+        return permissions1;
     }
 
     public static boolean hasPermission(List<Permission> permissions, TypePermissions type){

@@ -8,6 +8,8 @@ import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.exception.*;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import com.vertex.vertex.user.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,9 +30,9 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> save(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<?> save(@RequestBody UserDTO userDTO, HttpServletRequest request, HttpServletResponse response) {
         try {
-            return new ResponseEntity<>(userService.save(userDTO), HttpStatus.CREATED);
+            return new ResponseEntity<>(userService.save(userDTO, request, response), HttpStatus.CREATED);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
@@ -46,14 +48,6 @@ public class UserController {
         }
     }
 
-    @PatchMapping("/first-access")
-    public ResponseEntity<User> patchFirstAccess(@RequestBody UserLoginDTO userLoginDTO) {
-        try {
-            return new ResponseEntity<>(userService.patchUserFirstAccess(userLoginDTO), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-    }
 
     @PutMapping
     public ResponseEntity<User> edit(@RequestBody UserEditionDTO userEditionDTO) {
@@ -71,10 +65,6 @@ public class UserController {
                         HttpStatus.OK);
     }
 
-    @GetMapping
-    public ResponseEntity<Collection<User>> findAll() {
-        return new ResponseEntity<>(userService.findAll(), HttpStatus.OK);
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> findById(@PathVariable Long id) {
@@ -145,5 +135,13 @@ public class UserController {
                     (HttpStatus.CONFLICT);
         }
     }
-    //======================================================
+    @PatchMapping("/first-access/{userId}")
+    public ResponseEntity<?> firstAccess(@PathVariable Long userId){
+        try {
+            userService.setFirstAccessNull(userId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        }
+    }
 }

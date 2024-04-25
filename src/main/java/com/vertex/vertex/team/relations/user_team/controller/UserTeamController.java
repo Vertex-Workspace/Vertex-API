@@ -38,16 +38,15 @@ public class UserTeamController {
     @PatchMapping("/team/user")
     public ResponseEntity<?> saveUserTeam(@RequestBody UserTeamAssociateDTO userTeam) {
         try {
-            System.out.println("entrei");
             return new ResponseEntity<>(userTeamService.saveNewUserTeam(userTeam), HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 
-    @DeleteMapping("/team/user-team/{teamId}/{userId}")
+    @DeleteMapping("/team/{teamId}/{userId}")
     public ResponseEntity<?> deleteUserTeam(@PathVariable Long userId, @PathVariable Long teamId){
+        System.out.println("entrei");
         try{
             userTeamService.delete(teamId, userId);
             return new ResponseEntity<>(HttpStatus.OK);
@@ -65,6 +64,5 @@ public class UserTeamController {
             return new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
         }
     }
-
 
 }

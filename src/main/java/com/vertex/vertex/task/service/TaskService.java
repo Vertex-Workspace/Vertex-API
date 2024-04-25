@@ -68,7 +68,9 @@ public class TaskService {
 
 
         UserTeam creator = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), taskCreateDTO.getCreator().getId());
-        ValidationUtils.validateUserLogged(creator.getUser().getEmail());
+        if(!creator.getUser().isDefaultSettings()){
+            ValidationUtils.validateUserLogged(creator.getUser().getEmail());
+        }
 
         if(!Permission.hasPermission(creator.getPermissionUser(), TypePermissions.Criar)){
             throw new RuntimeException("Você não tem permissão!");
