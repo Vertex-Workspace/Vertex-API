@@ -31,13 +31,20 @@ public class PropertyController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
+    @PutMapping("/project/{projectID}")
+    public ResponseEntity<?> editProperty(@PathVariable Long projectID, @RequestBody Property property) {
+        try {
+            return new ResponseEntity<>(propertyService.edit(projectID, property), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
 
     @DeleteMapping("{propertyID}/project/{projectID}")
     public ResponseEntity<?> deleteProperty(@PathVariable Long projectID, @PathVariable Long propertyID) {
         try {
             return new ResponseEntity<>(propertyService.delete(projectID, propertyID), HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
@@ -48,7 +55,6 @@ public class PropertyController {
         try {
             return new ResponseEntity<>(propertyService.deletePropertyList(propertyID, propertyListID), HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }

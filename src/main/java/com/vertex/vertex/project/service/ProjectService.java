@@ -17,6 +17,7 @@ import com.vertex.vertex.security.ValidationUtils;
 import com.vertex.vertex.task.model.DTO.TaskModeViewDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
+import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
@@ -132,6 +133,24 @@ public class ProjectService {
         projectOneDTO.setTasks(getTasksProjectByResponsibility(project.getTasks(),
                 userTeamService.findUserTeamByComposeId(project.getTeam().getId()
                         , ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId())));
+
+//        //Properties Invisible
+//        projectOneDTO.setProperties(
+//                projectOneDTO.getProperties()
+//                        .stream()
+//                        .filter(p -> !p.getPropertyStatus().equals(PropertyStatus.INVISIBLE))
+//                        .toList()
+//        );
+
+        projectOneDTO.setTasks(
+            projectOneDTO.getTasks()
+                    .stream()
+                    .flatMap(t -> t.getValues().stream().filter(value -> !value.getProperty().getPropertyStatus().equals(PropertyStatus.INVISIBLE)))
+                    .map(Value::getTask)
+                    .map(TaskModeViewDTO::new)
+                    .toList()
+        );
+
 
         return projectOneDTO;
     }
