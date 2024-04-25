@@ -9,4 +9,5 @@ import lombok.NoArgsConstructor;
 @Data
 public class LanguageDTO {
     private String language;
+    private String linkLanguageImage;
 }

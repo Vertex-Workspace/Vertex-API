@@ -137,7 +137,7 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}/personalization/changeLanguage")
-    public ResponseEntity<?> patchUserPersonalization(@RequestBody LanguageDTO languageDTO, @PathVariable Long userId) {
+    public ResponseEntity<?> changeLanguage(@RequestBody LanguageDTO languageDTO, @PathVariable Long userId) {
         try {
             return new ResponseEntity<>(this.userService.changeLanguage(languageDTO,userId),HttpStatus.OK);
         } catch (Exception e) {
