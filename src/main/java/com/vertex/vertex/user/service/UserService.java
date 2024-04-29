@@ -28,26 +28,16 @@ import lombok.Data;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collection;
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 
 @Data
@@ -65,6 +55,7 @@ public class UserService {
     private final TaskHoursService taskHoursService;
     private final AuthenticationService authenticationService;
     private final SecurityContextRepository securityContextRepository;
+
     public User save(User user) {
         return userRepository.save(user);
     }
@@ -83,8 +74,6 @@ public class UserService {
             throw new InvalidEmailException();
         }
         regexValidate.isPasswordSecure(user, userDTO);
-
-
 
         //Seta usuário como autenticado
         userSetDefaultInformations(user);
@@ -213,11 +202,10 @@ public class UserService {
 
 
     public void deleteById(Long id) {
-        if (!getUserRepository().existsById(id)) {
+        if (!userRepository.existsById(id)) {
             throw new UserNotFoundException();
-        } else {
-            userRepository.deleteById(id);
         }
+        userRepository.deleteById(id);
     }
 
 
@@ -226,7 +214,8 @@ public class UserService {
             User user = findById(id);
             user.setImage(imageFile.getBytes());
             userRepository.save(user);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

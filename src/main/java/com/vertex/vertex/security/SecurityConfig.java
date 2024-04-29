@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -35,18 +36,19 @@ public class SecurityConfig{
                 .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
                 .requestMatchers(HttpMethod.GET, "/authenticate-user").authenticated()
                 .requestMatchers(WebSocketHttpHeaders.ALLOW, "/notifications", "/chat").permitAll()
-                .anyRequest().authenticated()
-        );
+                .anyRequest().permitAll()
+        )
+        .oauth2Login(Customizer.withDefaults())
+        .oauth2Client(Customizer.withDefaults());
 
-        http.securityContext((context) -> context.securityContextRepository(securityRepository));
-
-        http.sessionManagement(config -> config.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-        http.addFilterBefore(filterAuthentication, UsernamePasswordAuthenticationFilter.class);
-
-
-        http.formLogin(AbstractHttpConfigurer::disable);
-        http.logout(AbstractHttpConfigurer::disable);
+//        http.securityContext((context) -> context.securityContextRepository(securityRepository));
+//
+//        http.sessionManagement(config -> config.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+//
+//        http.addFilterBefore(filterAuthentication, UsernamePasswordAuthenticationFilter.class);
+//
+//        http.formLogin(AbstractHttpConfigurer::disable);
+//        http.logout(AbstractHttpConfigurer::disable);
 
         return http.build();
     }
