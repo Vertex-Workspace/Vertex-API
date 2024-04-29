@@ -18,6 +18,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @AllArgsConstructor
 @RequestMapping
@@ -57,9 +59,11 @@ public class AuthenticationController {
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         try {
             CookieUtils cookieUtil = new CookieUtils(environment);
-            Cookie cookie = cookieUtil.getCookie(request, "JWT");
-            cookie.setMaxAge(0);
-            response.addCookie(cookie);
+            for (String cookieName : List.of("JWT", "JSESSIONID")){
+                Cookie cookie = cookieUtil.getCookie(request, cookieName);
+                cookie.setMaxAge(0);
+                response.addCookie(cookie);
+            }
         } catch (Exception e) {
             response.setStatus(401);
         }

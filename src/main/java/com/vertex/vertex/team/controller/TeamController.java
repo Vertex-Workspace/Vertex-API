@@ -1,6 +1,7 @@
 package com.vertex.vertex.team.controller;
 
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
+import com.vertex.vertex.team.model.DTO.TeamSearchDTO;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.service.TeamService;
 import jakarta.persistence.EntityNotFoundException;
@@ -42,7 +43,7 @@ public class TeamController {
     public ResponseEntity<TeamInfoDTO> findById(@PathVariable Long id) {
         try {
             return new ResponseEntity<>(teamService.findById(id), HttpStatus.OK);
-        } catch (EntityNotFoundException e) {
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
@@ -54,6 +55,14 @@ public class TeamController {
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+    @GetMapping("/invitation-page-info/{id}")
+    public ResponseEntity<TeamSearchDTO> findTeamInvitationPage(@PathVariable Long id) {
+        try {
+            return new ResponseEntity<>(teamService.findTeamInvitationPage(id), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 

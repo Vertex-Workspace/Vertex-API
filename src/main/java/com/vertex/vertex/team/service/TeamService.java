@@ -29,6 +29,7 @@ import com.vertex.vertex.utils.PerformanceUtils;
 import com.vertex.vertex.utils.RandomCodeUtils;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -88,7 +89,7 @@ public class TeamService {
     public TeamInfoDTO findById(Long id) {
         TeamInfoDTO dto = new TeamInfoDTO(); //retorna as informações necessárias para a tela de equipe
         Team team = findTeamById(id);
-        mapper.map(team, dto);
+        BeanUtils.copyProperties(team, dto);
         ValidationUtils.validateUserLogged(
                 team.getUserTeams().stream().map(UserTeam::getUser).map(User::getEmail).toList());
 
@@ -110,6 +111,9 @@ public class TeamService {
         } catch (Exception e) {
             throw new TeamNotFoundException(id);
         }
+    }
+    public TeamSearchDTO findTeamInvitationPage(Long id){
+        return new TeamSearchDTO(teamRepository.findById(id).get());
     }
 
     public void deleteById(Long id) {
@@ -217,8 +221,10 @@ public class TeamService {
     }
 
     public List<ProjectViewListDTO> convertTeamProjectsToDto(Team team) {
+        UserTeam userTeam = userTeamService.findUserTeamByComposeId(team.getId(), ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId());
         return team.getProjects()
                 .stream()
+                .filter(project -> project.getCollaborators().contains(userTeam))
                 .map(ProjectViewListDTO::new)
                 .toList();
     }

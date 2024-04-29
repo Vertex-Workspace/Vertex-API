@@ -124,33 +124,16 @@ public class ProjectService {
         ProjectOneDTO projectOneDTO = new ProjectOneDTO(project);
         ValidationUtils.loggedUserIsOnProject(project);
 
-
         projectOneDTO.setIdTeam(project.getTeam().getId());
+
         //Pass through all tasks of the project and validates if task has an opened review (UNDERANALYSIS)
         //If it has, It won't be included into list
 
-
-        projectOneDTO.setTasks(getTasksProjectByResponsibility(project.getTasks(),
-                userTeamService.findUserTeamByComposeId(project.getTeam().getId()
-                        , ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId())));
-
-//        //Properties Invisible
-//        projectOneDTO.setProperties(
-//                projectOneDTO.getProperties()
-//                        .stream()
-//                        .filter(p -> !p.getPropertyStatus().equals(PropertyStatus.INVISIBLE))
-//                        .toList()
-//        );
-
         projectOneDTO.setTasks(
-            projectOneDTO.getTasks()
-                    .stream()
-                    .flatMap(t -> t.getValues().stream().filter(value -> !value.getProperty().getPropertyStatus().equals(PropertyStatus.INVISIBLE)))
-                    .map(Value::getTask)
-                    .map(TaskModeViewDTO::new)
-                    .toList()
+                getTasksProjectByResponsibility(project.getTasks(),
+                        userTeamService.findUserTeamByComposeId(project.getTeam().getId()
+                                , ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId()))
         );
-
 
         return projectOneDTO;
     }
@@ -249,33 +232,35 @@ public class ProjectService {
         for (User user : projectEditDTO.getUsers()) {
             UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), user.getId());
             userTeamsToAdd.add(userTeam1);
+            if(!project.getCollaborators().contains(userTeam1)){
+                notificationOfUpdateCollaborators(userTeam1, project, true);
+            }
         }
-        notificationOfUpdateCollaborators(userTeamsToAdd, project);
 
         if (!userTeamsToAdd.contains(project.getCreator())) {
             userTeamsToAdd.add(project.getCreator());
         }
 
+        //Pass through all removed cola
+        for (UserTeam ut : project.getCollaborators()){
+            if(!userTeamsToAdd.contains(ut)){
+                notificationOfUpdateCollaborators(ut, project, false);
+            }
+        }
         project.setCollaborators(userTeamsToAdd);
         project.setGroups(projectEditDTO.getGroups());
+
         return projectRepository.save(project);
     }
 
-    public void notificationOfUpdateCollaborators(List<UserTeam> userTeamsToAdd, Project project) {
-        for (Boolean bool : List.of(false, true)) {
-            String title = bool ? "Agora você é responsável do projeto " : "Você não é responsável do projeto ";
-            userTeamsToAdd.stream()
-                    .filter(userTeam -> project.getCollaborators().contains(userTeam) == bool)
-                    .toList()
-                    .forEach(userTeam -> {
-                        notificationService.save(new Notification(
-                                project,
-                                title + project.getName(),
-                                "projeto/" + project.getId() + "/tarefas",
-                                userTeam.getUser()
-                        ));
-                    });
-        }
+    public void notificationOfUpdateCollaborators(UserTeam userTeam, Project project, Boolean bool) {
+        String title = bool ? "Agora você é responsável do projeto " : "Você não é mais responsável do projeto ";
+        notificationService.save(new Notification(
+                project,
+                title + project.getName(),
+                bool ? "projeto/" + project.getId() + "/tarefas" : "",
+                userTeam.getUser()
+        ));
     }
 
     public List<ProjectSearchDTO> findAllByUserAndQuery(Long userId, String query) {

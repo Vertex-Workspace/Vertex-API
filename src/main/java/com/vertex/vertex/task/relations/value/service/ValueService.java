@@ -63,7 +63,6 @@ public class ValueService {
 
     public Task updateTaskValues(Task task, EditValueDTO editValueDTO,
                                  Property property, UserTeam userTeam) {
-
         for (Value value : task.getValues()) {
             if (value.getId().equals(editValueDTO.getValue().getId())) {
                 Value currentValue = property.getKind().getValue();
@@ -73,7 +72,6 @@ public class ValueService {
 
                 if (validPropertyValueModification
                         (task, userTeam, property, value, editValueDTO)) {
-
                     int i = (task.getValues().indexOf(getValueFromProperty(property, task)));
                     currentValue.setValue(editValueDTO.getValue().getValue());
                     task.getValues().set(i, currentValue);
