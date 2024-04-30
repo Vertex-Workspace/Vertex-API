@@ -1,6 +1,10 @@
 package com.vertex.vertex.security;
 
 import lombok.AllArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.web.filter.CorsFilter;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
@@ -27,12 +31,23 @@ public class BeansConfig {
         return new HttpSessionSecurityContextRepository();
     }
 
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    private ClientRegistration googleClientRegistration()
+
+    @Bean
+    public ClientRegistrationRepository clientRegistrationRepository() {
+        return new InMemoryClientRegistrationRepository(google);
+    }
 
     @Bean
     public AuthenticationManager authenticationManager() {
         //Forma de autenticação através do userDetailsService e do passwordEncoder
         DaoAuthenticationProvider dao = new DaoAuthenticationProvider();
-        dao.setPasswordEncoder(new BCryptPasswordEncoder());
+        dao.setPasswordEncoder(passwordEncoder());
         dao.setUserDetailsService(authenticationService);
         return new ProviderManager(dao);
     }

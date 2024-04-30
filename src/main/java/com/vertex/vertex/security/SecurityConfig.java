@@ -36,19 +36,19 @@ public class SecurityConfig{
                 .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
                 .requestMatchers(HttpMethod.GET, "/authenticate-user").authenticated()
                 .requestMatchers(WebSocketHttpHeaders.ALLOW, "/notifications", "/chat").permitAll()
-                .anyRequest().permitAll()
+                .anyRequest().authenticated()
         )
         .oauth2Login(Customizer.withDefaults())
         .oauth2Client(Customizer.withDefaults());
 
-//        http.securityContext((context) -> context.securityContextRepository(securityRepository));
-//
-//        http.sessionManagement(config -> config.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-//
-//        http.addFilterBefore(filterAuthentication, UsernamePasswordAuthenticationFilter.class);
-//
-//        http.formLogin(AbstractHttpConfigurer::disable);
-//        http.logout(AbstractHttpConfigurer::disable);
+        http.securityContext((context) -> context.securityContextRepository(securityRepository));
+
+        http.sessionManagement(config -> config.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        http.addFilterBefore(filterAuthentication, UsernamePasswordAuthenticationFilter.class);
+
+        http.formLogin(AbstractHttpConfigurer::disable);
+        http.logout(AbstractHttpConfigurer::disable);
 
         return http.build();
     }

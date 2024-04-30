@@ -64,7 +64,7 @@ public class FilterAuthentication extends OncePerRequestFilter {
     }
 
     private boolean isPublicRouter(HttpServletRequest request) {
-        return
+        return ((request.getRequestURI().equals("/"))) ||
                 ((request.getRequestURI().equals("/login")
                         || request.getRequestURI().equals("/user/register"))
                 && ((request.getMethod().equals("POST"))))
