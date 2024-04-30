@@ -172,7 +172,6 @@ public class UserService {
                         .filter(taskResponsable -> taskResponsable.getUserTeam().getUser().getId().equals(id))
                         .toList();
 
-
         List<PropertyListKind> listKinds = List.of(PropertyListKind.TODO, PropertyListKind.DOING, PropertyListKind.DONE);
         for (PropertyListKind propertyListKind : listKinds) {
             int sumFinal = 0;
@@ -193,10 +192,10 @@ public class UserService {
         dto.setTime(LocalTime.MIDNIGHT.plus(duration));
 
 
+
+
         User loggedUser = findById(loggedUserID);
-
         if (!loggedUser.equals(user)) {
-
             //Refatorar obrigatoriamente - ass. Otávio
             List<Task> tasks = tasksResponsible.stream().map(TaskResponsable::getTask).toList();
             List<TaskResponsable> taskResponsables = tasks.stream()

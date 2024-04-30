@@ -88,6 +88,8 @@ public class Task implements FileSupporter {
     @JsonIgnore
     private List<Group> groups;
 
+    private Long indexTask;
+
     public String getModifiedAttributeDescription
             (TaskEditDTO dto) {
         if (!Objects.equals(this.name, dto.getName()))
@@ -121,8 +123,6 @@ public class Task implements FileSupporter {
         this.project = project;
         if (Objects.isNull(project.getTasks())) project.setTasks(List.of(this));
         else project.getTasks().add(this);
-
-        System.out.println(project.getTasks());
 
     }
 
