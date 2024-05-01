@@ -60,7 +60,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User save(UserDTO userDTO, HttpServletRequest request, HttpServletResponse response) {
+    public User save(UserDTO userDTO) {
         User user = new User();
         BeanUtils.copyProperties(userDTO, user);
 
@@ -73,7 +73,7 @@ public class UserService {
         } else {
             throw new InvalidEmailException();
         }
-        regexValidate.isPasswordSecure(user, userDTO);
+//        regexValidate.isPasswordSecure(user, userDTO);
 
         //Seta usuário como autenticado
         userSetDefaultInformations(user);

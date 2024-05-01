@@ -36,13 +36,6 @@ public class BeansConfig {
         return new BCryptPasswordEncoder();
     }
 
-    private ClientRegistration googleClientRegistration()
-
-    @Bean
-    public ClientRegistrationRepository clientRegistrationRepository() {
-        return new InMemoryClientRegistrationRepository(google);
-    }
-
     @Bean
     public AuthenticationManager authenticationManager() {
         //Forma de autenticação através do userDetailsService e do passwordEncoder

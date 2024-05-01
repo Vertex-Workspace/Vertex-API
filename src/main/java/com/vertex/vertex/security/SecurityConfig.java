@@ -1,5 +1,8 @@
 package com.vertex.vertex.security;
 
+import com.vertex.vertex.user.model.DTO.UserDTO;
+import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +12,8 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -23,6 +28,8 @@ public class SecurityConfig{
 
     private final FilterAuthentication filterAuthentication;
     private final SecurityContextRepository securityRepository;
+    private final AuthenticationService authenticationService;
+    private final UserService userService;
 
     @Bean
     public SecurityFilterChain config(HttpSecurity http) throws Exception {
@@ -38,8 +45,26 @@ public class SecurityConfig{
                 .requestMatchers(WebSocketHttpHeaders.ALLOW, "/notifications", "/chat").permitAll()
                 .anyRequest().authenticated()
         )
-        .oauth2Login(Customizer.withDefaults())
-        .oauth2Client(Customizer.withDefaults());
+                .oauth2Login(httpOauth2 -> httpOauth2.successHandler((request, response, authentication) -> {
+                    OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+                    String email = oAuth2User.getAttribute("email");
+
+                    try {
+                        authenticationService.loadUserByUsername(email);
+                    } catch (UsernameNotFoundException e) {
+                        String lastName = oAuth2User.getAttribute("family_name");
+                        String firstName = oAuth2User.getAttribute("name");
+                        firstName = firstName.substring(0, firstName.indexOf(" "));
+
+                        User user = new User();
+                        user.setEmail(email);
+                        user.setPassword(email);
+                        user.setFirstName(firstName);
+                        user.setLastName(lastName);
+
+                        userService.save(new UserDTO(user));
+                    }
+                }) );
 
         http.securityContext((context) -> context.securityContextRepository(securityRepository));
 

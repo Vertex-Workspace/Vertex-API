@@ -32,7 +32,7 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<?> save(@RequestBody UserDTO userDTO, HttpServletRequest request, HttpServletResponse response) {
         try {
-            return new ResponseEntity<>(userService.save(userDTO, request, response), HttpStatus.CREATED);
+            return new ResponseEntity<>(userService.save(userDTO), HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
