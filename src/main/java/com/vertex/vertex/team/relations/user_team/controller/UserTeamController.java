@@ -46,7 +46,6 @@ public class UserTeamController {
 
     @DeleteMapping("/team/{teamId}/{userId}")
     public ResponseEntity<?> deleteUserTeam(@PathVariable Long userId, @PathVariable Long teamId){
-        System.out.println("entrei");
         try{
             userTeamService.delete(teamId, userId);
             return new ResponseEntity<>(HttpStatus.OK);

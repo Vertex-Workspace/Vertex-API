@@ -21,19 +21,28 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @PostMapping("/{teamId}")
-    public ResponseEntity<?> save(@RequestBody ProjectCreateDTO project, @PathVariable Long teamId){
+    public ResponseEntity<?> save(@RequestBody ProjectCreateDTO project, @PathVariable Long teamId) {
         try {
             return new ResponseEntity<>(projectService.saveWithRelationOfProject(project, teamId), HttpStatus.CREATED);
-        }catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> findProjectById(@PathVariable Long id){
-        try{
+    public ResponseEntity<?> findProjectById(@PathVariable Long id) {
+        try {
             return new ResponseEntity<>(projectService.findProjectById(id), HttpStatus.OK);
-        }catch(Exception e){
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping("/name/{id}")
+    public ResponseEntity<?> getProjectName(@PathVariable Long id) {
+        try {
+            return new ResponseEntity<>(projectService.findById(id).getName(), HttpStatus.OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
@@ -48,7 +57,7 @@ public class ProjectController {
         } catch (Exception e) {
             return new ResponseEntity<>
                     (e.getMessage(),
-                                HttpStatus.CONFLICT);
+                            HttpStatus.CONFLICT);
         }
     }
 
@@ -67,7 +76,7 @@ public class ProjectController {
         try {
             return new ResponseEntity<>
                     (true, HttpStatus.OK);
-        } catch (Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>
                     (false,
                             HttpStatus.NOT_FOUND);
@@ -77,13 +86,13 @@ public class ProjectController {
     @GetMapping("/exists/{projectId}")
     public ResponseEntity<?> existsByIdAndUserBelongs(
             @PathVariable Long projectId) {
-        try{
+        try {
 
             return new ResponseEntity<>
                     (projectService.existsByIdAndUserBelongs
                             (projectId),
                             HttpStatus.OK);
-        } catch (Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>
                     (HttpStatus.UNAUTHORIZED);
         }
@@ -103,19 +112,19 @@ public class ProjectController {
     }
 
     @PatchMapping("/update")
-    public ResponseEntity<?> updateProject (@RequestBody ProjectEditDTO projectEditDTO){
+    public ResponseEntity<?> updateProject(@RequestBody ProjectEditDTO projectEditDTO) {
         try {
             return new ResponseEntity<>(projectService.updateProjectCollaborators(projectEditDTO), HttpStatus.OK);
-        }catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 
     @GetMapping("/getAll/{projectId}")
-    public ResponseEntity<?> returnAllColaborators(@PathVariable Long projectId){
+    public ResponseEntity<?> returnAllColaborators(@PathVariable Long projectId) {
         try {
             return new ResponseEntity<>(projectService.returnAllCollaborators(projectId), HttpStatus.OK);
-        }catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
@@ -134,10 +143,10 @@ public class ProjectController {
     }
 
     @GetMapping("/{teamId}/{userId}")
-    public ResponseEntity<?> getProjectsByCollaborators(@PathVariable Long teamId, @PathVariable Long userId){
+    public ResponseEntity<?> getProjectsByCollaborators(@PathVariable Long teamId, @PathVariable Long userId) {
         try {
             return new ResponseEntity<>(projectService.getAllByTeamAndCollaborators(teamId, userId), HttpStatus.OK);
-        }catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }

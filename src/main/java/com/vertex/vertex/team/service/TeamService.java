@@ -13,10 +13,7 @@ import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.review.service.ReviewService;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.service.TaskService;
-import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
-import com.vertex.vertex.team.model.DTO.TeamLinkDTO;
-import com.vertex.vertex.team.model.DTO.TeamSearchDTO;
-import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
+import com.vertex.vertex.team.model.DTO.*;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
@@ -29,6 +26,7 @@ import com.vertex.vertex.utils.PerformanceUtils;
 import com.vertex.vertex.utils.RandomCodeUtils;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -88,7 +86,7 @@ public class TeamService {
     public TeamInfoDTO findById(Long id) {
         TeamInfoDTO dto = new TeamInfoDTO(); //retorna as informações necessárias para a tela de equipe
         Team team = findTeamById(id);
-        mapper.map(team, dto);
+        BeanUtils.copyProperties(team, dto);
         ValidationUtils.validateUserLogged(
                 team.getUserTeams().stream().map(UserTeam::getUser).map(User::getEmail).toList());
 
@@ -102,6 +100,10 @@ public class TeamService {
         return dto;
     }
 
+    public TeamProjectsDTO getTeamScreenInformation(Long id) {
+        return new TeamProjectsDTO(findTeamById(id));
+    }
+
     public TeamLinkDTO findInvitationCodeById(Long id) {
         try {
             Team team = findTeamById(id);
@@ -110,6 +112,9 @@ public class TeamService {
         } catch (Exception e) {
             throw new TeamNotFoundException(id);
         }
+    }
+    public TeamSearchDTO findTeamInvitationPage(Long id){
+        return new TeamSearchDTO(teamRepository.findById(id).get());
     }
 
     public void deleteById(Long id) {
@@ -141,6 +146,11 @@ public class TeamService {
         ValidationUtils.validateUserLogged(
                 team.getUserTeams().stream().map(UserTeam::getUser).map(User::getEmail).toList());
         return team;
+    }
+
+    public String getTeamName(Long id) {
+        return teamRepository.findById(id)
+                .orElseThrow(EntityDoesntExistException::new).getName();
     }
 
     public TeamInfoDTO updateImage(MultipartFile file, Long teamId) {
@@ -217,8 +227,10 @@ public class TeamService {
     }
 
     public List<ProjectViewListDTO> convertTeamProjectsToDto(Team team) {
+        UserTeam userTeam = userTeamService.findUserTeamByComposeId(team.getId(), ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId());
         return team.getProjects()
                 .stream()
+                .filter(project -> project.getCollaborators().contains(userTeam))
                 .map(ProjectViewListDTO::new)
                 .toList();
     }

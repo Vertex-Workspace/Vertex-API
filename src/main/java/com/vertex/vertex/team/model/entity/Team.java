@@ -51,6 +51,7 @@ public class Team {
     private List<Group> groups = new ArrayList<>();
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private Chat chat;
 
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)

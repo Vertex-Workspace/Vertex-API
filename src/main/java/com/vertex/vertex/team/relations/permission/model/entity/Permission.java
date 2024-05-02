@@ -1,6 +1,7 @@
 package com.vertex.vertex.team.relations.permission.model.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.team.relations.permission.model.enums.TypePermissions;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
@@ -26,6 +27,7 @@ public class Permission {
     private TypePermissions name;
 
     @ManyToOne
+    @JsonIgnore
     private UserTeam userTeam;
 
     private boolean enabled;
@@ -37,14 +39,9 @@ public class Permission {
     }
 
     public List<Permission> createBasicPermissions(UserTeam userTeam, boolean isCreator){
-        List<Permission> permissions1 = new ArrayList<>();
-        Permission permission1 = new Permission(TypePermissions.Criar, userTeam, isCreator);
-        Permission permission2 = new Permission(TypePermissions.Editar, userTeam, isCreator);
-        Permission permission3 = new Permission(TypePermissions.Deletar, userTeam, isCreator);
-        permissions1.add(permission1);
-        permissions1.add(permission2);
-        permissions1.add(permission3);
-        return permissions1;
+        return List.of(new Permission(TypePermissions.Criar, userTeam, isCreator),
+                new Permission(TypePermissions.Editar, userTeam, isCreator),
+                new Permission(TypePermissions.Deletar, userTeam, isCreator));
     }
 
     public static boolean hasPermission(List<Permission> permissions, TypePermissions type){

@@ -37,6 +37,7 @@ public class NoteController {
                     (noteService.create(dto, projectId, userId),
                             HttpStatus.CREATED);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>
                     (HttpStatus.CONFLICT);
         }

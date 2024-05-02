@@ -18,7 +18,6 @@ public class ProjectEditDTO {
     private String name;
     private String description;
     private Project projectDependency;
-    private List<User> listOfResponsibles;
     private ProjectReviewENUM projectReviewENUM;
     private List<User> users;
     private List<Group> groups;

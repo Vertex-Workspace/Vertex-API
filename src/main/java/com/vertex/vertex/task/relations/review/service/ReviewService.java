@@ -18,6 +18,7 @@ import com.vertex.vertex.task.relations.task_hours.service.TaskHoursService;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
+import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +36,7 @@ public class ReviewService {
     private final ProjectService projectService;
     private final TaskHoursService taskHoursService;
     private final NotificationService notificationService;
-
+    private final UserTeamService userTeamService;
     public void finalReview(ReviewCheck reviewCheck) {
         Task task = taskService.findById(reviewCheck.getTaskID());
 
@@ -99,7 +100,7 @@ public class ReviewService {
         ValidationUtils.loggedUserIsOnTask(task);
 
         //Validations
-        if (task.isNotUnderAnalysis()) {
+        if (!task.isUnderAnalysis()) {
             Review review = new Review();
             //Description
             review.setDescription(sendToReviewDTO.getDescription());
@@ -143,37 +144,32 @@ public class ReviewService {
 
         Project project = projectService.findById(projectID);
 
-        UserTeam loggedUser = project.getTeam().getUserTeams()
-                .stream()
-                .filter(userTeam -> userTeam.getUser().getId().equals(userID))
-                .findFirst()
-                .get();
+
+        UserTeam loggedUser = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), userID);
 
         ValidationUtils.validateUserLogged(loggedUser.getUser().getEmail());
 
-        for (Task task : project.getTasks()) {
-            if (task.getCreator().equals(loggedUser) && task.isNotUnderAnalysis()) {
-                TaskWaitingToReviewDTO taskWaitingToReviewDTO = new TaskWaitingToReviewDTO(task);
+        List<Task> tasksToReview =
+                project.getTasks().stream()
+                .filter(t -> t.isUnderAnalysis() && t.getCreator().equals(loggedUser))
+                .toList();
 
-                Optional<Review> currentReview = task.getReviews().stream()
-                        .filter(review -> review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)).findFirst();
-
-                if (currentReview.isPresent()) {
-                    Review review = currentReview.get();
-
-                    taskWaitingToReviewDTO.setSender(
-                            new ReviewSenderDTO(
-                                    review.getDescription(),
-                                    review.getUserThatSentReview().getUserTeam().getUser().getFullName(),
-                                    review.getUserThatSentReview().getUserTeam().getUser().getEmail(),
-                                    review.getReviewDate()
-                            )
-
-                    );
-                    taskWaitingToReviewDTO.setReviewHours(getPerformanceInTask(task.getId()));
-
-                    tasks.add(taskWaitingToReviewDTO);
-                }
+        for (Task task : tasksToReview) {
+            TaskWaitingToReviewDTO taskWaitingToReviewDTO = new TaskWaitingToReviewDTO(task);
+            Optional<Review> currentReview = task.getReviews().stream()
+                    .filter(review -> review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)).findAny();
+            if (currentReview.isPresent()) {
+                Review review = currentReview.get();
+                taskWaitingToReviewDTO.setSender(
+                        new ReviewSenderDTO(
+                                review.getDescription(),
+                                review.getUserThatSentReview().getUserTeam().getUser().getFullName(),
+                                review.getUserThatSentReview().getUserTeam().getUser().getEmail(),
+                                review.getReviewDate()
+                        )
+                );
+                taskWaitingToReviewDTO.setReviewHours(getPerformanceInTask(task.getId()));
+                tasks.add(taskWaitingToReviewDTO);
             }
         }
         return tasks;

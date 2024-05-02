@@ -41,7 +41,7 @@ public class UsedWebSocketHandler extends AbstractWebSocketHandler {
 
     public void sendNotification(Long userID) throws IOException {
         for (WebSocketSession webSocketSession : webSocketSessions) {
-            if (webSocketSession != null && webSocketSession.getUri() != null && webSocketSession.getUri().getPath().contains("chat")) {
+            if (webSocketSession != null && webSocketSession.getUri() != null && webSocketSession.getUri().getPath().contains("notifications")) {
                 webSocketSession.sendMessage(new TextMessage(userID.toString()));
             }
         }

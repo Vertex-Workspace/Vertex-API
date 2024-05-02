@@ -4,6 +4,7 @@ import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
+import com.vertex.vertex.user.model.entity.User;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,10 +34,10 @@ public class ValidationUtils {
                 .stream()
                 .map(TaskResponsable::getUserTeam)
                 .map(UserTeam::getUser)
-                .map(user -> user.getEmail().equals((
-                        (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+                .anyMatch(user -> user.getEmail().equals((
+                        (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
                         .getUsername()
-                )).findAny().get()){
+                ))){
             return;
         }
         throw new AuthenticationCredentialsNotFoundException("Usuário não pertence a tarefa!");
@@ -45,7 +46,7 @@ public class ValidationUtils {
     public static void loggedUserIsOnTaskAndIsCreator(Task task){
         loggedUserIsOnTask(task);
         if(task.getCreator().getUser().getEmail().equals(
-                ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+                ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
                         .getUsername())){
             return;
         }
@@ -53,11 +54,12 @@ public class ValidationUtils {
     }
 
     public static void loggedUserIsOnProject(Project project){
-        System.out.println(project.getCollaborators());
-        if(project.getCollaborators().stream().map(UserTeam::getUser).map(user -> user.getEmail().equals(
-                ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-                        .getUsername())).findAny().get()){
-            System.out.println("Funcionou");
+        if(project.getCollaborators()
+                .stream()
+                .map(UserTeam::getUser)
+                .anyMatch(user -> user.getEmail().equals(
+                ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+                        .getEmail()))){
             return;
         }
         throw new AuthenticationCredentialsNotFoundException("Usuário não faz parte do projeto!");
