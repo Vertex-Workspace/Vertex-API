@@ -42,7 +42,8 @@ public class ProjectOneDTO {
     public ProjectOneDTO(Project project) {
         BeanUtils.copyProperties(project, this);
 
-        this.notes = project.getNotes()
+        this.notes =
+                project.getNotes()
                 .stream()
                 .map(NoteDTO::new)
                 .toList();

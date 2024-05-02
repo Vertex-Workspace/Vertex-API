@@ -13,10 +13,7 @@ import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.review.service.ReviewService;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.task.service.TaskService;
-import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
-import com.vertex.vertex.team.model.DTO.TeamLinkDTO;
-import com.vertex.vertex.team.model.DTO.TeamSearchDTO;
-import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
+import com.vertex.vertex.team.model.DTO.*;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.model.exceptions.TeamNotFoundException;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
@@ -103,6 +100,10 @@ public class TeamService {
         return dto;
     }
 
+    public TeamProjectsDTO getTeamScreenInformation(Long id) {
+        return new TeamProjectsDTO(findTeamById(id));
+    }
+
     public TeamLinkDTO findInvitationCodeById(Long id) {
         try {
             Team team = findTeamById(id);
@@ -145,6 +146,11 @@ public class TeamService {
         ValidationUtils.validateUserLogged(
                 team.getUserTeams().stream().map(UserTeam::getUser).map(User::getEmail).toList());
         return team;
+    }
+
+    public String getTeamName(Long id) {
+        return teamRepository.findById(id)
+                .orElseThrow(EntityDoesntExistException::new).getName();
     }
 
     public TeamInfoDTO updateImage(MultipartFile file, Long teamId) {

@@ -121,6 +121,7 @@ public class ProjectService {
 
     public ProjectOneDTO findProjectById(Long id) {
         Project project = findById(id);
+
         ProjectOneDTO projectOneDTO = new ProjectOneDTO(project);
         ValidationUtils.loggedUserIsOnProject(project);
 

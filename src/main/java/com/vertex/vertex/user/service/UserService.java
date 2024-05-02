@@ -69,7 +69,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User save(UserDTO userDTO, HttpServletRequest request, HttpServletResponse response) {
+    public User save(UserDTO userDTO) {
         User user = new User();
         BeanUtils.copyProperties(userDTO, user);
 

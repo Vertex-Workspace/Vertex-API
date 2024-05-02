@@ -28,10 +28,7 @@ public class PersonalizationService {
 
     public Personalization defaultSave(User user){
         Personalization personalization = new Personalization();
-        personalization.setPrimaryColorLight("#092C4C");
-        personalization.setSecondColorLight("#F3F3F3");
-        personalization.setPrimaryColorDark("#F3F3F3");
-        personalization.setSecondColorDark("#1E1E1E");
+        personalization.setPrimaryColor("#092C4C");
         personalization.setFontFamily("Inter");
         personalization.setFontSize(14);
         personalization.setTheme(0);
@@ -41,20 +38,6 @@ public class PersonalizationService {
 
         return personalization;
     }
-
-//    public User patchUserPersonalization(User user, Personalization personalization){
-//
-////        user.getPersonalization().setPrimaryColor(personalization.getPrimaryColor());
-////        user.getPersonalization().setSecondColor(personalization.getSecondColor());
-////        user.getPersonalization().setFontFamily(personalization.getFontFamily());
-////        user.getPersonalization().setFontSize(personalization.getFontSize());
-////        user.getPersonalization().setVoiceCommand(personalization.getVoiceCommand());
-////        user.getPersonalization().setListeningText(personalization.getListeningText());
-////        user.getPersonalization().setUser(personalization.getUser());
-//
-//
-//        return personalization;
-//    }
 
     public Personalization findById(Long id) {
         if (!personalizationRepository.existsById(id)) {
