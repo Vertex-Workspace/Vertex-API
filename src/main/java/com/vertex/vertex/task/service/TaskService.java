@@ -315,13 +315,14 @@ public class TaskService {
                 , task.getProject().getProjectReviewENUM());
     }
 
-    public List<Task> getAllByUser(Long userID) {
+    public List<TaskModeViewDTO> getAllByUser(Long userID) {
         try {
             return userTeamService.findAllUserTeamByUserId(userID)
                     .stream()
                     .flatMap(ut -> ut.getTeam().getProjects().stream()
                             .flatMap(p -> filterTasksByResponsible(p.getTasks(), ut).stream())
                     )
+                    .map(TaskModeViewDTO::new)
                     .toList();
 
         } catch (Exception e) {

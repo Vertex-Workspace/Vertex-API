@@ -28,7 +28,6 @@ public class TeamViewListDTO {
     private String description;
     private LocalDateTime creationDate;
     private boolean defaultTeam;
-    private Chat chat;
     private List<ProjectViewListDTO> projects;
 
     public TeamViewListDTO(String name, User creator, byte[] image, String description, LocalDateTime creationDate, boolean defaultTeam) {

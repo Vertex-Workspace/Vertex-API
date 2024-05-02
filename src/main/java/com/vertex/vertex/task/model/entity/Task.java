@@ -97,14 +97,14 @@ public class Task implements FileSupporter {
         else return "A descrição da tarefa foi alterada";
     }
 
-    public boolean isNotUnderAnalysis(){
+    public boolean isUnderAnalysis(){
         if(this.getReviews() != null){
-            return !this.getReviews()
+            return this.getReviews()
                     .stream()
                     .map(review -> review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS))
                     .isParallel();
         }
-        return true;
+        return false;
     }
 
     public Task(TaskCreateDTO dto, Project project, UserTeam creator) {

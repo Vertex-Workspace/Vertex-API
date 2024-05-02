@@ -38,6 +38,15 @@ public class ProjectController {
         }
     }
 
+    @GetMapping("/name/{id}")
+    public ResponseEntity<?> getProjectName(@PathVariable Long id) {
+        try {
+            return new ResponseEntity<>(projectService.findById(id).getName(), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
     @GetMapping("/team/{teamId}")
     public ResponseEntity<?> findAllByTeam(
             @PathVariable Long teamId) {

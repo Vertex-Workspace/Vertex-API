@@ -28,10 +28,7 @@ public class PersonalizationService {
 
     public Personalization defaultSave(User user){
         Personalization personalization = new Personalization();
-        personalization.setPrimaryColorLight("#092C4C");
-        personalization.setSecondColorLight("#F3F3F3");
-        personalization.setPrimaryColorDark("#F3F3F3");
-        personalization.setSecondColorDark("#1E1E1E");
+        personalization.setPrimaryColor("#092C4C");
         personalization.setFontFamily("Inter");
         personalization.setFontSize(14);
         personalization.setTheme(0);

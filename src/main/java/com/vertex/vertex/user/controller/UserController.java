@@ -31,9 +31,9 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> save(@RequestBody UserDTO userDTO, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> save(@RequestBody UserDTO userDTO) {
         try {
-            return new ResponseEntity<>(userService.save(userDTO, request, response), HttpStatus.CREATED);
+            return new ResponseEntity<>(userService.save(userDTO), HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
@@ -96,7 +96,7 @@ public class UserController {
 
 
     @PatchMapping("/{id}/personalization")
-    public ResponseEntity<?> patchUserPersonalization(@PathVariable Long id, @RequestBody Personalization personalization) {
+    public ResponseEntity<?> personalization(@PathVariable Long id, @RequestBody Personalization personalization) {
         try {
             return new ResponseEntity<>(this.userService.patchUserPersonalization(id,personalization),HttpStatus.OK);
         } catch (Exception e) {

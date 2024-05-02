@@ -18,7 +18,6 @@ public class PersonalizationController {
     @GetMapping("/personalization/{userId}")
     public ResponseEntity<Personalization> findByUserId(@PathVariable Long userId){
         try {
-            System.out.println("AQUIIII"+userId);
             return new ResponseEntity<>(personalizationService.findByUserId(userId), HttpStatus.OK);
         }catch (Exception e){
             throw new RuntimeException("Essa personalização não está atrelada à nenhum usuário.");

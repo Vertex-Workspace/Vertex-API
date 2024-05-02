@@ -1,6 +1,7 @@
 package com.vertex.vertex.team.controller;
 
 import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
+import com.vertex.vertex.team.model.DTO.TeamProjectsDTO;
 import com.vertex.vertex.team.model.DTO.TeamSearchDTO;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.service.TeamService;
@@ -45,6 +46,25 @@ public class TeamController {
             return new ResponseEntity<>(teamService.findById(id), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/screen/{id}")
+    public ResponseEntity<TeamProjectsDTO> teamScreenInformations(@PathVariable Long id) {
+        try {
+            return new ResponseEntity<>(teamService.getTeamScreenInformation(id), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+
+    @GetMapping("/name/{id}")
+    public ResponseEntity<?> getTeamName(@PathVariable Long id) {
+        try {
+            return new ResponseEntity<>(teamService.getTeamName(id), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 
