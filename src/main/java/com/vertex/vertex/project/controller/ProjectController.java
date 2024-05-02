@@ -5,19 +5,12 @@ import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
 import com.vertex.vertex.project.model.DTO.ProjectEditDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
-import com.vertex.vertex.property.model.entity.Property;
-import com.vertex.vertex.property.service.PropertyService;
-import com.vertex.vertex.team.model.entity.Team;
-import com.vertex.vertex.team.relations.group.model.entity.Group;
-import com.vertex.vertex.user.model.entity.User;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Set;
 
 @CrossOrigin
 @RestController
@@ -26,22 +19,21 @@ import java.util.Set;
 public class ProjectController {
 
     private final ProjectService projectService;
-    private final FileService fileService;
 
     @PostMapping("/{teamId}")
-    public ResponseEntity<?> save(@RequestBody ProjectCreateDTO project, @PathVariable Long teamId){
+    public ResponseEntity<?> save(@RequestBody ProjectCreateDTO project, @PathVariable Long teamId) {
         try {
-            return new ResponseEntity<>(projectService.save(project, teamId), HttpStatus.CREATED);
-        }catch(Exception e){
+            return new ResponseEntity<>(projectService.saveWithRelationOfProject(project, teamId), HttpStatus.CREATED);
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> findProjectById(@PathVariable Long id){
-        try{
+    public ResponseEntity<?> findProjectById(@PathVariable Long id) {
+        try {
             return new ResponseEntity<>(projectService.findProjectById(id), HttpStatus.OK);
-        }catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
@@ -56,7 +48,7 @@ public class ProjectController {
         } catch (Exception e) {
             return new ResponseEntity<>
                     (e.getMessage(),
-                                HttpStatus.CONFLICT);
+                            HttpStatus.CONFLICT);
         }
     }
 
@@ -67,39 +59,34 @@ public class ProjectController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
-
         }
     }
-
-//    @PutMapping
-//    public ResponseEntity<Project> update(@RequestBody Project project){
-//        try {
-//            return new ResponseEntity<>(projectService.save(project), HttpStatus.CREATED);
-//        }catch(Exception e){
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//    }
 
     @GetMapping("/exists/{id}")
     public ResponseEntity<?> existsById(@PathVariable Long id) {
         try {
             return new ResponseEntity<>
                     (true, HttpStatus.OK);
-        } catch (Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>
                     (false,
                             HttpStatus.NOT_FOUND);
         }
     }
 
-    @GetMapping("/exists/{projectId}/{userId}")
+    @GetMapping("/exists/{projectId}")
     public ResponseEntity<?> existsByIdAndUserBelongs(
-            @PathVariable Long projectId,
-            @PathVariable Long userId) {
-        return new ResponseEntity<>
-                (projectService.existsByIdAndUserBelongs
-                        (projectId, userId),
-                        HttpStatus.OK);
+            @PathVariable Long projectId) {
+        try {
+
+            return new ResponseEntity<>
+                    (projectService.existsByIdAndUserBelongs
+                            (projectId),
+                            HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>
+                    (HttpStatus.UNAUTHORIZED);
+        }
     }
 
     @PatchMapping("/image/{projectId}")
@@ -107,39 +94,28 @@ public class ProjectController {
             @PathVariable Long projectId,
             @RequestParam MultipartFile file) {
         try {
-            projectService.updateImage(file, projectId);
             return new ResponseEntity<>
-                    (HttpStatus.OK);
+                    (projectService.updateImage(file, projectId), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>
                     (HttpStatus.CONFLICT);
         }
     }
 
-    @GetMapping("/{teamId}/{userId}")
-    public ResponseEntity<?> getProjectsByCollaborators(@PathVariable Long teamId, @PathVariable Long userId){
-        try {
-            return new ResponseEntity<>(projectService.getAllByTeamAndCollaborators(teamId, userId), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-    }
-
-    @GetMapping("/users/{projectId}")
-    public ResponseEntity<?> getCollaborators(@PathVariable Long projectId){
-        try {
-            return new ResponseEntity<>(projectService.getUsersByProject(projectId), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-    }
-
     @PatchMapping("/update")
-    public ResponseEntity<?> updateProject (@RequestBody ProjectEditDTO projectEditDTO){
+    public ResponseEntity<?> updateProject(@RequestBody ProjectEditDTO projectEditDTO) {
         try {
             return new ResponseEntity<>(projectService.updateProjectCollaborators(projectEditDTO), HttpStatus.OK);
-        }catch(Exception e){
-            System.out.println(e);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping("/getAll/{projectId}")
+    public ResponseEntity<?> returnAllColaborators(@PathVariable Long projectId) {
+        try {
+            return new ResponseEntity<>(projectService.returnAllCollaborators(projectId), HttpStatus.OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
@@ -152,10 +128,19 @@ public class ProjectController {
                     (projectService.findAllByUserAndQuery(userId, query),
                             HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>
                     (HttpStatus.CONFLICT);
         }
     }
+
+    @GetMapping("/{teamId}/{userId}")
+    public ResponseEntity<?> getProjectsByCollaborators(@PathVariable Long teamId, @PathVariable Long userId) {
+        try {
+            return new ResponseEntity<>(projectService.getAllByTeamAndCollaborators(teamId, userId), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
+
 
 }

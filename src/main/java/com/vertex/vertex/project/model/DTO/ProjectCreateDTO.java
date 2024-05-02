@@ -23,12 +23,18 @@ public class ProjectCreateDTO {
     private String description;
     private byte[] image;
     private UserTeam creator;
-    private Team team;
     private Project projectDependency;
-//    private File file;
-    private List<User> listOfResponsibles;
+    private List<User> users;
+    private List<Group> groups;
 
     private ProjectReviewENUM projectReviewENUM;
 
+    public ProjectCreateDTO(String name, String description, UserTeam creator, List<User> users) {
+        this.name = name;
+        this.description = description;
+        this.creator = creator;
+        this.users = users;
+        this.projectReviewENUM = ProjectReviewENUM.EMPTY;
+    }
 }
 

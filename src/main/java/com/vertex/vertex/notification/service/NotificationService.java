@@ -33,8 +33,10 @@ public class NotificationService {
     private final UserRepository userRepository;
     private final ModelMapper mapper;
 
+
     public Notification save(Notification notification) {
         Notification notificationSaved = notificationRepository.save(notification);
+
         if(notification.getUser().getSendToEmail()){
             sendToEmail(notificationSaved);
         }

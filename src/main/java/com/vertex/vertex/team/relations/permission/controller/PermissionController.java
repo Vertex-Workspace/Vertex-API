@@ -18,10 +18,10 @@ public class PermissionController {
     private final PermissionService permissionService;
 
 
-    @PatchMapping("/{permissionId}/{userId}/{teamId}")
-    public ResponseEntity<?> giveAPermission(@PathVariable Long permissionId, @PathVariable Long userId, @PathVariable Long teamId){
+    @PatchMapping("/{permissionId}")
+    public ResponseEntity<?> giveAPermission(@PathVariable Long permissionId){
         try{
-            permissionService.changeEnabled(permissionId, userId, teamId);
+            permissionService.changeEnabled(permissionId);
             return new ResponseEntity<>(HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);

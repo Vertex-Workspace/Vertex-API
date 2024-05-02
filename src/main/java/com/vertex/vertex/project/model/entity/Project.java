@@ -7,6 +7,7 @@ import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.note.model.entity.Note;
 import com.vertex.vertex.team.model.entity.Team;
+import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -46,7 +47,8 @@ public class Project {
     @OneToMany(mappedBy = "project", orphanRemoval = true)
     private List<Note> notes;
 
-    @OneToOne
+    @ManyToOne
+    @JsonIgnore
     private Project projectDependency;
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -56,8 +58,12 @@ public class Project {
     @ToString.Exclude
     private List<UserTeam> collaborators;
 
+    @ManyToMany(cascade = CascadeType.REMOVE)
+    @JsonIgnore
+    private List<Group> groups;
+
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+//    @Column(nullable = false)
     private ProjectReviewENUM projectReviewENUM;
 
 

@@ -31,6 +31,14 @@ public class PropertyController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
+    @PutMapping("/project/{projectID}")
+    public ResponseEntity<?> editProperty(@PathVariable Long projectID, @RequestBody Property property) {
+        try {
+            return new ResponseEntity<>(propertyService.edit(projectID, property), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
 
     @DeleteMapping("{propertyID}/project/{projectID}")
     public ResponseEntity<?> deleteProperty(@PathVariable Long projectID, @PathVariable Long propertyID) {

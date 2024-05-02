@@ -34,7 +34,7 @@ public class TaskResponsable {
     @ToString.Exclude
     private UserTeam userTeam;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnore
     @ToString.Exclude
     private Task task;

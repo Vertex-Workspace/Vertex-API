@@ -37,7 +37,7 @@ public class NoteService {
         Project project = projectService.findById(projectId);
         UserTeam creator = userTeamService
                 .findUserTeamByComposeId
-                        (userId, project.getTeam().getId());
+                        (project.getTeam().getId(), userId);
 
         Note note = new Note(project, creator, dto);
         return noteRepository.save(note);

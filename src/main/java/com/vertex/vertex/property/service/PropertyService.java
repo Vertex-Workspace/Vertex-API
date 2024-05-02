@@ -1,5 +1,6 @@
 package com.vertex.vertex.property.service;
 
+import com.vertex.vertex.project.model.DTO.ProjectOneDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.project.service.ProjectService;
@@ -16,11 +17,14 @@ import com.vertex.vertex.property.model.exceptions.PropertyIsNotAListException;
 import com.vertex.vertex.property.repository.PropertyListRepository;
 import com.vertex.vertex.property.repository.PropertyRepository;
 import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
+import com.vertex.vertex.task.relations.value.model.entity.ValueDate;
 import com.vertex.vertex.task.relations.value.model.entity.ValueText;
 import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.service.TaskService;
+import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
@@ -29,6 +33,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 import static com.vertex.vertex.property.model.ENUM.PropertyKind.*;
 
@@ -44,75 +49,104 @@ public class PropertyService {
     private final ModelMapper mapper;
 
 
-    public Project save(Long projectID, Property property) {
+    public ProjectOneDTO save(Long projectID, Property property) {
         Project project = projectService.findById(projectID);
         Property finalProperty = new Property();
-
         mapper.map(property, finalProperty);
-        //Edit
-        if (property.getId() != 0) {
-            finalProperty.getPropertyLists().forEach(propertyList -> propertyList.setProperty(property));
-            //FIXED PROPERTIES CANNOT BE EDITED VERY DEEP
-            if(property.getPropertyStatus() != PropertyStatus.FIXED){
-                Property oldProperty = findById(property.getId());
-                if(oldProperty.getKind() != property.getKind()){
-                    this.deleteValuesCascade(project, oldProperty);
-                    //Add a new value to each property
-                    for(Task task : project.getTasks()){
-                        Value value = property.getKind().getValue();
-                        value.setTask(task);
-                        value.setProperty(property);
-                        task.getValues().add(value);
-                        taskRepository.save(task);
-                    }
-                }
-            }
-        }
-        //Create
-        else {
-            finalProperty.setIsObligate(false);
-            Property newProperty = propertyRepository.save(finalProperty);
-            finalProperty.getPropertyLists().forEach(propertyList -> propertyList.setProperty(newProperty));
-            finalProperty.setId(newProperty.getId());
-            for (Task task : project.getTasks()) {
-                Value newValue = property.getKind().getValue();
-                newValue.setProperty(newProperty);
-                newValue.setTask(task);
-                valueService.save(newValue);
-            }
-        }
-
         finalProperty.setProject(project);
-        propertyRepository.save(finalProperty);
+        finalProperty.setIsObligate(false);
+        Property newProperty = propertyRepository.save(finalProperty);
 
-        return projectService.findById(projectID);
+        finalProperty.getPropertyLists().forEach(propertyList -> propertyList.setProperty(newProperty));
+
+        finalProperty.setId(newProperty.getId());
+
+        for (Task task : project.getTasks()) {
+            Value newValue = property.getKind().getValue();
+            newValue.setProperty(newProperty);
+            newValue.setTask(task);
+
+            if(property.getDefaultValue() != null && !property.getDefaultValue().isEmpty()){
+                newValue.setValue(property.getDefaultValue());
+            }
+            valueService.save(newValue);
+        }
+        propertyRepository.save(newProperty);
+        return projectService.findProjectById(project.getId());
     }
 
+    public ProjectOneDTO edit(Long projectId, Property property){
+        Project project = projectService.findById(projectId);
+        Property finalProperty = new Property();
+        mapper.map(property, finalProperty);
+
+        finalProperty.setProject(project);
+
+        //Edit Property list
+        finalProperty.getPropertyLists().forEach(propertyList -> propertyList.setProperty(property));
+
+
+        //DEPRECATED - ASS OTÁVIO
+        //CANNOT CHANGE A KIND OF PROPERTY WHEN IT'S CREATED
+
+
+//        //FIXED PROPERTIES CANNOT BE EDITED VERY DEEP
+//        if(property.getPropertyStatus() != PropertyStatus.FIXED){
+//            Property oldProperty = findById(property.getId());
+//            if(oldProperty.getKind() != property.getKind()){
+//                //Add a new value to each property
+//                for(Task task : project.getTasks()){
+//                    Value value = property.getKind().getValue();
+//                    value.setTask(task);
+//                    value.setProperty(property);
+//
+//                    int indexOldProperty = task.getValues().indexOf(task.getValues().stream().filter(
+//                            v -> v.getProperty().getId().equals(oldProperty.getId())).findAny().get());
+//
+//                    task.getValues().set(indexOldProperty, value);
+//                    taskRepository.save(task);
+//                }
+//            }
+//        }
+        propertyRepository.save(finalProperty);
+
+        return projectService.findProjectById(project.getId());
+    }
+
+
     //in this method, we need, firstly, remove the value, and then remove the property
-    public Project delete(Long projectId, Long propertyId) {
+    public ProjectOneDTO delete(Long projectId, Long propertyId) {
         Property property = findById(propertyId);
         Project project = projectService.findById(projectId);
 
-        if (property.getPropertyStatus() != PropertyStatus.FIXED) {
+        if(!property.getProject().getId().equals(projectId)){
+            throw new RuntimeException("Propriedade não pertence ao projeto!");
+        }
 
+        if (property.getPropertyStatus() != PropertyStatus.FIXED) {
             this.deleteValuesCascade(project, property);
             propertyRepository.delete(property);
-            return projectService.findById(projectId);
+            return projectService.findProjectById(project.getId());
         } else {
             throw new CantDeleteStatusException();
         }
     }
 
     private void deleteValuesCascade(Project project, Property property){
+        List<Task> tasksToBeSaved = new ArrayList<>();
+        List<Value> values = new ArrayList<>();
         for (Task task : project.getTasks()) {
             for (Value value : task.getValues()) {
                 if (value.getProperty().getId().equals(property.getId())) {
-                    task.getValues().remove(value);
-                    taskRepository.save(task);
-                    break;
+                    values.add(value);
                 }
             }
+            for(Value value : values){
+                task.getValues().remove(value);
+                tasksToBeSaved.add(task);
+            }
         }
+        taskRepository.saveAll(tasksToBeSaved);
     }
 
     public Property findById(Long id) {
@@ -136,13 +170,11 @@ public class PropertyService {
                     //Validates and find the value with property ID
                     if (value.getProperty().getId().equals(property.getId())) {
                         //Validates if the value that intend to be excluded, belongs to the current value
-                        if (value.getProperty().getPropertyLists().contains(propertyList)) {
-                            if (property.getKind() == STATUS) {
-                                PropertyList currentPropertyList = (PropertyList) value.getValue();
-                                //Set the value as the default for each task
-                                value.setValue(getFixedStatusValue(project, currentPropertyList));
-                                valueService.save(value);
-                            }
+                        if (value.getProperty().getPropertyLists().contains(propertyList) && property.getKind() == STATUS) {
+                            PropertyList currentPropertyList = (PropertyList) value.getValue();
+                            //Set the value as the default for each task
+                            value.setValue(getFixedStatusValue(project, currentPropertyList));
+                            valueService.save(value);
 //                            if(property.getKind() == LIST){
 //
 //                            }
@@ -181,4 +213,36 @@ public class PropertyService {
         }
         return null;
     }
+
+    public String getPropertyValueAsString(Property property, Task task) {
+        Value value = task.getValues()
+                .stream()
+                .filter(v -> Objects.equals(property.getId(), v.getProperty().getId()))
+                .findFirst()
+                .get();
+
+        if (property.getKind() == PropertyKind.STATUS
+                || property.getKind() == PropertyKind.LIST) {
+            PropertyList pl = (PropertyList) value.getValue();
+            return pl.getValue();
+        }
+
+        if (value instanceof ValueDate) {
+            return ((ValueDate) value).format();
+        }
+
+        return value.getValue().toString();
+    }
+
+    public Property findByIdAndProjectContains(Long id, Project project) {
+        Property property = findById(id);
+
+        if (!project.getProperties().contains(property)) {
+            throw new RuntimeException("Property doesn't exist in this project");
+        }
+
+        return property;
+    }
+
+
 }

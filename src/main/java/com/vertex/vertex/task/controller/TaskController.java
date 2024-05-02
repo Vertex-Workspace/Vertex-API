@@ -2,8 +2,8 @@ package com.vertex.vertex.task.controller;
 
 import com.vertex.vertex.chat.model.Chat;
 import com.vertex.vertex.chat.service.ChatService;
-import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.DTO.TaskEditDTO;
+import com.vertex.vertex.task.model.DTO.UpdateTaskResponsableDTO;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.relations.task_responsables.model.DTOs.TaskResponsablesDTO;
@@ -13,7 +13,6 @@ import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
-import org.hibernate.Remove;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,21 +38,12 @@ public class TaskController {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
-    @GetMapping
-    public ResponseEntity<List<Task>> findAllByProject(){
-        try{
-            return new ResponseEntity<>(taskService.findAll(), HttpStatus.OK);
-        } catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-    }
 
     @PostMapping
     public ResponseEntity<?> save(@RequestBody TaskCreateDTO taskCreateDTO){
         try{
             return new ResponseEntity<>(taskService.save(taskCreateDTO), HttpStatus.OK);
         }catch(Exception e){
-            System.out.println(e.getMessage());
             return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
         }
     }
@@ -73,7 +63,6 @@ public class TaskController {
         try{
             return new ResponseEntity<>(taskService.edit(taskEditDTO), HttpStatus.OK);
         }catch(Exception e){
-            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
@@ -118,6 +107,15 @@ public class TaskController {
         }
     }
 
+    @GetMapping("/{taskID}/task-permission/{userID}")
+    public ResponseEntity<?> getTaskPermissions(@PathVariable Long taskID, @PathVariable Long userID){
+        try{
+            return new ResponseEntity<>(taskService.getTaskPermissions(taskID, userID), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
 
 
     @PatchMapping("/responsables")
@@ -129,12 +127,12 @@ public class TaskController {
         }
     }
 
-    @GetMapping("/user/{id}")
+    @GetMapping("/user/{userID}")
     public ResponseEntity<?> findAllByUser(
-            @PathVariable Long id) {
+            @PathVariable Long userID) {
         try {
             return new ResponseEntity<>(
-                    taskService.getAllByUser(id),
+                    taskService.getAllByUser(userID),
                         HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(
@@ -190,6 +188,14 @@ public class TaskController {
         }
     }
 
+    @PatchMapping("/taskResponsables")
+    public ResponseEntity<?> updateParticipants(@RequestBody UpdateTaskResponsableDTO updateTaskResponsableDTO){
+        try{
+            return new ResponseEntity<>(taskService.editTaskResponsables(updateTaskResponsableDTO), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
 
     @PostMapping("/{idTask}/chat")
     public ResponseEntity<Task> createChatOfTask(@PathVariable Long idTask){
@@ -218,6 +224,43 @@ public class TaskController {
                     (HttpStatus.CONFLICT);
         }
     }
+    @PatchMapping("/taskDependency/{taskId}/{taskdependencyId}")
+    public ResponseEntity<?> setTaskDependency(@PathVariable Long taskId, @PathVariable Long taskdependencyId){
+        try{
+            return new ResponseEntity<>(taskService.setDependency(taskId, taskdependencyId), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
+
+    @PatchMapping("/taskDependency/{taskId}")
+    public ResponseEntity<?> setTaskDependencyNull(@PathVariable Long taskId){
+        try{
+            taskService.setTaskDependencyNull(taskId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping("/doneTask/{projectDependencyId}")
+    public ResponseEntity<?> getTasksDone(@PathVariable Long projectDependencyId){
+        try {
+            return new ResponseEntity<>(taskService.getTasksDone(projectDependencyId), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping("/taskResponsables/{taskId}")
+    public ResponseEntity<?> returnResponsables(@PathVariable Long taskId){
+        try {
+            return new ResponseEntity<>(taskService.returnAllResponsables(taskId), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+    }
+
 
 
 }

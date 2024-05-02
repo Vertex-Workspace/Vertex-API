@@ -2,52 +2,42 @@ package com.vertex.vertex.team.relations.group.service;
 
 import com.vertex.vertex.notification.service.NotificationService;
 import com.vertex.vertex.team.model.entity.Team;
-import com.vertex.vertex.team.relations.group.model.DTO.AddUsersDTO;
+import com.vertex.vertex.team.relations.group.model.DTO.GroupRegisterDTO;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
+import com.vertex.vertex.team.relations.group.model.exception.GroupNameInvalidException;
 import com.vertex.vertex.team.relations.group.repository.GroupRepository;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
-import com.vertex.vertex.team.repository.TeamRepository;
+import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.user.model.entity.User;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @AllArgsConstructor
 @Service
 public class GroupService {
 
     private final GroupRepository groupRepository;
-    private final TeamRepository teamRepository;
+    private final TeamService teamService;
     private final UserTeamService userTeamService;
     private final NotificationService notificationService;
 
-    public Group edit(Group group) {
-        return groupRepository.save(group);
-    }
 
     public Group findById(Long groupId) {
-        return groupRepository.findById(groupId).get();
+        Optional<Group> optionalGroup = groupRepository.findById(groupId);
+        if(optionalGroup.isPresent()){
+            return optionalGroup.get();
+        }
+        throw new RuntimeException("Grupo não encontrado!");
     }
 
-    public List<Group> findAll() {
-        return groupRepository.findAll();
-    }
 
     public void delete(Long id) {
-        Group group = findById(id);
-
-        for (UserTeam userTeam : group.getUserTeams()) {
-            userTeam.getGroups().remove(group);
-            System.out.println(userTeam.getGroups());
-        }
-
-        Team team = group.getTeam();
-        team.getGroups().remove(findById(id));
-        teamRepository.save(team);
-        groupRepository.delete(group);
+        groupRepository.delete(findById(id));
     }
 
     public void deleteUserFromGroup(Long userId, Long teamId, Long groupId) {
@@ -66,37 +56,66 @@ public class GroupService {
 
     public List<User> participantsOutOfGroup(Long teamId, Long groupId) {
         List<User> users = new ArrayList<>();
-        Team team = teamRepository.findById(teamId).get();
+        Team team = teamService.findTeamById(teamId);
         Group group = findById(groupId);
         for (UserTeam userTeam : team.getUserTeams()) {
-            if (group.getUserTeams().contains(userTeam)) {
-                System.out.println("This user is already in the group");
-            } else {
+            if (!group.getUserTeams().contains(userTeam)) {
                 users.add(userTeam.getUser());
             }
         }
         return users;
     }
 
-    public void addParticipants(Long id, AddUsersDTO addUsersDTO) {
-        Group group = findById(id);
+    public void addParticipants(Long groupId, Long userId) {
+        Group group = findById(groupId);
         Team team = group.getTeam();
-        for (User user : addUsersDTO.getUsers()) {
+        for (UserTeam userTeam : team.getUserTeams()) {
+            if (userTeam.getUser().getId().equals(userId)) {
+                if (userTeam.getGroups().contains(group)){
+                    throw new RuntimeException("Esse userTeam já está no grupo");
+                } else {
+                    group.getUserTeams().add(userTeam);
+                    userTeam.getGroups().add(group);
+                    groupRepository.save(group);
+                    userTeamService.save(userTeam);
+                }
+            }
+        }
+    }
+
+    public Group editGroupName(Group group, Long teamId) {
+        Team team = teamService.findTeamById(teamId);
+        group.setTeam(team);
+        return groupRepository.save(group);
+    }
+    public Team saveGroup(GroupRegisterDTO groupRegisterDTO) {
+
+        List<UserTeam> userTeams = new ArrayList<>();
+        Group group = new Group();
+
+        Team team = teamService.findTeamById(groupRegisterDTO.getTeam().getId());
+
+        if (groupRegisterDTO.getName().isEmpty()) {
+            throw new GroupNameInvalidException();
+        }
+
+        group.setName(groupRegisterDTO.getName());
+        team.getGroups().add(group);
+        group.setTeam(team);
+
+        for (User userFor : groupRegisterDTO.getUsers()) {
             for (UserTeam userTeam : team.getUserTeams()) {
-                if (userTeam.getUser().getId() == user.getId()) {
-                    if (userTeam.getGroups().contains(group)){
-                        throw new RuntimeException("Esse userTeam já está no grupo");
-                    } else {
-                        group.getUserTeams().add(userTeam);
-                        userTeam.getGroups().add(group);
-                        groupRepository.save(group);
-                        userTeamService.save(userTeam);
-                        if(userTeam.getUser().getNewMembersAndGroups()){
-                            notificationService.groupAndTeam("Você foi adicionado(a) ao grupo " + group.getName(), userTeam);
-                        }
+                if (userTeam.getUser().equals(userFor)) {
+                    userTeams.add(userTeam);
+                    userTeam.getGroups().add(group);
+                    group.setUserTeams(userTeams);
+
+                    if (userTeam.getUser().getNewMembersAndGroups()) {
+                        notificationService.groupAndTeam("Você foi adicionado(a) ao grupo " + group.getName(), userTeam);
                     }
                 }
             }
         }
+        return teamService.save(team);
     }
 }

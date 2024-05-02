@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -44,17 +45,17 @@ public class Team {
     private LocalDateTime creationDate;
 
     @OneToMany(mappedBy = "team", fetch = FetchType.EAGER, orphanRemoval = true)
-    private List<Project> projects;
+    private List<Project> projects = new ArrayList<>();
 
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL , orphanRemoval = true)
-    private List<Group> groups;
+    private List<Group> groups = new ArrayList<>();
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Chat chat;
 
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @ToString.Exclude
-    private List<UserTeam> userTeams;
+    private List<UserTeam> userTeams = new ArrayList<>();
 
 
 

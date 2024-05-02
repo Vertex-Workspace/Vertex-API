@@ -1,6 +1,7 @@
 package com.vertex.vertex.chat.service;
 
 import com.vertex.vertex.chat.model.Chat;
+import com.vertex.vertex.chat.model.DTO.ChatListDTO;
 import com.vertex.vertex.chat.relations.message.Message;
 import com.vertex.vertex.chat.relations.message.MessageRepository;
 import com.vertex.vertex.chat.repository.ChatRepository;
@@ -13,7 +14,6 @@ import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.repository.UserRepository;
-import com.vertex.vertex.user.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -35,21 +36,16 @@ public class ChatService {
     private final UserTeamService userTeamService;
     private final TaskService taskService;
 
-    public List<Chat> findAllByUser(User user) {
-        List<Chat> allChatsOfUser = new ArrayList<>();
-        chatRepository.findAll().forEach(chat -> {
-            chat.getUserTeams().forEach(userTeam -> {
-                if (userTeam.getUser().getId() == user.getId()){
-                    if (chat.getUserTeams().size() > 1){
-                        allChatsOfUser.add(chat);
-                    }
-                }
-            });
-        });
-        return allChatsOfUser;
+
+    public List<ChatListDTO> findAllByUser(Long userID) {
+        return userTeamService.findAllUserTeamByUserId(userID)
+                .stream()
+                .flatMap(userTeam -> userTeam.getChats().stream())
+                .map(ChatListDTO::new)
+                .toList();
     }
 
-    public Chat create(Chat chat) {
+    public Chat save(Chat chat) {
         return chatRepository.save(chat);
     }
 
@@ -66,9 +62,6 @@ public class ChatService {
 
     public Chat patchMessages(Long idChat, User user, Message message) {
         Chat chat = chatRepository.findById(idChat).get();
-
-
-
         Message message1 = new Message();
         message1.setChat(chat);
         message1.setUser(user.getFirstName());
@@ -114,12 +107,9 @@ public class ChatService {
         chat.setMessages(new ArrayList<>());
         task.setChatCreated(true);
         task.setChat(chat);
-        create(chat);
+        save(chat);
 
         return task;
     }
 
-    public Chat save(Chat chat){
-        return chatRepository.save(chat);
-    }
 }

@@ -33,4 +33,11 @@ public class Chat{
 
     private boolean conversationOpened;
 
+
+    public Chat(Team team){
+        this.name = team.getName();
+        this.userTeams = team.getUserTeams();
+        team.getUserTeams().forEach(ut -> ut.getChats().add(this));
+    }
+
 }

@@ -17,20 +17,15 @@ public class WebSocketConfiguration implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(getWebSocketHandler(),"/chat", "/notifications", "/tasks").setAllowedOrigins("*");
+        registry.addHandler(new UsedWebSocketHandler(),"/chat", "/notifications").setAllowedOrigins("*");
     }
 
     @Bean
     public ServletServerContainerFactoryBean createWebSocketContainer() {
         ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
-
         container.setMaxTextMessageBufferSize(99999999);
-
+        container.setMaxSessionIdleTimeout(700000L);
         return container;
     }
 
-    @Bean
-    public WebSocketHandler getWebSocketHandler(){
-        return new UsedWebSocketHandler();
-    }
 }

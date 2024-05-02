@@ -4,11 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
 import com.vertex.vertex.property.model.ENUM.PropertyStatus;
+import com.vertex.vertex.task.relations.value.model.entity.Value;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.List;
 
