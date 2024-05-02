@@ -38,28 +38,16 @@ public class PersonalizationService {
         personalization.setSignLanguage(false);
         personalization.setListeningText(false);
         personalization.setUser(user);
+        personalization.setLanguage("pt");
 
         return personalization;
     }
-
-//    public User patchUserPersonalization(User user, Personalization personalization){
-//
-////        user.getPersonalization().setPrimaryColor(personalization.getPrimaryColor());
-////        user.getPersonalization().setSecondColor(personalization.getSecondColor());
-////        user.getPersonalization().setFontFamily(personalization.getFontFamily());
-////        user.getPersonalization().setFontSize(personalization.getFontSize());
-////        user.getPersonalization().setVoiceCommand(personalization.getVoiceCommand());
-////        user.getPersonalization().setListeningText(personalization.getListeningText());
-////        user.getPersonalization().setUser(personalization.getUser());
-//
-//
-//        return personalization;
-//    }
 
     public Personalization findById(Long id) {
         if (!personalizationRepository.existsById(id)) {
             throw new NoSuchElementException("Personalização escolhida não existe.");
         }
+        System.out.println(personalizationRepository.findById(id).get());
         return personalizationRepository.findById(id).get();
     }
 
@@ -72,6 +60,8 @@ public class PersonalizationService {
     }
 
     public Personalization findByUserId(Long id){
+        System.out.println(id);
+        System.out.println(personalizationRepository.findByUser_Id(id));
         return personalizationRepository.findByUser_Id(id);
     }
 
