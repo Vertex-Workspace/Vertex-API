@@ -219,7 +219,7 @@ public class TeamService {
         ProjectCreateDTO projectDefault1 =
                 new ProjectCreateDTO("Projeto Pessoal", "Seu projeto pessoal padrão", team.getCreator(), List.of(user));
 //
-//        Project project = projectService.saveWithRelationOfProject(projectDefault1, team.getId());
+//        Project p = projectService.saveWithRelationOfProject(projectDefault1, team.getId());
 //
 //        TaskCreateDTO taskCreateDTO1 =
 //                new TaskCreateDTO("Tarefa 1", "Sua tarefa é lavar a louça", team.getCreator().getUser(), project);

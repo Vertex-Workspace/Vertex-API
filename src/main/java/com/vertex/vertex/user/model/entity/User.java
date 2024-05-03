@@ -8,6 +8,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.security.Provider;
@@ -76,13 +78,17 @@ public class User implements UserDetails {
         String lastName = user.getAttribute("family_name");
         String firstName = user.getAttribute("name");
         firstName = firstName.substring(0, firstName.indexOf(" "));
-
+        System.out.println(user.getClass());
         this.email = email;
         setPassword(email);
         this.firstName = firstName;
         this.lastName = lastName;
     }
 
+    public void setPassword(String password) {
+        PasswordEncoder encoder = new BCryptPasswordEncoder();
+        this.password = encoder.encode(password);
+    }
 
     public String getFullName(){
         return this.firstName + " " + this.lastName;
