@@ -60,32 +60,36 @@ public class UserService {
     }
 
     public User save(UserDTO userDTO) {
-        User user = new User();
-        BeanUtils.copyProperties(userDTO, user);
+        try {
+            User user = new User(userDTO);
 
-        if (existsByEmail(user.getEmail())) {
-            throw new EmailAlreadyExistsException();
-        }
+            if (existsByEmail(user.getEmail())) {
+                throw new EmailAlreadyExistsException();
+            }
 
-        if (regexValidate.isEmailSecure(user.getEmail())) {
-            user.setEmail(user.getEmail());
-        } else {
-            throw new InvalidEmailException();
-        }
+            if (regexValidate.isEmailSecure(user.getEmail())) {
+                user.setEmail(user.getEmail());
+            } else {
+                throw new InvalidEmailException();
+            }
 //        regexValidate.isPasswordSecure(user, userDTO);
 
-        //Seta usuário como autenticado
-        userSetDefaultInformations(user);
-        user.setDefaultSettings(false);
-//        byte[] data = Base64.getDecoder().decode(userDTO.getImage());
-//        user.setImage(data);
+            //Seta usuário como autenticado
+            userSetDefaultInformations(user);
+            user.setDefaultSettings(false);
+//            byte[] data = Base64.getDecoder().decode(userDTO.getImage());
+//            user.setImage(data);
 
-        return save(user);
+            return save(user);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public void userSetDefaultInformations(User user) {
-        user.setLocation("Brasil");
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+        user.setLocation("Brasil");
         user.setPersonalization(personalizationService.defaultSave(user));
         user.setTaskReview(true);
         user.setNewMembersAndGroups(true);

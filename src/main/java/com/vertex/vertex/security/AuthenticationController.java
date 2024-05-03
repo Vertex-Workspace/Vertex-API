@@ -16,6 +16,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,11 +38,12 @@ public class AuthenticationController {
             HttpServletResponse response
     ) {
         try {
+            System.out.println("-------------------");
+            System.out.println(user);
             return new ResponseEntity<>
                     (authService.login(user, request, response),
                             HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>
                     ("E-mail ou senha inválidos!",
                             HttpStatus.UNAUTHORIZED);

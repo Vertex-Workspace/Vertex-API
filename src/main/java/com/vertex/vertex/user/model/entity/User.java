@@ -3,9 +3,11 @@ package com.vertex.vertex.user.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.notification.entity.model.Notification;
+import com.vertex.vertex.user.model.DTO.UserDTO;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,6 +24,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class User implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
@@ -83,9 +86,9 @@ public class User implements UserDetails {
         this.lastName = lastName;
     }
 
-    public void setPassword(String password) {
-        PasswordEncoder encoder = new BCryptPasswordEncoder();
-        this.password = encoder.encode(password);
+    public User(UserDTO dto) {
+        BeanUtils.copyProperties(dto, this);
+        setPassword(dto.getPassword());
     }
 
     public String getFullName(){

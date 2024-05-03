@@ -47,10 +47,10 @@ public class AuthService {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             Cookie cookie = cookieUtil.generateCookieJWT(userDetails);
             response.addCookie(cookie);
-
             return userService.findByEmail(userDetails.getUsername());
 
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }

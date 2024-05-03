@@ -20,7 +20,9 @@ import java.util.List;
 @Configuration
 @AllArgsConstructor
 public class BeansConfig {
+
     private final UserDetailsServiceImpl userDetailsServiceImpl;
+
     @Bean
     public SecurityContextRepository securityContextRepository() {
         return new HttpSessionSecurityContextRepository();
