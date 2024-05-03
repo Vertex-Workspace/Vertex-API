@@ -97,15 +97,14 @@ public class AuthService {
         try { // already registered
             UserDetails user = userDetailsService.loadUserByUsername(email);
             externalServiceLogin(request, response, user);
-            response.sendRedirect("http://localhost:4200");
 
         } catch (UsernameNotFoundException e) { // first access
             User user = new User(oAuth2User, email);
             userService.save(new UserDTO(user));
             externalServiceLogin(request, response, user);
-            response.sendRedirect("http://localhost:4200");
 
         }
+        response.sendRedirect("http://localhost:4200");
     }
 
 
