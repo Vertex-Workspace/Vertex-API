@@ -18,6 +18,7 @@ import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.user.model.DTO.*;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.exception.*;
+import com.vertex.vertex.user.relations.personalization.model.entity.LanguageDTO;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import com.vertex.vertex.user.relations.personalization.service.PersonalizationService;
 import com.vertex.vertex.user.repository.UserRepository;
@@ -76,8 +77,8 @@ public class UserService {
         //Seta usuário como autenticado
         userSetDefaultInformations(user);
         user.setDefaultSettings(false);
-        byte[] data = Base64.getDecoder().decode(userDTO.getImage());
-        user.setImage(data);
+//        byte[] data = Base64.getDecoder().decode(userDTO.getImage());
+//        user.setImage(data);
 
         return save(user);
     }
@@ -225,7 +226,7 @@ public class UserService {
     }
 
 
-    public User changeLanguage(LanguageDTO languageDTO,Long userId){
+    public User changeLanguage(LanguageDTO languageDTO, Long userId){
         User user = findById(userId);
 
         Personalization personalization = personalizationService.findById(user.getPersonalization().getId());
@@ -237,7 +238,6 @@ public class UserService {
     }
 
     public User patchUserPassword(UserLoginDTO userLoginDTO) {
-
         User user = findByEmail(userLoginDTO.getEmail());
         user.setPassword(userLoginDTO.getPassword());
         return userRepository.save(user);

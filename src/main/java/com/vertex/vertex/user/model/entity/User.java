@@ -58,7 +58,7 @@ public class User implements UserDetails {
 
     private Boolean showCharts;
 
-    @OneToMany(orphanRemoval = true, mappedBy ="user")
+    @OneToMany(mappedBy ="user")
     @JsonIgnore
     @ToString.Exclude
     private List<Notification> notifications;
@@ -74,11 +74,9 @@ public class User implements UserDetails {
     private Boolean anyUpdateOnTask;
     private Boolean sendToEmail;
 
-    public User(OAuth2User user, String email) {
-        String lastName = user.getAttribute("family_name");
-        String firstName = user.getAttribute("name");
+    public User(String email, String name, String lastName) {
+        String firstName = name;
         firstName = firstName.substring(0, firstName.indexOf(" "));
-        System.out.println(user.getClass());
         this.email = email;
         setPassword(email);
         this.firstName = firstName;

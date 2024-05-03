@@ -99,7 +99,7 @@ public class AuthService {
             externalServiceLogin(request, response, user);
 
         } catch (UsernameNotFoundException e) { // first access
-            User user = new User(oAuth2User, email);
+            User user = new User(email, oAuth2User.getAttribute("name"), oAuth2User.getAttribute("family_name"));
             userService.save(new UserDTO(user));
             externalServiceLogin(request, response, user);
 
