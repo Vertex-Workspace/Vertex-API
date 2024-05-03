@@ -1,6 +1,7 @@
 package com.vertex.vertex.team.relations.user_team.service;
 
 import com.vertex.vertex.notification.service.NotificationService;
+import com.vertex.vertex.project.model.DTO.ProjectViewListDTO;
 import com.vertex.vertex.security.ValidationUtils;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.model.entity.Team;
@@ -15,6 +16,7 @@ import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 
@@ -59,6 +61,12 @@ public class UserTeamService {
             TeamViewListDTO dto = new TeamViewListDTO();
             Team team = userTeam.getTeam();
             BeanUtils.copyProperties(team, dto);
+
+            dto.setIsCreator(((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+                    .getId()
+                    .equals(team.getCreator().getUser().getId()));
+
+            dto.setProjects(team.getProjects().stream().map(ProjectViewListDTO::new).toList());
             teams.add(dto);
         }
         return teams;

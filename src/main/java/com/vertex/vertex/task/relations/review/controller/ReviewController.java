@@ -56,7 +56,7 @@ public class ReviewController {
 
 
     @PatchMapping("/{taskID}/review/change-state/{booleanState}")
-    public ResponseEntity<?> getPerformanceInTask(
+    public ResponseEntity<?> performanceInTask(
             @PathVariable Long taskID,
             @PathVariable Boolean booleanState){
         try{

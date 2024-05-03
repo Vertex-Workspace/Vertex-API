@@ -30,6 +30,11 @@ public class FilterAuthentication extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         JwtUtil jwtUtil = new JwtUtil(environment);
         CookieUtils cookieUtil = new CookieUtils(environment);
+
+//        Cookie cookieSession = new Cookie("JSESSIONID", "");
+//        cookieSession.setMaxAge(0);
+//        response.addCookie(cookieSession);
+
         if (!isPublicRouter(request)) {
             //Get the JWT Cookie from request and the value
             Cookie cookie;

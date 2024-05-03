@@ -22,7 +22,6 @@ public class TeamInfoDTO extends TeamViewListDTO{
     private List<User> users;
     private List<ProjectViewListDTO> projects;
     private List<Group> groups;
-    private Chat chat;
     private User creator;
 
     private List<Integer> tasksPerformances = new ArrayList<>();

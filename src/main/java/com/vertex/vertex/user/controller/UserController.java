@@ -6,6 +6,7 @@ import com.vertex.vertex.user.model.DTO.UserEditionDTO;
 import com.vertex.vertex.user.model.DTO.UserLoginDTO;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.exception.*;
+import com.vertex.vertex.user.relations.personalization.model.entity.LanguageDTO;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import com.vertex.vertex.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +31,7 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> save(@RequestBody UserDTO userDTO, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> save(@RequestBody UserDTO userDTO) {
         try {
             return new ResponseEntity<>(userService.save(userDTO), HttpStatus.CREATED);
         } catch (Exception e) {
@@ -95,9 +96,18 @@ public class UserController {
 
 
     @PatchMapping("/{id}/personalization")
-    public ResponseEntity<?> patchControllerUser(@PathVariable Long id, @RequestBody Personalization personalization) {
+    public ResponseEntity<?> personalization(@PathVariable Long id, @RequestBody Personalization personalization) {
         try {
             return new ResponseEntity<>(this.userService.patchUserPersonalization(id,personalization),HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
+        }
+    }
+
+    @PatchMapping("/{userId}/personalization/changeLanguage")
+    public ResponseEntity<?> changeLanguage(@RequestBody LanguageDTO languageDTO, @PathVariable Long userId) {
+        try {
+            return new ResponseEntity<>(this.userService.changeLanguage(languageDTO,userId),HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
         }

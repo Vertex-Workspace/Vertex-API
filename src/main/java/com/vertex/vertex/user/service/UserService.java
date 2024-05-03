@@ -18,6 +18,7 @@ import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.user.model.DTO.*;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.exception.*;
+import com.vertex.vertex.user.relations.personalization.model.entity.LanguageDTO;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import com.vertex.vertex.user.relations.personalization.service.PersonalizationService;
 import com.vertex.vertex.user.repository.UserRepository;
@@ -159,7 +160,6 @@ public class UserService {
                         .filter(taskResponsable -> taskResponsable.getUserTeam().getUser().getId().equals(id))
                         .toList();
 
-
         List<PropertyListKind> listKinds = List.of(PropertyListKind.TODO, PropertyListKind.DOING, PropertyListKind.DONE);
         for (PropertyListKind propertyListKind : listKinds) {
             int sumFinal = 0;
@@ -180,10 +180,10 @@ public class UserService {
         dto.setTime(LocalTime.MIDNIGHT.plus(duration));
 
 
+
+
         User loggedUser = findById(loggedUserID);
-
         if (!loggedUser.equals(user)) {
-
             //Refatorar obrigatoriamente - ass. Otávio
             List<Task> tasks = tasksResponsible.stream().map(TaskResponsable::getTask).toList();
             List<TaskResponsable> taskResponsables = tasks.stream()
@@ -225,7 +225,20 @@ public class UserService {
         return userRepository.save(user);
     }
 
+
+    public User changeLanguage(LanguageDTO languageDTO,Long userId){
+        User user = findById(userId);
+
+        Personalization personalization = personalizationService.findById(user.getPersonalization().getId());
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.map(languageDTO,personalization);
+
+        user.setPersonalization(personalization);
+        return userRepository.save(user);
+    }
+
     public User patchUserPassword(UserLoginDTO userLoginDTO) {
+
         User user = findByEmail(userLoginDTO.getEmail());
         user.setPassword(userLoginDTO.getPassword());
         return userRepository.save(user);

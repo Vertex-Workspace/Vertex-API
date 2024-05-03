@@ -56,7 +56,7 @@ public class Project {
 
     @ManyToMany(cascade = CascadeType.ALL)
     @ToString.Exclude
-    private List<UserTeam> collaborators;
+    private List<UserTeam> collaborators = new ArrayList<>();
 
     @ManyToMany(cascade = CascadeType.REMOVE)
     @JsonIgnore
