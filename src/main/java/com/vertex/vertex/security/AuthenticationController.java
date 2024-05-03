@@ -38,6 +38,7 @@ public class AuthenticationController {
                     (authService.login(user, request, response),
                             HttpStatus.OK);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>
                     ("E-mail ou senha inválidos!",
                             HttpStatus.UNAUTHORIZED);
@@ -48,8 +49,9 @@ public class AuthenticationController {
     @PostMapping("/logout")
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         try {
-            response.addCookie(
-                    authService.logout(request));
+            for (Cookie c : authService.logout(request)) {
+                response.addCookie(c);
+            }
         } catch (Exception e) {
             response.setStatus(401);
         }

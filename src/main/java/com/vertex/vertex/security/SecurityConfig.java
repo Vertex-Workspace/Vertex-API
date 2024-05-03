@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -25,8 +26,6 @@ public class SecurityConfig{
 
     private final FilterAuthentication filterAuthentication;
     private final SecurityContextRepository securityRepository;
-    private final UserDetailsServiceImpl authenticationService;
-    private final UserService userService;
     private final AuthService authService;
 
     @Bean
@@ -43,34 +42,7 @@ public class SecurityConfig{
                 .requestMatchers(WebSocketHttpHeaders.ALLOW, "/notifications", "/chat").permitAll()
                 .anyRequest().authenticated()
         )
-                .oauth2Login(httpOauth2 -> httpOauth2.successHandler((request, response, authentication) -> {
-                    OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-                    String email = oAuth2User.getAttribute("email");
-
-                    try {
-                        UserDetails user = authenticationService.loadUserByUsername(email);
-                        authService.externalServiceLogin(request, response, user);
-                        response.sendRedirect("http://localhost:4200");
-
-                    } catch (UsernameNotFoundException e) {
-                        String lastName = oAuth2User.getAttribute("family_name");
-                        String firstName = oAuth2User.getAttribute("name");
-                        firstName = firstName.substring(0, firstName.indexOf(" "));
-
-                        User user = new User();
-                        user.setEmail(email);
-                        user.setPassword(email);
-                        user.setFirstName(firstName);
-                        user.setLastName(lastName);
-
-                        userService.save(new UserDTO(user));
-
-                        authService.externalServiceLogin(request, response, user);
-                        response.sendRedirect("http://localhost:4200");
-                    }
-
-
-                }) );
+        .oauth2Login(httpOauth2 -> httpOauth2.successHandler(authService::initExternalServiceLogin));
 
         http.securityContext((context) -> context.securityContextRepository(securityRepository));
 

@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.security.Provider;
 import java.util.Collection;
@@ -70,6 +71,17 @@ public class User implements UserDetails {
     private Boolean responsibleInProjectOrTask;
     private Boolean anyUpdateOnTask;
     private Boolean sendToEmail;
+
+    public User(OAuth2User user, String email) {
+        String lastName = user.getAttribute("family_name");
+        String firstName = user.getAttribute("name");
+        firstName = firstName.substring(0, firstName.indexOf(" "));
+
+        this.email = email;
+        setPassword(email);
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
 
 
     public String getFullName(){

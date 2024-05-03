@@ -1,5 +1,6 @@
 package com.vertex.vertex.security;
 
+import com.vertex.vertex.user.model.DTO.UserDTO;
 import com.vertex.vertex.user.model.DTO.UserLoginDTO;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.service.UserService;
@@ -13,7 +14,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -22,6 +28,7 @@ public class AuthService {
     private final Environment environment;
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
+    private final UserDetailsServiceImpl userDetailsService;
 
     public User login(UserLoginDTO user,
                       HttpServletRequest request,
@@ -48,22 +55,23 @@ public class AuthService {
         }
     }
 
-    public User externalServiceLogin(
+    private void externalServiceLogin(
             HttpServletRequest request,
             HttpServletResponse response,
             UserDetails userDetails) {
         CookieUtils cookieUtil = new CookieUtils(environment);
         Cookie cookie = cookieUtil.generateCookieJWT(userDetails);
         response.addCookie(cookie);
-        return userService.findByEmail(userDetails.getUsername());
     }
 
-    public Cookie logout(HttpServletRequest request) {
+    public List<Cookie> logout(HttpServletRequest request) {
         try {
             CookieUtils cookieUtil = new CookieUtils(environment);
             Cookie cookie = cookieUtil.getCookie(request, "JWT");
+            Cookie cookie1 = cookieUtil.getCookie(request, "JSESSIONID");
+            cookie1.setMaxAge(0);
             cookie.setMaxAge(0);
-            return cookie;
+            return List.of(cookie1, cookie);
         } catch (Exception e) {
             throw new RuntimeException();
         }
@@ -75,6 +83,29 @@ public class AuthService {
                         .getContext().getAuthentication()
                         .getPrincipal();
         return userService.findByEmail(userDetails.getUsername());
+    }
+
+    public void initExternalServiceLogin(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Authentication authentication
+    ) throws IOException {
+
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        String email = oAuth2User.getAttribute("email");
+
+        try { // already registered
+            UserDetails user = userDetailsService.loadUserByUsername(email);
+            externalServiceLogin(request, response, user);
+            response.sendRedirect("http://localhost:4200");
+
+        } catch (UsernameNotFoundException e) { // first access
+            User user = new User(oAuth2User, email);
+            userService.save(new UserDTO(user));
+            externalServiceLogin(request, response, user);
+            response.sendRedirect("http://localhost:4200");
+
+        }
     }
 
 
