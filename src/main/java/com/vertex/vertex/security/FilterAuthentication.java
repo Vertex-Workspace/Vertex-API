@@ -23,7 +23,7 @@ import java.io.IOException;
 public class FilterAuthentication extends OncePerRequestFilter {
 
     private final Environment environment;
-    private final AuthenticationService authenticationService;
+    private final UserDetailsServiceImpl userDetailsServiceImpl;
     private final SecurityContextRepository securityContextRepository;
 
     @Override
@@ -43,7 +43,7 @@ public class FilterAuthentication extends OncePerRequestFilter {
             String token = cookie.getValue();
             //Validates the token and creation of authenticate user
             String email = jwtUtil.getUsername(token);
-            UserDetails userDetails = authenticationService.loadUserByUsername(email);
+            UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(email);
 
             Authentication authentication =
                     new UsernamePasswordAuthenticationToken(

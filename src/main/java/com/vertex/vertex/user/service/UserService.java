@@ -5,7 +5,7 @@ import com.vertex.vertex.notification.service.NotificationService;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
 import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.PropertyList;
-import com.vertex.vertex.security.AuthenticationService;
+import com.vertex.vertex.security.UserDetailsServiceImpl;
 import com.vertex.vertex.task.model.DTO.TaskSearchDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_hours.service.TaskHoursService;
@@ -21,8 +21,6 @@ import com.vertex.vertex.user.model.exception.*;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import com.vertex.vertex.user.relations.personalization.service.PersonalizationService;
 import com.vertex.vertex.user.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -53,7 +51,7 @@ public class UserService {
     private final TeamService teamService;
     private final RegexValidate regexValidate;
     private final TaskHoursService taskHoursService;
-    private final AuthenticationService authenticationService;
+    private final UserDetailsServiceImpl userDetailsServiceImpl;
     private final SecurityContextRepository securityContextRepository;
 
     public User save(User user) {
