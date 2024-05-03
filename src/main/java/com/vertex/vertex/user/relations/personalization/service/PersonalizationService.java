@@ -36,7 +36,6 @@ public class PersonalizationService {
         personalization.setListeningText(false);
         personalization.setUser(user);
         personalization.setLanguage("pt");
-
         return personalization;
     }
 
@@ -44,7 +43,6 @@ public class PersonalizationService {
         if (!personalizationRepository.existsById(id)) {
             throw new NoSuchElementException("Personalização escolhida não existe.");
         }
-        System.out.println(personalizationRepository.findById(id).get());
         return personalizationRepository.findById(id).get();
     }
 
@@ -57,8 +55,6 @@ public class PersonalizationService {
     }
 
     public Personalization findByUserId(Long id){
-        System.out.println(id);
-        System.out.println(personalizationRepository.findByUser_Id(id));
         return personalizationRepository.findByUser_Id(id);
     }
 

@@ -24,15 +24,15 @@ public class TeamProjectsDTO {
     private List<ProjectViewListDTO> projects;
     private List<Permission> permissions;
 
-    public TeamProjectsDTO(Team team){
+    public TeamProjectsDTO(Team team, UserTeam userTeam){
         this.id = team.getId();
         this.name = team.getName();
-        this.projects = team.getProjects().stream().map(ProjectViewListDTO::new).toList();
-        this.permissions =
-                team.getUserTeams().stream()
-                .filter(ut ->
-                        ut.getUser().getId().equals(
-                                ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId())
-                ).findAny().get().getPermissionUser();
+
+        this.projects = team.getProjects()
+                .stream()
+                .filter(project -> project.getCollaborators().contains(userTeam))
+                .map(ProjectViewListDTO::new).toList();
+
+        this.permissions = userTeam.getPermissionUser();
     }
 }

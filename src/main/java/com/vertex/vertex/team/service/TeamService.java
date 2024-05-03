@@ -101,7 +101,11 @@ public class TeamService {
     }
 
     public TeamProjectsDTO getTeamScreenInformation(Long id) {
-        return new TeamProjectsDTO(findTeamById(id));
+        return new TeamProjectsDTO(
+                findTeamById(id),
+                userTeamService.findUserTeamByComposeId(
+                        id,
+                        ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId()));
     }
 
     public TeamLinkDTO findInvitationCodeById(Long id) {
@@ -214,16 +218,16 @@ public class TeamService {
 
         ProjectCreateDTO projectDefault1 =
                 new ProjectCreateDTO("Projeto Pessoal", "Seu projeto pessoal padrão", team.getCreator(), List.of(user));
-
-        Project project = projectService.saveWithRelationOfProject(projectDefault1, team.getId());
-
-        TaskCreateDTO taskCreateDTO1 =
-                new TaskCreateDTO("Tarefa 1", "Sua tarefa é lavar a louça", team.getCreator().getUser(), project);
-        TaskCreateDTO taskCreateDTO2 =
-                new TaskCreateDTO("Tarefa 2", "Sua tarefa é lavar a louça", team.getCreator().getUser(), project);
-
-        taskService.save(taskCreateDTO1);
-        taskService.save(taskCreateDTO2);
+//
+//        Project project = projectService.saveWithRelationOfProject(projectDefault1, team.getId());
+//
+//        TaskCreateDTO taskCreateDTO1 =
+//                new TaskCreateDTO("Tarefa 1", "Sua tarefa é lavar a louça", team.getCreator().getUser(), project);
+//        TaskCreateDTO taskCreateDTO2 =
+//                new TaskCreateDTO("Tarefa 2", "Sua tarefa é lavar a louça", team.getCreator().getUser(), project);
+//
+//        taskService.save(taskCreateDTO1);
+//        taskService.save(taskCreateDTO2);
     }
 
     public List<ProjectViewListDTO> convertTeamProjectsToDto(Team team) {
