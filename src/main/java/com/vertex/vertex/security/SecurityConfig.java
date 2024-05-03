@@ -50,7 +50,7 @@ public class SecurityConfig{
                     try {
                         UserDetails user = authenticationService.loadUserByUsername(email);
                         authService.externalServiceLogin(request, response, user);
-                        response.sendRedirect("http://localhost:4200/home");
+                        response.sendRedirect("http://localhost:4200");
 
                     } catch (UsernameNotFoundException e) {
                         String lastName = oAuth2User.getAttribute("family_name");
@@ -66,7 +66,7 @@ public class SecurityConfig{
                         userService.save(new UserDTO(user));
 
                         authService.externalServiceLogin(request, response, user);
-                        response.sendRedirect("http://localhost:4200/home");
+                        response.sendRedirect("http://localhost:4200");
                     }
 
 
