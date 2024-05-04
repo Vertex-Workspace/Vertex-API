@@ -38,8 +38,6 @@ public class AuthenticationController {
             HttpServletResponse response
     ) {
         try {
-            System.out.println("-------------------");
-            System.out.println(user);
             return new ResponseEntity<>
                     (authService.login(user, request, response),
                             HttpStatus.OK);

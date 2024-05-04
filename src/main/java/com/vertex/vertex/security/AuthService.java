@@ -41,7 +41,8 @@ public class AuthService {
                     new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
 
             //Interface genérica para autenticação
-            Authentication authentication = authenticationManager.authenticate(authenticationToken);
+            Authentication authentication
+                    = authenticationManager.authenticate(authenticationToken);
 
             //Gera cookie com o token JWT e o adiciona na resposta da request
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -50,7 +51,6 @@ public class AuthService {
             return userService.findByEmail(userDetails.getUsername());
 
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -99,7 +99,7 @@ public class AuthService {
             externalServiceLogin(request, response, user);
 
         } catch (UsernameNotFoundException e) { // first access
-            User user = new User(email, oAuth2User.getAttribute("name"), oAuth2User.getAttribute("family_name"));
+            User user = new User(email, oAuth2User);
             userService.save(new UserDTO(user));
             externalServiceLogin(request, response, user);
 

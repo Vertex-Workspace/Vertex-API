@@ -32,7 +32,6 @@ public class ChatController {
     @PatchMapping("/chat/{idChat}")
     public ResponseEntity<Chat> patchChat(@PathVariable Long idChat, @RequestBody UserTeamAssociateDTO userTeam){
         try {
-            System.out.println(userTeam);
             chatService.patchUserTeams(idChat,userTeam);
             return new ResponseEntity<>( HttpStatus.CREATED);
         }catch (Exception e){

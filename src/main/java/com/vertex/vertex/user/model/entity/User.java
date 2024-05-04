@@ -77,8 +77,9 @@ public class User implements UserDetails {
     private Boolean anyUpdateOnTask;
     private Boolean sendToEmail;
 
-    public User(String email, String name, String lastName) {
-        String firstName = name;
+    public User(String email, OAuth2User user) {
+        String lastName = user.getAttribute("family_name");
+        String firstName = user.getAttribute("name");
         firstName = firstName.substring(0, firstName.indexOf(" "));
         this.email = email;
         setPassword(email);

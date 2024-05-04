@@ -72,13 +72,15 @@ public class UserService {
             } else {
                 throw new InvalidEmailException();
             }
-//        regexValidate.isPasswordSecure(user, userDTO);
+//            regexValidate.isPasswordSecure(user, userDTO);
 
             //Seta usuário como autenticado
             userSetDefaultInformations(user);
             user.setDefaultSettings(false);
-//            byte[] data = Base64.getDecoder().decode(userDTO.getImage());
-//            user.setImage(data);
+            if (userDTO.getImage() != null) {
+                byte[] data = Base64.getDecoder().decode(userDTO.getImage());
+                user.setImage(data);
+            }
 
             return save(user);
         } catch (Exception e) {

@@ -78,7 +78,6 @@ public class ForgotPasswordService {
             // Anexo da imagem da empresa em base64
             MimeBodyPart imagePart = new MimeBodyPart();
             String imageData = this.getImageData(); // ESSA LINHA ESTÁ DANDO ERRO / APÓS ESSA LINHA O CÓDIGO NÃO EXECUTA
-            System.out.println("AQUI");
             imagePart.setDataHandler(new DataHandler(new ByteArrayDataSource(imageData, "image/png")));
             imagePart.setHeader("Content-ID", "<logo>");
             imagePart.setDisposition(MimeBodyPart.INLINE);
@@ -89,7 +88,6 @@ public class ForgotPasswordService {
 
             // Envio do e-mail
             Transport.send(message);
-            System.out.println("Email enviado com sucesso...");
         } catch (MessagingException | IOException e) {
             e.printStackTrace();
         }
