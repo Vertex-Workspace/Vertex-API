@@ -5,7 +5,7 @@ import com.vertex.vertex.notification.service.NotificationService;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
 import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.PropertyList;
-import com.vertex.vertex.security.AuthenticationService;
+import com.vertex.vertex.security.UserDetailsServiceImpl;
 import com.vertex.vertex.task.model.DTO.TaskSearchDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_hours.service.TaskHoursService;
@@ -22,33 +22,21 @@ import com.vertex.vertex.user.relations.personalization.model.entity.LanguageDTO
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import com.vertex.vertex.user.relations.personalization.service.PersonalizationService;
 import com.vertex.vertex.user.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collection;
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 
 @Data
@@ -64,41 +52,46 @@ public class UserService {
     private final TeamService teamService;
     private final RegexValidate regexValidate;
     private final TaskHoursService taskHoursService;
-    private final AuthenticationService authenticationService;
+    private final UserDetailsServiceImpl userDetailsServiceImpl;
     private final SecurityContextRepository securityContextRepository;
+
     public User save(User user) {
         return userRepository.save(user);
     }
 
     public User save(UserDTO userDTO) {
-        User user = new User();
-        BeanUtils.copyProperties(userDTO, user);
+        try {
+            User user = new User(userDTO);
 
-        if (existsByEmail(user.getEmail())) {
-            throw new EmailAlreadyExistsException();
+            if (existsByEmail(user.getEmail())) {
+                throw new EmailAlreadyExistsException();
+            }
+
+            if (regexValidate.isEmailSecure(user.getEmail())) {
+                user.setEmail(user.getEmail());
+            } else {
+                throw new InvalidEmailException();
+            }
+//            regexValidate.isPasswordSecure(user, userDTO);
+
+            //Seta usuário como autenticado
+            userSetDefaultInformations(user);
+            user.setDefaultSettings(false);
+            if (userDTO.getImage() != null) {
+                byte[] data = Base64.getDecoder().decode(userDTO.getImage());
+                user.setImage(data);
+            }
+
+            return save(user);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
-        if (regexValidate.isEmailSecure(user.getEmail())) {
-            user.setEmail(user.getEmail());
-        } else {
-            throw new InvalidEmailException();
-        }
-        regexValidate.isPasswordSecure(user, userDTO);
-
-
-
-        //Seta usuário como autenticado
-        userSetDefaultInformations(user);
-        user.setDefaultSettings(false);
-        byte[] data = Base64.getDecoder().decode(userDTO.getImage());
-        user.setImage(data);
-
-        return save(user);
     }
 
     public void userSetDefaultInformations(User user) {
-        user.setLocation("Brasil");
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+        user.setLocation("Brasil");
         user.setPersonalization(personalizationService.defaultSave(user));
         user.setTaskReview(true);
         user.setNewMembersAndGroups(true);
@@ -213,11 +206,10 @@ public class UserService {
 
 
     public void deleteById(Long id) {
-        if (!getUserRepository().existsById(id)) {
+        if (!userRepository.existsById(id)) {
             throw new UserNotFoundException();
-        } else {
-            userRepository.deleteById(id);
         }
+        userRepository.deleteById(id);
     }
 
 
@@ -226,7 +218,8 @@ public class UserService {
             User user = findById(id);
             user.setImage(imageFile.getBytes());
             userRepository.save(user);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -239,7 +232,7 @@ public class UserService {
     }
 
 
-    public User changeLanguage(LanguageDTO languageDTO,Long userId){
+    public User changeLanguage(LanguageDTO languageDTO, Long userId){
         User user = findById(userId);
 
         Personalization personalization = personalizationService.findById(user.getPersonalization().getId());
@@ -251,7 +244,6 @@ public class UserService {
     }
 
     public User patchUserPassword(UserLoginDTO userLoginDTO) {
-
         User user = findByEmail(userLoginDTO.getEmail());
         user.setPassword(userLoginDTO.getPassword());
         return userRepository.save(user);

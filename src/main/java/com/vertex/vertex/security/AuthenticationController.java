@@ -16,6 +16,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,31 +28,23 @@ import java.util.List;
 @CrossOrigin
 public class AuthenticationController {
 
-    private final AuthenticationManager authenticationManager;
-    private final UserService userService;
-    private final Environment environment;
+    private final AuthService authService;
 
     //Manipular a requisição de forma única e personalizável
     @PostMapping("/login")
-    public ResponseEntity<?> authenticate(@RequestBody UserLoginDTO user,
-                                          HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> authenticate(
+            @RequestBody UserLoginDTO user,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
         try {
-            CookieUtils cookieUtil = new CookieUtils(environment);
-            //Principal - username
-            //Credential - password
-            Authentication authenticationToken =
-                    new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
-
-            //Interface genérica para autenticação
-            Authentication authentication = authenticationManager.authenticate(authenticationToken);
-
-            //Gera cookie com o token JWT e o adiciona na resposta da request
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            Cookie cookie = cookieUtil.generateCookieJWT(userDetails);
-            response.addCookie(cookie);
-            return new ResponseEntity<>(userService.findByEmail(userDetails.getUsername()), HttpStatus.OK);
+            return new ResponseEntity<>
+                    (authService.login(user, request, response),
+                            HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>("E-mail ou senha inválidos!", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>
+                    ("E-mail ou senha inválidos!",
+                            HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -58,11 +52,8 @@ public class AuthenticationController {
     @PostMapping("/logout")
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         try {
-            CookieUtils cookieUtil = new CookieUtils(environment);
-            for (String cookieName : List.of("JWT", "JSESSIONID")){
-                Cookie cookie = cookieUtil.getCookie(request, cookieName);
-                cookie.setMaxAge(0);
-                response.addCookie(cookie);
+            for (Cookie c : authService.logout(request)) {
+                response.addCookie(c);
             }
         } catch (Exception e) {
             response.setStatus(401);
@@ -72,8 +63,9 @@ public class AuthenticationController {
     @GetMapping("/authenticate-user")
     public ResponseEntity<?> getAuthenticationUser() {
         try {
-            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            return new ResponseEntity<>(userService.findByEmail(userDetails.getUsername()), HttpStatus.OK);
+            return new ResponseEntity<>
+                    (authService.getAuthenticatedUser(),
+                            HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }

@@ -42,12 +42,13 @@ public class ProjectService {
     private final NotificationService notificationService;
     private final ModelMapper mapper;
 
-    public Project saveWithRelationOfProject(ProjectCreateDTO projectCreateDTO, Long teamId) {
+    public ProjectViewListDTO saveWithRelationOfProject(ProjectCreateDTO projectCreateDTO, Long teamId) {
         Project project = new Project();
         mapper.map(projectCreateDTO, project);
 
         createUserTeamAndSetCreator(teamId, project);
-        setCollaboratorsAndVerifyCreator(projectCreateDTO.getUsers(), project);
+        Project savedProject = save(project);
+        setCollaboratorsAndVerifyCreator(projectCreateDTO.getUsers(), savedProject);
         project.setProjectReviewENUM(projectCreateDTO.getProjectReviewENUM());
         if(projectCreateDTO.getProjectReviewENUM() == null){
             project.setProjectReviewENUM(ProjectReviewENUM.OPTIONAL);
@@ -55,7 +56,7 @@ public class ProjectService {
         defaultPropertyList(project);
 
         project.setProjectDependency(projectCreateDTO.getProjectDependency());
-        return save(project);
+        return new ProjectViewListDTO(save(project));
 
     }
 
@@ -65,7 +66,9 @@ public class ProjectService {
                         teamId, project.getCreator().getUser().getId());
         project.setTeam(userTeam.getTeam());
         project.setCreator(userTeam);
-        project.setCollaborators(List.of(userTeam));
+        List<UserTeam> userTeams = new ArrayList<>();
+        userTeams.add(userTeam);
+        project.setCollaborators(userTeams);
     }
 
     public void setCollaboratorsAndVerifyCreator(List<User> users, Project project) {
@@ -98,9 +101,9 @@ public class ProjectService {
 
     public Project updateImage(MultipartFile file, Long projectId) throws IOException {
         Project project = findById(projectId);
-        ValidationUtils.loggedUserIsOnProject(project);
+        ValidationUtils.loggedUserIsOnProjectAndIsCreator(project);
         project.setFile(fileService.save(file));
-        return projectRepository.save(project);
+        return save(project);
     }
 
     public Boolean existsByIdAndUserBelongs(Long projectId) {

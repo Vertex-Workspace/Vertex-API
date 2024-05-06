@@ -37,8 +37,6 @@ public class TeamViewListDTO {
         this.description = description;
         this.creationDate = creationDate;
         this.defaultTeam = defaultTeam;
-        this.isCreator = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-                .getId()
-                .equals(creator.getId());
+        this.isCreator = true;
     }
 }

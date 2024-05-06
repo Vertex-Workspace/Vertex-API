@@ -69,7 +69,6 @@ public class NotificationService {
     }
 
     public void groupAndTeam(String title, UserTeam userTeam) {
-        System.out.println(userTeam);
         Notification notification = new Notification(
                 userTeam.getTeam(),
                 title,
