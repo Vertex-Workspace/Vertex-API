@@ -53,6 +53,7 @@ public class UserTeamService {
         throw new RuntimeException("User Team Not Found!");
     }
 
+
     public List<TeamViewListDTO> findTeamsByUser(Long userID) {
         ValidationUtils.validateUserLogged(userRepository.findById(userID).get().getEmail());
 

@@ -101,8 +101,7 @@ public class Task implements FileSupporter {
         if(this.getReviews() != null){
             return this.getReviews()
                     .stream()
-                    .map(review -> review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS))
-                    .isParallel();
+                    .anyMatch(review -> review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS));
         }
         return false;
     }

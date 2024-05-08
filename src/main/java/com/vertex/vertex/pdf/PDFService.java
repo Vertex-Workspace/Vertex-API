@@ -7,6 +7,7 @@ import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
+import com.itextpdf.kernel.pdf.colorspace.PdfColorSpace;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.borders.SolidBorder;
 import com.itextpdf.layout.element.*;
@@ -19,6 +20,7 @@ import com.vertex.vertex.task.service.TaskService;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.css.RGBColor;
 
 import javax.swing.border.Border;
 import java.util.List;
@@ -46,7 +48,7 @@ public class PDFService {
             document.add(
                     new Paragraph(
                             task.getProject().getTeam().getName() + " | " + task.getProject().getName())
-                            .setFontSize(24F));
+                            .setFontSize(24F).setFontColor(new DeviceRgb(9,44, 76)));
 
             document.add(new Paragraph(task.getName()).setFontSize(16F));
 
@@ -59,32 +61,29 @@ public class PDFService {
                     .setBold());
 
             if (!task.getReviews().isEmpty()) {
-                for (int i = 0; i < 3; i++) {
-
-                    for (Review review : task.getReviews()) {
-                        Paragraph p = new Paragraph().setPaddingLeft(40F);
-                        Div div1 = new Div().setWidth(200f);
-                        div1.add(new Paragraph("Enviado por: ").setBold());
-                        div1.add(new Paragraph(review.getUserThatSentReview().getUserTeam().getUser().getFullName()).setFontSize(14));
-                        div1.add(new Paragraph("Descrição de envio: ").setBold());
-                        div1.add(new Paragraph(review.getDescription()).setFontSize(12));
-                        p.add(div1);
-                        p.addTabStops(new TabStop(150f));
-                        p.add(new Tab());
-                        Div div2 = new Div().setWidth(200f);
-                        if (review.getReviewer() != null) {
-                            div2.add(new Paragraph("Revisado por: ").setBold());
-                            div2.add(new Paragraph(review.getReviewer().getUserTeam().getUser().getFullName()).setFontSize(14));
-                            div2.add(new Paragraph("Descrição de devolutiva: ").setBold());
-                            div2.add(new Paragraph(review.getFinalDescription()).setFontSize(12));
-                            p.add(div2);
-                            p.add(new Paragraph("Status: " + review.getApproveStatus().getName() + "   ")
-                                    .add(new Paragraph("   |   "))
-                                    .add(new Paragraph("Nota: " + review.getGrade())));
-                        }
-                        p.setBorderBottom(new SolidBorder(DeviceRgb.BLACK, 4F));
-                        document.add(p);
+                for (Review review : task.getReviews()) {
+                    Paragraph p = new Paragraph().setPaddingLeft(40F);
+                    Div div1 = new Div().setWidth(200f);
+                    div1.add(new Paragraph("Enviado por: ").setBold());
+                    div1.add(new Paragraph(review.getUserThatSentReview().getUserTeam().getUser().getFullName()).setFontSize(14));
+                    div1.add(new Paragraph("Descrição de envio: ").setBold());
+                    div1.add(new Paragraph(review.getDescription()).setFontSize(12));
+                    p.add(div1);
+                    p.addTabStops(new TabStop(150f));
+                    p.add(new Tab());
+                    Div div2 = new Div().setWidth(200f);
+                    if (review.getReviewer() != null) {
+                        div2.add(new Paragraph("Revisado por: ").setBold());
+                        div2.add(new Paragraph(review.getReviewer().getUserTeam().getUser().getFullName()).setFontSize(14));
+                        div2.add(new Paragraph("Descrição de devolutiva: ").setBold());
+                        div2.add(new Paragraph(review.getFinalDescription()).setFontSize(12));
+                        p.add(div2);
+                        p.add(new Paragraph("Status: " + review.getApproveStatus().getName() + "   ")
+                                .add(new Paragraph("   |   "))
+                                .add(new Paragraph("Nota: " + review.getGrade())));
                     }
+                    p.setBorderBottom(new SolidBorder(DeviceRgb.BLACK, 2F));
+                    document.add(p);
                 }
             } else {
                 document.add(
@@ -109,11 +108,11 @@ public class PDFService {
 
         List<ReviewHoursDTO> hours = reviewService.getPerformanceInTask(taskId);
         // Add rows to the table (you can add as many rows as needed)
-        table.addHeaderCell(new Cell().add(new Paragraph("Responsável")));
-        table.addHeaderCell(new Cell().add(new Paragraph("Tempo Trabalhado")));
+        table.addHeaderCell(new Cell().add(new Paragraph("Responsável")).setHorizontalAlignment(HorizontalAlignment.CENTER));
+        table.addHeaderCell(new Cell().add(new Paragraph("Tempo Trabalhado")).setHorizontalAlignment(HorizontalAlignment.CENTER));
         for (ReviewHoursDTO hourFor : hours) {
-            table.addCell(new Cell().add(new Paragraph(hourFor.getUsername())));
-            table.addCell(new Cell().add(new Paragraph(String.valueOf(hourFor.getTime()))));
+            table.addCell(new Cell().add(new Paragraph(hourFor.getUsername())).setHorizontalAlignment(HorizontalAlignment.CENTER));
+            table.addCell(new Cell().add(new Paragraph(String.valueOf(hourFor.getTime()))).setHorizontalAlignment(HorizontalAlignment.CENTER));
         }
 
         return table;

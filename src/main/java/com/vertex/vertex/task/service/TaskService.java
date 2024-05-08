@@ -431,9 +431,12 @@ public class TaskService {
         boolean canDeleteGroup = false;
 
         if (task.getTaskResponsables().isEmpty()) {
-            UserTeam userTeam = userTeamService.findUserTeamByComposeId(updateTaskResponsableDTO.getTeamId(), updateTaskResponsableDTO.getUser().getId());
-            TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
-            taskResponsablesRepository.save(taskResponsable1);
+            Optional<UserTeam> userTeam = task.getProject()
+                    .getCollaborators()
+                    .stream()
+                    .filter(ut -> ut.getUser().getId().equals(updateTaskResponsableDTO.getUser().getId()))
+                    .findAny();
+            userTeam.ifPresent(team -> taskResponsablesRepository.save(new TaskResponsable(team, task)));
         }
 
         for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
@@ -458,8 +461,12 @@ public class TaskService {
             if (updateTaskResponsableDTO.getGroup() != null) {
                 task.getGroups().add(updateTaskResponsableDTO.getGroup());
             } else {
-                UserTeam userTeam = userTeamService.findUserTeamByComposeId(updateTaskResponsableDTO.getTeamId(), updateTaskResponsableDTO.getUser().getId());
-                taskResponsablesRepository.save(new TaskResponsable(userTeam, task));
+                Optional<UserTeam> userTeam = task.getProject()
+                        .getCollaborators()
+                        .stream()
+                        .filter(ut -> ut.getUser().getId().equals(updateTaskResponsableDTO.getUser().getId()))
+                        .findAny();
+                userTeam.ifPresent(team -> taskResponsablesRepository.save(new TaskResponsable(team, task)));
             }
         }
 
