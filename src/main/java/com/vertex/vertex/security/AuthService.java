@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -100,7 +101,9 @@ public class AuthService {
 
         } catch (UsernameNotFoundException e) { // first access
             User user = new User(email, oAuth2User);
-            userService.save(new UserDTO(user));
+            System.out.println(Optional.ofNullable(oAuth2User.getAttribute("picture")));
+            userService.save(new UserDTO(user, oAuth2User.getAttribute("picture")));
+//            userService.save(new UserDTO(user));
             externalServiceLogin(request, response, user);
 
         }

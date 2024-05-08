@@ -77,9 +77,13 @@ public class UserService {
             //Seta usuário como autenticado
             userSetDefaultInformations(user);
             user.setDefaultSettings(false);
-            if (userDTO.getImage() != null) {
+
+            try {
                 byte[] data = Base64.getDecoder().decode(userDTO.getImage());
-                user.setImage(data);
+                user.setImage(data); // default user
+            } catch (Exception ignored) {
+                userDTO.setImage(userDTO.getImage().replace("s96", "s800")); //upscale image
+                user.setImgUrl(userDTO.getImage()); // external
             }
 
             return save(user);

@@ -21,10 +21,11 @@ public class UserDTO {
     private boolean firstAccess;
     private String image;
 
-    public UserDTO(User user) {
+    public UserDTO(User user, String imageUrl) {
         BeanUtils.copyProperties(user, this);
         this.passwordConf = user.getPassword();
         this.firstAccess = true;
+        this.image = imageUrl;
     }
 
 }

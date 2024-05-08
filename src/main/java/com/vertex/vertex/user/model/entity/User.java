@@ -55,7 +55,8 @@ public class User implements UserDetails {
     @Column(name = "image",
             columnDefinition = "LONGBLOB")
     @ToString.Exclude
-    private byte[] image;
+    private byte[] image; //default
+    private String imgUrl; //external
 
     private Boolean publicProfile;
 

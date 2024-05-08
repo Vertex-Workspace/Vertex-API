@@ -1,5 +1,6 @@
 package com.vertex.vertex.security;
 
+import com.pkslow.ai.GoogleBardClient;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.modelmapper.ModelMapper;
@@ -49,7 +50,6 @@ public class BeansConfig {
         mapper.getConfiguration().setAmbiguityIgnored(true);
         return mapper;
     }
-
 
     public static CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration cors = new CorsConfiguration();
