@@ -39,4 +39,12 @@ public class TeamViewListDTO {
         this.defaultTeam = defaultTeam;
         this.isCreator = true;
     }
+
+    public TeamViewListDTO(String name, User creator, String description, boolean defaultTeam) {
+        this.name = name;
+        this.creator = creator;
+        this.description = description;
+        this.defaultTeam = defaultTeam;
+        this.isCreator = true;
+    }
 }
