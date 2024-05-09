@@ -3,6 +3,7 @@ package com.vertex.vertex.task.service;
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.notification.entity.model.Notification;
+import com.vertex.vertex.notification.repository.LogRepository;
 import com.vertex.vertex.notification.service.NotificationService;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
@@ -144,7 +145,7 @@ public class TaskService {
 
     public void deleteById(Long id) {
         Task task = findById(id);
-        validateUserLoggedIntoTask(task);
+        ValidationUtils.loggedUserIsOnTaskAndIsCreator(task);
         taskRepository.deleteById(id);
     }
 
