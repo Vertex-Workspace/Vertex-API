@@ -80,7 +80,7 @@ public class Task implements FileSupporter {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<LogRecord> log;
 
