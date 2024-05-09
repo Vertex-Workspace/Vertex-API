@@ -29,6 +29,7 @@ import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.permission.model.entity.Permission;
 import com.vertex.vertex.team.relations.permission.model.enums.TypePermissions;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
+import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.exception.UserNotFoundException;
@@ -61,6 +62,7 @@ public class TaskService {
     private final FileService fileService;
     private final ValueService valueService;
     private final NotificationService notificationService;
+    private final UserTeamRepository userTeamRepository;
 
 
     public Task save(TaskCreateDTO taskCreateDTO) {
@@ -75,6 +77,32 @@ public class TaskService {
         if(!Permission.hasPermission(creator.getPermissionUser(), TypePermissions.Criar)){
             throw new RuntimeException("Você não tem permissão!");
         }
+        Task task = new Task(taskCreateDTO, project, creator);
+        setResponsablesInTask(project, task);
+
+        //When the task is created, every property is associated with a null value, unless it has a default value
+        valueService.setTaskDefaultValues(task, project.getProperties());
+
+        //Notifications
+        for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
+            if (taskResponsable.getUserTeam().getUser().getResponsibleInProjectOrTask() && !taskResponsable.getUserTeam().equals(task.getCreator())) {
+                notificationService.save(new Notification(
+                        project,
+                        "Você foi adicionado como responsável da tarefa " + task.getName(),
+                        "projeto/" + project.getId() + "/tarefas?taskID=" + task.getId(),
+                        taskResponsable.getUserTeam().getUser()
+                ));
+            }
+        }
+
+        return save(task);
+    }
+
+    public Task savePostConstruct(TaskCreateDTO taskCreateDTO) {
+        Project project = projectService.findById(taskCreateDTO.getProject().getId());
+
+
+        UserTeam creator = userTeamRepository.findByTeam_IdAndUser_Id(project.getTeam().getId(), taskCreateDTO.getCreator().getId()).get();
         Task task = new Task(taskCreateDTO, project, creator);
         setResponsablesInTask(project, task);
 

@@ -36,7 +36,7 @@ public class Property {
     @ToString.Exclude
     private Project project;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "property", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "property", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<PropertyList> propertyLists;
 
     @Enumerated(value = EnumType.STRING)

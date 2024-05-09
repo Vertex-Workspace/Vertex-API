@@ -74,7 +74,7 @@ public class Task implements FileSupporter {
     @OneToMany(mappedBy = "task", orphanRemoval = true)
     private List<Review> reviews;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "task", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "task", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Value> values;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -108,22 +108,25 @@ public class Task implements FileSupporter {
     }
 
     public Task(TaskCreateDTO dto, Project project, UserTeam creator) {
-        BeanUtils.copyProperties(dto, this);
+        try {
+            BeanUtils.copyProperties(dto, this);
 
-        //Set if the task is revisable or no...
-        this.setRevisable(project.getProjectReviewENUM()
-                .equals(ProjectReviewENUM.MANDATORY));
+            //Set if the task is revisable or no...
+            this.setRevisable(project.getProjectReviewENUM()
+                    .equals(ProjectReviewENUM.MANDATORY));
 
-        this.creator = creator;
-        this.files = new ArrayList<>();
-        this.log = (List.of
-                (new LogRecord(this,
-                        "A tarefa foi criada")));
+            this.creator = creator;
+            this.files = new ArrayList<>();
+            this.log = (List.of
+                    (new LogRecord(this,
+                            "A tarefa foi criada")));
 
-        this.project = project;
-        if (Objects.isNull(project.getTasks())) project.setTasks(List.of(this));
-        else project.getTasks().add(this);
-
+            this.project = project;
+            if (Objects.isNull(project.getTasks())) project.setTasks(List.of(this));
+            else project.getTasks().add(this);
+        }catch(Exception e){
+            e.getMessage();
+        }
     }
 
 }

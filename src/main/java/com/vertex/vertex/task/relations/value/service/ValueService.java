@@ -38,27 +38,31 @@ public class ValueService {
     }
 
     public void setTaskDefaultValues(Task task, List<Property> properties) {
-        List<Value> values = new ArrayList<>();
+        try {
+            List<Value> values = new ArrayList<>();
 
-        for (Property property : properties) {
-            Value currentValue = property.getKind().getValue();
-            currentValue.setProperty(property);
-            currentValue.setTask(task);
-            values.add(currentValue);
+            for (Property property : properties) {
+                Value currentValue = property.getKind().getValue();
+                currentValue.setProperty(property);
+                currentValue.setTask(task);
+                values.add(currentValue);
 
-            if (property.getKind() == PropertyKind.STATUS) {
-                //Get the first element, how the three are fixed, it always will be TO DO "Não Iniciado"
-                currentValue.setValue(property.getPropertyLists().get(0));
+                if (property.getKind() == PropertyKind.STATUS) {
+                    //Get the first element, how the three are fixed, it always will be TO DO "Não Iniciado"
+                    currentValue.setValue(property.getPropertyLists().get(0));
+                }
+                if (property.getKind() == PropertyKind.DATE) {
+                    ((ValueDate) currentValue).setValue();
+                }
+                if (property.getKind() == PropertyKind.TEXT) {
+                    currentValue.setValue(property.getDefaultValue());
+                }
             }
-            if (property.getKind() == PropertyKind.DATE) {
-                ((ValueDate) currentValue).setValue();
-            }
-            if (property.getKind() == PropertyKind.TEXT) {
-                currentValue.setValue(property.getDefaultValue());
-            }
+
+            task.setValues(values);
+        }catch(Exception e){
+            e.printStackTrace();
         }
-
-        task.setValues(values);
     }
 
     public Task updateTaskValues(Task task, EditValueDTO editValueDTO,
