@@ -42,12 +42,9 @@ public class UserTeamService {
     }
 
     public UserTeam findUserTeamByComposeId(Long teamId, Long userID) {
-        User user = userRepository.findById(userID).get();
-        if(!user.isDefaultSettings()){
-            ValidationUtils.validateUserLogged(user.getEmail());
-        }
         Optional<UserTeam> userTeam = userTeamRepository.findByTeam_IdAndUser_Id(teamId, userID);
         if (userTeam.isPresent()) {
+            ValidationUtils.validateUserLogged(userTeam.get().getUser().getEmail());
             return userTeam.get();
         }
         throw new RuntimeException("User Team Not Found!");
@@ -122,8 +119,8 @@ public class UserTeamService {
 
 
 
-    public List<Permission> getAllPermissionOfAUserTeam(Long userId, Long teamId) {
-        return findUserTeamByComposeId(teamId, userId).getPermissionUser();
+    public List<Permission> getAllPermissionOfAUserTeam(Long teamId, Long userId) {
+        return userTeamRepository.findByTeam_IdAndUser_Id(teamId, userId).get().getPermissionUser();
     }
 
     public Team saveNewUserTeam(UserTeamAssociateDTO userTeam) {
