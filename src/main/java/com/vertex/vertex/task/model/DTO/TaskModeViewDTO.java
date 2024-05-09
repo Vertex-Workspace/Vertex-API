@@ -1,5 +1,6 @@
 package com.vertex.vertex.task.model.DTO;
 
+import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
@@ -16,9 +17,12 @@ public class TaskModeViewDTO {
     private String name;
     private List<Value> values;
 
+    private byte[] image;
+
     public TaskModeViewDTO(Task task){
         this.id = task.getId();
         this.name = task.getName();
         this.values = task.getValues();
+        this.image = task.getCreator().getUser().getImage();
     }
 }

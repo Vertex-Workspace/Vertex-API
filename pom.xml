@@ -42,6 +42,11 @@
             <version>2.10.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itext7-core</artifactId>
+            <version>7.2.1</version>
+        </dependency>
 
         <!-- https://mvnrepository.com/artifact/javax.mail/javax.mail-api -->
         <dependency>

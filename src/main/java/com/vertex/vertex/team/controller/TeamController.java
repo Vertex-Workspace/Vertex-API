@@ -9,6 +9,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -44,6 +45,8 @@ public class TeamController {
     public ResponseEntity<TeamInfoDTO> findById(@PathVariable Long id) {
         try {
             return new ResponseEntity<>(teamService.findById(id), HttpStatus.OK);
+        } catch (AuthenticationCredentialsNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -53,6 +56,8 @@ public class TeamController {
     public ResponseEntity<TeamProjectsDTO> teamScreenInformations(@PathVariable Long id) {
         try {
             return new ResponseEntity<>(teamService.getTeamScreenInformation(id), HttpStatus.OK);
+        } catch (AuthenticationCredentialsNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -63,6 +68,8 @@ public class TeamController {
     public ResponseEntity<?> getTeamName(@PathVariable Long id) {
         try {
             return new ResponseEntity<>(teamService.getTeamName(id), HttpStatus.OK);
+        } catch (AuthenticationCredentialsNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
@@ -77,6 +84,7 @@ public class TeamController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
+
     @GetMapping("/invitation-page-info/{id}")
     public ResponseEntity<TeamSearchDTO> findTeamInvitationPage(@PathVariable Long id) {
         try {

@@ -80,7 +80,7 @@ public class Task implements FileSupporter {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<LogRecord> log;
 
@@ -101,8 +101,7 @@ public class Task implements FileSupporter {
         if(this.getReviews() != null){
             return this.getReviews()
                     .stream()
-                    .map(review -> review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS))
-                    .isParallel();
+                    .anyMatch(review -> review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS));
         }
         return false;
     }

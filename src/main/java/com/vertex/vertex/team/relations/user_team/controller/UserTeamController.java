@@ -27,10 +27,10 @@ public class UserTeamController {
 
 
     @GetMapping("/team/permission/{userId}/{teamId}")
-    public ResponseEntity<?> getAllPermissions(@PathVariable Long userId, @PathVariable Long teamId) {
+    public ResponseEntity<?> getAllPermissions(@PathVariable Long teamId, @PathVariable Long userId) {
         try {
-            return new ResponseEntity<>(userTeamService.getAllPermissionOfAUserTeam(userId, teamId), HttpStatus.OK);
-        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(userTeamService.getAllPermissionOfAUserTeam(teamId, userId), HttpStatus.OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }

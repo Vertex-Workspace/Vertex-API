@@ -252,16 +252,16 @@ public class DataConfig {
     }
 
     public void createTasks() {
-        TaskCreateDTO taskCreateDTO = new TaskCreateDTO("Regras de Negócio", "Escreva todas as regras de negócio aqui",
-                userRepository.findById(3L).get(), projectRepository.findById(1L).get());
-        TaskCreateDTO taskCreateDTO2 = new TaskCreateDTO("Criar Models", "Separar em entities e dtos",
-                userRepository.findById(1L).get(), projectRepository.findById(1L).get());
-        TaskCreateDTO taskCreateDTO3 = new TaskCreateDTO("Fazer requisições", "criar services e fazer as requisições",
-                userRepository.findById(1L).get(), projectRepository.findById(1L).get());
-
-        taskService.savePostConstruct(taskCreateDTO);
-        taskService.savePostConstruct(taskCreateDTO2);
-        taskService.savePostConstruct(taskCreateDTO3);
+//        TaskCreateDTO taskCreateDTO = new TaskCreateDTO("Regras de Negócio", "Escreva todas as regras de negócio aqui",
+//                userRepository.findById(3L).get(), projectRepository.findById(1L).get());
+//        TaskCreateDTO taskCreateDTO2 = new TaskCreateDTO("Criar Models", "Separar em entities e dtos",
+//                userRepository.findById(1L).get(), projectRepository.findById(1L).get());
+//        TaskCreateDTO taskCreateDTO3 = new TaskCreateDTO("Fazer requisições", "criar services e fazer as requisições",
+//                userRepository.findById(1L).get(), projectRepository.findById(1L).get());
+//
+//        taskService.savePostConstruct(taskCreateDTO);
+//        taskService.savePostConstruct(taskCreateDTO2);
+//        taskService.savePostConstruct(taskCreateDTO3);
 //
 
 

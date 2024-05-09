@@ -19,10 +19,12 @@ public class ChatListDTO {
     private String name;
 
     private boolean conversationOpened;
+    private byte[] image;
 
     public ChatListDTO(Chat chat) {
         this.id = chat.getId();
         this.name = chat.getName();
         this.conversationOpened = chat.isConversationOpened();
+        this.image = chat.getUserTeams().get(0).getTeam().getImage();
     }
 }

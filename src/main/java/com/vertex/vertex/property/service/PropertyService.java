@@ -57,9 +57,7 @@ public class PropertyService {
         finalProperty.setIsObligate(false);
         Property newProperty = propertyRepository.save(finalProperty);
 
-        finalProperty.getPropertyLists().forEach(propertyList -> propertyList.setProperty(newProperty));
-
-        finalProperty.setId(newProperty.getId());
+        newProperty.getPropertyLists().forEach(propertyList -> propertyList.setProperty(newProperty));
 
         for (Task task : project.getTasks()) {
             Value newValue = property.getKind().getValue();

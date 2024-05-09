@@ -48,7 +48,7 @@ public class SecurityConfig{
 
         http.sessionManagement(config -> {
             config.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-            config.maximumSessions(1);
+//            config.maximumSessions(1);
         });
 
         http.addFilterBefore(filterAuthentication, UsernamePasswordAuthenticationFilter.class);
