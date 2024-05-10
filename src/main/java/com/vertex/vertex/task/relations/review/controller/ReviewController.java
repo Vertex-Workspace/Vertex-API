@@ -21,7 +21,7 @@ public class ReviewController {
             reviewService.sendToReview(sendToReviewDTO);
             return new ResponseEntity<>(HttpStatus.OK);
         }catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -31,7 +31,7 @@ public class ReviewController {
             reviewService.finalReview(reviewCheck);
             return new ResponseEntity<>(HttpStatus.OK);
         }catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -41,7 +41,7 @@ public class ReviewController {
         try{
             return new ResponseEntity<>(reviewService.getTasksToReview(userID, projectID), HttpStatus.OK);
         }catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 

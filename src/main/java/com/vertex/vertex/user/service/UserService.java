@@ -100,6 +100,7 @@ public class UserService {
         user.setAnyUpdateOnTask(true);
         user.setResponsibleInProjectOrTask(true);
         user.setDefaultSettings(true);
+        user.setPublicProfile(true);
         defaultTeams(save(user));
     }
 

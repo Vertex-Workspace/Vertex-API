@@ -59,7 +59,6 @@ public class User implements UserDetails {
 
     private Boolean publicProfile;
 
-    private Boolean showCharts;
 
     @OneToMany(mappedBy ="user")
     @JsonIgnore

@@ -56,8 +56,6 @@ public class TaskController {
         try{
             taskService.deleteById(id);
             return new ResponseEntity<>(true, HttpStatus.OK);
-        } catch (AuthenticationCredentialsNotFoundException e){
-            return new ResponseEntity<>(false, HttpStatus.CONFLICT);
         } catch (Exception e){
             return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
         }
