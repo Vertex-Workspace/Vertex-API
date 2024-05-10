@@ -38,7 +38,7 @@ public class Project {
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Property> properties;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     private UserTeam creator;
 
     @OneToMany(mappedBy = "project", orphanRemoval = true)

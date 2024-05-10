@@ -1,6 +1,14 @@
 package com.vertex.vertex.config;
 
+import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
+import com.vertex.vertex.project.service.ProjectService;
+import com.vertex.vertex.property.model.ENUM.Color;
+import com.vertex.vertex.property.model.ENUM.PropertyKind;
+import com.vertex.vertex.property.model.ENUM.PropertyListKind;
+import com.vertex.vertex.property.model.ENUM.PropertyStatus;
+import com.vertex.vertex.property.model.entity.Property;
+import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
@@ -25,6 +33,8 @@ import org.hibernate.Hibernate;
 import org.springframework.context.annotation.Configuration;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Configuration
 @AllArgsConstructor
@@ -32,13 +42,11 @@ public class DataConfig {
 
     private UserService userService;
     private TeamService teamService;
-    private TaskRepository taskRepository;
-    private UserRepository userRepository;
-    private ProjectRepository projectRepository;
-    private UserTeamRepository userTeamRepository;
-    private ValueService valueService;
-    private TaskService taskService;
+    private ProjectService projectService;
     private TaskResponsablesRepository taskResponsablesRepository;
+    private UserRepository userRepository;
+    private TaskService taskService;
+    private ProjectRepository projectRepository;
     private static final String BANCO_URL = "jdbc:mysql://localhost:3306/vertex";
     private static final String USERNAME = "root";
     private static final String PASSSWORD = "root";
@@ -49,24 +57,24 @@ public class DataConfig {
     public void init() {
 
         //default Users
-            userService.save(new UserDTO
-                    ("ana@gmail.com", "We3sl@ey", "Ana", "Borchardt"));
-            userService.save(new UserDTO
-                    ("kaique@gmail.com", "We3sl@ey", "Kaique", "Fernandes"));
-            User user3 = userService.save(new UserDTO
-                    ("otavio@gmail.com", "We3sl@ey", "Otavio", "Miguel Rocha"));
-            userService.save(new UserDTO
-                    ("miguel@gmail.com", "We3sl@ey", "Miguel", "Bertoldi"));
+        userService.save(new UserDTO
+                ("ana@gmail.com", "We3sl@ey", "Ana", "Borchardt"));
+        userService.save(new UserDTO
+                ("kaique@gmail.com", "We3sl@ey", "Kaique", "Fernandes"));
+        User user3 = userService.save(new UserDTO
+                ("otavio@gmail.com", "We3sl@ey", "Otavio", "Miguel Rocha"));
+        userService.save(new UserDTO
+                ("miguel@gmail.com", "We3sl@ey", "Miguel", "Bertoldi"));
 //
-            teamService.save(new TeamViewListDTO
-                    ("Vertex", user3, "A Equipe vertex tem como propósito organizar as tarefas e funcionalidades ...", false));
+        teamService.save(new TeamViewListDTO
+                ("Vertex", user3, "A Equipe vertex tem como propósito organizar as tarefas e funcionalidades ...", false));
 
-            sendInformation();
-            associateUserTeamsWithChat();
-            createPermissions();
-            createProjectAndCollaborators();
-            createProperties();
-            createTasks();
+        sendInformation();
+        associateUserTeamsWithChat();
+        createPermissions();
+        createProjectAndCollaborators();
+        createProperties();
+        createTasks();
     }
 
     public void sendInformation() {
@@ -160,17 +168,17 @@ public class DataConfig {
                 preparedStatement.executeUpdate();
 
                 // Projeto 2
-                preparedStatement.setString(1, "Descrição do Projeto 2");
-                preparedStatement.setString(2, "Projeto 2");
-                preparedStatement.setString(3, "OPTIONAL");
+                preparedStatement.setString(1, "Desenvolvimento backend");
+                preparedStatement.setString(2, "Desenvolvimento backend");
+                preparedStatement.setString(3, "MANDATORY");
                 preparedStatement.setLong(4, 5);
                 preparedStatement.setLong(5, 5);
                 preparedStatement.executeUpdate();
 
                 // Projeto 3
-                preparedStatement.setString(1, "Descrição do Projeto 3");
-                preparedStatement.setString(2, "Projeto 3");
-                preparedStatement.setString(3, "EMPTY");
+                preparedStatement.setString(1, "Desenvolvimento frontend");
+                preparedStatement.setString(2, "Desenvolvimento frontend");
+                preparedStatement.setString(3, "MANDATORY");
                 preparedStatement.setLong(4, 5);
                 preparedStatement.setLong(5, 5);
                 preparedStatement.executeUpdate();
@@ -191,81 +199,63 @@ public class DataConfig {
         }
     }
 
-    public static void createProperties() {
-        try {
-            // Create a connection
-            Connection connection = DriverManager.getConnection(BANCO_URL, USERNAME, PASSSWORD);
-
-            // Insert statements
-            String insertPropertyQuery = "INSERT INTO property (is_obligate, kind, name, property_status, project_id) " +
-                    "VALUES (?, ?, ?, ?, ?)";
-            String insertPropertyListQuery = "INSERT INTO property_list (color, is_fixed, property_list_kind, value, property_id) " +
-                    "VALUES (?, ?, ?, ?, ?)";
-
-            // Prepare statements
-            PreparedStatement insertPropertyStatement = connection.prepareStatement(insertPropertyQuery);
-            PreparedStatement insertPropertyListStatement = connection.prepareStatement(insertPropertyListQuery);
-
-            // Execute insertions
-            // Insert into property table
-            for (int i = 1; i <= 3; i++) {
-                insertPropertyStatement.setInt(1, 1);
-                insertPropertyStatement.setString(2, "STATUS");
-                insertPropertyStatement.setString(3, "Status");
-                insertPropertyStatement.setString(4, "FIXED");
-                insertPropertyStatement.setInt(5, i);
-                insertPropertyStatement.executeUpdate();
-
-                // Insert into property_list table
-                insertPropertyListStatement.setString(1, "#ffe2dd");
-                insertPropertyListStatement.setInt(2, 1);
-                insertPropertyListStatement.setString(3, "DONE");
-                insertPropertyListStatement.setString(4, "Concluído");
-                insertPropertyListStatement.setInt(5, i);
-                insertPropertyListStatement.executeUpdate();
-
-                insertPropertyListStatement.setString(1, "#fdecc8");
-                insertPropertyListStatement.setInt(2, 1);
-                insertPropertyListStatement.setString(3, "DOING");
-                insertPropertyListStatement.setString(4, "Em Andamento");
-                insertPropertyListStatement.setInt(5, i);
-                insertPropertyListStatement.executeUpdate();
-
-                insertPropertyListStatement.setString(1, "#d3e5ef");
-                insertPropertyListStatement.setInt(2, 0);
-                insertPropertyListStatement.setString(3, "DOING");
-                insertPropertyListStatement.setString(4, "Pausado");
-                insertPropertyListStatement.setInt(5, i);
-                insertPropertyListStatement.executeUpdate();
-
-                insertPropertyListStatement.setString(1, "#dbeddb");
-                insertPropertyListStatement.setInt(2, 1);
-                insertPropertyListStatement.setString(3, "TODO");
-                insertPropertyListStatement.setString(4, "Não Iniciado");
-                insertPropertyListStatement.setInt(5, i);
-                insertPropertyListStatement.executeUpdate();
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+    public void createProperties() {
+        for (long i = 1; i <=3 ; i++) {
+            Project project = projectService.findById(i);
+            defaultPropertyList(project);
         }
     }
 
+    public List<PropertyList> defaultStatus(Property property) {
+        List<PropertyList> propertiesList = new ArrayList<>();
+        propertiesList.add(new PropertyList("Não Iniciado", Color.RED, property, PropertyListKind.TODO, true));
+        propertiesList.add(new PropertyList("Em Andamento", Color.YELLOW, property, PropertyListKind.DOING, true));
+        propertiesList.add(new PropertyList("Pausado", Color.BLUE, property, PropertyListKind.DOING, false));
+        propertiesList.add(new PropertyList("Concluído", Color.GREEN, property, PropertyListKind.DONE, true));
+        return propertiesList;
+    }
+
+    public List<Property> defaultProperties() {
+        System.out.println(2);
+        List<Property> properties = new ArrayList<>();
+        properties.add(new Property(PropertyKind.STATUS, "Status", true, null, PropertyStatus.FIXED));
+        properties.add(new Property(PropertyKind.DATE, "Data", true, null, PropertyStatus.FIXED));
+        properties.add(new Property(PropertyKind.LIST, "Dificuldade", false, null, PropertyStatus.VISIBLE));
+        properties.add(new Property(PropertyKind.NUMBER, "Número", false, null, PropertyStatus.VISIBLE));
+        properties.add(new Property(PropertyKind.TEXT, "Palavra-Chave", false, null, PropertyStatus.INVISIBLE));
+        return properties;
+    }
+
+    public void defaultPropertyList(Project project) {
+        for (Property property : defaultProperties()) {
+            if (property.getKind() == PropertyKind.STATUS) {
+                property.setPropertyLists(defaultStatus(property));
+            }
+            if (property.getKind() == PropertyKind.LIST) {
+                List<PropertyList> propertiesList = new ArrayList<>();
+                propertiesList.add(new PropertyList("Fácil", Color.GREEN, property, PropertyListKind.VISIBLE, false));
+                propertiesList.add(new PropertyList("Médio", Color.YELLOW, property, PropertyListKind.VISIBLE, true));
+                propertiesList.add(new PropertyList("Díficil", Color.RED, property, PropertyListKind.VISIBLE, true));
+                propertiesList.add(new PropertyList("Não validado", Color.BLUE, property, PropertyListKind.INVISIBLE, true));
+                property.setPropertyLists(propertiesList);
+            }
+            property.setProject(project);
+            project.addProperty(property);
+        }
+        projectService.save(project);
+    }
+
     public void createTasks() {
-//        TaskCreateDTO taskCreateDTO = new TaskCreateDTO("Regras de Negócio", "Escreva todas as regras de negócio aqui",
-//                userRepository.findById(3L).get(), projectRepository.findById(1L).get());
-//        TaskCreateDTO taskCreateDTO2 = new TaskCreateDTO("Criar Models", "Separar em entities e dtos",
-//                userRepository.findById(1L).get(), projectRepository.findById(1L).get());
-//        TaskCreateDTO taskCreateDTO3 = new TaskCreateDTO("Fazer requisições", "criar services e fazer as requisições",
-//                userRepository.findById(1L).get(), projectRepository.findById(1L).get());
-//
-//        taskService.savePostConstruct(taskCreateDTO);
-//        taskService.savePostConstruct(taskCreateDTO2);
-//        taskService.savePostConstruct(taskCreateDTO3);
-//
+        TaskCreateDTO taskCreateDTO = new TaskCreateDTO("Regras de Negócio", "Escreva todas as regras de negócio aqui",
+                userRepository.findById(1L).get(), projectRepository.findById(1L).get());
+        TaskCreateDTO taskCreateDTO2 = new TaskCreateDTO("Criar Models", "Separar em entities e dtos",
+                userRepository.findById(1L).get(), projectRepository.findById(1L).get());
+        TaskCreateDTO taskCreateDTO3 = new TaskCreateDTO("Fazer requisições", "criar services e fazer as requisições",
+                userRepository.findById(1L).get(), projectRepository.findById(1L).get());
 
-
-
+        taskService.savePostConstruct(taskCreateDTO);
+        taskService.savePostConstruct(taskCreateDTO2);
+        taskService.savePostConstruct(taskCreateDTO3);
     }
 
 }

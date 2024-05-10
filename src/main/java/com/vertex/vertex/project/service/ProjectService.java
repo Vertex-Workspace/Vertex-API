@@ -199,6 +199,7 @@ public class ProjectService {
     }
 
     public List<Property> defaultProperties() {
+        System.out.println(2);
         List<Property> properties = new ArrayList<>();
         properties.add(new Property(PropertyKind.STATUS, "Status", true, null, PropertyStatus.FIXED));
         properties.add(new Property(PropertyKind.DATE, "Data", true, null, PropertyStatus.FIXED));
