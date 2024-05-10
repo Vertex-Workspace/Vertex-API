@@ -88,7 +88,12 @@ public class UserTeamService {
         if (userTeam.getUser().getNewMembersAndGroups()) {
             notificationService.groupAndTeam("Você foi removido(a) de " + userTeam.getTeam().getName(), userTeam);
         }
-        userTeamRepository.delete(findUserTeamByComposeId(teamID, userID));
+        Team team = userTeam.getTeam();
+        team.getUserTeams().remove(userTeam);
+        userTeam.getChats().forEach(chat -> chat.getUserTeams().remove(userTeam));
+        teamRepository.save(team);
+        userTeamRepository.delete(userTeam);
+
     }
 
     public void removeUserTeamDependencies(UserTeam userTeam){

@@ -17,7 +17,6 @@ public class ChatListDTO {
     private Long id;
 
     private String name;
-
     private boolean conversationOpened;
     private byte[] image;
 

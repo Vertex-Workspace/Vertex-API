@@ -104,6 +104,7 @@ public class TeamController {
         }
     }
 
+
     @GetMapping("/{idTeam}/groups")
     public ResponseEntity<?> findGroupsByTeamId(@PathVariable Long idTeam) {
         try {

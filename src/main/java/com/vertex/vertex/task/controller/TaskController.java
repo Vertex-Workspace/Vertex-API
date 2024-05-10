@@ -47,7 +47,7 @@ public class TaskController {
         try{
             return new ResponseEntity<>(taskService.save(taskCreateDTO), HttpStatus.OK);
         }catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -77,7 +77,7 @@ public class TaskController {
         try{
             return new ResponseEntity<>(taskService.save(editValueDTO), HttpStatus.OK);
         }catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 

@@ -48,14 +48,14 @@ public class ProjectService {
     public ProjectViewListDTO saveWithRelationOfProject(ProjectCreateDTO projectCreateDTO, Long teamId) {
         Project project = new Project();
         mapper.map(projectCreateDTO, project);
-
-        createUserTeamAndSetCreator(teamId, project);
-        Project savedProject = save(project);
-        setCollaboratorsAndVerifyCreator(projectCreateDTO.getUsers(), savedProject);
         project.setProjectReviewENUM(projectCreateDTO.getProjectReviewENUM());
         if(projectCreateDTO.getProjectReviewENUM() == null){
             project.setProjectReviewENUM(ProjectReviewENUM.OPTIONAL);
         }
+        createUserTeamAndSetCreator(teamId, project);
+        Project savedProject = save(project);
+        setCollaboratorsAndVerifyCreator(projectCreateDTO.getUsers(), savedProject);
+
         defaultPropertyList(project);
 
         project.setProjectDependency(projectCreateDTO.getProjectDependency());
@@ -145,6 +145,9 @@ public class ProjectService {
                     projectOneDTO.getTasks().add(new TaskModeViewDTO(task));
             }
         }
+        System.out.println(projectOneDTO.getTasks());
+        projectOneDTO.getTasks().sort(Comparator.comparingLong(TaskModeViewDTO::getIndexTask).reversed());
+        System.out.println(projectOneDTO.getTasks());
 
         return projectOneDTO;
     }
