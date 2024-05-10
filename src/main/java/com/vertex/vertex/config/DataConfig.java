@@ -249,9 +249,9 @@ public class DataConfig {
         TaskCreateDTO taskCreateDTO = new TaskCreateDTO("Regras de Negócio", "Escreva todas as regras de negócio aqui",
                 userRepository.findById(1L).get(), projectRepository.findById(1L).get());
         TaskCreateDTO taskCreateDTO2 = new TaskCreateDTO("Criar Models", "Separar em entities e dtos",
-                userRepository.findById(1L).get(), projectRepository.findById(1L).get());
+                userRepository.findById(1L).get(), projectRepository.findById(2L).get());
         TaskCreateDTO taskCreateDTO3 = new TaskCreateDTO("Fazer requisições", "criar services e fazer as requisições",
-                userRepository.findById(1L).get(), projectRepository.findById(1L).get());
+                userRepository.findById(1L).get(), projectRepository.findById(3L).get());
 
         taskService.savePostConstruct(taskCreateDTO);
         taskService.savePostConstruct(taskCreateDTO2);
