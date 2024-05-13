@@ -35,10 +35,10 @@ public class Project {
     @ToString.Exclude
     private Team team;
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Property> properties;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     private UserTeam creator;
 
     @OneToMany(mappedBy = "project", orphanRemoval = true)
@@ -54,7 +54,7 @@ public class Project {
     @OneToOne(cascade = CascadeType.ALL)
     private File file;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<UserTeam> collaborators = new ArrayList<>();
 

@@ -52,6 +52,11 @@ public class File {
     public File(MultipartFile file) throws IOException {
         this.setValues(file);
     }
+
+    public File(byte[] file) {
+        this.file = file;
+    }
+
     private void setValues(MultipartFile file) throws IOException {
         this.name = file.getOriginalFilename();
         this.type = file.getContentType();

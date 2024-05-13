@@ -42,7 +42,7 @@ public class UserTeam {
     @EqualsAndHashCode.Include
     private User user;
 
-    @OneToMany(mappedBy = "userTeam", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "userTeam", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonIgnore
     @ToString.Exclude
     private List<Permission> permissionUser;
