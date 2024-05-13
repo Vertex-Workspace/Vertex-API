@@ -58,8 +58,6 @@ public class DataConfig {
 
         //default Users
         userService.save(new UserDTO
-                ("ana@gmail.com", "We3sl@ey", "Ana", "Borchardt"));
-        userService.save(new UserDTO
                 ("kaique@gmail.com", "We3sl@ey", "Kaique", "Fernandes"));
         User user3 = userService.save(new UserDTO
                 ("otavio@gmail.com", "We3sl@ey", "Otavio", "Miguel Rocha"));
@@ -82,11 +80,11 @@ public class DataConfig {
              Statement statement = conn.createStatement()) {
 
             // Inserir usuário "Ana" na equipe "Vertex"
-            statement.executeUpdate("INSERT INTO `user_team` (`team_id`, `user_id`)" +
-                    " SELECT t.id, u.id" +
-                    " FROM `team` t" +
-                    " CROSS JOIN `user` u" +
-                    " WHERE t.name = 'Vertex' AND u.email = 'ana@gmail.com'");
+//            statement.executeUpdate("INSERT INTO `user_team` (`team_id`, `user_id`)" +
+//                    " SELECT t.id, u.id" +
+//                    " FROM `team` t" +
+//                    " CROSS JOIN `user` u" +
+//                    " WHERE t.name = 'Vertex' AND u.email = 'ana@gmail.com'");
 
             // Inserir usuário "Miguel" na equipe "Vertex"
             statement.executeUpdate("INSERT INTO `user_team` (`team_id`, `user_id`)" +
@@ -140,9 +138,8 @@ public class DataConfig {
 
             // Criar as permissões para os UserTeams com IDs 6, 7 e 8
             String sql = "INSERT INTO `permission` (`enabled`, `name`, `user_team_id`) VALUES " +
-                    "(false, 'Criar', 6), (false, 'Editar', 6), (false, 'Deletar', 6), " +
-                    "(false, 'Criar', 7), (false, 'Editar', 7), (false, 'Deletar', 7), " +
-                    "(false, 'Criar', 8), (false, 'Editar', 8), (false, 'Deletar', 8)";
+                    "(false, 'Criar', 5), (false, 'Editar', 5), (false, 'Deletar', 5), " +
+                    "(false, 'Criar', 6), (false, 'Editar', 6), (false, 'Deletar', 6); ";
             statement.executeUpdate(sql);
 
             System.out.println("Permissões criadas com sucesso.");
@@ -163,24 +160,24 @@ public class DataConfig {
                 preparedStatement.setString(1, "Ideias e Planejamento");
                 preparedStatement.setString(2, "Ideias e Planejamento");
                 preparedStatement.setString(3, "MANDATORY");
-                preparedStatement.setLong(4, 5);
-                preparedStatement.setLong(5, 5);
+                preparedStatement.setLong(4, 4);
+                preparedStatement.setLong(5, 4);
                 preparedStatement.executeUpdate();
 
                 // Projeto 2
                 preparedStatement.setString(1, "Desenvolvimento backend");
                 preparedStatement.setString(2, "Desenvolvimento backend");
                 preparedStatement.setString(3, "MANDATORY");
-                preparedStatement.setLong(4, 5);
-                preparedStatement.setLong(5, 5);
+                preparedStatement.setLong(4, 4);
+                preparedStatement.setLong(5, 4);
                 preparedStatement.executeUpdate();
 
                 // Projeto 3
                 preparedStatement.setString(1, "Desenvolvimento frontend");
                 preparedStatement.setString(2, "Desenvolvimento frontend");
                 preparedStatement.setString(3, "MANDATORY");
-                preparedStatement.setLong(4, 5);
-                preparedStatement.setLong(5, 5);
+                preparedStatement.setLong(4, 4);
+                preparedStatement.setLong(5, 4);
                 preparedStatement.executeUpdate();
             }
 
@@ -189,7 +186,7 @@ public class DataConfig {
                     "SELECT p.id, ut.id FROM project p, user_team ut WHERE p.team_id = ?";
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(insertCollaboratorsSQL)) {
-                preparedStatement.setLong(1, 5);
+                preparedStatement.setLong(1, 4);
                 preparedStatement.executeUpdate();
             }
 
@@ -247,11 +244,11 @@ public class DataConfig {
 
     public void createTasks() {
         TaskCreateDTO taskCreateDTO = new TaskCreateDTO("Regras de Negócio", "Escreva todas as regras de negócio aqui",
-                userRepository.findById(1L).get(), projectRepository.findById(1L).get());
+                userRepository.findById(2L).get(), projectRepository.findById(1L).get());
         TaskCreateDTO taskCreateDTO2 = new TaskCreateDTO("Criar Models", "Separar em entities e dtos",
-                userRepository.findById(1L).get(), projectRepository.findById(2L).get());
+                userRepository.findById(2L).get(), projectRepository.findById(2L).get());
         TaskCreateDTO taskCreateDTO3 = new TaskCreateDTO("Fazer requisições", "criar services e fazer as requisições",
-                userRepository.findById(1L).get(), projectRepository.findById(3L).get());
+                userRepository.findById(2L).get(), projectRepository.findById(3L).get());
 
         taskService.savePostConstruct(taskCreateDTO);
         taskService.savePostConstruct(taskCreateDTO2);

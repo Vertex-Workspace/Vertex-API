@@ -130,6 +130,7 @@ public class TaskService {
             taskResponsables.add(new TaskResponsable(userTeam, task));
         }
         task.setTaskResponsables(taskResponsables);
+        System.out.println("tks" + task.getTaskResponsables());
     }
 
 
