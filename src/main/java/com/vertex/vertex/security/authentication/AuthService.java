@@ -83,11 +83,14 @@ public class AuthService {
             Cookie cookie1 = cookieUtil.getCookie(request, "JSESSIONID");
             cookie1.setMaxAge(0);
             cookie.setMaxAge(0);
+
             return List.of(cookie1, cookie);
         } catch (Exception e) {
             throw new RuntimeException();
         }
     }
+
+
 
     public User getAuthenticatedUser() {
         UserDetails userDetails =

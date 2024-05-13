@@ -2,6 +2,7 @@ package com.vertex.vertex.user.model.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.api.client.auth.oauth2.Credential;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.user.model.DTO.UserDTO;
 import com.vertex.vertex.user.model.enums.UserKind;

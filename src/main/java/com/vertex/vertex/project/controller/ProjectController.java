@@ -35,11 +35,11 @@ public class ProjectController {
     @GetMapping("/{id}")
     public ResponseEntity<?> findProjectById(@PathVariable Long id, HttpServletResponse response) {
         try {
-            try {
-                calendarService.getEvents(response);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+//            try {
+//                calendarService.getEvents(response);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
             return new ResponseEntity<>(projectService.findProjectById(id), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);

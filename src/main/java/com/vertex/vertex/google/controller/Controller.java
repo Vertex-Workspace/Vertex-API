@@ -1,12 +1,12 @@
 package com.vertex.vertex.google.controller;
 
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.vertex.vertex.security.CalendarService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -18,9 +18,17 @@ public class Controller {
 
     private final CalendarService service;
 
-    @GetMapping
-    public void authorize() throws GeneralSecurityException, IOException {
-
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> authorize(
+            @PathVariable Long userId, HttpServletResponse response)
+            throws GeneralSecurityException, IOException {
+        try {
+            service.getCredentials(response, userId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
     }
 
 }

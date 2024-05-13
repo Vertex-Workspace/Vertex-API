@@ -7,6 +7,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
@@ -50,10 +51,12 @@ public class CalendarService {
     private static final String CREDENTIALS_FILE_PATH = "src/main/resources/credentials.json";
 
 
-    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT, HttpServletResponse response)
+
+    public Credential getCredentials(HttpServletResponse response, Long userId)
             throws IOException {
 
         try {
+            HttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
             // Load client secrets.
             File in = new File(CREDENTIALS_FILE_PATH);
             GoogleClientSecrets clientSecrets =
@@ -62,11 +65,11 @@ public class CalendarService {
         // Build flow and trigger user authorization request.
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
                 HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
+                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH + "/" + userId.toString())))
                 .setAccessType("offline")
                 .build();
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-        Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+        Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize(userId.toString());
         //returns an authorized Credential object.
         return credential;
 
@@ -77,11 +80,11 @@ public class CalendarService {
     }
 
 
-    public List<Event> getEvents(HttpServletResponse response) throws IOException, GeneralSecurityException {
+    public List<Event> getEvents(HttpServletResponse response, Long userId) throws IOException, GeneralSecurityException {
         // Build a new authorized API client service.
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+        HttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         Calendar service =
-                new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT, response))
+                new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(response, userId))
                         .setApplicationName(APPLICATION_NAME)
                         .build();
 
