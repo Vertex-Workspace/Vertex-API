@@ -103,7 +103,7 @@ public class UserController {
         try {
             return new ResponseEntity<>(this.userService.patchUserPersonalization(id,personalization),HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
         }
     }
 
@@ -112,7 +112,7 @@ public class UserController {
         try {
             return new ResponseEntity<>(this.userService.patchUserShowCharts(id),HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
         }
     }
 
