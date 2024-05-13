@@ -147,15 +147,13 @@ public class ReviewService {
 
         UserTeam loggedUser = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), userID);
 
-        ValidationUtils.loggedUserIsOnProjectAndIsCreator(project);
-        System.out.println(project.getTasks());
+        ValidationUtils.loggedUserIsOnProject(project);
 
         List<Task> tasksToReview =
                 project.getTasks().stream()
                 .filter(t -> t.isUnderAnalysis() && t.getCreator().equals(loggedUser))
                 .toList();
 
-        System.out.println(tasksToReview);
         for (Task task : tasksToReview) {
             TaskWaitingToReviewDTO taskWaitingToReviewDTO = new TaskWaitingToReviewDTO(task);
             Optional<Review> currentReview = task.getReviews().stream()

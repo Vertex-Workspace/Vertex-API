@@ -42,10 +42,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
@@ -64,7 +61,7 @@ public class TaskService {
     private final NotificationService notificationService;
 
 
-    public Task save(TaskCreateDTO taskCreateDTO) {
+    public TaskModeViewDTO save(TaskCreateDTO taskCreateDTO) {
         Project project = projectService.findById(taskCreateDTO.getProject().getId());
 
 
@@ -76,8 +73,19 @@ public class TaskService {
         if(!Permission.hasPermission(creator.getPermissionUser(), TypePermissions.Criar)){
             throw new RuntimeException("Você não tem permissão!");
         }
+        long index = 0L;
+        List<Long> indexs = new ArrayList<>(project.getTasks().stream().map(Task::getIndexTask).toList());
+
+        if(indexs.isEmpty()){
+            index = 1L;
+        } else {
+            Collections.sort(indexs);
+            index = indexs.get(indexs.size()-1) + 1;
+        }
+
         Task task = new Task(taskCreateDTO, project, creator);
         setResponsablesInTask(project, task);
+        task.setIndexTask(index);
 
         //When the task is created, every property is associated with a null value, unless it has a default value
         valueService.setTaskDefaultValues(task, project.getProperties());
@@ -94,7 +102,7 @@ public class TaskService {
             }
         }
 
-        return save(task);
+        return new TaskModeViewDTO(save(task));
     }
     public void setResponsablesInTask(Project project, Task task){
         List<TaskResponsable> taskResponsables = new ArrayList<>();

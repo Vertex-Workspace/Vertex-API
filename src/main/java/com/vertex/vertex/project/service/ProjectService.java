@@ -22,6 +22,7 @@ import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskRespo
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
+import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
 import lombok.AllArgsConstructor;
@@ -40,6 +41,7 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final UserTeamService userTeamService;
+    private final UserTeamRepository userTeamRepository;
     private final ValueService valueService;
     private final FileService fileService;
     private final NotificationService notificationService;
@@ -48,14 +50,14 @@ public class ProjectService {
     public ProjectViewListDTO saveWithRelationOfProject(ProjectCreateDTO projectCreateDTO, Long teamId) {
         Project project = new Project();
         mapper.map(projectCreateDTO, project);
-
-        createUserTeamAndSetCreator(teamId, project);
-        Project savedProject = save(project);
-        setCollaboratorsAndVerifyCreator(projectCreateDTO.getUsers(), savedProject);
         project.setProjectReviewENUM(projectCreateDTO.getProjectReviewENUM());
         if(projectCreateDTO.getProjectReviewENUM() == null){
             project.setProjectReviewENUM(ProjectReviewENUM.OPTIONAL);
         }
+        createUserTeamAndSetCreator(teamId, project);
+        Project savedProject = save(project);
+        setCollaboratorsAndVerifyCreator(projectCreateDTO.getUsers(), savedProject);
+
         defaultPropertyList(project);
 
         project.setProjectDependency(projectCreateDTO.getProjectDependency());
@@ -77,7 +79,7 @@ public class ProjectService {
     public void setCollaboratorsAndVerifyCreator(List<User> users, Project project) {
         if (users != null) {
             for (User user : users) {
-                UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), user.getId());
+                UserTeam userTeam1 = userTeamRepository.findByTeam_IdAndUser_Id(project.getTeam().getId(), user.getId()).get();
                 if (!project.getCollaborators().contains(userTeam1) && !project.getCreator().equals(userTeam1)) {
                     project.getCollaborators().add(userTeam1);
                     notificationOfCollaborators(userTeam1, project);
@@ -145,6 +147,9 @@ public class ProjectService {
                     projectOneDTO.getTasks().add(new TaskModeViewDTO(task));
             }
         }
+        System.out.println(projectOneDTO.getTasks());
+        projectOneDTO.getTasks().sort(Comparator.comparingLong(TaskModeViewDTO::getIndexTask).reversed());
+        System.out.println(projectOneDTO.getTasks());
 
         return projectOneDTO;
     }
@@ -173,7 +178,7 @@ public class ProjectService {
             save(project);
         }
 
-        for (Project projectFor : projectRepository.findAll()) {
+        for (Project projectFor : project.getTeam().getProjects()) {
             if (projectFor.getProjectDependency() != null) {
                 if (projectFor.getProjectDependency().getId().equals(id)) {
                     projectFor.setProjectDependency(null);
