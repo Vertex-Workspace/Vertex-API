@@ -6,6 +6,7 @@ import com.vertex.vertex.project.model.DTO.ProjectEditDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.security.CalendarService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,10 +33,10 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> findProjectById(@PathVariable Long id) {
+    public ResponseEntity<?> findProjectById(@PathVariable Long id, HttpServletResponse response) {
         try {
             try {
-                calendarService.getEvents();
+                calendarService.getEvents(response);
             } catch (Exception e) {
                 e.printStackTrace();
             }

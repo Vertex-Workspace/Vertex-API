@@ -1,5 +1,6 @@
 package com.vertex.vertex.user.model.DTO;
 
+import com.vertex.vertex.user.model.enums.UserKind;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import lombok.AllArgsConstructor;
 import lombok.Data;

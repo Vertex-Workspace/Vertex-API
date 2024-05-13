@@ -65,11 +65,6 @@ public class AuthService {
             HttpServletRequest request,
             HttpServletResponse response,
             UserDetails userDetails) {
-        try {
-            System.out.println(calendarService.getEvents());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         CookieUtils cookieUtil = new CookieUtils(environment);
         Cookie cookie = cookieUtil.generateCookieJWT(userDetails);
         response.addCookie(cookie);
