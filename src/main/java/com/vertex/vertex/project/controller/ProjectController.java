@@ -8,6 +8,7 @@ import com.vertex.vertex.project.service.ProjectService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,6 +34,8 @@ public class ProjectController {
     public ResponseEntity<?> findProjectById(@PathVariable Long id) {
         try {
             return new ResponseEntity<>(projectService.findProjectById(id), HttpStatus.OK);
+        } catch (AuthenticationCredentialsNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
@@ -42,6 +45,8 @@ public class ProjectController {
     public ResponseEntity<?> getProjectName(@PathVariable Long id) {
         try {
             return new ResponseEntity<>(projectService.findById(id).getName(), HttpStatus.OK);
+        } catch (AuthenticationCredentialsNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
@@ -116,6 +121,7 @@ public class ProjectController {
         try {
             return new ResponseEntity<>(projectService.updateProjectCollaborators(projectEditDTO), HttpStatus.OK);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
@@ -124,6 +130,8 @@ public class ProjectController {
     public ResponseEntity<?> returnAllColaborators(@PathVariable Long projectId) {
         try {
             return new ResponseEntity<>(projectService.returnAllCollaborators(projectId), HttpStatus.OK);
+        } catch (AuthenticationCredentialsNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
@@ -146,6 +154,8 @@ public class ProjectController {
     public ResponseEntity<?> getProjectsByCollaborators(@PathVariable Long teamId, @PathVariable Long userId) {
         try {
             return new ResponseEntity<>(projectService.getAllByTeamAndCollaborators(teamId, userId), HttpStatus.OK);
+        } catch (AuthenticationCredentialsNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }

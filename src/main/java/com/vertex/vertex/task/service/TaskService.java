@@ -3,6 +3,7 @@ package com.vertex.vertex.task.service;
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.notification.entity.model.Notification;
+import com.vertex.vertex.notification.repository.LogRepository;
 import com.vertex.vertex.notification.service.NotificationService;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
@@ -144,7 +145,7 @@ public class TaskService {
 
     public void deleteById(Long id) {
         Task task = findById(id);
-        validateUserLoggedIntoTask(task);
+        ValidationUtils.loggedUserIsOnTaskAndIsCreator(task);
         taskRepository.deleteById(id);
     }
 
@@ -431,9 +432,12 @@ public class TaskService {
         boolean canDeleteGroup = false;
 
         if (task.getTaskResponsables().isEmpty()) {
-            UserTeam userTeam = userTeamService.findUserTeamByComposeId(updateTaskResponsableDTO.getTeamId(), updateTaskResponsableDTO.getUser().getId());
-            TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
-            taskResponsablesRepository.save(taskResponsable1);
+            Optional<UserTeam> userTeam = task.getProject()
+                    .getCollaborators()
+                    .stream()
+                    .filter(ut -> ut.getUser().getId().equals(updateTaskResponsableDTO.getUser().getId()))
+                    .findAny();
+            userTeam.ifPresent(team -> taskResponsablesRepository.save(new TaskResponsable(team, task)));
         }
 
         for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
@@ -458,8 +462,12 @@ public class TaskService {
             if (updateTaskResponsableDTO.getGroup() != null) {
                 task.getGroups().add(updateTaskResponsableDTO.getGroup());
             } else {
-                UserTeam userTeam = userTeamService.findUserTeamByComposeId(updateTaskResponsableDTO.getTeamId(), updateTaskResponsableDTO.getUser().getId());
-                taskResponsablesRepository.save(new TaskResponsable(userTeam, task));
+                Optional<UserTeam> userTeam = task.getProject()
+                        .getCollaborators()
+                        .stream()
+                        .filter(ut -> ut.getUser().getId().equals(updateTaskResponsableDTO.getUser().getId()))
+                        .findAny();
+                userTeam.ifPresent(team -> taskResponsablesRepository.save(new TaskResponsable(team, task)));
             }
         }
 

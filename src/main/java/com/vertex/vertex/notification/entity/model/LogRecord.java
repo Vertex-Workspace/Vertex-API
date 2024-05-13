@@ -36,8 +36,8 @@ public class LogRecord {
         this.description = name + " " + description;
         this.date = LocalDateTime.now();
 
-//        if (Objects.isNull(task.getLog())) task.setLog(List.of(this));
-//        else task.getLog().add(this);
+        if (Objects.isNull(task.getLog())) task.setLog(List.of(this));
+        else task.getLog().add(this);
     }
 
     public LogRecord(Task task, String description) {

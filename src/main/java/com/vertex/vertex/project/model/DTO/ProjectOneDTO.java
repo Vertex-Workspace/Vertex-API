@@ -41,7 +41,7 @@ public class ProjectOneDTO {
 
     public ProjectOneDTO(Project project) {
         BeanUtils.copyProperties(project, this);
-
+        this.tasks = new ArrayList<>();
         this.notes =
                 project.getNotes()
                 .stream()

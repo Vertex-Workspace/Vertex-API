@@ -63,6 +63,7 @@ public class Project {
     private List<Group> groups;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
 //    @Column(nullable = false)
     private ProjectReviewENUM projectReviewENUM;
 

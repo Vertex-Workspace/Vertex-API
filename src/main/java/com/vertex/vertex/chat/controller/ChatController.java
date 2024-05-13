@@ -80,7 +80,7 @@ public class ChatController {
         try {
             return new ResponseEntity<>(chatService.findAllByUser(id) ,HttpStatus.OK);
         }catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
