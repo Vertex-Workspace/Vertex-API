@@ -13,11 +13,11 @@ import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
-import com.vertex.vertex.security.ValidationUtils;
+import com.vertex.vertex.security.util.ValidationUtils;
 import com.vertex.vertex.task.model.DTO.TaskModeViewDTO;
 import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
-import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
@@ -133,16 +133,20 @@ public class ProjectService {
         //Pass through all tasks of the project and validates if task has an opened review (UNDERANALYSIS)
         //If it has, It won't be included into list
 
-        projectOneDTO.setTasks(
-                getTasksProjectByResponsibility(project.getTasks(),
-                        userTeamService.findUserTeamByComposeId(project.getTeam().getId()
-                                , ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId()))
-        );
+        for (Task task : getTasksProjectByResponsibility(project.getTasks(),
+                userTeamService.findUserTeamByComposeId(project.getTeam().getId()
+                        , ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId()))){
+            if(task.getReviews() == null || task.getReviews().isEmpty()){
+                projectOneDTO.getTasks().add(new TaskModeViewDTO(task));
+            } else if(task.getReviews().stream().noneMatch(r -> r.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS))){
+                    projectOneDTO.getTasks().add(new TaskModeViewDTO(task));
+            }
+        }
 
         return projectOneDTO;
     }
 
-    private List<TaskModeViewDTO> getTasksProjectByResponsibility(List<Task> tasks, UserTeam userTeam){
+    private List<Task> getTasksProjectByResponsibility(List<Task> tasks, UserTeam userTeam){
         return tasks
                 .stream()
                 .flatMap(task -> task.getTaskResponsables().stream())
@@ -151,7 +155,7 @@ public class ProjectService {
 //                .flatMap(task -> task.getReviews().stream())
 //                .filter(review -> !review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS))
 //                .map(Review::getTask)
-                .map(TaskModeViewDTO::new)
+//                .map(TaskModeViewDTO::new)
                 .toList();
     }
 
@@ -219,7 +223,7 @@ public class ProjectService {
         }
     }
 
-    public Project updateProjectCollaborators(ProjectEditDTO projectEditDTO) {
+    public ProjectOneDTO updateProjectCollaborators(ProjectEditDTO projectEditDTO) {
         Project project = findById(projectEditDTO.getId());
         ValidationUtils.loggedUserIsOnProjectAndIsCreator(project);
 
@@ -230,14 +234,16 @@ public class ProjectService {
         project.setName(projectEditDTO.getName());
         project.setDescription(projectEditDTO.getDescription());
 
-
         List<UserTeam> userTeamsToAdd = new ArrayList<>();
 
         for (User user : projectEditDTO.getUsers()) {
-            UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), user.getId());
-            userTeamsToAdd.add(userTeam1);
-            if(!project.getCollaborators().contains(userTeam1)){
-                notificationOfUpdateCollaborators(userTeam1, project, true);
+            Optional<UserTeam> userTeam = project.getTeam()
+                    .getUserTeams().stream().filter(ut -> ut.getUser().getId().equals(user.getId())).findAny();
+            if(userTeam.isPresent()){
+                userTeamsToAdd.add(userTeam.get());
+                if(!project.getCollaborators().contains(userTeam.get())){
+                    notificationOfUpdateCollaborators(userTeam.get(), project, true);
+                }
             }
         }
 
@@ -245,7 +251,7 @@ public class ProjectService {
             userTeamsToAdd.add(project.getCreator());
         }
 
-        //Pass through all removed cola
+        //Pass through all removed colaborators
         for (UserTeam ut : project.getCollaborators()){
             if(!userTeamsToAdd.contains(ut)){
                 notificationOfUpdateCollaborators(ut, project, false);
@@ -253,8 +259,11 @@ public class ProjectService {
         }
         project.setCollaborators(userTeamsToAdd);
         project.setGroups(projectEditDTO.getGroups());
-
-        return projectRepository.save(project);
+        project.setProjectReviewENUM(projectEditDTO.getProjectReviewENUM());
+        if(projectEditDTO.getProjectReviewENUM() == null) {
+            project.setProjectReviewENUM(ProjectReviewENUM.OPTIONAL);
+        }
+        return findProjectById(projectRepository.save(project).getId());
     }
 
     public void notificationOfUpdateCollaborators(UserTeam userTeam, Project project, Boolean bool) {

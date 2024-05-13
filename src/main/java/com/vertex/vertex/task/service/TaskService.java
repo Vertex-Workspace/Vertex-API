@@ -11,7 +11,8 @@ import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.property.service.PropertyService;
-import com.vertex.vertex.security.ValidationUtils;
+import com.vertex.vertex.security.CalendarService;
+import com.vertex.vertex.security.util.ValidationUtils;
 import com.vertex.vertex.task.model.DTO.*;
 import com.vertex.vertex.task.relations.review.repository.ReviewRepository;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
@@ -43,7 +44,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Data
@@ -61,6 +61,7 @@ public class TaskService {
     private final FileService fileService;
     private final ValueService valueService;
     private final NotificationService notificationService;
+    private final CalendarService calendarService;
 
 
     public Task save(TaskCreateDTO taskCreateDTO) {
@@ -431,9 +432,12 @@ public class TaskService {
         boolean canDeleteGroup = false;
 
         if (task.getTaskResponsables().isEmpty()) {
-            UserTeam userTeam = userTeamService.findUserTeamByComposeId(updateTaskResponsableDTO.getTeamId(), updateTaskResponsableDTO.getUser().getId());
-            TaskResponsable taskResponsable1 = new TaskResponsable(userTeam, task);
-            taskResponsablesRepository.save(taskResponsable1);
+            Optional<UserTeam> userTeam = task.getProject()
+                    .getCollaborators()
+                    .stream()
+                    .filter(ut -> ut.getUser().getId().equals(updateTaskResponsableDTO.getUser().getId()))
+                    .findAny();
+            userTeam.ifPresent(team -> taskResponsablesRepository.save(new TaskResponsable(team, task)));
         }
 
         for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
@@ -458,8 +462,12 @@ public class TaskService {
             if (updateTaskResponsableDTO.getGroup() != null) {
                 task.getGroups().add(updateTaskResponsableDTO.getGroup());
             } else {
-                UserTeam userTeam = userTeamService.findUserTeamByComposeId(updateTaskResponsableDTO.getTeamId(), updateTaskResponsableDTO.getUser().getId());
-                taskResponsablesRepository.save(new TaskResponsable(userTeam, task));
+                Optional<UserTeam> userTeam = task.getProject()
+                        .getCollaborators()
+                        .stream()
+                        .filter(ut -> ut.getUser().getId().equals(updateTaskResponsableDTO.getUser().getId()))
+                        .findAny();
+                userTeam.ifPresent(team -> taskResponsablesRepository.save(new TaskResponsable(team, task)));
             }
         }
 

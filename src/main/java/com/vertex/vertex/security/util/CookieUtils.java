@@ -1,19 +1,13 @@
-package com.vertex.vertex.security;
+package com.vertex.vertex.security.util;
 
-import com.vertex.vertex.task.model.entity.Task;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Component
 @AllArgsConstructor

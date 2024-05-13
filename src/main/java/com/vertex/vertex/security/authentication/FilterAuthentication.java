@@ -1,5 +1,7 @@
-package com.vertex.vertex.security;
+package com.vertex.vertex.security.authentication;
 
+import com.vertex.vertex.security.util.CookieUtils;
+import com.vertex.vertex.security.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;

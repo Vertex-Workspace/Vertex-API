@@ -5,6 +5,7 @@ import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
 import com.vertex.vertex.project.model.DTO.ProjectEditDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
+import com.vertex.vertex.security.CalendarService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProjectController {
 
     private final ProjectService projectService;
+    private final CalendarService calendarService;
 
     @PostMapping("/{teamId}")
     public ResponseEntity<?> save(@RequestBody ProjectCreateDTO project, @PathVariable Long teamId) {
@@ -32,6 +34,11 @@ public class ProjectController {
     @GetMapping("/{id}")
     public ResponseEntity<?> findProjectById(@PathVariable Long id) {
         try {
+            try {
+                calendarService.getEvents();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return new ResponseEntity<>(projectService.findProjectById(id), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
@@ -116,6 +123,7 @@ public class ProjectController {
         try {
             return new ResponseEntity<>(projectService.updateProjectCollaborators(projectEditDTO), HttpStatus.OK);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }

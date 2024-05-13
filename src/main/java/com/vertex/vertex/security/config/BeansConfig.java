@@ -1,6 +1,7 @@
-package com.vertex.vertex.security;
+package com.vertex.vertex.security.config;
 
-import com.pkslow.ai.GoogleBardClient;
+import com.google.api.services.calendar.Calendar;
+import com.vertex.vertex.security.authentication.UserDetailsServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.modelmapper.ModelMapper;

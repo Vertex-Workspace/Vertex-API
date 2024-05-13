@@ -1,4 +1,4 @@
-package com.vertex.vertex.security;
+package com.vertex.vertex.security.util;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
