@@ -118,7 +118,12 @@ public class TeamService {
         }
     }
     public TeamSearchDTO findTeamInvitationPage(Long id){
-        return new TeamSearchDTO(teamRepository.findById(id).get());
+        Team team = teamRepository.findById(id).get();
+        Long idLoggedUser = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
+        if(team.getUserTeams().stream().anyMatch(userTeam ->  userTeam.getUser().getId().equals(idLoggedUser))){
+            throw new RuntimeException("Usuário pertence a equipe");
+        }
+        return new TeamSearchDTO(team);
     }
 
     public void deleteById(Long id) {
