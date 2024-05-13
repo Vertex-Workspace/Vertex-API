@@ -18,7 +18,7 @@ public class ForgotPasswordController {
         try {
             return new ResponseEntity<>(forgotPasswordService.sendCodeToEmail(emailTo), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 }

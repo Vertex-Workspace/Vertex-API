@@ -24,7 +24,7 @@ public class UserPublicProfileDTO {
     private String email;
     private byte[] image;
     private LocalTime time;
-
+    private Boolean showCharts;
     private List<Integer> tasksPerformances = new ArrayList<>();
     private List<TaskSearchDTO> tasksInCommon = new ArrayList<>();
 }

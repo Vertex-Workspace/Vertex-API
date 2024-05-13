@@ -50,6 +50,15 @@ public class UserTeamService {
         throw new RuntimeException("User Team Not Found!");
     }
 
+    public List<Team> findTeamsByUserId(Long userID){
+        return userTeamRepository.findAll()
+                .stream()
+                .map(UserTeam::getTeam)
+                .flatMap(team -> team.getUserTeams().stream().filter(userTeam -> userTeam.getUser().getId().equals(userID)))
+                .map(UserTeam::getTeam)
+                .toList();
+    }
+
 
     public List<TeamViewListDTO> findTeamsByUser(Long userID) {
         ValidationUtils.validateUserLogged(userRepository.findById(userID).get().getEmail());
@@ -117,7 +126,6 @@ public class UserTeamService {
     }
 
     public List<UserTeam> findAllUserTeamByUserId(Long userId) {
-        ValidationUtils.validateUserLogged(userRepository.findById(userId).get().getEmail());
         return userTeamRepository
                 .findAllByUser_Id(userId);
     }
