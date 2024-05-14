@@ -6,14 +6,15 @@ import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.model.FileSupporter;
 import com.vertex.vertex.notification.entity.model.LogRecord;
 import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
+import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.model.DTO.TaskEditDTO;
+import com.vertex.vertex.task.model.enums.TaskKind;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
-import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
-import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
+import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.*;
@@ -35,6 +36,7 @@ public class Task implements FileSupporter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String gId;
 
     @Column(length = 55)
     private String name;
@@ -89,6 +91,9 @@ public class Task implements FileSupporter {
     private List<Group> groups;
 
     private Long indexTask;
+
+    @Enumerated(EnumType.STRING)
+    private TaskKind taskKind;
 
     public String getModifiedAttributeDescription
             (TaskEditDTO dto) {

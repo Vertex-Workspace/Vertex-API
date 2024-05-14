@@ -17,6 +17,7 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
+import com.vertex.vertex.task.service.TaskService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -50,6 +51,8 @@ public class CalendarService {
             Collections.singletonList(CalendarScopes.CALENDAR_READONLY);
     private static final String CREDENTIALS_FILE_PATH = "src/main/resources/credentials.json";
 
+    private final TaskService taskService;
+
 
 
     public Credential getCredentials(HttpServletResponse response, Long userId)
@@ -68,16 +71,49 @@ public class CalendarService {
                 .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH + "/" + userId.toString())))
                 .setAccessType("offline")
                 .build();
+
+//        GoogleAuthorizationCodeRequestUrl authorizationUrl = flow.newAuthorizationUrl();
+//        authorizationUrl.setRedirectUri("http://localhost:8888/Callback");
+//        authorizationUrl.setAccessType("offline");
+//        String url = authorizationUrl.build();
+//        response.sendRedirect(url);
+
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
         Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize(userId.toString());
-        //returns an authorized Credential object.
+//        //returns an authorized Credential object.
         return credential;
-
+//            return null;
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
+
+    public void convertEventsToTask(HttpServletResponse response, Long userId, Long projectId) {
+        try {
+            HttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+            Calendar service =
+                    new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(response, userId))
+                            .setApplicationName(APPLICATION_NAME)
+                            .build();
+
+            DateTime now = new DateTime(System.currentTimeMillis());
+            Events events = service.events().list("primary")
+                    .setTimeMin(now)
+                    .setOrderBy("startTime")
+                    .setSingleEvents(true)
+                    .execute();
+            List<Event> items = events.getItems();
+
+            if (!items.isEmpty()) {
+                taskService.convertEventsToTask(items, projectId, userId);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
 
     public List<Event> getEvents(HttpServletResponse response, Long userId) throws IOException, GeneralSecurityException {
@@ -88,10 +124,9 @@ public class CalendarService {
                         .setApplicationName(APPLICATION_NAME)
                         .build();
 
-        // List the next 10 events from the primary calendar.
+        // List the next events from the primary calendar.
         DateTime now = new DateTime(System.currentTimeMillis());
         Events events = service.events().list("primary")
-                .setMaxResults(10)
                 .setTimeMin(now)
                 .setOrderBy("startTime")
                 .setSingleEvents(true)

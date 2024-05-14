@@ -18,12 +18,14 @@ public class Controller {
 
     private final CalendarService service;
 
-    @GetMapping("/{userId}")
+    @GetMapping("/{userId}/{projectId}")
     public ResponseEntity<?> authorize(
-            @PathVariable Long userId, HttpServletResponse response)
+            @PathVariable Long userId,
+            @PathVariable Long projectId,
+            HttpServletResponse response)
             throws GeneralSecurityException, IOException {
         try {
-            service.getCredentials(response, userId);
+            service.convertEventsToTask(response, userId, projectId);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,5 +1,7 @@
 package com.vertex.vertex.task.service;
 
+import com.google.api.client.util.DateTime;
+import com.google.api.services.calendar.model.Event;
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.notification.entity.model.Notification;
@@ -44,6 +46,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Data
@@ -61,7 +64,6 @@ public class TaskService {
     private final FileService fileService;
     private final ValueService valueService;
     private final NotificationService notificationService;
-    private final CalendarService calendarService;
 
 
     public Task save(TaskCreateDTO taskCreateDTO) {
@@ -560,4 +562,19 @@ public class TaskService {
     }
 
 
+    public void convertEventsToTask(List<Event> items, Long projectId, Long userId) {
+        Project project = projectService.findById(projectId);
+        User user = userTeamService
+                .findAllUserTeamByUserId(userId)
+                        .stream().map(UserTeam::getUser)
+                        .findFirst().get();
+
+        items.forEach(i -> {
+//            if (!taskRepository.existsByGId(i.getId())) {
+                System.out.println(i);
+                Task task = save(new TaskCreateDTO(i, user, project));
+                System.out.println(task);
+//            }
+        });
+    }
 }
