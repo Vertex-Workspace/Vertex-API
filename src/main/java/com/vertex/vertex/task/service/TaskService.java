@@ -571,9 +571,8 @@ public class TaskService {
 
         items.forEach(i -> {
 //            if (!taskRepository.existsByGId(i.getId())) {
-                System.out.println(i);
+
                 Task task = save(new TaskCreateDTO(i, user, project));
-                System.out.println(task);
 //            }
         });
     }
