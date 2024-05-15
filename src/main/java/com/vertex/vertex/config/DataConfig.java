@@ -59,11 +59,7 @@ public class DataConfig {
                 ("otavio@gmail.com", "We3sl@ey", "Otavio", "Miguel Rocha"));
         User user3 = userService.save(new UserDTO
                 ("miguel@gmail.com", "We3sl@ey", "Miguel", "Bertoldi"));
-        setUserImage(List.of(user1, user2, user3),
-                List.of("src/main/java/com/vertex/vertex/upload/otavio.jpg",
-                        "src/main/java/com/vertex/vertex/upload/otavio.jpg",
-                        "src/main/java/com/vertex/vertex/upload/otavio.jpg"));
-//
+        setUserImage(user1, user2, user3);
         teamService.save(new TeamViewListDTO
                 ("Vertex", user2, setTeamImage(), "A Equipe vertex tem como propósito organizar as tarefas e funcionalidades ...", false));
 
@@ -290,14 +286,16 @@ public class DataConfig {
         }
     }
 
-    public void setUserImage(List<User> users, List<String> paths) throws IOException {
+    public void setUserImage(User user1, User user2, User user3) throws IOException {
         try {
-            for(User user : users){
-                for(String path : paths){
-                    user.setImage(Files.readAllBytes(Paths.get(path)));
-                    userRepository.save(user);
-                }
-            }
+            user1.setImage(Files.readAllBytes(Paths.get("src/main/java/com/vertex/vertex/upload/kaique.jpg")));
+            userRepository.save(user1);
+
+            user2.setImage(Files.readAllBytes(Paths.get("src/main/java/com/vertex/vertex/upload/otavio.jpg")));
+            userRepository.save(user2);
+
+            user3.setImage(Files.readAllBytes(Paths.get("src/main/java/com/vertex/vertex/upload/kaique.jpg")));
+            userRepository.save(user3);
         }catch(Exception e){
             e.printStackTrace();
             throw new RuntimeException();
