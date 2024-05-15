@@ -114,10 +114,12 @@ public class ProjectService {
         project.setFile(fileService.save(file));
         return save(project);
     }
-    public void updateIndex(Long projectId, Long taskID, Long finalIndex) throws IOException {
+    public List<TaskModeViewDTO> updateIndex(Long projectId, List<TaskModeViewDTO> tasks) throws IOException {
         Project project = findById(projectId);
-        Task task = project.getTasks().stream().filter(t -> t.getId().equals(taskID)).findAny().get();
-        indexUtils.updateIndex(project, task, finalIndex);
+        indexUtils.updateIndex(project, tasks);
+        Project projectModification = findById(projectId);
+        projectModification.getTasks().sort(Comparator.comparingLong(Task::getIndexTask).reversed());
+        return projectModification.getTasks().stream().map(TaskModeViewDTO::new).toList();
     }
 
     public Boolean existsByIdAndUserBelongs(Long projectId) {

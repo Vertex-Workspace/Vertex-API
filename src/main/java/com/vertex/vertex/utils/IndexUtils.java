@@ -23,51 +23,40 @@ public class IndexUtils {
         task.setIndexTask(index);
     }
 
-    public void updateIndex(Project project, Task task, Long finalIndex){
-        List<Task> tasks = sortList(project);
+    public void updateIndex(Project project, List<TaskModeViewDTO> tasks){
 
-        Task oldIndexTask = tasks.stream().filter(t -> t.getIndexTask().equals(finalIndex)).findAny().get(); //74
 
-        for (Task value : tasks) {
-            value.setIndexTask(-1L);
-        }
 
         System.out.println(
                 tasks.stream()
-                        .map(Task::getId)
+                        .map(TaskModeViewDTO::getId)
                         .toList());
         System.out.println(
                 tasks.stream()
-                        .map(Task::getIndexTask)
+                        .map(TaskModeViewDTO::getIndexTask)
                         .toList());
-        System.out.println("Index Final :" + finalIndex); // 2
-        System.out.println("Tarefa Mexida: " + task.getId()); // 73
-
-
-
-
-        tasks.get(tasks.indexOf(task)).setIndexTask(finalIndex); // 73 - setIndex = 2
-
-        tasks.get(tasks.indexOf(oldIndexTask)).setIndexTask(finalIndex-1); // 74 - setIndex = 1
 
         long count = 0;
-        for (Task value : tasks) {
-            if(value.getIndexTask().equals(-1L)){
-                value.setIndexTask(count);
+        List<Task> tasksToUpdate = new ArrayList<>();
+        for (TaskModeViewDTO value : tasks) {
+            for (Task task : project.getTasks()){
+                if(value.getId().equals(task.getId())){
+                    task.setIndexTask(count);
+                    count++;
+                    tasksToUpdate.add(task);
+                }
             }
-            count++;
         }
-        tasks.sort(Comparator.comparingLong(Task::getIndexTask));
         System.out.println(
-                tasks.stream()
+                project.getTasks().stream()
                         .map(Task::getId)
                         .toList());
         System.out.println(
-                tasks.stream()
-                .map(Task::getIndexTask)
-                .toList());
+                project.getTasks().stream()
+                        .map(Task::getIndexTask)
+                        .toList());
 
-        taskRepository.saveAll(tasks);
+        taskRepository.saveAll(tasksToUpdate);
     }
 
     private List<Task> sortList(Project project){

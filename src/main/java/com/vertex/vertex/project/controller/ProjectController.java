@@ -10,6 +10,7 @@ import com.vertex.vertex.task.model.DTO.TaskModeViewDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 //import org.springframework.web.bind.annotation.*;
@@ -125,25 +126,11 @@ public class ProjectController {
         }
     }
 
-    @PatchMapping("/{projectId}/task")
-    public ResponseEntity<?> updateIndex(@PathVariable Long projectId, @RequestBody TaskIndexDTO tasksDTO) {
+    @PatchMapping("/{projectId}/task/index")
+    public ResponseEntity<?> updateIndex(@PathVariable Long projectId, @RequestBody List<TaskModeViewDTO> tasks) {
         try {
-            projectService.updateIndex(projectId, tasksDTO.getTaskID(), tasksDTO.getFinalIndex());
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(projectService.updateIndex(projectId, tasks), HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseEntity<>
-                    (HttpStatus.BAD_REQUEST);
-        }
-    }
-    @PatchMapping("/task-teste")
-    public ResponseEntity<?> updateIndexByList(@RequestBody List<TaskModeViewDTO> tasks) {
-        try {
-//            projectService.updateIndex(projectId, tasksDTO.getTaskID(), tasksDTO.getFinalIndex());
-            System.out.println("new patch" + tasks);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>
                     (HttpStatus.BAD_REQUEST);
         }

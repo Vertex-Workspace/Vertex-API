@@ -179,7 +179,7 @@ public class TaskService {
         taskRepository.deleteById(id);
     }
 
-    public Task save(EditValueDTO editValueDTO) throws Exception {
+    public TaskModeViewDTO save(EditValueDTO editValueDTO) throws Exception {
         Task task = findById(editValueDTO.getId());
 
         Property property = propertyService.findByIdAndProjectContains(
@@ -208,7 +208,7 @@ public class TaskService {
         notificationService.saveLogRecord(task,
                 ("O valor da propriedade " + property.getName()
                         + " foi definido como " + propertyValue));
-        return task;
+        return new TaskModeViewDTO(task);
     }
 
 
