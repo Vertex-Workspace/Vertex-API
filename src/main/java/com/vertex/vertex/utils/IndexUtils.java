@@ -24,18 +24,6 @@ public class IndexUtils {
     }
 
     public void updateIndex(Project project, List<TaskModeViewDTO> tasks){
-
-
-
-        System.out.println(
-                tasks.stream()
-                        .map(TaskModeViewDTO::getId)
-                        .toList());
-        System.out.println(
-                tasks.stream()
-                        .map(TaskModeViewDTO::getIndexTask)
-                        .toList());
-
         long count = 0;
         List<Task> tasksToUpdate = new ArrayList<>();
         for (TaskModeViewDTO value : tasks) {
@@ -47,15 +35,6 @@ public class IndexUtils {
                 }
             }
         }
-        System.out.println(
-                project.getTasks().stream()
-                        .map(Task::getId)
-                        .toList());
-        System.out.println(
-                project.getTasks().stream()
-                        .map(Task::getIndexTask)
-                        .toList());
-
         taskRepository.saveAll(tasksToUpdate);
     }
 
