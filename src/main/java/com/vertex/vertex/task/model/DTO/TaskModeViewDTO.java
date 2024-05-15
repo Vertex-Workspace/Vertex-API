@@ -7,16 +7,22 @@ import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskRespo
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class TaskModeViewDTO {
 
     private Long id;
     private String name;
+    @ToString.Exclude
     private List<Value> values;
-
+    private Long indexTask;
+    @ToString.Exclude
     private byte[] image;
 
     public TaskModeViewDTO(Task task){
@@ -24,5 +30,6 @@ public class TaskModeViewDTO {
         this.name = task.getName();
         this.values = task.getValues();
         this.image = task.getCreator().getUser().getImage();
+        this.indexTask = task.getIndexTask();
     }
 }

@@ -78,6 +78,9 @@ public class GroupService {
                     userTeam.getGroups().add(group);
                     groupRepository.save(group);
                     userTeamService.save(userTeam);
+                    if(userTeam.getUser().getNewMembersAndGroups()){
+                        notificationService.groupAndTeam("Você foi adicionado(a) ao grupo " + group.getName(), userTeam);
+                    }
                 }
             }
         }

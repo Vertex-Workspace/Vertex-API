@@ -33,9 +33,9 @@ public class ChatController {
     public ResponseEntity<Chat> patchChat(@PathVariable Long idChat, @RequestBody UserTeamAssociateDTO userTeam){
         try {
             chatService.patchUserTeams(idChat,userTeam);
-            return new ResponseEntity<>( HttpStatus.CREATED);
+            return new ResponseEntity<>( HttpStatus.OK);
         }catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -45,8 +45,7 @@ public class ChatController {
         try {
             return new ResponseEntity<>(chatService.findMessagesByChatId(idChat),HttpStatus.OK);
         }catch (Exception e){
-            e.printStackTrace();
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
     }
@@ -55,11 +54,10 @@ public class ChatController {
     @PatchMapping("/messagePatch/{idChat}/{idUser}")
     public ResponseEntity<Chat> patchMessages(@PathVariable Long idChat,@PathVariable Long idUser,
                                               @RequestBody Message message){
-        System.out.println("a"+idChat);
         try {
             return new ResponseEntity<>(chatService.patchMessages(idChat,userService.findById(idUser),message),HttpStatus.OK);
         }catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 

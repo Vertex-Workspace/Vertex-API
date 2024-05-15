@@ -53,7 +53,7 @@ public class BeansConfig {
 
     public static CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration cors = new CorsConfiguration();
-        cors.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:63523"));
+        cors.setAllowedOrigins(List.of("http://localhost:4200"));
         cors.setAllowedMethods(List.of("GET", "POST", "PATCH", "PUT", "DELETE"));
         //Funcionamento dos Cookies
         cors.setAllowCredentials(true);

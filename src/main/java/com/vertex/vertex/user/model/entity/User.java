@@ -57,9 +57,8 @@ public class User implements UserDetails {
     @ToString.Exclude
     private byte[] image;
 
-    private Boolean publicProfile;
-
     private Boolean showCharts;
+
 
     @OneToMany(mappedBy ="user")
     @JsonIgnore

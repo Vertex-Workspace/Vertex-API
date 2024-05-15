@@ -35,10 +35,10 @@ public class Project {
     @ToString.Exclude
     private Team team;
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Property> properties;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     private UserTeam creator;
 
     @OneToMany(mappedBy = "project", orphanRemoval = true)

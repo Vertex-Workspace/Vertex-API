@@ -26,5 +26,12 @@ public class UserDTO {
         this.passwordConf = user.getPassword();
         this.firstAccess = true;
     }
+    public UserDTO(String email, String password, String firstName, String lastName) {
+        this.email = email;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
 
 }

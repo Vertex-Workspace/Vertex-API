@@ -36,5 +36,12 @@ public class ProjectCreateDTO {
         this.users = users;
         this.projectReviewENUM = ProjectReviewENUM.EMPTY;
     }
+
+    public ProjectCreateDTO(String name, String description, List<User> users) {
+        this.name = name;
+        this.description = description;
+        this.users = users;
+        this.projectReviewENUM = ProjectReviewENUM.EMPTY;
+    }
 }
 

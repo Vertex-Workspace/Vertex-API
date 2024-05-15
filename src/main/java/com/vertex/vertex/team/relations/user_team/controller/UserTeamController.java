@@ -50,7 +50,8 @@ public class UserTeamController {
             userTeamService.delete(teamId, userId);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+            e.printStackTrace();
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 

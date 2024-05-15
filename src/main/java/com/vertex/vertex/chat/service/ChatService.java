@@ -41,6 +41,7 @@ public class ChatService {
         return userTeamService.findAllUserTeamByUserId(userID)
                 .stream()
                 .flatMap(userTeam -> userTeam.getChats().stream())
+                .filter(chat -> chat.getUserTeams().size() > 1)
                 .map(ChatListDTO::new)
                 .toList();
     }

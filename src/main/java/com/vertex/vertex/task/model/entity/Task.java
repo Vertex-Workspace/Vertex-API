@@ -16,6 +16,7 @@ import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
+import com.vertex.vertex.utils.IndexUtils;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -74,7 +75,7 @@ public class Task implements FileSupporter {
     @OneToMany(mappedBy = "task", orphanRemoval = true)
     private List<Review> reviews;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "task", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "task", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Value> values;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -106,23 +107,21 @@ public class Task implements FileSupporter {
         return false;
     }
 
-    public Task(TaskCreateDTO dto, Project project, UserTeam creator) {
+    public Task(TaskCreateDTO dto, Project project, UserTeam creator, IndexUtils indexUtils) {
         BeanUtils.copyProperties(dto, this);
-
         //Set if the task is revisable or no...
         this.setRevisable(project.getProjectReviewENUM()
                 .equals(ProjectReviewENUM.MANDATORY));
-
         this.creator = creator;
         this.files = new ArrayList<>();
         this.log = (List.of
                 (new LogRecord(this,
                         "A tarefa foi criada")));
 
+        indexUtils.setIndex(project, this);
         this.project = project;
         if (Objects.isNull(project.getTasks())) project.setTasks(List.of(this));
         else project.getTasks().add(this);
-
     }
 
 }

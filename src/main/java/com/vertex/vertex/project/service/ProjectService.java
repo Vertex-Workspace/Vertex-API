@@ -14,6 +14,7 @@ import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.security.ValidationUtils;
+import com.vertex.vertex.task.model.DTO.TaskIndexDTO;
 import com.vertex.vertex.task.model.DTO.TaskModeViewDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
@@ -22,8 +23,11 @@ import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskRespo
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
+import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.utils.IndexUtils;
+import jakarta.persistence.Index;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,22 +44,24 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final UserTeamService userTeamService;
+    private final UserTeamRepository userTeamRepository;
     private final ValueService valueService;
     private final FileService fileService;
     private final NotificationService notificationService;
     private final ModelMapper mapper;
+    private final IndexUtils indexUtils;
 
     public ProjectViewListDTO saveWithRelationOfProject(ProjectCreateDTO projectCreateDTO, Long teamId) {
         Project project = new Project();
         mapper.map(projectCreateDTO, project);
-
-        createUserTeamAndSetCreator(teamId, project);
-        Project savedProject = save(project);
-        setCollaboratorsAndVerifyCreator(projectCreateDTO.getUsers(), savedProject);
         project.setProjectReviewENUM(projectCreateDTO.getProjectReviewENUM());
         if(projectCreateDTO.getProjectReviewENUM() == null){
             project.setProjectReviewENUM(ProjectReviewENUM.OPTIONAL);
         }
+        createUserTeamAndSetCreator(teamId, project);
+        Project savedProject = save(project);
+        setCollaboratorsAndVerifyCreator(projectCreateDTO.getUsers(), savedProject);
+
         defaultPropertyList(project);
 
         project.setProjectDependency(projectCreateDTO.getProjectDependency());
@@ -77,7 +83,7 @@ public class ProjectService {
     public void setCollaboratorsAndVerifyCreator(List<User> users, Project project) {
         if (users != null) {
             for (User user : users) {
-                UserTeam userTeam1 = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), user.getId());
+                UserTeam userTeam1 = userTeamRepository.findByTeam_IdAndUser_Id(project.getTeam().getId(), user.getId()).get();
                 if (!project.getCollaborators().contains(userTeam1) && !project.getCreator().equals(userTeam1)) {
                     project.getCollaborators().add(userTeam1);
                     notificationOfCollaborators(userTeam1, project);
@@ -107,6 +113,13 @@ public class ProjectService {
         ValidationUtils.loggedUserIsOnProjectAndIsCreator(project);
         project.setFile(fileService.save(file));
         return save(project);
+    }
+    public List<TaskModeViewDTO> updateIndex(Long projectId, List<TaskModeViewDTO> tasks) throws IOException {
+        Project project = findById(projectId);
+        indexUtils.updateIndex(project, tasks);
+        Project projectModification = findById(projectId);
+        projectModification.getTasks().sort(Comparator.comparingLong(Task::getIndexTask).reversed());
+        return projectModification.getTasks().stream().map(TaskModeViewDTO::new).toList();
     }
 
     public Boolean existsByIdAndUserBelongs(Long projectId) {
@@ -145,6 +158,7 @@ public class ProjectService {
                     projectOneDTO.getTasks().add(new TaskModeViewDTO(task));
             }
         }
+        projectOneDTO.getTasks().sort(Comparator.comparingLong(TaskModeViewDTO::getIndexTask).reversed());
 
         return projectOneDTO;
     }
@@ -173,7 +187,7 @@ public class ProjectService {
             save(project);
         }
 
-        for (Project projectFor : projectRepository.findAll()) {
+        for (Project projectFor : project.getTeam().getProjects()) {
             if (projectFor.getProjectDependency() != null) {
                 if (projectFor.getProjectDependency().getId().equals(id)) {
                     projectFor.setProjectDependency(null);

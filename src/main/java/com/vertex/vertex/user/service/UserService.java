@@ -11,9 +11,11 @@ import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_hours.service.TaskHoursService;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
+import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
 import com.vertex.vertex.team.relations.group.service.GroupService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
+import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.user.model.DTO.*;
 import com.vertex.vertex.user.model.entity.User;
@@ -27,6 +29,8 @@ import lombok.Data;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
@@ -54,6 +58,7 @@ public class UserService {
     private final TaskHoursService taskHoursService;
     private final UserDetailsServiceImpl userDetailsServiceImpl;
     private final SecurityContextRepository securityContextRepository;
+    private final UserTeamService userTeamService;
 
     public User save(User user) {
         return userRepository.save(user);
@@ -151,15 +156,19 @@ public class UserService {
                 .orElseThrow(EntityDoesntExistException::new);
     }
 
-    public UserPublicProfileDTO findUserInformations(Long id, Long loggedUserID) {
+    public UserPublicProfileDTO findUserInformations(Long id) {
         User user = findById(id);
         UserPublicProfileDTO dto = new UserPublicProfileDTO();
         mapper.map(user, dto);
         dto.setFullname(user.getFullName());
-
+        User userLogged = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<Team> teams = userTeamService.findTeamsByUserId(user.getId());
+        if(teams.stream().flatMap(team -> team.getUserTeams().stream()).map(UserTeam::getUser).noneMatch(u -> u.getId().equals(userLogged.getId()))){
+            throw new AuthenticationCredentialsNotFoundException("Usuário não compartilha nenhuma equipe com você!");
+        }
         //All tasks that the user is responsible
         List<TaskResponsable> tasksResponsible =
-                teamService.findAllUserTeamsByUserID(user.getId()).stream()
+                teams.stream().flatMap(team -> team.getUserTeams().stream())
                         .flatMap(userTeam -> userTeam.getTeam().getProjects().stream())
                         .flatMap(project -> project.getTasks().stream())
                         .flatMap(task -> task.getTaskResponsables().stream())
@@ -186,20 +195,15 @@ public class UserService {
         dto.setTime(LocalTime.MIDNIGHT.plus(duration));
 
 
-
-
-        User loggedUser = findById(loggedUserID);
-        if (!loggedUser.equals(user)) {
-            //Refatorar obrigatoriamente - ass. Otávio
-            List<Task> tasks = tasksResponsible.stream().map(TaskResponsable::getTask).toList();
-            List<TaskResponsable> taskResponsables = tasks.stream()
-                    .flatMap(task -> task.getTaskResponsables().stream())
-                    .filter(taskResponsable -> taskResponsable.getUserTeam().getUser().getId().equals(loggedUserID))
-                    .toList();
-            dto.setTasksInCommon(taskResponsables.stream()
-                    .map(TaskResponsable::getTask)
-                    .map(TaskSearchDTO::new).toList());
-        }
+        //Refatorar obrigatoriamente - ass. Otávio
+        List<Task> tasks = tasksResponsible.stream().map(TaskResponsable::getTask).toList();
+        List<TaskResponsable> taskResponsables = tasks.stream()
+                .flatMap(task -> task.getTaskResponsables().stream())
+                .filter(taskResponsable -> taskResponsable.getUserTeam().getUser().getId().equals(userLogged.getId()))
+                .toList();
+        dto.setTasksInCommon(taskResponsables.stream()
+                .map(TaskResponsable::getTask)
+                .map(TaskSearchDTO::new).toList());
 
         return dto;
     }
@@ -228,6 +232,12 @@ public class UserService {
         personalization.setId(user.getPersonalization().getId());
         personalization.setUser(user);
         user.setPersonalization(personalization);
+        return userRepository.save(user);
+    }
+
+    public User patchUserShowCharts(Long id) {
+        User user = findById(id);
+        user.setShowCharts(!user.getShowCharts());
         return userRepository.save(user);
     }
 
