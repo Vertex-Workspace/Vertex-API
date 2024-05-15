@@ -87,6 +87,8 @@ public class UserService {
                 user.setImage(data);
             }
 
+
+
             return save(user);
         } catch (Exception e) {
             throw new RuntimeException(e);
