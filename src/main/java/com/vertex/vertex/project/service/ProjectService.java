@@ -14,6 +14,7 @@ import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.security.ValidationUtils;
+import com.vertex.vertex.task.model.DTO.TaskIndexDTO;
 import com.vertex.vertex.task.model.DTO.TaskModeViewDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
@@ -25,6 +26,8 @@ import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.utils.IndexUtils;
+import jakarta.persistence.Index;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -46,6 +49,7 @@ public class ProjectService {
     private final FileService fileService;
     private final NotificationService notificationService;
     private final ModelMapper mapper;
+    private final IndexUtils indexUtils;
 
     public ProjectViewListDTO saveWithRelationOfProject(ProjectCreateDTO projectCreateDTO, Long teamId) {
         Project project = new Project();
@@ -110,6 +114,11 @@ public class ProjectService {
         project.setFile(fileService.save(file));
         return save(project);
     }
+    public void updateIndex(Long projectId, Long taskID, Long finalIndex) throws IOException {
+        Project project = findById(projectId);
+        Task task = project.getTasks().stream().filter(t -> t.getId().equals(taskID)).findAny().get();
+        indexUtils.updateIndex(project, task, finalIndex);
+    }
 
     public Boolean existsByIdAndUserBelongs(Long projectId) {
         if (projectRepository.existsById(projectId)) {
@@ -147,9 +156,7 @@ public class ProjectService {
                     projectOneDTO.getTasks().add(new TaskModeViewDTO(task));
             }
         }
-        System.out.println(projectOneDTO.getTasks());
         projectOneDTO.getTasks().sort(Comparator.comparingLong(TaskModeViewDTO::getIndexTask).reversed());
-        System.out.println(projectOneDTO.getTasks());
 
         return projectOneDTO;
     }
@@ -204,7 +211,6 @@ public class ProjectService {
     }
 
     public List<Property> defaultProperties() {
-        System.out.println(2);
         List<Property> properties = new ArrayList<>();
         properties.add(new Property(PropertyKind.STATUS, "Status", true, null, PropertyStatus.FIXED));
         properties.add(new Property(PropertyKind.DATE, "Data", true, null, PropertyStatus.FIXED));

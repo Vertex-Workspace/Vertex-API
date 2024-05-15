@@ -5,12 +5,19 @@ import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
 import com.vertex.vertex.project.model.DTO.ProjectEditDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
+import com.vertex.vertex.task.model.DTO.TaskIndexDTO;
+import com.vertex.vertex.task.model.DTO.TaskModeViewDTO;
+import com.vertex.vertex.task.model.entity.Task;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+//import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.lang.annotation.Repeatable;
+import java.util.List;
 
 
 @CrossOrigin
@@ -73,7 +80,6 @@ public class ProjectController {
             projectService.deleteById(id);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -109,10 +115,35 @@ public class ProjectController {
     public ResponseEntity<?> updateImage(
             @PathVariable Long projectId,
             @RequestParam MultipartFile file) {
+        System.out.println("Update image");
         try {
             return new ResponseEntity<>
                     (projectService.updateImage(file, projectId), HttpStatus.OK);
         } catch (Exception e) {
+            return new ResponseEntity<>
+                    (HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PatchMapping("/{projectId}/task")
+    public ResponseEntity<?> updateIndex(@PathVariable Long projectId, @RequestBody TaskIndexDTO tasksDTO) {
+        try {
+            projectService.updateIndex(projectId, tasksDTO.getTaskID(), tasksDTO.getFinalIndex());
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>
+                    (HttpStatus.BAD_REQUEST);
+        }
+    }
+    @PatchMapping("/task-teste")
+    public ResponseEntity<?> updateIndexByList(@RequestBody List<TaskModeViewDTO> tasks) {
+        try {
+//            projectService.updateIndex(projectId, tasksDTO.getTaskID(), tasksDTO.getFinalIndex());
+            System.out.println("new patch" + tasks);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>
                     (HttpStatus.BAD_REQUEST);
         }

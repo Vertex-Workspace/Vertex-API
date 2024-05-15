@@ -30,7 +30,6 @@ public class FilterAuthentication extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         JwtUtil jwtUtil = new JwtUtil(environment);
         CookieUtils cookieUtil = new CookieUtils(environment);
-
 //        Cookie cookieSession = new Cookie("JSESSIONID", "");
 //        cookieSession.setMaxAge(0);
 //        response.addCookie(cookieSession);
@@ -72,7 +71,8 @@ public class FilterAuthentication extends OncePerRequestFilter {
         return ((request.getRequestURI().equals("/"))) ||
                 ((request.getRequestURI().equals("/login")
                         || request.getRequestURI().equals("/user/register")
-                        || request.getRequestURI().equals("/forgotPassword"))
+                        || request.getRequestURI().equals("/forgotPassword")
+                        || request.getRequestURI().contains("/swagger-ui"))
                 && ((request.getMethod().equals("POST"))))
                         || request.getRequestURI().equals("/notifications")
                         || request.getRequestURI().equals("/chat");

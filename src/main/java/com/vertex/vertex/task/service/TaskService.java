@@ -34,7 +34,9 @@ import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.exception.UserNotFoundException;
+import com.vertex.vertex.utils.IndexUtils;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.Index;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.modelmapper.ModelMapper;
@@ -61,7 +63,7 @@ public class TaskService {
     private final ValueService valueService;
     private final NotificationService notificationService;
     private final UserTeamRepository userTeamRepository;
-
+    private final IndexUtils indexUtils;
 
     public TaskModeViewDTO save(TaskCreateDTO taskCreateDTO) {
         Project project = projectService.findById(taskCreateDTO.getProject().getId());
@@ -75,22 +77,14 @@ public class TaskService {
         if(!Permission.hasPermission(creator.getPermissionUser(), TypePermissions.Criar)){
             throw new RuntimeException("Você não tem permissão!");
         }
-        long index = 0L;
-        List<Long> indexs = new ArrayList<>(project.getTasks().stream().map(Task::getIndexTask).toList());
 
-        if(indexs.isEmpty()){
-            index = 1L;
-        } else {
-            Collections.sort(indexs);
-            index = indexs.get(indexs.size()-1) + 1;
-        }
 
-        Task task = new Task(taskCreateDTO, project, creator);
+        Task task = new Task(taskCreateDTO, project, creator, indexUtils);
         setResponsablesInTask(project, task);
-        task.setIndexTask(index);
 
         //When the task is created, every property is associated with a null value, unless it has a default value
         valueService.setTaskDefaultValues(task, project.getProperties());
+
 
         //Notifications
         for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
@@ -112,7 +106,7 @@ public class TaskService {
 
 
         UserTeam creator = userTeamRepository.findByTeam_IdAndUser_Id(project.getTeam().getId(), taskCreateDTO.getCreator().getId()).get();
-        Task task = new Task(taskCreateDTO, project, creator);
+        Task task = new Task(taskCreateDTO, project, creator, indexUtils);
         setResponsablesInTask(project, task);
 
         //When the task is created, every property is associated with a null value, unless it has a default value
@@ -138,7 +132,6 @@ public class TaskService {
             taskResponsables.add(new TaskResponsable(userTeam, task));
         }
         task.setTaskResponsables(taskResponsables);
-        System.out.println("tks" + task.getTaskResponsables());
     }
 
 
