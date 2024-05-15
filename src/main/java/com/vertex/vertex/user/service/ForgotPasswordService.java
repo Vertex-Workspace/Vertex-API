@@ -1,6 +1,7 @@
 package com.vertex.vertex.user.service;
 
 
+import lombok.AllArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.stereotype.Service;
@@ -19,20 +20,27 @@ import java.io.OutputStream;
 import java.util.Properties;
 
 @Service
+@AllArgsConstructor
 public class ForgotPasswordService {
 
+    private final UserService userService;
+
     public Long sendCodeToEmail(String emailTo) {
+        userService.findByEmail(emailTo);
+
         Properties properties = new Properties();
 
         String host = "smtp.gmail.com";
         String email = "vertex.workspacee@gmail.com";
         String password = "sryx rozm wixy iool";
 
+        System.out.println("Sending email to: " + emailTo);
+
         // Configuração das propriedades do servidor SMTP
         properties.put("mail.smtp.auth", "true");
         properties.put("mail.smtp.starttls.enable", "true");
         properties.put("mail.smtp.host", host);
-        properties.put("mail.smtp.port", "465");
+        properties.put("mail.smtp.port", "587");
         properties.put("mail.smtp.ssl.trust", host);
 
         // Cria a sessão com autenticação
@@ -52,7 +60,7 @@ public class ForgotPasswordService {
             // Criação da mensagem de e-mail
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(email, "VERTEX: Gerencie seu tempo de ponta a ponta!"));
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress("anaclaratomaselliborchardt75@gmail.com"));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(emailTo));
             message.setSubject("O código de recuperação da sua conta VERTEX é: " + code + "\n");
 
             // Criação do conteúdo HTML do e-mail
@@ -62,7 +70,7 @@ public class ForgotPasswordService {
             MimeBodyPart textPart = new MimeBodyPart();
             String htmlContent = "<html><body style='background-color: #f6f8fa;'>" +
                     "<div style='margin: 0 auto; max-width: 600px; padding: 20px; text-align: center;'>" +
-                    "<img style='width: 150px; height: 140px; margin-bottom: 20px;' src='cid:logo' alt='VERTEX LOGO' >" +
+                    "<img style='width: 140px; height: auto; margin-bottom: 20px;' src='cid:logo' alt='VERTEX LOGO' >" +
                     "<div style='background-color: #fff; border-radius: 6px; padding: 40px;'>" +
                     "<h2 style='color: #092C4C; font-weight: 500;'>Código de Recuperação</h2>" +
                     "<p style='font-size: 16px;'>Seu código de recuperação é:</p>" +
