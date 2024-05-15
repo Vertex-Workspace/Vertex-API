@@ -1,5 +1,6 @@
 package com.vertex.vertex.user.service;
 
+import com.vertex.vertex.user.model.DTO.ChangePasswordDTO;
 import com.vertex.vertex.user.model.DTO.UserDTO;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.exception.InvalidPasswordException;
@@ -28,6 +29,17 @@ public class RegexValidate {
 
         if (!userDTO.getPassword().equals(userDTO.getPasswordConf())) {
             throw new InvalidPasswordException();
+        }
+        return validPassword;
+    }
+
+    public boolean isPasswordSecure(ChangePasswordDTO changePasswordDTO) {
+        boolean validPassword = Pattern.compile("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$")
+                .matcher(changePasswordDTO.getPassword())
+                .find();
+
+        if (changePasswordDTO.getPassword() != null && !validPassword) {
+            throw new UnsafePasswordException();
         }
         return validPassword;
     }

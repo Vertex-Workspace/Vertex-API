@@ -1,6 +1,7 @@
 package com.vertex.vertex.user.controller;
 
 import com.vertex.vertex.notification.entity.model.Notification;
+import com.vertex.vertex.user.model.DTO.ChangePasswordDTO;
 import com.vertex.vertex.user.model.DTO.UserDTO;
 import com.vertex.vertex.user.model.DTO.UserEditionDTO;
 import com.vertex.vertex.user.model.DTO.UserLoginDTO;
@@ -151,6 +152,16 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PatchMapping("/password")
+    public ResponseEntity<?> changePasswordPeriodically(@RequestBody ChangePasswordDTO changePasswordDTO) {
+        try {
+            this.userService.changePasswordPeriodically(changePasswordDTO);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }
 }

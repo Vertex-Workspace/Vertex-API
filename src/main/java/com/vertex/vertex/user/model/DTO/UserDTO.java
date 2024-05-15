@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,6 +22,7 @@ public class UserDTO {
     private String passwordConf;
     private boolean firstAccess;
     private String image;
+    private LocalDateTime registerDay;
 
     public UserDTO(User user) {
         BeanUtils.copyProperties(user, this);
@@ -31,6 +34,7 @@ public class UserDTO {
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.registerDay = LocalDateTime.now();
     }
 
 

@@ -285,5 +285,18 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public void changePasswordPeriodically(ChangePasswordDTO changePasswordDTO){
+        User user = findById(changePasswordDTO.getId());
+        if(!Objects.equals(user.getPassword(), changePasswordDTO.getPassword())){
+            if(regexValidate.isPasswordSecure(changePasswordDTO)) {
+                user.setPassword(new BCryptPasswordEncoder().encode(changePasswordDTO.getPassword()));
+                user.setRegisterDay(LocalDateTime.now());
+                save(user);
+            }
+        } else {
+            throw new RuntimeException("Your password can't be the same as the last");
+        }
+    }
+
 
 }
