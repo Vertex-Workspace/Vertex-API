@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.security.Provider;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -75,6 +76,7 @@ public class User implements UserDetails {
     private Boolean responsibleInProjectOrTask;
     private Boolean anyUpdateOnTask;
     private Boolean sendToEmail;
+    private LocalDateTime registerDay;
 
     public User(String email, OAuth2User user) {
         String lastName = user.getAttribute("family_name");

@@ -348,13 +348,15 @@ public class TaskService {
 
     public List<TaskModeViewDTO> getAllByUser(Long userID) {
         try {
-            return userTeamService.findAllUserTeamByUserId(userID)
+            List<TaskModeViewDTO> tasks = userTeamService.findAllUserTeamByUserId(userID)
                     .stream()
                     .flatMap(ut -> ut.getTeam().getProjects().stream()
                             .flatMap(p -> filterTasksByResponsible(p.getTasks(), ut).stream())
                     )
                     .map(TaskModeViewDTO::new)
                     .toList();
+            tasks.forEach(taskModeViewDTO -> taskModeViewDTO.setImage(null));
+            return tasks;
 
         } catch (Exception e) {
             throw new RuntimeException();

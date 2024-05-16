@@ -252,7 +252,7 @@ public class TeamService {
         try {
             User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             UserTeam userTeam = userTeamService.findUserTeamByComposeId(id, user.getId());
-            return findTeamById(id)
+            List<TaskModeViewDTO> tasks = findTeamById(id)
                     .getProjects()
                     .stream()
                     .flatMap(p -> p.getTasks().stream())
@@ -261,6 +261,8 @@ public class TeamService {
                     .map(TaskResponsable::getTask)
                     .map(TaskModeViewDTO::new)
                     .toList();
+            tasks.forEach(taskModeViewDTO -> taskModeViewDTO.setImage(null));
+            return tasks;
 
         } catch (Exception e) {
             throw new RuntimeException();
