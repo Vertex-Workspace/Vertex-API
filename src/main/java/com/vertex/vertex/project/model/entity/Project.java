@@ -41,7 +41,7 @@ public class Project {
     @ManyToOne(cascade = CascadeType.PERSIST)
     private UserTeam creator;
 
-    @OneToMany(mappedBy = "project", orphanRemoval = true)
+    @OneToMany(mappedBy = "project", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Task> tasks;
 
     @OneToMany(mappedBy = "project", orphanRemoval = true)
@@ -54,7 +54,7 @@ public class Project {
     @OneToOne(cascade = CascadeType.ALL)
     private File file;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @ToString.Exclude
     private List<UserTeam> collaborators = new ArrayList<>();
 

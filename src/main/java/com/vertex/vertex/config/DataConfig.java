@@ -173,12 +173,16 @@ public class DataConfig {
             }
 
             // Adicionar membros da equipe como colaboradores
-            String insertCollaboratorsSQL = "INSERT INTO project_collaborators (project_id, collaborators_id) " +
-                    "SELECT p.id, ut.id FROM project p, user_team ut WHERE p.team_id = ?";
+            try (Connection conn = DriverManager.getConnection(BANCO_URL, USERNAME, PASSSWORD);
+                 Statement statement = conn.createStatement()) {
 
-            try (PreparedStatement preparedStatement = connection.prepareStatement(insertCollaboratorsSQL)) {
-                preparedStatement.setLong(1, 4);
-                preparedStatement.executeUpdate();
+                // Criar as permissões para os UserTeams com IDs 6, 7 e 8
+                String sql = "INSERT INTO `project_collaborators` (`project_id`, `collaborators_id`) VALUES " +
+                        "(1, 4), (1,5), (1,6), (2, 4), (2,5), (2,6), (3, 4), (3,5), (3,6)";
+                statement.executeUpdate(sql);
+
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
             }
 
             setProjectImage();
