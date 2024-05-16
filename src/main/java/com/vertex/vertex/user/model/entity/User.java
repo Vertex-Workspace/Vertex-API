@@ -64,8 +64,9 @@ public class User implements UserDetails {
     private String imgUrl; //external
 
     private Boolean publicProfile;
-
     private Boolean showCharts;
+    private Boolean syncWithCalendar;
+    private Boolean syncWithDrive;
 
     @OneToMany(mappedBy ="user")
     @JsonIgnore

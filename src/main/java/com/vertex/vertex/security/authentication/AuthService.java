@@ -1,6 +1,6 @@
 package com.vertex.vertex.security.authentication;
 
-import com.vertex.vertex.security.CalendarService;
+import com.vertex.vertex.google.service.CalendarService;
 import com.vertex.vertex.security.util.CookieUtils;
 import com.vertex.vertex.user.model.DTO.UserDTO;
 import com.vertex.vertex.user.model.DTO.UserLoginDTO;
@@ -21,9 +21,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor

@@ -1,11 +1,10 @@
 package com.vertex.vertex.project.controller;
 
-import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
 import com.vertex.vertex.project.model.DTO.ProjectEditDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
-import com.vertex.vertex.security.CalendarService;
+import com.vertex.vertex.google.service.CalendarService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -35,11 +34,6 @@ public class ProjectController {
     @GetMapping("/{id}")
     public ResponseEntity<?> findProjectById(@PathVariable Long id, HttpServletResponse response) {
         try {
-//            try {
-//                calendarService.getEvents(response);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
             return new ResponseEntity<>(projectService.findProjectById(id), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);

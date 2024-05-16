@@ -16,6 +16,7 @@ import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.util.List;
 
@@ -55,9 +56,11 @@ public class BeansConfig {
     public static CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration cors = new CorsConfiguration();
         cors.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:63523"));
-        cors.setAllowedMethods(List.of("GET", "POST", "PATCH", "PUT", "DELETE"));
+        cors.setAllowedMethods(List.of("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"));
+
         //Funcionamento dos Cookies
         cors.setAllowCredentials(true);
+//        cors.add("/**")
 
         cors.setAllowedHeaders(List.of("*"));
 
@@ -65,6 +68,7 @@ public class BeansConfig {
                 new UrlBasedCorsConfigurationSource();
         // "/**" allows multiples names after the / for example -> /task/property/2
         corsConfigurationSource.registerCorsConfiguration("/**", cors);
+
         return corsConfigurationSource;
     }
 }

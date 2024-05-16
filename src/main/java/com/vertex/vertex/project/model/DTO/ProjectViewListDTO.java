@@ -2,6 +2,7 @@ package com.vertex.vertex.project.model.DTO;
 
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.project.model.entity.Project;
+import com.vertex.vertex.task.model.enums.CreationOrigin;
 import com.vertex.vertex.user.model.entity.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ public class ProjectViewListDTO {
     private String description;
     private File file;
     private Boolean isCreator;
+    private CreationOrigin creationOrigin;
 
     public ProjectViewListDTO(Project project) {
         this.id = project.getId();
@@ -23,7 +25,7 @@ public class ProjectViewListDTO {
         this.description = project.getDescription();
         this.file = project.getFile();
         this.isCreator = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId().equals(project.getCreator().getUser().getId());
-
+        this.creationOrigin = project.getCreationOrigin();
     }
 
 }

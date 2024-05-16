@@ -1,4 +1,4 @@
-package com.vertex.vertex.security;
+package com.vertex.vertex.google.service;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -15,9 +15,18 @@ import com.google.api.client.util.DateTime;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
-import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.Events;
+import com.google.api.services.calendar.model.*;
+import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
+import com.vertex.vertex.project.model.entity.Project;
+import com.vertex.vertex.project.service.ProjectService;
+import com.vertex.vertex.task.model.DTO.TaskModeViewDTO;
+import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.model.enums.CreationOrigin;
 import com.vertex.vertex.task.service.TaskService;
+import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
+import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
+import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -26,6 +35,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.security.GeneralSecurityException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,26 +45,17 @@ import java.util.List;
 @AllArgsConstructor
 public class CalendarService {
 
-    private static final String APPLICATION_NAME = "Vertex";
-    /**
-     * Global instance of the JSON factory.
-     */
-    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-    /**
-     * Directory to store authorization tokens for this application.
-     */
-    private static final String TOKENS_DIRECTORY_PATH = "tokens";
+    private final ProjectService projectService;
+    private final UserService userService;
 
-    /**
-     * Global instance of the scopes required by this quickstart.
-     * If modifying these scopes, delete your previously saved tokens/ folder.
-     */
+    private static final String APPLICATION_NAME = "Vertex";
+    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+    private static final String TOKENS_DIRECTORY_PATH = "tokens";
     private static final List<String> SCOPES =
-            Collections.singletonList(CalendarScopes.CALENDAR_READONLY);
+            Collections.singletonList(CalendarScopes.CALENDAR);
     private static final String CREDENTIALS_FILE_PATH = "src/main/resources/credentials.json";
 
     private final TaskService taskService;
-
 
 
     public Credential getCredentials(HttpServletResponse response, Long userId)
@@ -89,7 +92,7 @@ public class CalendarService {
         }
     }
 
-    public void convertEventsToTask(HttpServletResponse response, Long userId, Long projectId) {
+    public List<Task> convertEventsToTask(HttpServletResponse response, Long userId, Long projectId) {
         try {
             HttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
             Calendar service =
@@ -106,46 +109,68 @@ public class CalendarService {
             List<Event> items = events.getItems();
 
             if (!items.isEmpty()) {
-                taskService.convertEventsToTask(items, projectId, userId);
+                return taskService.convertEventsToTask(items, projectId, userId);
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        throw new RuntimeException("Empty!");
     }
 
 
+    public Project createCalendarProject(
+            Long teamId, ProjectCreateDTO dto,
+            Long userId, HttpServletResponse response) {
+        Project project = projectService.findById(projectService.saveWithRelationOfProject(dto, teamId).getId());
+        project.setCreationOrigin(CreationOrigin.GOOGLE);
+        return projectService.save(project);
+    }
 
 
-    public List<Event> getEvents(HttpServletResponse response, Long userId) throws IOException, GeneralSecurityException {
-        // Build a new authorized API client service.
-        HttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+    public Project findByIdAndGetNewEvents(Long projectId, Long userId, HttpServletResponse response) {
+        Project project = projectService.findById(projectId);
+        project.getTasks().addAll(convertEventsToTask(response, userId, projectId));
+        return projectService.save(project);
+    }
+
+    public Task create(HttpServletResponse response, Long userId, Long projectId)
+            throws GeneralSecurityException, IOException {
+        User user = userService.findById(userId);
+        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         Calendar service =
                 new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(response, userId))
                         .setApplicationName(APPLICATION_NAME)
                         .build();
 
-        // List the next events from the primary calendar.
-        DateTime now = new DateTime(System.currentTimeMillis());
-        Events events = service.events().list("primary")
-                .setTimeMin(now)
-                .setOrderBy("startTime")
-                .setSingleEvents(true)
-                .execute();
-        List<Event> items = events.getItems();
-//        System.out.println(items.get(0).getId());
+        Event event = new Event()
+                .setSummary("Nova tarefa")
+                .setDescription("Descreva um pouco sobre sua tarefa aqui.");
 
-        if (items.isEmpty()) {
-            System.out.println("No upcoming events found.");
-        } else {
-            System.out.println("Upcoming events");
-            for (Event event : items) {
-                DateTime start = event.getStart().getDateTime();
-                if (start == null) {
-                    start = event.getStart().getDate();
-                }
-                System.out.printf("%s (%s)\n", event.getSummary(), start);
-            }
-        }
-        return items;
+        DateTime startDateTime = new DateTime(LocalDateTime.now().toString());
+        EventDateTime start = new EventDateTime()
+                .setDateTime(startDateTime)
+                .setTimeZone("America/Sao_Paulo");
+        event.setStart(start);
+
+        DateTime endDateTime = new DateTime(LocalDateTime.now().plusHours(1).toString());
+        EventDateTime end = new EventDateTime()
+                .setDateTime(endDateTime)
+                .setTimeZone("America/Sao_Paulo");
+        event.setEnd(end);
+
+        String[] recurrence = new String[] {"RRULE:FREQ=DAILY;COUNT=1"};
+        event.setRecurrence(Arrays.asList(recurrence));
+
+        EventAttendee[] attendees = new EventAttendee[] {
+                new EventAttendee().setEmail(user.getEmail()),
+                new EventAttendee().setEmail("vertex.workspacee@gmail.com")
+        };
+        event.setAttendees(Arrays.asList(attendees));
+
+        String calendarId = "primary";
+        event = service.events().insert(calendarId, event).execute();
+        return taskService.saveNewEvent(event, user, projectId);
     }
 }

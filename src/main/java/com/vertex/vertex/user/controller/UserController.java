@@ -5,6 +5,7 @@ import com.vertex.vertex.user.model.DTO.UserDTO;
 import com.vertex.vertex.user.model.DTO.UserEditionDTO;
 import com.vertex.vertex.user.model.DTO.UserLoginDTO;
 import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user.model.enums.UserKind;
 import com.vertex.vertex.user.model.exception.*;
 import com.vertex.vertex.user.relations.personalization.model.entity.LanguageDTO;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
@@ -33,6 +34,7 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<?> save(@RequestBody UserDTO userDTO) {
         try {
+            userDTO.setUserKind(UserKind.DEFAULT);
             return new ResponseEntity<>(userService.save(userDTO), HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);

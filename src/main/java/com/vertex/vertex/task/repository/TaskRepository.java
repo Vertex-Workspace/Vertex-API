@@ -8,10 +8,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
+    boolean existsByGoogleId(String googleId);
+
+
 //    @Query("SELECT TaskProperty FROM com.vertex.vertex.task.controller.Task JOIN TaskProperty ON com.vertex.vertex.task.controller.Task.id = TaskProperty.task.id")
 //    List<TaskProperty> find();
 
-
-//    boolean existsByGId(String gId);
 
 }

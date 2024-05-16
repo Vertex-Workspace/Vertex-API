@@ -1,6 +1,6 @@
 package com.vertex.vertex.task.model.enums;
 
-public enum TaskKind {
+public enum CreationOrigin {
     DEFAULT,
-    CALENDAR
+    GOOGLE
 }

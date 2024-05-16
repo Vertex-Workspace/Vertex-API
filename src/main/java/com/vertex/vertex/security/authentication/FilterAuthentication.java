@@ -37,6 +37,7 @@ public class FilterAuthentication extends OncePerRequestFilter {
 //        cookieSession.setMaxAge(0);
 //        response.addCookie(cookieSession);
 
+
         if (!isPublicRouter(request)) {
             //Get the JWT Cookie from request and the value
             Cookie cookie;

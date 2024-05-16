@@ -7,6 +7,7 @@ import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.DTO.TaskModeViewDTO;
 import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.model.enums.CreationOrigin;
 import com.vertex.vertex.task.relations.note.model.dto.NoteDTO;
 import com.vertex.vertex.task.relations.note.model.entity.Note;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
@@ -38,6 +39,7 @@ public class ProjectOneDTO {
     private List<TaskModeViewDTO> tasks = new ArrayList<>();
     private List<NoteDTO> notes;
     private ProjectReviewENUM projectReviewENUM;
+    private CreationOrigin creationOrigin;
 
     public ProjectOneDTO(Project project) {
         BeanUtils.copyProperties(project, this);

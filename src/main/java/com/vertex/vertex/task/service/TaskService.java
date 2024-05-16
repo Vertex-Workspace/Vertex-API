@@ -13,7 +13,6 @@ import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.property.service.PropertyService;
-import com.vertex.vertex.security.CalendarService;
 import com.vertex.vertex.security.util.ValidationUtils;
 import com.vertex.vertex.task.model.DTO.*;
 import com.vertex.vertex.task.relations.review.repository.ReviewRepository;
@@ -23,6 +22,7 @@ import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.model.exceptions.TaskDoesNotExistException;
 import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
+import com.vertex.vertex.task.relations.value.model.entity.ValueDate;
 import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
@@ -43,10 +43,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Data
@@ -83,6 +84,14 @@ public class TaskService {
 
         //When the task is created, every property is associated with a null value, unless it has a default value
         valueService.setTaskDefaultValues(task, project.getProperties());
+
+        if (taskCreateDTO.getEvent() != null) { // save the date of tasks from calendar
+            DateTime dateTime = taskCreateDTO.getEvent().getStart().getDateTime();
+            LocalDateTime local
+                    = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime.getValue()),
+                    ZoneId.systemDefault());
+            task.getValues().get(1).setValue(local);
+        }
 
         //Notifications
         for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
@@ -180,6 +189,11 @@ public class TaskService {
         notificationService.saveLogRecord(task,
                 ("O valor da propriedade " + property.getName()
                         + " foi definido como " + propertyValue));
+
+        System.out.println(task);
+
+        CaelndarGoogle.updateValueAtTask(task);
+
         return task;
     }
 
@@ -562,18 +576,23 @@ public class TaskService {
     }
 
 
-    public void convertEventsToTask(List<Event> items, Long projectId, Long userId) {
+    public List<Task> convertEventsToTask(List<Event> items, Long projectId, Long userId) {
         Project project = projectService.findById(projectId);
-        User user = userTeamService
-                .findAllUserTeamByUserId(userId)
-                        .stream().map(UserTeam::getUser)
+        UserTeam ut = userTeamService
+                .findAllUserTeamByUserId(userId).stream()
                         .findFirst().get();
 
-        items.forEach(i -> {
-//            if (!taskRepository.existsByGId(i.getId())) {
+            return (items.stream()
+                    .map(e -> new TaskCreateDTO(e, ut.getUser(), project))
+                    .filter(t -> !taskRepository.existsByGoogleId(t.getGoogleId()))
+                    .map(this::save)
+                    .toList());
+    }
 
-                Task task = save(new TaskCreateDTO(i, user, project));
-//            }
-        });
+
+    public Task saveNewEvent(Event event, User user, Long projectId) {
+        Project project = projectService.findById(projectId);
+        TaskCreateDTO dto = new TaskCreateDTO(event, user, project);
+        return save(dto);
     }
 }
