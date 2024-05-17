@@ -1,5 +1,6 @@
 package com.vertex.vertex.user.service;
 
+import com.vertex.vertex.config.DefaultConfigService;
 import com.vertex.vertex.log.model.exception.EntityDoesntExistException;
 import com.vertex.vertex.notification.service.NotificationService;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
@@ -59,6 +60,7 @@ public class UserService {
     private final UserDetailsServiceImpl userDetailsServiceImpl;
     private final SecurityContextRepository securityContextRepository;
     private final UserTeamService userTeamService;
+    private final DefaultConfigService defaultConfig;
 
     public User save(User user) {
         return userRepository.save(user);
@@ -79,7 +81,7 @@ public class UserService {
             }
 //            regexValidate.isPasswordSecure(user, userDTO);
 
-            //Seta usuário como autenticado
+            userRepository.save(user);
             userSetDefaultInformations(user);
             user.setDefaultSettings(false);
             if (userDTO.getImage() != null) {
@@ -107,7 +109,7 @@ public class UserService {
         user.setAnyUpdateOnTask(true);
         user.setResponsibleInProjectOrTask(true);
         user.setDefaultSettings(true);
-        defaultTeams(save(user));
+        defaultConfig.createTeam(user);
     }
 
     public User findByEmail(String email) {
@@ -284,13 +286,6 @@ public class UserService {
                 .toList();
     }
 
-    public void defaultTeams(User user) {
-        TeamViewListDTO teamViewListDTO =
-                new TeamViewListDTO("Equipe " + user.getFirstName(), user, null,
-                        "“As boas equipes incorporam o trabalho em equipe na sua cultura, criando os elementos essenciais ao sucesso.” — Ted Sundquist, jogador de futebol americano.", LocalDateTime.now(), true);
-        teamService.save(teamViewListDTO);
-    }
-
     public void setFirstAccessNull(Long userId) {
         User user = findById(userId);
         user.setFirstAccess(false);
@@ -309,6 +304,7 @@ public class UserService {
             throw new RuntimeException("Your password can't be the same as the last");
         }
     }
+
 
 
 }

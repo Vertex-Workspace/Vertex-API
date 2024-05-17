@@ -104,9 +104,9 @@ public class TaskService {
     public Task savePostConstruct(TaskCreateDTO taskCreateDTO) {
         Project project = projectService.findById(taskCreateDTO.getProject().getId());
 
-
         UserTeam creator = userTeamRepository.findByTeam_IdAndUser_Id(project.getTeam().getId(), taskCreateDTO.getCreator().getId()).get();
         Task task = new Task(taskCreateDTO, project, creator, indexUtils);
+
         setResponsablesInTask(project, task);
 
         //When the task is created, every property is associated with a null value, unless it has a default value
@@ -114,6 +114,7 @@ public class TaskService {
 
         //Notifications
         for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
+            if(taskResponsable.getUserTeam().getUser().getResponsibleInProjectOrTask() !=null){
             if (taskResponsable.getUserTeam().getUser().getResponsibleInProjectOrTask() && !taskResponsable.getUserTeam().equals(task.getCreator())) {
                 notificationService.save(new Notification(
                         project,
@@ -121,6 +122,7 @@ public class TaskService {
                         "projeto/" + project.getId() + "/tarefas?taskID=" + task.getId(),
                         taskResponsable.getUserTeam().getUser()
                 ));
+            }
             }
         }
 
@@ -132,6 +134,7 @@ public class TaskService {
             taskResponsables.add(new TaskResponsable(userTeam, task));
         }
         task.setTaskResponsables(taskResponsables);
+        System.out.println(task.getTaskResponsables());
     }
 
 
@@ -193,13 +196,15 @@ public class TaskService {
 
         //Notifications
         for (TaskResponsable taskResponsableFor : task.getTaskResponsables()) {
-            if (!taskResponsableFor.getUserTeam().equals(userTeam) && taskResponsableFor.getUserTeam().getUser().getAnyUpdateOnTask()) {
-                notificationService.save(new Notification(
-                        task.getProject(),
-                        "Valor da propriedade " + property.getName() + " alterado em " + task.getName(),
-                        "projeto/" + task.getProject().getId() + "/tarefas?taskID=" + task.getId(),
-                        taskResponsableFor.getUserTeam().getUser()
-                ));
+            if(taskResponsableFor.getUserTeam() != null) {
+                if (!taskResponsableFor.getUserTeam().equals(userTeam) && taskResponsableFor.getUserTeam().getUser().getAnyUpdateOnTask()) {
+                    notificationService.save(new Notification(
+                            task.getProject(),
+                            "Valor da propriedade " + property.getName() + " alterado em " + task.getName(),
+                            "projeto/" + task.getProject().getId() + "/tarefas?taskID=" + task.getId(),
+                            taskResponsableFor.getUserTeam().getUser()
+                    ));
+                }
             }
         }
 
