@@ -47,7 +47,6 @@ public class TaskController {
         try{
             return new ResponseEntity<>(taskService.save(taskCreateDTO), HttpStatus.OK);
         }catch(Exception e){
-            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }

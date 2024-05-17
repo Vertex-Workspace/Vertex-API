@@ -16,6 +16,7 @@ import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.security.ValidationUtils;
 import com.vertex.vertex.task.model.DTO.TaskIndexDTO;
 import com.vertex.vertex.task.model.DTO.TaskModeViewDTO;
+import com.vertex.vertex.task.model.DTO.TaskViewListImageDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
@@ -114,12 +115,13 @@ public class ProjectService {
         project.setFile(fileService.save(file));
         return save(project);
     }
-    public List<TaskModeViewDTO> updateIndex(Long projectId, List<TaskModeViewDTO> tasks) throws IOException {
+    public List<TaskViewListImageDTO> updateIndex(Long projectId, List<TaskModeViewDTO> tasks) throws IOException {
         Project project = findById(projectId);
         indexUtils.updateIndex(project, tasks);
         Project projectModification = findById(projectId);
+        setTasksResponsiblesAndReviews(projectModification);
         projectModification.getTasks().sort(Comparator.comparingLong(Task::getIndexTask).reversed());
-        return projectModification.getTasks().stream().map(TaskModeViewDTO::new).toList();
+        return projectModification.getTasks().stream().map(TaskViewListImageDTO::new).toList();
     }
 
     public Boolean existsByIdAndUserBelongs(Long projectId) {
@@ -149,18 +151,24 @@ public class ProjectService {
         //Pass through all tasks of the project and validates if task has an opened review (UNDERANALYSIS)
         //If it has, It won't be included into list
 
+        projectOneDTO.setTasks(setTasksResponsiblesAndReviews(project));
+        projectOneDTO.getTasks().sort(Comparator.comparingLong(TaskModeViewDTO::getIndexTask).reversed());
+
+        return projectOneDTO;
+    }
+
+    private List<TaskViewListImageDTO> setTasksResponsiblesAndReviews(Project project){
+        List<TaskViewListImageDTO> tasks = new ArrayList<>();
         for (Task task : getTasksProjectByResponsibility(project.getTasks(),
                 userTeamService.findUserTeamByComposeId(project.getTeam().getId()
                         , ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId()))){
             if(task.getReviews() == null || task.getReviews().isEmpty()){
-                projectOneDTO.getTasks().add(new TaskModeViewDTO(task));
+                tasks.add(new TaskViewListImageDTO(task));
             } else if(task.getReviews().stream().noneMatch(r -> r.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS))){
-                    projectOneDTO.getTasks().add(new TaskModeViewDTO(task));
+                tasks.add(new TaskViewListImageDTO(task));
             }
         }
-        projectOneDTO.getTasks().sort(Comparator.comparingLong(TaskModeViewDTO::getIndexTask).reversed());
-
-        return projectOneDTO;
+        return tasks;
     }
 
     private List<Task> getTasksProjectByResponsibility(List<Task> tasks, UserTeam userTeam){

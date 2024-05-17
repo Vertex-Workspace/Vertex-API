@@ -138,8 +138,14 @@ public class UserService {
 
     public User edit(UserEditionDTO userEditionDTO) throws Exception {
         User user = findById(userEditionDTO.getId());
-        BeanUtils.copyProperties(userEditionDTO, user);
-        emailValidation(user);
+        if(!Objects.equals(user.getEmail(), userEditionDTO.getEmail())){
+            emailValidation(user);
+        }
+        user.setEmail(userEditionDTO.getEmail());
+        user.setDescription(userEditionDTO.getDescription());
+        user.setLocation(userEditionDTO.getLocation());
+        user.setFirstName(userEditionDTO.getFirstName());
+        user.setLastName(userEditionDTO.getLastName());
         return userRepository.save(user);
     }
 
@@ -293,7 +299,7 @@ public class UserService {
 
     public void setFirstAccessNull(Long userId) {
         User user = findById(userId);
-        user.setFirstAccess(false);
+        user.setFirstAccess(!user.isFirstAccess());
         userRepository.save(user);
     }
 

@@ -65,7 +65,7 @@ public class TaskService {
     private final UserTeamRepository userTeamRepository;
     private final IndexUtils indexUtils;
 
-    public TaskModeViewDTO save(TaskCreateDTO taskCreateDTO) {
+    public TaskViewListImageDTO save(TaskCreateDTO taskCreateDTO) {
         Project project = projectService.findById(taskCreateDTO.getProject().getId());
 
 
@@ -98,7 +98,7 @@ public class TaskService {
             }
         }
 
-        return new TaskModeViewDTO(save(task));
+        return new TaskViewListImageDTO(save(task));
     }
 
     public Task savePostConstruct(TaskCreateDTO taskCreateDTO) {
@@ -179,7 +179,7 @@ public class TaskService {
         taskRepository.deleteById(id);
     }
 
-    public TaskModeViewDTO save(EditValueDTO editValueDTO) throws Exception {
+    public TaskViewListImageDTO save(EditValueDTO editValueDTO) throws Exception {
         Task task = findById(editValueDTO.getId());
 
         Property property = propertyService.findByIdAndProjectContains(
@@ -208,7 +208,7 @@ public class TaskService {
         notificationService.saveLogRecord(task,
                 ("O valor da propriedade " + property.getName()
                         + " foi definido como " + propertyValue));
-        return new TaskModeViewDTO(task);
+        return new TaskViewListImageDTO(task);
     }
 
 
@@ -348,15 +348,13 @@ public class TaskService {
 
     public List<TaskModeViewDTO> getAllByUser(Long userID) {
         try {
-            List<TaskModeViewDTO> tasks = userTeamService.findAllUserTeamByUserId(userID)
+            return userTeamService.findAllUserTeamByUserId(userID)
                     .stream()
                     .flatMap(ut -> ut.getTeam().getProjects().stream()
                             .flatMap(p -> filterTasksByResponsible(p.getTasks(), ut).stream())
                     )
                     .map(TaskModeViewDTO::new)
                     .toList();
-            tasks.forEach(taskModeViewDTO -> taskModeViewDTO.setImage(null));
-            return tasks;
 
         } catch (Exception e) {
             throw new RuntimeException();

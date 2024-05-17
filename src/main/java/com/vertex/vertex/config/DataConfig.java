@@ -54,11 +54,11 @@ public class DataConfig {
         }
         //default Users
         User user1 = userService.save(new UserDTO
-                ("kaique@gmail.com", "We3sl@ey", "Kaique", "Fernandes"));
+                ("kaique@gmail.com", "@Weg123456", "Kaique", "Fernandes"));
         User user2 = userService.save(new UserDTO
-                ("otavio@gmail.com", "We3sl@ey", "Otavio", "Miguel Rocha"));
+                ("otavio@gmail.com", "@Weg123456", "Otavio", "Miguel Rocha"));
         User user3 = userService.save(new UserDTO
-                ("miguel@gmail.com", "We3sl@ey", "Miguel", "Bertoldi"));
+                ("miguel@gmail.com", "@Weg123456", "Miguel", "Bertoldi"));
         setUserImage(user1, user2, user3);
         teamService.save(new TeamViewListDTO
                 ("Vertex", user2, setTeamImage(), "A Equipe vertex tem como propósito organizar as tarefas e funcionalidades ...", false));

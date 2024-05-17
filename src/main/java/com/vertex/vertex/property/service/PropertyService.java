@@ -82,30 +82,6 @@ public class PropertyService {
 
         //Edit Property list
         finalProperty.getPropertyLists().forEach(propertyList -> propertyList.setProperty(property));
-
-
-        //DEPRECATED - ASS OTÁVIO
-        //CANNOT CHANGE A KIND OF PROPERTY WHEN IT'S CREATED
-
-
-//        //FIXED PROPERTIES CANNOT BE EDITED VERY DEEP
-//        if(property.getPropertyStatus() != PropertyStatus.FIXED){
-//            Property oldProperty = findById(property.getId());
-//            if(oldProperty.getKind() != property.getKind()){
-//                //Add a new value to each property
-//                for(Task task : project.getTasks()){
-//                    Value value = property.getKind().getValue();
-//                    value.setTask(task);
-//                    value.setProperty(property);
-//
-//                    int indexOldProperty = task.getValues().indexOf(task.getValues().stream().filter(
-//                            v -> v.getProperty().getId().equals(oldProperty.getId())).findAny().get());
-//
-//                    task.getValues().set(indexOldProperty, value);
-//                    taskRepository.save(task);
-//                }
-//            }
-//        }
         propertyRepository.save(finalProperty);
 
         return projectService.findProjectById(project.getId());

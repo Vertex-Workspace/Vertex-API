@@ -56,6 +56,7 @@ public class UserController {
         try {
             return new ResponseEntity<>(userService.edit(userEditionDTO), HttpStatus.OK);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }

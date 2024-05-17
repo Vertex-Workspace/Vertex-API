@@ -116,7 +116,6 @@ public class ProjectController {
     public ResponseEntity<?> updateImage(
             @PathVariable Long projectId,
             @RequestParam MultipartFile file) {
-        System.out.println("Update image");
         try {
             return new ResponseEntity<>
                     (projectService.updateImage(file, projectId), HttpStatus.OK);
@@ -141,7 +140,6 @@ public class ProjectController {
         try {
             return new ResponseEntity<>(projectService.updateProjectCollaborators(projectEditDTO), HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }

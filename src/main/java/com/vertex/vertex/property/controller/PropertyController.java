@@ -28,7 +28,7 @@ public class PropertyController {
         try {
             return new ResponseEntity<>(propertyService.save(projectID, property), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
     @PutMapping("/project/{projectID}")
@@ -36,7 +36,7 @@ public class PropertyController {
         try {
             return new ResponseEntity<>(propertyService.edit(projectID, property), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -45,7 +45,7 @@ public class PropertyController {
         try {
             return new ResponseEntity<>(propertyService.delete(projectID, propertyID), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -55,7 +55,7 @@ public class PropertyController {
         try {
             return new ResponseEntity<>(propertyService.deletePropertyList(propertyID, propertyListID), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -64,7 +64,7 @@ public class PropertyController {
         try {
             return new ResponseEntity<>(propertyService.changePropertyListColor(propertyList), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 }
