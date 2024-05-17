@@ -12,6 +12,7 @@ import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,9 +50,9 @@ public class TaskController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id){
+    public ResponseEntity<?> delete(@PathVariable Long id, HttpServletResponse response){
         try{
-            taskService.deleteById(id);
+            taskService.deleteById(id, response);
             return new ResponseEntity<>(true, HttpStatus.OK);
         } catch (Exception e){
             return new ResponseEntity<>(false, HttpStatus.CONFLICT);
@@ -59,18 +60,18 @@ public class TaskController {
     }
 
     @PatchMapping
-    public ResponseEntity<?> edit(@RequestBody TaskEditDTO taskEditDTO){
+    public ResponseEntity<?> edit(@RequestBody TaskEditDTO taskEditDTO, HttpServletResponse response){
         try{
-            return new ResponseEntity<>(taskService.edit(taskEditDTO), HttpStatus.OK);
+            return new ResponseEntity<>(taskService.edit(taskEditDTO, response), HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
     @PatchMapping("/value")
-    public ResponseEntity<?> save(@RequestBody EditValueDTO editValueDTO){
+    public ResponseEntity<?> save(@RequestBody EditValueDTO editValueDTO, HttpServletResponse response){
         try{
-            return new ResponseEntity<>(taskService.save(editValueDTO), HttpStatus.OK);
+            return new ResponseEntity<>(taskService.save(editValueDTO, response), HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }

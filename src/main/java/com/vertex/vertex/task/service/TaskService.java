@@ -4,6 +4,7 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
+import com.vertex.vertex.google.service.CalendarManagerService;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.service.NotificationService;
 import com.vertex.vertex.project.model.entity.Project;
@@ -22,7 +23,6 @@ import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.model.exceptions.TaskDoesNotExistException;
 import com.vertex.vertex.task.relations.comment.model.DTO.CommentDTO;
 import com.vertex.vertex.task.relations.comment.model.entity.Comment;
-import com.vertex.vertex.task.relations.value.model.entity.ValueDate;
 import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
@@ -36,6 +36,7 @@ import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.exception.UserNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.modelmapper.ModelMapper;
@@ -65,7 +66,7 @@ public class TaskService {
     private final FileService fileService;
     private final ValueService valueService;
     private final NotificationService notificationService;
-
+    private final CalendarManagerService calendarManager;
 
     public Task save(TaskCreateDTO taskCreateDTO) {
         Project project = projectService.findById(taskCreateDTO.getProject().getId());
@@ -117,7 +118,7 @@ public class TaskService {
 
 
 
-    public Task edit(TaskEditDTO taskEditDTO) {
+    public Task edit(TaskEditDTO taskEditDTO, HttpServletResponse response) {
         try {
             Task task = findById(taskEditDTO.getId());
 
@@ -128,8 +129,13 @@ public class TaskService {
                     modifiedAttributeDescription);
 
             modelMapper.map(taskEditDTO, task);
+
+            if (task.getGoogleId() != null) {
+                calendarManager.update(response, task);
+            }
             return taskRepository.save(task);
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
 
@@ -154,13 +160,22 @@ public class TaskService {
                         .map(User::getEmail).toList());
     }
 
-    public void deleteById(Long id) {
-        Task task = findById(id);
-        validateUserLoggedIntoTask(task);
-        taskRepository.deleteById(id);
+    public void deleteById(Long id, HttpServletResponse response) {
+        try {
+            Task task = findById(id);
+            validateUserLoggedIntoTask(task);
+
+            if (task.getGoogleId() != null) {
+                calendarManager.delete(response, task);
+            }
+
+            taskRepository.deleteById(id);
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
     }
 
-    public Task save(EditValueDTO editValueDTO) throws Exception {
+    public Task save(EditValueDTO editValueDTO, HttpServletResponse response) throws Exception {
         Task task = findById(editValueDTO.getId());
 
         Property property = propertyService.findByIdAndProjectContains(
@@ -190,9 +205,9 @@ public class TaskService {
                 ("O valor da propriedade " + property.getName()
                         + " foi definido como " + propertyValue));
 
-        System.out.println(task);
-
-        CaelndarGoogle.updateValueAtTask(task);
+        if (task.getGoogleId() != null) {
+            calendarManager.update(response,task);
+        }
 
         return task;
     }

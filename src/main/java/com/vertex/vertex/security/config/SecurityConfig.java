@@ -46,7 +46,6 @@ public class SecurityConfig {
 
         http.securityContext((context) -> context.securityContextRepository(securityRepository));
 
-
         http.addFilterBefore(filterAuthentication, UsernamePasswordAuthenticationFilter.class);
 
         http.formLogin(AbstractHttpConfigurer::disable);

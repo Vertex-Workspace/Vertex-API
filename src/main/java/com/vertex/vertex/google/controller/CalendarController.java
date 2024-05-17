@@ -2,6 +2,9 @@ package com.vertex.vertex.google.controller;
 
 import com.vertex.vertex.google.service.CalendarService;
 import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
+import com.vertex.vertex.property.model.DTO.PropertyListDTO;
+import com.vertex.vertex.property.model.entity.PropertyList;
+import com.vertex.vertex.task.model.entity.Task;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -53,7 +56,7 @@ public class CalendarController {
     }
 
     @PostMapping("/{userId}")
-    public ResponseEntity<?> teste(
+    public ResponseEntity<?> create(
             @PathVariable Long userId,
             @RequestBody Long projectId,
             HttpServletResponse response
@@ -67,6 +70,7 @@ public class CalendarController {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
+
 
 
 

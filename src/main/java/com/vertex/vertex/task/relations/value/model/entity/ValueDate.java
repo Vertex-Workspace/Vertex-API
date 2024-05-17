@@ -32,4 +32,5 @@ public class ValueDate extends Value {
     public void setValue(){
         this.value = LocalDateTime.now();
     }
+
 }

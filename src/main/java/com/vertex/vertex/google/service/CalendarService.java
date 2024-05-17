@@ -22,14 +22,17 @@ import com.vertex.vertex.project.service.ProjectService;
 import com.vertex.vertex.task.model.DTO.TaskModeViewDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.model.enums.CreationOrigin;
+import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user.repository.UserRepository;
 import com.vertex.vertex.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -46,58 +49,16 @@ import java.util.List;
 public class CalendarService {
 
     private final ProjectService projectService;
-    private final UserService userService;
-
-    private static final String APPLICATION_NAME = "Vertex";
-    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-    private static final String TOKENS_DIRECTORY_PATH = "tokens";
-    private static final List<String> SCOPES =
-            Collections.singletonList(CalendarScopes.CALENDAR);
-    private static final String CREDENTIALS_FILE_PATH = "src/main/resources/credentials.json";
-
+    private final UserRepository userRepository;
     private final TaskService taskService;
 
-
-    public Credential getCredentials(HttpServletResponse response, Long userId)
-            throws IOException {
-
-        try {
-            HttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-            // Load client secrets.
-            File in = new File(CREDENTIALS_FILE_PATH);
-            GoogleClientSecrets clientSecrets =
-                GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(new FileInputStream(in)));
-
-        // Build flow and trigger user authorization request.
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH + "/" + userId.toString())))
-                .setAccessType("offline")
-                .build();
-
-//        GoogleAuthorizationCodeRequestUrl authorizationUrl = flow.newAuthorizationUrl();
-//        authorizationUrl.setRedirectUri("http://localhost:8888/Callback");
-//        authorizationUrl.setAccessType("offline");
-//        String url = authorizationUrl.build();
-//        response.sendRedirect(url);
-
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-        Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize(userId.toString());
-//        //returns an authorized Credential object.
-        return credential;
-//            return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-    }
 
     public List<Task> convertEventsToTask(HttpServletResponse response, Long userId, Long projectId) {
         try {
             HttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
             Calendar service =
-                    new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(response, userId))
-                            .setApplicationName(APPLICATION_NAME)
+                    new Calendar.Builder(HTTP_TRANSPORT, CalendarConfig.JSON_FACTORY, getCredentials(response, userId))
+                            .setApplicationName(CalendarConfig.APPLICATION_NAME)
                             .build();
 
             DateTime now = new DateTime(System.currentTimeMillis());
@@ -120,6 +81,7 @@ public class CalendarService {
     }
 
 
+
     public Project createCalendarProject(
             Long teamId, ProjectCreateDTO dto,
             Long userId, HttpServletResponse response) {
@@ -137,11 +99,11 @@ public class CalendarService {
 
     public Task create(HttpServletResponse response, Long userId, Long projectId)
             throws GeneralSecurityException, IOException {
-        User user = userService.findById(userId);
+        User user = userRepository.findById(userId).get();
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         Calendar service =
-                new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(response, userId))
-                        .setApplicationName(APPLICATION_NAME)
+                new Calendar.Builder(HTTP_TRANSPORT, CalendarConfig.JSON_FACTORY, getCredentials(response, userId))
+                        .setApplicationName(CalendarConfig.APPLICATION_NAME)
                         .build();
 
         Event event = new Event()
@@ -173,4 +135,6 @@ public class CalendarService {
         event = service.events().insert(calendarId, event).execute();
         return taskService.saveNewEvent(event, user, projectId);
     }
+
+
 }
