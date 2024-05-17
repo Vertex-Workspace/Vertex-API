@@ -1,5 +1,7 @@
-package com.vertex.vertex.security;
+package com.vertex.vertex.security.authentication;
 
+import com.vertex.vertex.security.util.CookieUtils;
+import com.vertex.vertex.security.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -34,6 +36,7 @@ public class FilterAuthentication extends OncePerRequestFilter {
 //        Cookie cookieSession = new Cookie("JSESSIONID", "");
 //        cookieSession.setMaxAge(0);
 //        response.addCookie(cookieSession);
+
 
         if (!isPublicRouter(request)) {
             //Get the JWT Cookie from request and the value

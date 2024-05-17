@@ -5,7 +5,7 @@ import com.vertex.vertex.notification.service.NotificationService;
 import com.vertex.vertex.property.model.ENUM.PropertyKind;
 import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.PropertyList;
-import com.vertex.vertex.security.UserDetailsServiceImpl;
+import com.vertex.vertex.security.authentication.UserDetailsServiceImpl;
 import com.vertex.vertex.task.model.DTO.TaskSearchDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_hours.service.TaskHoursService;
@@ -82,9 +82,13 @@ public class UserService {
             //Seta usuário como autenticado
             userSetDefaultInformations(user);
             user.setDefaultSettings(false);
-            if (userDTO.getImage() != null) {
+
+            try {
                 byte[] data = Base64.getDecoder().decode(userDTO.getImage());
-                user.setImage(data);
+                user.setImage(data); // default user
+            } catch (Exception ignored) {
+                userDTO.setImage(userDTO.getImage().replace("s96", "s800")); //upscale image
+                user.setImgUrl(userDTO.getImage()); // external
             }
 
 

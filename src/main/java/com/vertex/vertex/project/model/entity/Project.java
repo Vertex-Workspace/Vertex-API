@@ -5,6 +5,7 @@ import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.model.enums.CreationOrigin;
 import com.vertex.vertex.task.relations.note.model.entity.Note;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
@@ -63,6 +64,9 @@ public class Project {
     private List<Group> groups;
 
     @Enumerated(EnumType.STRING)
+    private CreationOrigin creationOrigin;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
 //    @Column(nullable = false)
     private ProjectReviewENUM projectReviewENUM;
@@ -85,5 +89,6 @@ public class Project {
         this.creator = creator;
         this.collaborators = collaborators;
         this.projectReviewENUM = ProjectReviewENUM.OPTIONAL;
+        this.creationOrigin = CreationOrigin.DEFAULT;
     }
 }

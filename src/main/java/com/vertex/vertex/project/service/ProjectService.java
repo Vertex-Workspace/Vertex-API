@@ -13,8 +13,7 @@ import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
-import com.vertex.vertex.security.ValidationUtils;
-import com.vertex.vertex.task.model.DTO.TaskIndexDTO;
+import com.vertex.vertex.security.util.ValidationUtils;
 import com.vertex.vertex.task.model.DTO.TaskModeViewDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
@@ -27,7 +26,6 @@ import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.utils.IndexUtils;
-import jakarta.persistence.Index;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -68,6 +66,8 @@ public class ProjectService {
         return new ProjectViewListDTO(save(project));
 
     }
+
+
 
     public void createUserTeamAndSetCreator(Long teamId, Project project){
         UserTeam userTeam = userTeamService

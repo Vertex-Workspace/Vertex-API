@@ -4,7 +4,7 @@ import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.notification.service.NotificationService;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
-import com.vertex.vertex.security.ValidationUtils;
+import com.vertex.vertex.security.util.ValidationUtils;
 import com.vertex.vertex.task.model.DTO.TaskWaitingToReviewDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.review.model.DTO.ReviewCheck;
