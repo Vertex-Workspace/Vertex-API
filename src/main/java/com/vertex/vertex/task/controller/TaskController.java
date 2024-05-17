@@ -52,7 +52,7 @@ public class TaskController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletResponse response){
         try{
-            taskService.deleteById(id, response);
+            taskService.deleteById(id);
             return new ResponseEntity<>(true, HttpStatus.OK);
         } catch (Exception e){
             return new ResponseEntity<>(false, HttpStatus.CONFLICT);
@@ -71,7 +71,7 @@ public class TaskController {
     @PatchMapping("/value")
     public ResponseEntity<?> save(@RequestBody EditValueDTO editValueDTO, HttpServletResponse response){
         try{
-            return new ResponseEntity<>(taskService.save(editValueDTO, response), HttpStatus.OK);
+            return new ResponseEntity<>(taskService.save(editValueDTO), HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }

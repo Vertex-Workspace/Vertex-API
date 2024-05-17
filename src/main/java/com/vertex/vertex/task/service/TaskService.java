@@ -131,7 +131,7 @@ public class TaskService {
             modelMapper.map(taskEditDTO, task);
 
             if (task.getGoogleId() != null) {
-                calendarManager.update(response, task);
+                calendarManager.update(task);
             }
             return taskRepository.save(task);
         } catch (Exception e) {
@@ -160,13 +160,13 @@ public class TaskService {
                         .map(User::getEmail).toList());
     }
 
-    public void deleteById(Long id, HttpServletResponse response) {
+    public void deleteById(Long id) {
         try {
             Task task = findById(id);
             validateUserLoggedIntoTask(task);
 
             if (task.getGoogleId() != null) {
-                calendarManager.delete(response, task);
+                calendarManager.delete(task);
             }
 
             taskRepository.deleteById(id);
@@ -175,7 +175,7 @@ public class TaskService {
         }
     }
 
-    public Task save(EditValueDTO editValueDTO, HttpServletResponse response) throws Exception {
+    public Task save(EditValueDTO editValueDTO) throws Exception {
         Task task = findById(editValueDTO.getId());
 
         Property property = propertyService.findByIdAndProjectContains(
@@ -206,7 +206,7 @@ public class TaskService {
                         + " foi definido como " + propertyValue));
 
         if (task.getGoogleId() != null) {
-            calendarManager.update(response,task);
+            calendarManager.update(task);
         }
 
         return task;

@@ -20,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProjectController {
 
     private final ProjectService projectService;
-    private final CalendarService calendarService;
 
     @PostMapping("/{teamId}")
     public ResponseEntity<?> save(@RequestBody ProjectCreateDTO project, @PathVariable Long teamId) {
@@ -32,7 +31,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> findProjectById(@PathVariable Long id, HttpServletResponse response) {
+    public ResponseEntity<?> findProjectById(@PathVariable Long id) {
         try {
             return new ResponseEntity<>(projectService.findProjectById(id), HttpStatus.OK);
         } catch (Exception e) {

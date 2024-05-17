@@ -39,18 +39,10 @@ import java.util.List;
 public class CalendarManagerService {
 
     private final TaskRepository taskService;
-    private final Calendar service;
 
 
-    public void update(HttpServletResponse response, Task task) throws GeneralSecurityException, IOException {
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        Calendar service =
-                new Calendar.Builder(HTTP_TRANSPORT, CalendarConfig.JSON_FACTORY, CalendarConfig.getCredentials(response,
-                        ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId()
-                ))
-                        .setApplicationName(CalendarConfig.APPLICATION_NAME)
-                        .build();
-
+    public void update(Task task) throws GeneralSecurityException, IOException {
+        Calendar service = CalendarConfig.createCalendar();
         Event event = service.events().get
                         ("primary", task.getGoogleId())
                 .execute();
@@ -76,15 +68,8 @@ public class CalendarManagerService {
         service.events().update("primary", event.getId(), event).execute();
     }
 
-    public void delete(HttpServletResponse response, Task task) throws GeneralSecurityException, IOException {
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        Calendar service =
-                new Calendar.Builder(HTTP_TRANSPORT, CalendarConfig.JSON_FACTORY, getCredentials(response,
-                        ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId()
-                ))
-                        .setApplicationName(CalendarConfig.APPLICATION_NAME)
-                        .build();
-
+    public void delete(Task task) throws GeneralSecurityException, IOException {
+        Calendar service = CalendarConfig.createCalendar();
         Event event = service.events().get
                         ("primary", task.getGoogleId())
                 .execute();

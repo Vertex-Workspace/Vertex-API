@@ -1,65 +1,49 @@
 package com.vertex.vertex.google.service;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.DateTime;
-import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.Calendar;
-import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.*;
 import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
 import com.vertex.vertex.project.model.entity.Project;
+import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.project.service.ProjectService;
-import com.vertex.vertex.task.model.DTO.TaskModeViewDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.model.enums.CreationOrigin;
-import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.service.TaskService;
-import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
-import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.repository.UserRepository;
-import com.vertex.vertex.user.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class CalendarService {
 
-    private final ProjectService projectService;
     private final UserRepository userRepository;
     private final TaskService taskService;
+    private final ProjectService projectService;
+
+    public Project createCalendarProject(
+            Long teamId, ProjectCreateDTO dto,
+            Long userId, HttpServletResponse response) {
+        Project project = projectService.findById(projectService.saveWithRelationOfProject(dto, teamId).getId());
+        project.setCreationOrigin(CreationOrigin.GOOGLE);
+        return projectService.save(project);
+    }
 
 
-    public List<Task> convertEventsToTask(HttpServletResponse response, Long userId, Long projectId) {
+
+    public List<Task> convertEventsToTask(Long userId, Long projectId) {
         try {
-            HttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-            Calendar service =
-                    new Calendar.Builder(HTTP_TRANSPORT, CalendarConfig.JSON_FACTORY, getCredentials(response, userId))
-                            .setApplicationName(CalendarConfig.APPLICATION_NAME)
-                            .build();
+
+            Calendar service = CalendarConfig.createCalendar();
 
             DateTime now = new DateTime(System.currentTimeMillis());
             Events events = service.events().list("primary")
@@ -81,30 +65,16 @@ public class CalendarService {
     }
 
 
-
-    public Project createCalendarProject(
-            Long teamId, ProjectCreateDTO dto,
-            Long userId, HttpServletResponse response) {
-        Project project = projectService.findById(projectService.saveWithRelationOfProject(dto, teamId).getId());
-        project.setCreationOrigin(CreationOrigin.GOOGLE);
-        return projectService.save(project);
-    }
-
-
     public Project findByIdAndGetNewEvents(Long projectId, Long userId, HttpServletResponse response) {
         Project project = projectService.findById(projectId);
-        project.getTasks().addAll(convertEventsToTask(response, userId, projectId));
+        project.getTasks().addAll(convertEventsToTask(userId, projectId));
         return projectService.save(project);
     }
 
     public Task create(HttpServletResponse response, Long userId, Long projectId)
-            throws GeneralSecurityException, IOException {
+            throws IOException, GeneralSecurityException {
+        Calendar service = CalendarConfig.createCalendar();
         User user = userRepository.findById(userId).get();
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        Calendar service =
-                new Calendar.Builder(HTTP_TRANSPORT, CalendarConfig.JSON_FACTORY, getCredentials(response, userId))
-                        .setApplicationName(CalendarConfig.APPLICATION_NAME)
-                        .build();
 
         Event event = new Event()
                 .setSummary("Nova tarefa")
