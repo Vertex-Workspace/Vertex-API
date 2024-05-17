@@ -116,6 +116,9 @@ public class TaskService {
         task.setTaskResponsables(taskResponsables);
     }
 
+    public boolean existsByGoogleId(String googleId) {
+        return taskRepository.existsByGoogleId(googleId);
+    }
 
 
     public Task edit(TaskEditDTO taskEditDTO, HttpServletResponse response) {
@@ -609,5 +612,9 @@ public class TaskService {
         Project project = projectService.findById(projectId);
         TaskCreateDTO dto = new TaskCreateDTO(event, user, project);
         return save(dto);
+    }
+
+    public Task findByGoogleId(String id) {
+        return taskRepository.findByGoogleId(id).get();
     }
 }

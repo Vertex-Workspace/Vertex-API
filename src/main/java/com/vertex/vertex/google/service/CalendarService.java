@@ -40,19 +40,8 @@ public class CalendarService {
 
 
 
-    public List<Task> convertEventsToTask(Long userId, Long projectId) {
+    public List<Task> convertEventsToTask(Long userId, Long projectId, List<Event> items) {
         try {
-
-            Calendar service = CalendarConfig.createCalendar();
-
-            DateTime now = new DateTime(System.currentTimeMillis());
-            Events events = service.events().list("primary")
-                    .setTimeMin(now)
-                    .setOrderBy("startTime")
-                    .setSingleEvents(true)
-                    .execute();
-            List<Event> items = events.getItems();
-
             if (!items.isEmpty()) {
                 return taskService.convertEventsToTask(items, projectId, userId);
             }
@@ -64,11 +53,42 @@ public class CalendarService {
         throw new RuntimeException("Empty!");
     }
 
+    public List<Event> getCalendarItems() {
+        try {
+            Calendar service = CalendarConfig.createCalendar();
+
+            DateTime now = new DateTime(System.currentTimeMillis());
+            Events events = service.events().list("primary")
+                    .setTimeMin(now)
+                    .setOrderBy("startTime")
+                    .setSingleEvents(true)
+                    .execute();
+            return events.getItems();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     public Project findByIdAndGetNewEvents(Long projectId, Long userId, HttpServletResponse response) {
         Project project = projectService.findById(projectId);
-        project.getTasks().addAll(convertEventsToTask(userId, projectId));
+        project.getTasks().addAll(convertEventsToTask(userId, projectId, getCalendarItems()));
+        updateCalendarTasks(project, getCalendarItems());
         return projectService.save(project);
+    }
+
+    private void updateCalendarTasks(Project project, List<Event> items) {
+        items.stream()
+                .filter(i -> taskService.existsByGoogleId(i.getId()))
+                .forEach(item -> {
+                    Task task = taskService.findByGoogleId(item.getId());
+                    if (!task.getName().equals(item.getSummary())
+                            || !task.getDescription().equals(item.getDescription())) {
+                        task.setDescription(item.getDescription());
+                        task.setName(item.getSummary());
+                        taskService.save(task);
+                    }
+                });
     }
 
     public Task create(HttpServletResponse response, Long userId, Long projectId)
