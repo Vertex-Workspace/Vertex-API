@@ -13,22 +13,19 @@ import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
-import com.vertex.vertex.security.ValidationUtils;
-import com.vertex.vertex.task.model.DTO.TaskIndexDTO;
+import com.vertex.vertex.security.util.ValidationUtils;
 import com.vertex.vertex.task.model.DTO.TaskModeViewDTO;
+import com.vertex.vertex.task.model.DTO.TaskModeViewImageDTO;
 import com.vertex.vertex.task.model.DTO.TaskViewListImageDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
-import com.vertex.vertex.task.relations.review.model.entity.Review;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
-import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.value.service.ValueService;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.utils.IndexUtils;
-import jakarta.persistence.Index;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -115,13 +112,14 @@ public class ProjectService {
         project.setFile(fileService.save(file));
         return save(project);
     }
-    public List<TaskViewListImageDTO> updateIndex(Long projectId, List<TaskModeViewDTO> tasks) throws IOException {
+    public List<TaskModeViewImageDTO> updateIndex(Long projectId, List<TaskModeViewDTO> tasks) throws IOException {
         Project project = findById(projectId);
         indexUtils.updateIndex(project, tasks);
         Project projectModification = findById(projectId);
-        setTasksResponsiblesAndReviews(projectModification);
-        projectModification.getTasks().sort(Comparator.comparingLong(Task::getIndexTask).reversed());
-        return projectModification.getTasks().stream().map(TaskViewListImageDTO::new).toList();
+        List<TaskModeViewImageDTO> tasksReturn = setTasksResponsiblesAndReviews(projectModification);
+        tasksReturn.sort(Comparator.comparingLong(TaskModeViewDTO::getIndexTask).reversed());
+        return tasksReturn;
+
     }
 
     public Boolean existsByIdAndUserBelongs(Long projectId) {
@@ -151,21 +149,22 @@ public class ProjectService {
         //Pass through all tasks of the project and validates if task has an opened review (UNDERANALYSIS)
         //If it has, It won't be included into list
 
+        //tHIS LOFIR
         projectOneDTO.setTasks(setTasksResponsiblesAndReviews(project));
         projectOneDTO.getTasks().sort(Comparator.comparingLong(TaskModeViewDTO::getIndexTask).reversed());
 
         return projectOneDTO;
     }
 
-    private List<TaskViewListImageDTO> setTasksResponsiblesAndReviews(Project project){
-        List<TaskViewListImageDTO> tasks = new ArrayList<>();
+    private List<TaskModeViewImageDTO> setTasksResponsiblesAndReviews(Project project){
+        List<TaskModeViewImageDTO> tasks = new ArrayList<>();
         for (Task task : getTasksProjectByResponsibility(project.getTasks(),
                 userTeamService.findUserTeamByComposeId(project.getTeam().getId()
                         , ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId()))){
             if(task.getReviews() == null || task.getReviews().isEmpty()){
-                tasks.add(new TaskViewListImageDTO(task));
+                tasks.add(new TaskModeViewImageDTO(task));
             } else if(task.getReviews().stream().noneMatch(r -> r.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS))){
-                tasks.add(new TaskViewListImageDTO(task));
+                tasks.add(new TaskModeViewImageDTO(task));
             }
         }
         return tasks;

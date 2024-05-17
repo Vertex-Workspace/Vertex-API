@@ -5,6 +5,7 @@ import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.project.model.ENUM.ProjectReviewENUM;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.model.enums.CreationOrigin;
 import com.vertex.vertex.task.relations.note.model.entity.Note;
 import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.group.model.entity.Group;
@@ -44,7 +45,7 @@ public class Project {
     @OneToMany(mappedBy = "project", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Task> tasks;
 
-    @OneToMany(mappedBy = "project", orphanRemoval = true)
+    @OneToMany(mappedBy = "project", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Note> notes;
 
     @ManyToOne
@@ -58,9 +59,12 @@ public class Project {
     @ToString.Exclude
     private List<UserTeam> collaborators = new ArrayList<>();
 
-    @ManyToMany(cascade = CascadeType.REMOVE)
+    @ManyToMany(cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     @JsonIgnore
     private List<Group> groups;
+
+    @Enumerated(EnumType.STRING)
+    private CreationOrigin creationOrigin;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -85,5 +89,6 @@ public class Project {
         this.creator = creator;
         this.collaborators = collaborators;
         this.projectReviewENUM = ProjectReviewENUM.OPTIONAL;
+        this.creationOrigin = CreationOrigin.DEFAULT;
     }
 }

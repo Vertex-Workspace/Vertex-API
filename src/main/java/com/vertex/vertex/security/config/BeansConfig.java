@@ -1,5 +1,6 @@
 package com.vertex.vertex.security;
 
+import com.vertex.vertex.security.authentication.UserDetailsServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.modelmapper.ModelMapper;
@@ -50,16 +51,13 @@ public class BeansConfig {
         return mapper;
     }
 
-
     public static CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration cors = new CorsConfiguration();
         cors.setAllowedOrigins(List.of("http://localhost:4200"));
         cors.setAllowedMethods(List.of("GET", "POST", "PATCH", "PUT", "DELETE"));
         //Funcionamento dos Cookies
         cors.setAllowCredentials(true);
-
         cors.setAllowedHeaders(List.of("*"));
-
         UrlBasedCorsConfigurationSource corsConfigurationSource =
                 new UrlBasedCorsConfigurationSource();
         // "/**" allows multiples names after the / for example -> /task/property/2

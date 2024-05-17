@@ -22,10 +22,13 @@ public class TaskModeViewDTO {
     @ToString.Exclude
     private List<Value> values;
     private Long indexTask;
+    private String googleId;
+
     public TaskModeViewDTO(Task task){
         this.id = task.getId();
         this.name = task.getName();
         this.values = task.getValues();
         this.indexTask = task.getIndexTask();
+        this.googleId = task.getGoogleId();
     }
 }

@@ -1,9 +1,11 @@
 package com.vertex.vertex.task.service;
 
+import com.google.api.client.util.DateTime;
+import com.google.api.services.calendar.model.Event;
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
+import com.vertex.vertex.google.service.CalendarManagerService;
 import com.vertex.vertex.notification.entity.model.Notification;
-import com.vertex.vertex.notification.repository.LogRepository;
 import com.vertex.vertex.notification.service.NotificationService;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
@@ -12,7 +14,7 @@ import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.property.service.PropertyService;
-import com.vertex.vertex.security.ValidationUtils;
+import com.vertex.vertex.security.util.ValidationUtils;
 import com.vertex.vertex.task.model.DTO.*;
 import com.vertex.vertex.task.relations.review.repository.ReviewRepository;
 import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
@@ -36,7 +38,7 @@ import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.exception.UserNotFoundException;
 import com.vertex.vertex.utils.IndexUtils;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.Index;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.modelmapper.ModelMapper;
@@ -44,7 +46,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 @Data
@@ -64,8 +68,9 @@ public class TaskService {
     private final NotificationService notificationService;
     private final UserTeamRepository userTeamRepository;
     private final IndexUtils indexUtils;
+    private final CalendarManagerService calendarManager;
 
-    public TaskViewListImageDTO save(TaskCreateDTO taskCreateDTO) {
+    public TaskModeViewImageDTO save(TaskCreateDTO taskCreateDTO) {
         Project project = projectService.findById(taskCreateDTO.getProject().getId());
 
 
@@ -97,8 +102,15 @@ public class TaskService {
                 ));
             }
         }
+        if (taskCreateDTO.getEvent() != null) { // save the date of tasks from calendar
+            DateTime dateTime = taskCreateDTO.getEvent().getStart().getDateTime();
+            LocalDateTime local
+                    = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime.getValue()),
+                    ZoneId.systemDefault());
+            task.getValues().get(1).setValue(local);
+        }
 
-        return new TaskViewListImageDTO(save(task));
+        return new TaskModeViewImageDTO(save(task));
     }
 
     public Task savePostConstruct(TaskCreateDTO taskCreateDTO) {
@@ -107,6 +119,7 @@ public class TaskService {
 
         UserTeam creator = userTeamRepository.findByTeam_IdAndUser_Id(project.getTeam().getId(), taskCreateDTO.getCreator().getId()).get();
         Task task = new Task(taskCreateDTO, project, creator, indexUtils);
+
         setResponsablesInTask(project, task);
 
         //When the task is created, every property is associated with a null value, unless it has a default value
@@ -134,9 +147,12 @@ public class TaskService {
         task.setTaskResponsables(taskResponsables);
     }
 
+    public boolean existsByGoogleId(String googleId) {
+        return taskRepository.existsByGoogleId(googleId);
+    }
 
 
-    public Task edit(TaskEditDTO taskEditDTO) {
+    public TaskModeViewImageDTO edit(TaskEditDTO taskEditDTO, HttpServletResponse response) {
         try {
             Task task = findById(taskEditDTO.getId());
 
@@ -147,7 +163,11 @@ public class TaskService {
                     modifiedAttributeDescription);
 
             modelMapper.map(taskEditDTO, task);
-            return taskRepository.save(task);
+
+            if (task.getGoogleId() != null) {
+                calendarManager.update(task);
+            }
+            return new TaskModeViewImageDTO(taskRepository.save(task));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -174,12 +194,21 @@ public class TaskService {
     }
 
     public void deleteById(Long id) {
-        Task task = findById(id);
-        ValidationUtils.loggedUserIsOnTaskAndIsCreator(task);
-        taskRepository.deleteById(id);
+        try {
+            Task task = findById(id);
+            validateUserLoggedIntoTask(task);
+
+            if (task.getGoogleId() != null) {
+                calendarManager.delete(task);
+            }
+
+            taskRepository.deleteById(id);
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
     }
 
-    public TaskViewListImageDTO save(EditValueDTO editValueDTO) throws Exception {
+    public TaskModeViewImageDTO save(EditValueDTO editValueDTO) throws Exception {
         Task task = findById(editValueDTO.getId());
 
         Property property = propertyService.findByIdAndProjectContains(
@@ -208,7 +237,11 @@ public class TaskService {
         notificationService.saveLogRecord(task,
                 ("O valor da propriedade " + property.getName()
                         + " foi definido como " + propertyValue));
-        return new TaskViewListImageDTO(task);
+
+        if (task.getGoogleId() != null) {
+            calendarManager.update(task);
+        }
+        return new TaskModeViewImageDTO(task);
     }
 
 
@@ -590,4 +623,28 @@ public class TaskService {
     }
 
 
+    public List<TaskModeViewImageDTO> convertEventsToTask(List<Event> items, Long projectId, Long userId) {
+        Project project = projectService.findById(projectId);
+        UserTeam ut = userTeamService
+                .findAllUserTeamByUserId(userId).stream()
+                        .findFirst().get();
+
+            return (items.stream()
+                    .map(e -> new TaskCreateDTO(e, ut.getUser(), project))
+                    .filter(t -> !taskRepository.existsByGoogleId(t.getGoogleId()))
+                    .map(this::save)
+                    .toList());
+    }
+
+
+    public Task saveNewEvent(Event event, User user, Long projectId) {
+        Project project = projectService.findById(projectId);
+        TaskCreateDTO dto = new TaskCreateDTO(event, user, project);
+        TaskModeViewImageDTO task = save(dto);
+        return findById(task.getId());
+    }
+
+    public Task findByGoogleId(String id) {
+        return taskRepository.findByGoogleId(id).get();
+    }
 }

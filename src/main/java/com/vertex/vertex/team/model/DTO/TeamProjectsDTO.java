@@ -23,10 +23,12 @@ public class TeamProjectsDTO {
     private String name;
     private List<ProjectViewListDTO> projects;
     private List<Permission> permissions;
+    private User creator;
 
     public TeamProjectsDTO(Team team, UserTeam userTeam){
         this.id = team.getId();
         this.name = team.getName();
+        this.creator =   team.getCreator().getUser();
 
         this.projects = team.getProjects()
                 .stream()

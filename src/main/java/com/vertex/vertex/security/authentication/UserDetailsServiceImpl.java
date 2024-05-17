@@ -1,4 +1,4 @@
-package com.vertex.vertex.security;
+package com.vertex.vertex.security.authentication;
 
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.repository.UserRepository;

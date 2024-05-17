@@ -24,7 +24,7 @@ public class LogRecord {
     private String description;
     private LocalDateTime date;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     @ToString.Exclude
     @JsonIgnore
     private Task task;

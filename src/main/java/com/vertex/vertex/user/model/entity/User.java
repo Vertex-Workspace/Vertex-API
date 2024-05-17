@@ -4,6 +4,7 @@ package com.vertex.vertex.user.model.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vertex.vertex.notification.entity.model.Notification;
 import com.vertex.vertex.user.model.DTO.UserDTO;
+import com.vertex.vertex.user.model.enums.UserKind;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
 import jakarta.persistence.*;
 import lombok.*;
@@ -52,13 +53,19 @@ public class User implements UserDetails {
 
     private boolean defaultSettings;
 
+    @Enumerated(EnumType.STRING)
+    private UserKind userKind;
+
     @Lob
     @Column(name = "image",
             columnDefinition = "LONGBLOB")
     @ToString.Exclude
-    private byte[] image;
+    private byte[] image; //default
+    private String imgUrl; //external
 
     private Boolean showCharts;
+    private Boolean syncWithCalendar;
+    private Boolean syncWithDrive;
 
 
     @OneToMany(mappedBy ="user")

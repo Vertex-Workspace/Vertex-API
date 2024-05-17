@@ -23,6 +23,7 @@ public class UserPublicProfileDTO {
     private String description;
     private String email;
     private byte[] image;
+    private String imgUrl;
     private LocalTime time;
     private Boolean showCharts;
     private List<Integer> tasksPerformances = new ArrayList<>();

@@ -6,8 +6,9 @@ import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.task.model.DTO.TaskModeViewDTO;
-import com.vertex.vertex.task.model.DTO.TaskViewListImageDTO;
+import com.vertex.vertex.task.model.DTO.TaskModeViewImageDTO;
 import com.vertex.vertex.task.model.entity.Task;
+import com.vertex.vertex.task.model.enums.CreationOrigin;
 import com.vertex.vertex.task.relations.note.model.dto.NoteDTO;
 import com.vertex.vertex.task.relations.note.model.entity.Note;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
@@ -36,9 +37,10 @@ public class ProjectOneDTO {
     private List<Property> properties;
     private UserTeam creator;
     private File file;
-    private List<TaskViewListImageDTO> tasks = new ArrayList<>();
+    private List<TaskModeViewImageDTO> tasks = new ArrayList<>();
     private List<NoteDTO> notes;
     private ProjectReviewENUM projectReviewENUM;
+    private CreationOrigin creationOrigin;
 
     public ProjectOneDTO(Project project) {
         BeanUtils.copyProperties(project, this);

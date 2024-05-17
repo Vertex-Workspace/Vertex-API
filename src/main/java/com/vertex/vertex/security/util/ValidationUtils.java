@@ -1,4 +1,4 @@
-package com.vertex.vertex.security;
+package com.vertex.vertex.security.util;
 
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.task.model.entity.Task;

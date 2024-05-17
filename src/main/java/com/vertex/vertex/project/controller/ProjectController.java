@@ -5,19 +5,14 @@ import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
 import com.vertex.vertex.project.model.DTO.ProjectEditDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.service.ProjectService;
-import com.vertex.vertex.task.model.DTO.TaskIndexDTO;
 import com.vertex.vertex.task.model.DTO.TaskModeViewDTO;
-import com.vertex.vertex.task.model.entity.Task;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-//import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.lang.annotation.Repeatable;
 import java.util.List;
 
 
@@ -34,7 +29,6 @@ public class ProjectController {
         try {
             return new ResponseEntity<>(projectService.saveWithRelationOfProject(project, teamId), HttpStatus.CREATED);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }

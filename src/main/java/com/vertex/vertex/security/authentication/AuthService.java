@@ -1,5 +1,7 @@
-package com.vertex.vertex.security;
+package com.vertex.vertex.security.authentication;
 
+import com.vertex.vertex.google.service.CalendarService;
+import com.vertex.vertex.security.util.CookieUtils;
 import com.vertex.vertex.user.model.DTO.UserDTO;
 import com.vertex.vertex.user.model.DTO.UserLoginDTO;
 import com.vertex.vertex.user.model.entity.User;
@@ -29,6 +31,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final UserDetailsServiceImpl userDetailsService;
+    private final CalendarService calendarService;
 
     public User login(UserLoginDTO user,
                       HttpServletRequest request,
@@ -48,6 +51,7 @@ public class AuthService {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             Cookie cookie = cookieUtil.generateCookieJWT(userDetails);
             response.addCookie(cookie);
+            firstAccess((User) authentication.getPrincipal());
             return userService.findByEmail(userDetails.getUsername());
 
         } catch (Exception e) {
@@ -64,6 +68,12 @@ public class AuthService {
         response.addCookie(cookie);
     }
 
+    private void firstAccess(User user) {
+        if (user.isFirstAccess()) {
+            user.setFirstAccess(false);
+        }
+    }
+
     public List<Cookie> logout(HttpServletRequest request) {
         try {
             CookieUtils cookieUtil = new CookieUtils(environment);
@@ -71,11 +81,14 @@ public class AuthService {
             Cookie cookie1 = cookieUtil.getCookie(request, "JSESSIONID");
             cookie1.setMaxAge(0);
             cookie.setMaxAge(0);
+
             return List.of(cookie1, cookie);
         } catch (Exception e) {
             throw new RuntimeException();
         }
     }
+
+
 
     public User getAuthenticatedUser() {
         UserDetails userDetails =
@@ -96,13 +109,13 @@ public class AuthService {
 
         try { // already registered
             UserDetails user = userDetailsService.loadUserByUsername(email);
+            firstAccess((User) user);
             externalServiceLogin(request, response, user);
 
         } catch (UsernameNotFoundException e) { // first access
             User user = new User(email, oAuth2User);
-            userService.save(new UserDTO(user));
+            userService.save(new UserDTO(user, oAuth2User.getAttribute("picture")));
             externalServiceLogin(request, response, user);
-
         }
         response.sendRedirect("http://localhost:4200");
     }

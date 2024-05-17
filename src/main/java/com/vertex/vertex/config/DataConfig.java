@@ -11,7 +11,6 @@ import com.vertex.vertex.property.model.ENUM.PropertyListKind;
 import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
-import com.vertex.vertex.security.ValidationUtils;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
 import com.vertex.vertex.task.service.TaskService;
@@ -174,7 +173,7 @@ public class DataConfig {
 
                 // Criar as permissões para os UserTeams com IDs 6, 7 e 8
                 String sql = "INSERT INTO `project_collaborators` (`project_id`, `collaborators_id`) VALUES " +
-                        "(1, 4), (1,5), (1,6), (2, 4), (2,5), (2,6), (3, 4), (3,5), (3,6)";
+                        "(4, 4), (4,5), (4,6), (5, 4), (5,5), (5,6), (6, 4), (6,5), (6,6)";
                 statement.executeUpdate(sql);
 
             } catch (SQLException throwables) {
@@ -190,7 +189,7 @@ public class DataConfig {
     }
 
     public void createProperties() {
-        for (long i = 1; i <=3 ; i++) {
+        for (long i = 4; i <=6 ; i++) {
             Project project = projectService.findById(i);
             defaultPropertyList(project);
         }
@@ -206,7 +205,6 @@ public class DataConfig {
     }
 
     public List<Property> defaultProperties() {
-        System.out.println(2);
         List<Property> properties = new ArrayList<>();
         properties.add(new Property(PropertyKind.STATUS, "Status", true, null, PropertyStatus.FIXED));
         properties.add(new Property(PropertyKind.DATE, "Data", true, null, PropertyStatus.FIXED));
@@ -237,11 +235,11 @@ public class DataConfig {
 
     public void createTasks() {
         TaskCreateDTO taskCreateDTO = new TaskCreateDTO("Regras de Negócio", "Escreva todas as regras de negócio aqui",
-                userRepository.findById(2L).get(), projectRepository.findById(1L).get());
+                userRepository.findById(2L).get(), projectRepository.findById(4L).get());
         TaskCreateDTO taskCreateDTO2 = new TaskCreateDTO("Criar Models", "Separar em entities e dtos",
-                userRepository.findById(2L).get(), projectRepository.findById(2L).get());
+                userRepository.findById(2L).get(), projectRepository.findById(5L).get());
         TaskCreateDTO taskCreateDTO3 = new TaskCreateDTO("Fazer requisições", "criar services e fazer as requisições",
-                userRepository.findById(2L).get(), projectRepository.findById(3L).get());
+                userRepository.findById(2L).get(), projectRepository.findById(6L).get());
 
         taskService.savePostConstruct(taskCreateDTO);
         taskService.savePostConstruct(taskCreateDTO2);
@@ -265,15 +263,15 @@ public class DataConfig {
             String imagePath2 = "src/main/java/com/vertex/vertex/upload/undraw_File_sync_re_0pcx.png";
             String imagePath3 = "src/main/java/com/vertex/vertex/upload/undraw_Code_review_re_woeb.png";
 
-            Project project1 = projectRepository.findById(1L).get();
+            Project project1 = projectRepository.findById(4L).get();
             project1.setFile(new File(Files.readAllBytes(Paths.get(imagePath1))));
             projectRepository.save(project1);
 
-            Project project2 = projectRepository.findById(2L).get();
+            Project project2 = projectRepository.findById(5L).get();
             project2.setFile(new File(Files.readAllBytes(Paths.get(imagePath2))));
             projectRepository.save(project2);
 
-            Project project3 = projectRepository.findById(3L).get();
+            Project project3 = projectRepository.findById(6L).get();
             project3.setFile(new File(Files.readAllBytes(Paths.get(imagePath3))));
             projectRepository.save(project3);
 
