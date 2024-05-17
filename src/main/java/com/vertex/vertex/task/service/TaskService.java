@@ -49,10 +49,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
@@ -119,9 +116,9 @@ public class TaskService {
     public Task savePostConstruct(TaskCreateDTO taskCreateDTO) {
         Project project = projectService.findById(taskCreateDTO.getProject().getId());
 
-
         UserTeam creator = userTeamRepository.findByTeam_IdAndUser_Id(project.getTeam().getId(), taskCreateDTO.getCreator().getId()).get();
         Task task = new Task(taskCreateDTO, project, creator, indexUtils);
+
         setResponsablesInTask(project, task);
 
         //When the task is created, every property is associated with a null value, unless it has a default value
@@ -171,7 +168,6 @@ public class TaskService {
             }
             return new TaskModeViewImageDTO(taskRepository.save(task));
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
 

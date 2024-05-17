@@ -45,7 +45,7 @@ public class Project {
     @OneToMany(mappedBy = "project", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Task> tasks;
 
-    @OneToMany(mappedBy = "project", orphanRemoval = true)
+    @OneToMany(mappedBy = "project", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Note> notes;
 
     @ManyToOne
@@ -59,7 +59,7 @@ public class Project {
     @ToString.Exclude
     private List<UserTeam> collaborators = new ArrayList<>();
 
-    @ManyToMany(cascade = CascadeType.REMOVE)
+    @ManyToMany(cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     @JsonIgnore
     private List<Group> groups;
 
