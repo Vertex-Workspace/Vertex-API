@@ -15,6 +15,7 @@ import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.security.util.ValidationUtils;
 import com.vertex.vertex.task.model.DTO.TaskModeViewDTO;
+import com.vertex.vertex.task.model.DTO.TaskModeViewImageDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
 import com.vertex.vertex.task.relations.review.model.entity.Review;
@@ -114,12 +115,12 @@ public class ProjectService {
         project.setFile(fileService.save(file));
         return save(project);
     }
-    public List<TaskModeViewDTO> updateIndex(Long projectId, List<TaskModeViewDTO> tasks) throws IOException {
+    public List<TaskModeViewImageDTO> updateIndex(Long projectId, List<TaskModeViewDTO> tasks) throws IOException {
         Project project = findById(projectId);
         indexUtils.updateIndex(project, tasks);
         Project projectModification = findById(projectId);
         projectModification.getTasks().sort(Comparator.comparingLong(Task::getIndexTask).reversed());
-        return projectModification.getTasks().stream().map(TaskModeViewDTO::new).toList();
+        return projectModification.getTasks().stream().map(TaskModeViewImageDTO::new).toList();
     }
 
     public Boolean existsByIdAndUserBelongs(Long projectId) {
@@ -153,9 +154,9 @@ public class ProjectService {
                 userTeamService.findUserTeamByComposeId(project.getTeam().getId()
                         , ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId()))){
             if(task.getReviews() == null || task.getReviews().isEmpty()){
-                projectOneDTO.getTasks().add(new TaskModeViewDTO(task));
+                projectOneDTO.getTasks().add(new TaskModeViewImageDTO(task));
             } else if(task.getReviews().stream().noneMatch(r -> r.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS))){
-                    projectOneDTO.getTasks().add(new TaskModeViewDTO(task));
+                    projectOneDTO.getTasks().add(new TaskModeViewImageDTO(task));
             }
         }
         projectOneDTO.getTasks().sort(Comparator.comparingLong(TaskModeViewDTO::getIndexTask).reversed());

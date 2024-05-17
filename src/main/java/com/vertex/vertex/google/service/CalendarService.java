@@ -7,6 +7,7 @@ import com.vertex.vertex.project.model.DTO.ProjectCreateDTO;
 import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.project.repository.ProjectRepository;
 import com.vertex.vertex.project.service.ProjectService;
+import com.vertex.vertex.task.model.DTO.TaskModeViewImageDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.model.enums.CreationOrigin;
 import com.vertex.vertex.task.service.TaskService;
@@ -43,7 +44,11 @@ public class CalendarService {
     public List<Task> convertEventsToTask(Long userId, Long projectId, List<Event> items) {
         try {
             if (!items.isEmpty()) {
-                return taskService.convertEventsToTask(items, projectId, userId);
+                List<TaskModeViewImageDTO> tasks = taskService.convertEventsToTask(items, projectId, userId);
+                return tasks
+                        .stream()
+                        .map(t -> taskService.findById(t.getId()))
+                        .toList();
             }
 
         } catch (Exception e) {

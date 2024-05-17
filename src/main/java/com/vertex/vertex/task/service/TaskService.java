@@ -73,7 +73,7 @@ public class TaskService {
     private final IndexUtils indexUtils;
     private final CalendarManagerService calendarManager;
 
-    public Task save(TaskCreateDTO taskCreateDTO) {
+    public TaskModeViewImageDTO save(TaskCreateDTO taskCreateDTO) {
         Project project = projectService.findById(taskCreateDTO.getProject().getId());
 
 
@@ -113,7 +113,7 @@ public class TaskService {
             task.getValues().get(1).setValue(local);
         }
 
-        return save(task);
+        return new TaskModeViewImageDTO(save(task));
     }
 
     public Task savePostConstruct(TaskCreateDTO taskCreateDTO) {
@@ -154,7 +154,7 @@ public class TaskService {
     }
 
 
-    public Task edit(TaskEditDTO taskEditDTO, HttpServletResponse response) {
+    public TaskModeViewImageDTO edit(TaskEditDTO taskEditDTO, HttpServletResponse response) {
         try {
             Task task = findById(taskEditDTO.getId());
 
@@ -169,7 +169,7 @@ public class TaskService {
             if (task.getGoogleId() != null) {
                 calendarManager.update(task);
             }
-            return taskRepository.save(task);
+            return new TaskModeViewImageDTO(taskRepository.save(task));
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -626,7 +626,7 @@ public class TaskService {
     }
 
 
-    public List<Task> convertEventsToTask(List<Event> items, Long projectId, Long userId) {
+    public List<TaskModeViewImageDTO> convertEventsToTask(List<Event> items, Long projectId, Long userId) {
         Project project = projectService.findById(projectId);
         UserTeam ut = userTeamService
                 .findAllUserTeamByUserId(userId).stream()
@@ -643,7 +643,8 @@ public class TaskService {
     public Task saveNewEvent(Event event, User user, Long projectId) {
         Project project = projectService.findById(projectId);
         TaskCreateDTO dto = new TaskCreateDTO(event, user, project);
-        return save(dto);
+        TaskModeViewImageDTO task = save(dto);
+        return findById(task.getId());
     }
 
     public Task findByGoogleId(String id) {
