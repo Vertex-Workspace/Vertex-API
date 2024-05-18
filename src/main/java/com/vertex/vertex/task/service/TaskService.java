@@ -152,7 +152,7 @@ public class TaskService {
     }
 
 
-    public TaskModeViewImageDTO edit(TaskEditDTO taskEditDTO, HttpServletResponse response) {
+    public Task edit(TaskEditDTO taskEditDTO, HttpServletResponse response) {
         try {
             Task task = findById(taskEditDTO.getId());
 
@@ -167,7 +167,7 @@ public class TaskService {
             if (task.getGoogleId() != null) {
                 calendarManager.update(task);
             }
-            return new TaskModeViewImageDTO(taskRepository.save(task));
+            return taskRepository.save(task);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

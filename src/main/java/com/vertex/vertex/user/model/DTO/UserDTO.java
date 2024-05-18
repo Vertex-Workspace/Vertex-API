@@ -26,6 +26,8 @@ public class UserDTO {
     private UserKind userKind;
     private LocalDateTime registerDay;
 
+    private boolean isDefaultUser = false;
+
     public UserDTO(User user, String imageUrl) {
         BeanUtils.copyProperties(user, this);
         this.passwordConf = user.getPassword();
@@ -39,6 +41,9 @@ public class UserDTO {
         this.firstName = firstName;
         this.lastName = lastName;
         this.registerDay = LocalDateTime.now();
+        this.firstAccess = false;
+        this.isDefaultUser = true;
+        this.userKind = UserKind.DEFAULT;
     }
 
 

@@ -79,21 +79,22 @@ public class UserService {
             } else {
                 throw new InvalidEmailException();
             }
-//            regexValidate.isPasswordSecure(user, userDTO);
-
+            if(!userDTO.isDefaultUser()){
+                regexValidate.isPasswordSecure(user, userDTO);
+            }
             userRepository.save(user);
             userSetDefaultInformations(user);
             user.setDefaultSettings(false);
 
-            try {
-                byte[] data = Base64.getDecoder().decode(userDTO.getImage());
-                user.setImage(data); // default user
-            } catch (Exception ignored) {
-                userDTO.setImage(userDTO.getImage().replace("s96", "s800")); //upscale image
-                user.setImgUrl(userDTO.getImage()); // external
+            if(userDTO.getImage() != null){
+                try {
+                    byte[] data = Base64.getDecoder().decode(userDTO.getImage());
+                    user.setImage(data); // default user
+                } catch (Exception ignored) {
+                    userDTO.setImage(userDTO.getImage().replace("s96", "s800")); //upscale image
+                    user.setImgUrl(userDTO.getImage()); // external
+                }
             }
-
-
 
             return save(user);
         } catch (Exception e) {
@@ -251,7 +252,11 @@ public class UserService {
 
     public User patchUserShowCharts(Long id) {
         User user = findById(id);
-        user.setShowCharts(!user.getShowCharts());
+        if(user.getShowCharts() == null){
+            user.setShowCharts(true);
+        } else {
+            user.setShowCharts(!user.getShowCharts());
+        }
         return userRepository.save(user);
     }
 

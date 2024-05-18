@@ -15,6 +15,7 @@ import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
 import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
+import com.vertex.vertex.team.repository.TeamRepository;
 import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.user.model.DTO.UserDTO;
 import com.vertex.vertex.user.model.entity.User;
@@ -37,6 +38,7 @@ public class DataConfig {
 
     private UserService userService;
     private TeamService teamService;
+    private TeamRepository teamRepository;
     private ProjectService projectService;
     private UserRepository userRepository;
     private TaskService taskService;
@@ -55,10 +57,11 @@ public class DataConfig {
         User user1 = userService.save(new UserDTO
                 ("kaique@gmail.com", "@Weg123456", "Kaique", "Fernandes"));
         User user2 = userService.save(new UserDTO
-                ("otavio@gmail.com", "@Weg123456", "Otavio", "Miguel Rocha"));
+                ("otavio@gmail.com", "@Weg123456", "Otávio", "Miguel Rocha"));
         User user3 = userService.save(new UserDTO
                 ("miguel@gmail.com", "@Weg123456", "Miguel", "Bertoldi"));
         setUserImage(user1, user2, user3);
+        teamRepository.deleteById(2L);
         teamService.save(new TeamViewListDTO
                 ("Vertex", user2, setTeamImage(), "A Equipe vertex tem como propósito organizar as tarefas e funcionalidades ...", false));
 
@@ -105,7 +108,7 @@ public class DataConfig {
                         " SELECT " + chatId + ", ut.id" +
                         " FROM `user_team` ut" +
                         " JOIN `team` t ON ut.team_id = t.id" +
-                        " WHERE t.name = 'Vertex'";
+                        " WHERE t.name = 'Vertex' AND ut.user_id <> '2'";
                 statement.executeUpdate(sql);
 
                 System.out.println("Associações entre equipes de usuário e chat foram criadas com sucesso.");
