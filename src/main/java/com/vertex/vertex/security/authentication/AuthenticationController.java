@@ -57,13 +57,12 @@ public class AuthenticationController {
         }
     }
 
-    @GetMapping("/user/confirm-email/{email}/{password}")
+    @GetMapping("/user/confirm-email/{email}")
     public ResponseEntity<?> confirmEmail(
             @PathVariable String email,
-            @PathVariable String password,
             HttpServletResponse response) {
         try {
-            authService.confirmEmail(email, password, response);
+            authService.confirmEmail(email, response);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);

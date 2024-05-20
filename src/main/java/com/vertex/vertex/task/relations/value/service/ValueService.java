@@ -38,6 +38,11 @@ public class ValueService {
         return valueRepository.save(value);
     }
 
+    public void deleteAll(List<Value> values){
+        valueRepository.deleteAll(values);
+    }
+
+
     public void setTaskDefaultValues(Task task, List<Property> properties) {
         try {
             List<Value> values = new ArrayList<>();

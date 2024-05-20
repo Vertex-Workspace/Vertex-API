@@ -122,11 +122,11 @@ public class AuthService {
 
     public void confirmEmail(
             String email,
-            String password,
             HttpServletResponse response) throws IOException {
         User user = userService.findByEmail(email);
-        login(new UserLoginDTO(user.getEmail(), password), response);
-        response.sendRedirect("http://localhost:4200/home");
+        user.setEmailConfirm(true);
+        userService.save(user);
+        response.sendRedirect("http://localhost:4200/login");
     }
 
 

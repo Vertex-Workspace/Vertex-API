@@ -37,14 +37,14 @@ public class SecurityConfig {
         });
 
         http.authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
-                .requestMatchers("/forgotPassword/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/authenticate-user").authenticated()
-                .requestMatchers(WebSocketHttpHeaders.ALLOW, "/notifications", "/chat").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/user/confirm-email/{email}").permitAll()
+                        .requestMatchers("/forgotPassword/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/authenticate-user").authenticated()
+                        .requestMatchers(WebSocketHttpHeaders.ALLOW, "/notifications", "/chat").permitAll()
                         .requestMatchers(HttpMethod.GET, "/swagger-ui/*").permitAll()
-
-                .anyRequest().authenticated()
+                        .anyRequest().authenticated()
         )
         .oauth2Login(httpOauth2 -> httpOauth2.successHandler(authService::initExternalServiceLogin));
 

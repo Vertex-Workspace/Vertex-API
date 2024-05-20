@@ -59,16 +59,17 @@ public class PropertyService {
         finalProperty.getPropertyLists().forEach(propertyList -> propertyList.setProperty(finalProperty));
         Property newProperty = propertyRepository.save(finalProperty);
 
-        for (Task task : project.getTasks()) {
+        List<Task> projectTasks = new ArrayList<>(project.getTasks());
+        for (Task task : projectTasks) {
             Value newValue = property.getKind().getValue();
             newValue.setProperty(newProperty);
             newValue.setTask(task);
-            if(property.getDefaultValue() != null && !property.getDefaultValue().isEmpty()){
+            if (property.getDefaultValue() != null && !property.getDefaultValue().isEmpty()) {
                 newValue.setValue(property.getDefaultValue());
             }
             task.getValues().add(valueService.save(newValue));
         }
-        taskRepository.saveAll(project.getTasks());
+        taskRepository.saveAll(projectTasks);
         project.getProperties().add(newProperty);
         return projectService.findProjectById(projectService.save(project).getId());
     }
@@ -107,23 +108,29 @@ public class PropertyService {
         }
     }
 
-    private void deleteValuesCascade(Project project, Property property){
+    private void deleteValuesCascade(Project project, Property property) {
+        List<Value> valuesToBeDeleted = new ArrayList<>();
         List<Task> tasksToBeSaved = new ArrayList<>();
-        List<Value> values = new ArrayList<>();
+
         for (Task task : project.getTasks()) {
-            for (Value value : task.getValues()) {
+            List<Value> valuesInTask = new ArrayList<>(task.getValues());
+            for (Value value : valuesInTask) {
                 if (value.getProperty().getId().equals(property.getId())) {
-                    values.add(value);
+                    valuesToBeDeleted.add(value);
                 }
             }
-            for(Value value : values){
-                task.getValues().remove(value);
+            task.getValues().removeAll(valuesToBeDeleted);
+            if (!valuesToBeDeleted.isEmpty()) {
                 tasksToBeSaved.add(task);
             }
         }
+
+        // Delete all the collected values before modifying tasks
+        valueService.deleteAll(valuesToBeDeleted);
+
+        // Save tasks after removing values
         taskRepository.saveAll(tasksToBeSaved);
     }
-
     public Property findById(Long id) {
         return propertyRepository.findById(id).get();
     }

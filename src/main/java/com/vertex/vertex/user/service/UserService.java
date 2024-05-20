@@ -124,6 +124,7 @@ public class UserService {
         user.setShowCharts(true);
         user.setSyncWithCalendar(false);
         user.setSyncWithDrive(false);
+        user.setDescription("Insira uma breve descrição sobre sua pessoa.");
         defaultConfig.createTeam(user);
     }
 
@@ -366,7 +367,7 @@ public class UserService {
                         "<div style='background-color: #fff; border-radius: 6px; padding: 40px;'>" +
                         "<p style='font-size: 14px; color: #586069;'>" + user.getFullName() + " </p>" +
                         "<h1 style='font-size: 36px; color: #092C4C; margin-top: 10px; margin-bottom: 30px;'>  </h1>" +
-                        "<h2 style='color: #092C4C; font-weight: 500;'><a href='http://localhost:7777/user/confirm-email/" + user.getEmail() + "/" + user.getPassword() +"'>Confirmar E-mail</a></h2>" +
+                        "<h2 style='color: #092C4C; font-weight: 500;'><a href='http://localhost:7777/user/confirm-email/" + user.getEmail() +"'>Confirmar E-mail</a></h2>" +
                         "</div>" +
                         "</div>" +
                         "</body></html>";
@@ -374,6 +375,7 @@ public class UserService {
                 message.setContent(htmlContent, "text/html; charset=utf-8");
 
                 Transport.send(message);
+                user.setEmailConfirm(false);
             } catch (MessagingException mex) {
                 mex.printStackTrace();
             } catch (UnsupportedEncodingException e) {

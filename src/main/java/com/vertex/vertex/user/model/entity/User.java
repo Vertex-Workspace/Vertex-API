@@ -66,6 +66,7 @@ public class User implements UserDetails {
     private Boolean showCharts;
     private Boolean syncWithCalendar;
     private Boolean syncWithDrive;
+    private Boolean emailConfirm;
 
 
     @OneToMany(mappedBy ="user")
