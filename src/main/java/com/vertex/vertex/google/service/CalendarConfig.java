@@ -118,7 +118,7 @@ public class CalendarConfig {
             try {
                 Long userId = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
                 Credential credential = exchangeCodeForToken(code, userId);
-                // Você pode salvar o token em algum lugar para uso posterior, por exemplo, em um banco de dados
+          
                 response.sendRedirect("http://localhost:4200");
                 return ResponseEntity.ok("Bem-sucedido");
             } catch (IOException | GeneralSecurityException e) {
