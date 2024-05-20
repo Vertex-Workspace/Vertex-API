@@ -61,7 +61,9 @@ public class DataConfig {
         User user3 = userService.save(new UserDTO
                 ("miguel@gmail.com", "@Weg123456", "Miguel", "Bertoldi"));
         setUserImage(user1, user2, user3);
+        teamRepository.deleteById(1L);
         teamRepository.deleteById(2L);
+        teamRepository.deleteById(3L);
         teamService.save(new TeamViewListDTO
                 ("Vertex", user2, setTeamImage(), "A Equipe vertex tem como propósito organizar as tarefas e funcionalidades ...", false));
 

@@ -87,11 +87,13 @@ public class UserService {
             if(!userDTO.isDefaultUser() && userDTO.getUserKind() != UserKind.GOOGLE){
                 regexValidate.isPasswordSecure(user, userDTO);
                 //Example e-mail multifatorial
-                sendEmailToValidateAccount(user);
+                try{
+//                    sendEmailToValidateAccount(user);
+                } catch (Exception ignored){}
             }
-            userRepository.save(user);
-            userSetDefaultInformations(user);
-            user.setDefaultSettings(false);
+            User saveUser =  userRepository.save(user);
+            userSetDefaultInformations(saveUser);
+            saveUser.setDefaultSettings(false);
 
             if(userDTO.getImage() != null){
                 try {
@@ -103,7 +105,7 @@ public class UserService {
                 }
             }
 
-            return save(user);
+            return save(saveUser);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
