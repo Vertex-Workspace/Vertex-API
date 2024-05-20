@@ -79,9 +79,9 @@ public class UserService {
             } else {
                 throw new InvalidEmailException();
             }
-            if(!userDTO.isDefaultUser()){
-                regexValidate.isPasswordSecure(user, userDTO);
-            }
+            //if(!userDTO.isDefaultUser()){
+            //    regexValidate.isPasswordSecure(user, userDTO);
+            //}
             userRepository.save(user);
             userSetDefaultInformations(user);
             user.setDefaultSettings(false);
