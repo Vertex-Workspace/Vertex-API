@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -51,10 +52,10 @@ public class CalendarService {
                         .toList();
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         throw new RuntimeException("Empty!");
     }
 

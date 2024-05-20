@@ -34,7 +34,6 @@ public class CalendarController {
                     (service.createCalendarProject(teamId, dto, userId, response),
                             HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -50,7 +49,6 @@ public class CalendarController {
                     (service.findByIdAndGetNewEvents(projectId, userId, response),
                             HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -66,7 +64,6 @@ public class CalendarController {
                     (service.create(response, userId, projectId),
                             HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
