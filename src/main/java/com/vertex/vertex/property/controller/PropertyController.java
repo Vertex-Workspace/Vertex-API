@@ -28,6 +28,7 @@ public class PropertyController {
         try {
             return new ResponseEntity<>(propertyService.save(projectID, property), HttpStatus.OK);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }

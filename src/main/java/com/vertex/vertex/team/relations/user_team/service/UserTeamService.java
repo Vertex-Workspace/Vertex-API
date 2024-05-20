@@ -53,10 +53,8 @@ public class UserTeamService {
     }
 
     public List<Team> findTeamsByUserId(Long userID){
-        return userTeamRepository.findAll()
+        return userTeamRepository.findAllByUser_Id(userID)
                 .stream()
-                .map(UserTeam::getTeam)
-                .flatMap(team -> team.getUserTeams().stream().filter(userTeam -> userTeam.getUser().getId().equals(userID)))
                 .map(UserTeam::getTeam)
                 .toList();
     }

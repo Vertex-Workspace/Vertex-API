@@ -86,13 +86,16 @@ public class User implements UserDetails {
     private LocalDateTime registerDay;
 
     public User(String email, OAuth2User user) {
-        String lastName = user.getAttribute("family_name");
-        String firstName = user.getAttribute("name");
-        firstName = firstName.substring(0, firstName.indexOf(" "));
-        this.email = email;
-        setPassword(email);
-        this.firstName = firstName;
-        this.lastName = lastName;
+        try{
+
+            String lastName = user.getAttribute("family_name");
+            String firstName = user.getAttribute("name");
+            firstName = firstName.substring(0, firstName.indexOf(" "));
+            this.email = email;
+            setPassword(email);
+            this.firstName = firstName;
+            this.lastName = lastName;
+        } catch (Exception ignored){}
     }
 
     public User(UserDTO dto) {

@@ -122,6 +122,8 @@ public class UserController {
     }
 
 
+
+
     @PatchMapping("/{userId}/personalization/changeLanguage")
     public ResponseEntity<?> changeLanguage(@RequestBody LanguageDTO languageDTO, @PathVariable Long userId) {
         try {

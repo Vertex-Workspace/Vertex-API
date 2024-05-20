@@ -53,24 +53,24 @@ public class PropertyService {
         Project project = projectService.findById(projectID);
         Property finalProperty = new Property();
         mapper.map(property, finalProperty);
+
         finalProperty.setProject(project);
         finalProperty.setIsObligate(false);
+        finalProperty.getPropertyLists().forEach(propertyList -> propertyList.setProperty(finalProperty));
         Property newProperty = propertyRepository.save(finalProperty);
-
-        newProperty.getPropertyLists().forEach(propertyList -> propertyList.setProperty(newProperty));
 
         for (Task task : project.getTasks()) {
             Value newValue = property.getKind().getValue();
             newValue.setProperty(newProperty);
             newValue.setTask(task);
-
             if(property.getDefaultValue() != null && !property.getDefaultValue().isEmpty()){
                 newValue.setValue(property.getDefaultValue());
             }
-            valueService.save(newValue);
+            task.getValues().add(valueService.save(newValue));
         }
-        propertyRepository.save(newProperty);
-        return projectService.findProjectById(project.getId());
+        taskRepository.saveAll(project.getTasks());
+        project.getProperties().add(newProperty);
+        return projectService.findProjectById(projectService.save(project).getId());
     }
 
     public ProjectOneDTO edit(Long projectId, Property property){
@@ -100,7 +100,8 @@ public class PropertyService {
         if (property.getPropertyStatus() != PropertyStatus.FIXED) {
             this.deleteValuesCascade(project, property);
             propertyRepository.delete(property);
-            return projectService.findProjectById(project.getId());
+            project.getProperties().remove(property);
+            return projectService.findProjectById(projectService.save(project).getId());
         } else {
             throw new CantDeleteStatusException();
         }

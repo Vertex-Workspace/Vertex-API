@@ -10,6 +10,7 @@ import com.vertex.vertex.task.relations.value.model.DTOs.EditValueDTO;
 import com.vertex.vertex.task.relations.value.model.entity.Value;
 import com.vertex.vertex.task.relations.value.model.entity.ValueDate;
 import com.vertex.vertex.task.relations.value.repository.ValueRepository;
+import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,8 +34,8 @@ public class ValueService {
     public void deleteById(Long id){
         valueRepository.deleteById(id);
     }
-    public void save(Value value){
-        valueRepository.save(value);
+    public Value save(Value value){
+        return valueRepository.save(value);
     }
 
     public void setTaskDefaultValues(Task task, List<Property> properties) {
