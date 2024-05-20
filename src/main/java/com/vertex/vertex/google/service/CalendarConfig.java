@@ -13,6 +13,7 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -44,6 +45,8 @@ public class CalendarConfig {
     protected static final List<String> SCOPES =
             Collections.singletonList(CalendarScopes.CALENDAR);
     protected static final String CREDENTIALS_FILE_PATH = "src/main/resources/credentials.json";
+
+    private final UserService userService;
 
     protected static Credential getCredentials(Long userId)
             throws IOException {
@@ -106,9 +109,19 @@ public class CalendarConfig {
 
     @GetMapping("/calendar/authorize")
     public void authorize(HttpServletResponse response) throws IOException {
-        System.out.println("chegou aqui");
-        System.out.println(generateUrl());
-        response.sendRedirect(generateUrl());
+        try {
+            User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (!user.getSyncWithCalendar()) {
+                user.setSyncWithCalendar(true);
+                response.sendRedirect(generateUrl());
+            } else {
+                user.setSyncWithCalendar(false);
+            }
+
+            userService.save(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @GetMapping("/Callback")

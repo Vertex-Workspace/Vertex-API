@@ -85,6 +85,7 @@ public class UserService {
             userRepository.save(user);
             userSetDefaultInformations(user);
             user.setDefaultSettings(false);
+            user.setSyncWithCalendar(false);
 
             if(userDTO.getImage() != null){
                 try {
