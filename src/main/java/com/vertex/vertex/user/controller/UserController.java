@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -44,15 +45,14 @@ public class UserController {
         }
     }
 
-    @PatchMapping("/edit-password")
-    public ResponseEntity<User> patchPassword(@RequestBody UserLoginDTO userLoginDTO) {
+    @PatchMapping("/password-update")
+    public ResponseEntity<Boolean> updatePassword(@RequestBody ChangePasswordDTO dto) {
         try {
-            return new ResponseEntity<>(userService.patchUserPassword(userLoginDTO), HttpStatus.OK);
+            return new ResponseEntity<>(userService.patchUserPassword(dto), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
-
 
     @PutMapping
     public ResponseEntity<User> edit(@RequestBody UserEditionDTO userEditionDTO) {

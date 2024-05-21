@@ -273,10 +273,21 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User patchUserPassword(UserLoginDTO userLoginDTO) {
-        User user = findByEmail(userLoginDTO.getEmail());
-        user.setPassword(userLoginDTO.getPassword());
-        return userRepository.save(user);
+    public Boolean patchUserPassword(ChangePasswordDTO dto) {
+        try {
+            User user = findById(dto.getUserId());
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+            if (encoder.matches(dto.getOldPassword(), user.getPassword())) {
+                regexValidate.isPasswordSecure(dto);
+                user.setPassword(encoder.encode(dto.getNewPassword()));
+                save(user);
+                return true;
+            }
+            throw new RuntimeException("Senha antiga não coincide!");
+
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     public List<User> getUsersByGroup(Long groupId) {
@@ -309,10 +320,10 @@ public class UserService {
     }
 
     public void changePasswordPeriodically(ChangePasswordDTO changePasswordDTO){
-        User user = findById(changePasswordDTO.getId());
-        if(!Objects.equals(user.getPassword(), changePasswordDTO.getPassword())){
+        User user = findById(changePasswordDTO.getUserId());
+        if(!Objects.equals(user.getPassword(), changePasswordDTO.getNewPassword())){
             if(regexValidate.isPasswordSecure(changePasswordDTO)) {
-                user.setPassword(new BCryptPasswordEncoder().encode(changePasswordDTO.getPassword()));
+                user.setPassword(new BCryptPasswordEncoder().encode(changePasswordDTO.getNewPassword()));
                 user.setRegisterDay(LocalDateTime.now());
                 save(user);
             }
