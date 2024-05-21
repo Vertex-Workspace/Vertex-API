@@ -52,6 +52,14 @@ public class UserTeamService {
         throw new RuntimeException("User Team Not Found!");
     }
 
+    public UserTeam findUserTeamByComposeIdWithoutCredentials(Long teamId, Long userID) {
+        Optional<UserTeam> userTeam = userTeamRepository.findByTeam_IdAndUser_Id(teamId, userID);
+        if (userTeam.isPresent()) {
+            return userTeam.get();
+        }
+        throw new RuntimeException("User Team Not Found!");
+    }
+
     public List<Team> findTeamsByUserId(Long userID){
         return userTeamRepository.findAllByUser_Id(userID)
                 .stream()

@@ -2,6 +2,9 @@ package com.vertex.vertex.task.service;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
+import com.vertex.vertex.chat.model.Chat;
+import com.vertex.vertex.chat.repository.ChatRepository;
+import com.vertex.vertex.chat.service.ChatService;
 import com.vertex.vertex.file.model.File;
 import com.vertex.vertex.file.service.FileService;
 import com.vertex.vertex.google.service.CalendarManagerService;
@@ -50,6 +53,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -69,17 +73,18 @@ public class TaskService {
     private final UserTeamRepository userTeamRepository;
     private final IndexUtils indexUtils;
     private final CalendarManagerService calendarManager;
+    private final ChatRepository chatRepository;
 
     public TaskModeViewImageDTO save(TaskCreateDTO taskCreateDTO) {
         Project project = projectService.findById(taskCreateDTO.getProject().getId());
 
 
         UserTeam creator = userTeamService.findUserTeamByComposeId(project.getTeam().getId(), taskCreateDTO.getCreator().getId());
-        if(!creator.getUser().isDefaultSettings()){
+        if (!creator.getUser().isDefaultSettings()) {
             ValidationUtils.validateUserLogged(creator.getUser().getEmail());
         }
 
-        if(!Permission.hasPermission(creator.getPermissionUser(), TypePermissions.Criar)){
+        if (!Permission.hasPermission(creator.getPermissionUser(), TypePermissions.Criar)) {
             throw new RuntimeException("Você não tem permissão!");
         }
 
@@ -139,9 +144,10 @@ public class TaskService {
 
         return save(task);
     }
-    public void setResponsablesInTask(Project project, Task task){
+
+    public void setResponsablesInTask(Project project, Task task) {
         List<TaskResponsable> taskResponsables = new ArrayList<>();
-        for(UserTeam userTeam : project.getCollaborators()){
+        for (UserTeam userTeam : project.getCollaborators()) {
             taskResponsables.add(new TaskResponsable(userTeam, task));
         }
         task.setTaskResponsables(taskResponsables);
@@ -184,7 +190,8 @@ public class TaskService {
 
         throw new TaskDoesNotExistException();
     }
-    private void validateUserLoggedIntoTask(Task task){
+
+    private void validateUserLoggedIntoTask(Task task) {
         ValidationUtils.validateUserLogged(
                 task.getTaskResponsables()
                         .stream()
@@ -393,7 +400,8 @@ public class TaskService {
             throw new RuntimeException();
         }
     }
-    private List<Task> filterTasksByResponsible(List<Task> tasks, UserTeam userTeam){
+
+    private List<Task> filterTasksByResponsible(List<Task> tasks, UserTeam userTeam) {
         return tasks.stream()
                 .flatMap(task -> task.getTaskResponsables()
                         .stream()
@@ -494,6 +502,9 @@ public class TaskService {
         boolean canDeleteUser = false;
         boolean canDeleteGroup = false;
 
+        UserTeam utS = userTeamService.findUserTeamByComposeIdWithoutCredentials(updateTaskResponsableDTO.getTeamId(), updateTaskResponsableDTO.getUser().getId());
+
+
         if (task.getTaskResponsables().isEmpty()) {
             Optional<UserTeam> userTeam = task.getProject()
                     .getCollaborators()
@@ -525,6 +536,10 @@ public class TaskService {
             if (updateTaskResponsableDTO.getGroup() != null) {
                 task.getGroups().add(updateTaskResponsableDTO.getGroup());
             } else {
+                assert updateTaskResponsableDTO.getUser() != null;
+                task.getChat().getUserTeams().add(utS);
+                utS.getChats().add(task.getChat());
+
                 Optional<UserTeam> userTeam = task.getProject()
                         .getCollaborators()
                         .stream()
@@ -534,16 +549,22 @@ public class TaskService {
             }
         }
 
+
         for (TaskResponsable taskResponsable : responsablesToDelete) {
             task.getTaskResponsables().remove(taskResponsable);
             taskResponsable.setTask(null);
             taskResponsablesRepository.delete(taskResponsable);
+
+            task.getChat().getUserTeams().remove(utS);
+            utS.getChats().remove(task.getChat());
+            userTeamService.save(utS);
         }
         for (Group group : groupsToDelete) {
             task.getGroups().remove(group);
             group.setTasks(null);
         }
 
+        userTeamService.save(utS);
         return taskRepository.save(task);
     }
 
@@ -577,20 +598,20 @@ public class TaskService {
         }
     }
 
-    public List<Permission> getTaskPermissions(Long taskID, Long userID){
+    public List<Permission> getTaskPermissions(Long taskID, Long userID) {
         Task task = findById(taskID);
         ValidationUtils.loggedUserIsOnTask(task);
 
         //Get all users teams of an user
-        for (UserTeam userteamFor : userTeamService.findAllUserTeamByUserId(userID)){
-            if(userteamFor.getTeam().equals(task.getProject().getTeam())){
-                return  userteamFor.getPermissionUser();
+        for (UserTeam userteamFor : userTeamService.findAllUserTeamByUserId(userID)) {
+            if (userteamFor.getTeam().equals(task.getProject().getTeam())) {
+                return userteamFor.getPermissionUser();
             }
         }
         throw new UserNotFoundException();
     }
 
-    public boolean getTasksDone(Long projectId){
+    public boolean getTasksDone(Long projectId) {
         Project project = projectService.findById(projectId);
         //[0] - TODO
         //[1] - DOING
@@ -608,12 +629,12 @@ public class TaskService {
         return tasksCategory.get(2) == project.getTasks().size();
     }
 
-    public ReturnTaskResponsablesDTO returnAllResponsables(Long taskId){
+    public ReturnTaskResponsablesDTO returnAllResponsables(Long taskId) {
         ReturnTaskResponsablesDTO returnTaskResponsablesDTO = new ReturnTaskResponsablesDTO();
         List<User> users = new ArrayList<>();
         Task task = findById(taskId);
 
-        for(TaskResponsable taskResponsable: task.getTaskResponsables()){
+        for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
             users.add(taskResponsable.getUserTeam().getUser());
         }
 
@@ -627,13 +648,13 @@ public class TaskService {
         Project project = projectService.findById(projectId);
         UserTeam ut = userTeamService
                 .findAllUserTeamByUserId(userId).stream()
-                        .findFirst().get();
+                .findFirst().get();
 
-            return (items.stream()
-                    .map(e -> new TaskCreateDTO(e, ut.getUser(), project))
-                    .filter(t -> !taskRepository.existsByGoogleId(t.getGoogleId()))
-                    .map(this::save)
-                    .toList());
+        return (items.stream()
+                .map(e -> new TaskCreateDTO(e, ut.getUser(), project))
+                .filter(t -> !taskRepository.existsByGoogleId(t.getGoogleId()))
+                .map(this::save)
+                .toList());
     }
 
 

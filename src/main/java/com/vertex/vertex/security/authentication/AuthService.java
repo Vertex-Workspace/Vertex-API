@@ -105,7 +105,10 @@ public class AuthService {
     ) throws IOException {
 
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+
+        System.out.println(oAuth2User+"OAUTH2");
         String email = oAuth2User.getAttribute("email");
+        System.out.println(email +"EMAIL");
 
         try { // already registered
             UserDetails user = userDetailsService.loadUserByUsername(email);

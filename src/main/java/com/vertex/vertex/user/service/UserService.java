@@ -72,6 +72,7 @@ public class UserService {
     }
 
     public User save(UserDTO userDTO) {
+        System.out.println(userDTO+"dto");
         try {
             User user = new User(userDTO);
 
