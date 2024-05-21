@@ -33,8 +33,8 @@ public class TaskController {
     private final ChatService chatService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<Task> findById(@PathVariable Long id){
-        try{
+    public ResponseEntity<Task> findById(@PathVariable Long id) {
+        try {
             return new ResponseEntity<>(taskService.findById(id), HttpStatus.OK);
         } catch (AuthenticationCredentialsNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -44,51 +44,50 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<?> save(@RequestBody TaskCreateDTO taskCreateDTO){
-        try{
+    public ResponseEntity<?> save(@RequestBody TaskCreateDTO taskCreateDTO) {
+        try {
             return new ResponseEntity<>(taskService.save(taskCreateDTO), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id, HttpServletResponse response){
-        try{
+    public ResponseEntity<?> delete(@PathVariable Long id, HttpServletResponse response) {
+        try {
             taskService.deleteById(id);
             return new ResponseEntity<>(true, HttpStatus.OK);
-        } catch (Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
         }
     }
 
     @PatchMapping
-    public ResponseEntity<?> edit(@RequestBody TaskEditDTO taskEditDTO, HttpServletResponse response){
-        try{
+    public ResponseEntity<?> edit(@RequestBody TaskEditDTO taskEditDTO, HttpServletResponse response) {
+        try {
             return new ResponseEntity<>(taskService.edit(taskEditDTO, response), HttpStatus.OK);
-        }catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
     @PatchMapping("/value")
-    public ResponseEntity<?> save(@RequestBody EditValueDTO editValueDTO, HttpServletResponse response){
-        try{
+    public ResponseEntity<?> save(@RequestBody EditValueDTO editValueDTO, HttpServletResponse response) {
+        try {
             return new ResponseEntity<>(taskService.save(editValueDTO), HttpStatus.OK);
-        }catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @GetMapping("/info/{taskID}")
     public ResponseEntity<?> getTaskInfos(@PathVariable Long taskID) {
-        try
-        {
+        try {
             return new ResponseEntity<>
                     (taskService.getTaskInfos(taskID), HttpStatus.OK);
         } catch (AuthenticationCredentialsNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        } catch (Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>
                     (e.getMessage(),
                             HttpStatus.NOT_FOUND);
@@ -96,39 +95,38 @@ public class TaskController {
     }
 
     @PatchMapping("/comment")
-    public ResponseEntity<?> saveComment (@RequestBody CommentDTO commentDTO){
-        try{
+    public ResponseEntity<?> saveComment(@RequestBody CommentDTO commentDTO) {
+        try {
             return new ResponseEntity<>(taskService.saveComment(commentDTO), HttpStatus.OK);
-        }catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
     @DeleteMapping("/{taskID}/comment/{commentID}")
-    public ResponseEntity<?> deleteComment(@PathVariable Long taskID, @PathVariable Long commentID){
-        try{
+    public ResponseEntity<?> deleteComment(@PathVariable Long taskID, @PathVariable Long commentID) {
+        try {
             return new ResponseEntity<>(taskService.deleteComment(taskID, commentID), HttpStatus.OK);
-        }catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
     @GetMapping("/{taskID}/task-permission/{userID}")
-    public ResponseEntity<?> getTaskPermissions(@PathVariable Long taskID, @PathVariable Long userID){
-        try{
+    public ResponseEntity<?> getTaskPermissions(@PathVariable Long taskID, @PathVariable Long userID) {
+        try {
             return new ResponseEntity<>(taskService.getTaskPermissions(taskID, userID), HttpStatus.OK);
-        } catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
 
-
     @PatchMapping("/responsables")
-    public ResponseEntity<?> saveResponsables (@RequestBody TaskResponsablesDTO taskResponsable){
-        try{
+    public ResponseEntity<?> saveResponsables(@RequestBody TaskResponsablesDTO taskResponsable) {
+        try {
             return new ResponseEntity<>(taskService.saveResponsables(taskResponsable), HttpStatus.OK);
-        }catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
@@ -139,13 +137,13 @@ public class TaskController {
         try {
             return new ResponseEntity<>(
                     taskService.getAllByUser(userID),
-                        HttpStatus.OK);
+                    HttpStatus.OK);
         } catch (AuthenticationCredentialsNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
             return new ResponseEntity<>(
                     "Usuário não encontrado!",
-                        HttpStatus.NOT_FOUND);
+                    HttpStatus.NOT_FOUND);
         }
     }
 
@@ -155,12 +153,12 @@ public class TaskController {
         try {
             return new ResponseEntity<>(
                     taskService.getAllByProject(id),
-                        HttpStatus.OK);
+                    HttpStatus.OK);
 
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(
                     "Projeto não encontrado!",
-                        HttpStatus.NOT_FOUND
+                    HttpStatus.NOT_FOUND
             );
         }
     }
@@ -173,7 +171,7 @@ public class TaskController {
         try {
             return new ResponseEntity<>
                     (taskService.uploadFile(file, id, userID),
-                        HttpStatus.OK);
+                            HttpStatus.OK);
 
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>
@@ -197,25 +195,25 @@ public class TaskController {
     }
 
     @PatchMapping("/taskResponsables")
-    public ResponseEntity<?> updateParticipants(@RequestBody UpdateTaskResponsableDTO updateTaskResponsableDTO){
-        try{
+    public ResponseEntity<?> updateParticipants(@RequestBody UpdateTaskResponsableDTO updateTaskResponsableDTO) {
+        try {
             return new ResponseEntity<>(taskService.editTaskResponsables(updateTaskResponsableDTO), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping("/{idTask}/chat")
-    public ResponseEntity<Task> createChatOfTask(@PathVariable Long idTask){
-        try{
-            return new ResponseEntity<>(chatService.createChatOfTask(idTask),HttpStatus.CREATED);
-        }catch (Exception e) {
+    public ResponseEntity<Task> createChatOfTask(@PathVariable Long idTask) {
+        try {
+            return new ResponseEntity<>(chatService.createChatOfTask(idTask), HttpStatus.CREATED);
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 
     @GetMapping("/{idTask}/chat")
-    public Chat getChatOfTask(@PathVariable Long idTask){
+    public Chat getChatOfTask(@PathVariable Long idTask) {
         return taskService.findById(idTask).getChat();
     }
 
@@ -232,45 +230,44 @@ public class TaskController {
                     (HttpStatus.CONFLICT);
         }
     }
+
     @PatchMapping("/taskDependency/{taskId}/{taskdependencyId}")
-    public ResponseEntity<?> setTaskDependency(@PathVariable Long taskId, @PathVariable Long taskdependencyId){
-        try{
+    public ResponseEntity<?> setTaskDependency(@PathVariable Long taskId, @PathVariable Long taskdependencyId) {
+        try {
             return new ResponseEntity<>(taskService.setDependency(taskId, taskdependencyId), HttpStatus.OK);
-        }catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 
     @PatchMapping("/taskDependency/{taskId}")
-    public ResponseEntity<?> setTaskDependencyNull(@PathVariable Long taskId){
-        try{
+    public ResponseEntity<?> setTaskDependencyNull(@PathVariable Long taskId) {
+        try {
             taskService.setTaskDependencyNull(taskId);
             return new ResponseEntity<>(HttpStatus.OK);
-        }catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 
 
-
     @GetMapping("/doneTask/{projectDependencyId}")
-    public ResponseEntity<?> getTasksDone(@PathVariable Long projectDependencyId){
+    public ResponseEntity<?> getTasksDone(@PathVariable Long projectDependencyId) {
         try {
             return new ResponseEntity<>(taskService.getTasksDone(projectDependencyId), HttpStatus.OK);
-        }catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 
     @GetMapping("/taskResponsables/{taskId}")
-    public ResponseEntity<?> returnResponsables(@PathVariable Long taskId){
+    public ResponseEntity<?> returnResponsables(@PathVariable Long taskId) {
         try {
             return new ResponseEntity<>(taskService.returnAllResponsables(taskId), HttpStatus.OK);
-        }catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
-
 
 
 }

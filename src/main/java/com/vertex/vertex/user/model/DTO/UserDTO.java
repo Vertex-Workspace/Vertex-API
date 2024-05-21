@@ -29,6 +29,7 @@ public class UserDTO {
     private boolean isDefaultUser = false;
 
     public UserDTO(User user, String imageUrl) {
+        System.out.println(user);
         BeanUtils.copyProperties(user, this);
         this.passwordConf = user.getPassword();
         this.firstAccess = true;

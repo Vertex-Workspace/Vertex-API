@@ -89,14 +89,21 @@ public class User implements UserDetails {
     public User(String email, OAuth2User user) {
         try{
 
-            String lastName = user.getAttribute("family_name");
             String firstName = user.getAttribute("name");
-            firstName = firstName.substring(0, firstName.indexOf(" "));
+            String lastName = user.getAttribute("family_name");
+            if (firstName.contains(" ")){
+                firstName = firstName.substring(0, firstName.indexOf(" "));
+            }
+            if (lastName == null){
+                lastName = firstName;
+            }
             this.email = email;
             setPassword(email);
             this.firstName = firstName;
             this.lastName = lastName;
-        } catch (Exception ignored){}
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public User(UserDTO dto) {
