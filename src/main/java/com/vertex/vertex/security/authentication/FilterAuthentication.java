@@ -33,11 +33,6 @@ public class FilterAuthentication extends OncePerRequestFilter {
         JwtUtil jwtUtil = new JwtUtil(environment);
         CookieUtils cookieUtil = new CookieUtils(environment);
 
-//        Cookie cookieSession = new Cookie("JSESSIONID", "");
-//        cookieSession.setMaxAge(0);
-//        response.addCookie(cookieSession);
-
-
         if (!isPublicRouter(request)) {
             //Get the JWT Cookie from request and the value
             Cookie cookie;
@@ -77,6 +72,7 @@ public class FilterAuthentication extends OncePerRequestFilter {
                         request.getRequestURI().equals("/user/register")) &&
                         (request.getMethod().equals("POST"))) ||
                 request.getRequestURI().equals("/notifications") ||
+                request.getRequestURI().contains("/user/confirm-email") ||
                 request.getRequestURI().equals("/chat") ||
                 request.getRequestURI().startsWith("/forgotPassword")) ||
                 request.getRequestURI().contains("/calendar");

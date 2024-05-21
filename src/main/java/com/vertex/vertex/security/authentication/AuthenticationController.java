@@ -21,12 +21,11 @@ public class AuthenticationController {
     @PostMapping("/login")
     public ResponseEntity<?> authenticate(
             @RequestBody UserLoginDTO user,
-            HttpServletRequest request,
             HttpServletResponse response
     ) {
         try {
             return new ResponseEntity<>
-                    (authService.login(user, request, response),
+                    (authService.login(user, response),
                             HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>
@@ -55,6 +54,18 @@ public class AuthenticationController {
                             HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @GetMapping("/user/confirm-email/{email}")
+    public ResponseEntity<?> confirmEmail(
+            @PathVariable String email,
+            HttpServletResponse response) {
+        try {
+            authService.confirmEmail(email, response);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }
 }

@@ -20,6 +20,7 @@ import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.user.model.DTO.*;
 import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user.model.enums.UserKind;
 import com.vertex.vertex.user.model.exception.*;
 import com.vertex.vertex.user.relations.personalization.model.entity.LanguageDTO;
 import com.vertex.vertex.user.relations.personalization.model.entity.Personalization;
@@ -37,6 +38,10 @@ import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -79,13 +84,16 @@ public class UserService {
             } else {
                 throw new InvalidEmailException();
             }
-            //if(!userDTO.isDefaultUser()){
-            //    regexValidate.isPasswordSecure(user, userDTO);
-            //}
-            userRepository.save(user);
-            userSetDefaultInformations(user);
-            user.setDefaultSettings(false);
-            user.setSyncWithCalendar(false);
+            if(!userDTO.isDefaultUser() && userDTO.getUserKind() != UserKind.GOOGLE){
+                regexValidate.isPasswordSecure(user, userDTO);
+                //Example e-mail multifatorial
+                try{
+//                    sendEmailToValidateAccount(user);
+                } catch (Exception ignored){}
+            }
+            User saveUser =  userRepository.save(user);
+            userSetDefaultInformations(saveUser);
+            saveUser.setDefaultSettings(false);
 
             if(userDTO.getImage() != null){
                 try {
@@ -115,6 +123,10 @@ public class UserService {
         user.setAnyUpdateOnTask(true);
         user.setResponsibleInProjectOrTask(true);
         user.setDefaultSettings(true);
+        user.setShowCharts(true);
+        user.setSyncWithCalendar(false);
+        user.setSyncWithDrive(false);
+        user.setDescription("Insira uma breve descrição sobre sua pessoa.");
         defaultConfig.createTeam(user);
     }
 
@@ -184,8 +196,8 @@ public class UserService {
         }
         //All tasks that the user is responsible
         List<TaskResponsable> tasksResponsible =
-                teams.stream().flatMap(team -> team.getUserTeams().stream())
-                        .flatMap(userTeam -> userTeam.getTeam().getProjects().stream())
+                teams.stream()
+                        .flatMap(team -> team.getProjects().stream())
                         .flatMap(project -> project.getTasks().stream())
                         .flatMap(task -> task.getTaskResponsables().stream())
                         .filter(taskResponsable -> taskResponsable.getUserTeam().getUser().getId().equals(id))
@@ -262,6 +274,7 @@ public class UserService {
     }
 
 
+
     public User changeLanguage(LanguageDTO languageDTO, Long userId){
         User user = findById(userId);
 
@@ -329,6 +342,60 @@ public class UserService {
             }
         } else {
             throw new RuntimeException("Your password can't be the same as the last");
+        }
+    }
+
+    public void sendEmailToValidateAccount(User user){
+        try {
+            Properties properties = System.getProperties();
+
+            // define os dados básicos
+            String host = "smtp.gmail.com";
+            String email = "vertex.workspacee@gmail.com";
+            String password = "sryx rozm wixy iool";
+
+            //liga os protocolo tudo
+            properties.put("mail.smtp.auth", "true");
+            properties.put("mail.smtp.starttls.enable", "true");
+            properties.put("mail.smtp.host", host);
+            properties.put("mail.smtp.port", "587");
+            properties.put("mail.smtp.ssl.trust", host);
+
+            Session session = Session.getDefaultInstance(properties, new Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(email, password);
+                }
+            });
+
+            try {
+                MimeMessage message = new MimeMessage(session);
+                message.setFrom(new InternetAddress(email, "VERTEX: Gerencie seu tempo de ponta a ponta!"));
+                message.addRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
+                message.setSubject("Confirme Seu Email!");
+
+                String htmlContent = "<html><body style='background-color: #f6f8fa;'>" +
+                        "<div style='margin: 0 auto; max-width: 600px; padding: 20px; text-align: center;'>" +
+                        "<img src='https://github.com/Vertex-Workspace/Vertex/blob/main/src/assets/vertex-logo.png?raw=true' " +
+                        "alt='VERTEX LOGO' style='margin-bottom: 20px; width: 140px; height: auto;'>"+
+                        "<div style='background-color: #fff; border-radius: 6px; padding: 40px;'>" +
+                        "<p style='font-size: 14px; color: #586069;'>" + user.getFullName() + " </p>" +
+                        "<h1 style='font-size: 36px; color: #092C4C; margin-top: 10px; margin-bottom: 30px;'>  </h1>" +
+                        "<h2 style='color: #092C4C; font-weight: 500;'><a href='http://localhost:7777/user/confirm-email/" + user.getEmail() +"'>Confirmar E-mail</a></h2>" +
+                        "</div>" +
+                        "</div>" +
+                        "</body></html>";
+
+                message.setContent(htmlContent, "text/html; charset=utf-8");
+
+                Transport.send(message);
+                user.setEmailConfirm(false);
+            } catch (MessagingException mex) {
+                mex.printStackTrace();
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+        } catch (Exception e) {
+            System.out.println("Falha E-mail");
         }
     }
 

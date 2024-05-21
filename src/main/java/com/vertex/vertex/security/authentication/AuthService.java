@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +35,6 @@ public class AuthService {
     private final CalendarService calendarService;
 
     public User login(UserLoginDTO user,
-                      HttpServletRequest request,
                       HttpServletResponse response) {
         try {
             CookieUtils cookieUtil = new CookieUtils(environment);
@@ -119,6 +119,16 @@ public class AuthService {
         }
         response.sendRedirect("http://localhost:4200");
     }
+
+    public void confirmEmail(
+            String email,
+            HttpServletResponse response) throws IOException {
+        User user = userService.findByEmail(email);
+        user.setEmailConfirm(true);
+        userService.save(user);
+        response.sendRedirect("http://localhost:4200/login");
+    }
+
 
 
 

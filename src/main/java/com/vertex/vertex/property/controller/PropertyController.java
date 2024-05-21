@@ -45,6 +45,7 @@ public class PropertyController {
         try {
             return new ResponseEntity<>(propertyService.delete(projectID, propertyID), HttpStatus.OK);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }

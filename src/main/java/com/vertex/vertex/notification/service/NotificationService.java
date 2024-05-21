@@ -17,10 +17,15 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Properties;
 import java.util.function.Function;
 
 @Service
@@ -38,7 +43,9 @@ public class NotificationService {
         Notification notificationSaved = notificationRepository.save(notification);
 
         if(notification.getUser().getSendToEmail()){
-            sendToEmail(notificationSaved);
+            try{
+                sendToEmail(notificationSaved);
+            } catch (Exception ignored) {}
         }
         try {
             webSocket(notification.getUser().getId());

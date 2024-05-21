@@ -12,7 +12,13 @@ import com.vertex.vertex.property.model.ENUM.PropertyStatus;
 import com.vertex.vertex.property.model.entity.Property;
 import com.vertex.vertex.property.model.entity.PropertyList;
 import com.vertex.vertex.task.model.DTO.TaskCreateDTO;
+import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
+import com.vertex.vertex.task.relations.value.model.entity.Value;
+import com.vertex.vertex.task.relations.value.model.entity.ValueDate;
+import com.vertex.vertex.task.relations.value.model.entity.ValueList;
+import com.vertex.vertex.task.relations.value.service.ValueService;
+import com.vertex.vertex.task.repository.TaskRepository;
 import com.vertex.vertex.task.service.TaskService;
 import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
 import com.vertex.vertex.team.repository.TeamRepository;
@@ -42,6 +48,7 @@ public class DataConfig {
     private ProjectService projectService;
     private UserRepository userRepository;
     private TaskService taskService;
+    private ValueService valueService;
     private ProjectRepository projectRepository;
     private static final String BANCO_URL = "jdbc:mysql://localhost:3306/vertex";
     private static final String USERNAME = "root";
@@ -61,7 +68,9 @@ public class DataConfig {
         User user3 = userService.save(new UserDTO
                 ("miguel@gmail.com", "@Weg123456", "Miguel", "Bertoldi"));
         setUserImage(user1, user2, user3);
+        teamRepository.deleteById(1L);
         teamRepository.deleteById(2L);
+        teamRepository.deleteById(3L);
         teamService.save(new TeamViewListDTO
                 ("Vertex", user2, setTeamImage(), "A Equipe vertex tem como propósito organizar as tarefas e funcionalidades ...", false));
 
@@ -239,14 +248,40 @@ public class DataConfig {
     public void createTasks() {
         TaskCreateDTO taskCreateDTO = new TaskCreateDTO("Regras de Negócio", "Escreva todas as regras de negócio aqui",
                 userRepository.findById(2L).get(), projectRepository.findById(4L).get());
-        TaskCreateDTO taskCreateDTO2 = new TaskCreateDTO("Criar Models", "Separar em entities e dtos",
+        TaskCreateDTO taskCreateDTO2 = new TaskCreateDTO("Criação das Models", "Separar em entities e dtos",
                 userRepository.findById(2L).get(), projectRepository.findById(5L).get());
-        TaskCreateDTO taskCreateDTO3 = new TaskCreateDTO("Fazer requisições", "criar services e fazer as requisições",
+        TaskCreateDTO taskCreateDTO3 = new TaskCreateDTO("Refatoração do backend", "Visa redução de código e maior legibilidade",
+                userRepository.findById(2L).get(), projectRepository.findById(5L).get());
+        TaskCreateDTO taskCreateDTO4 = new TaskCreateDTO("Estruturação do banco de dados", "Estabelecimento das tabelas e relações ",
+                userRepository.findById(2L).get(), projectRepository.findById(5L).get());
+        TaskCreateDTO taskCreateDTO5 = new TaskCreateDTO("Criação de controllers e services", "Definir rotas e regras de negócios",
+                userRepository.findById(2L).get(), projectRepository.findById(5L).get());
+        TaskCreateDTO taskCreateDTO6 = new TaskCreateDTO("Integração front-back", "Definir cors config e integrar ambas partes do sistema",
+                userRepository.findById(2L).get(), projectRepository.findById(5L).get());
+        TaskCreateDTO taskCreateDTO7 = new TaskCreateDTO("Fazer requisições", "criar services e fazer as requisições",
                 userRepository.findById(2L).get(), projectRepository.findById(6L).get());
 
         taskService.savePostConstruct(taskCreateDTO);
-        taskService.savePostConstruct(taskCreateDTO2);
+        Task task2 = taskService.savePostConstruct(taskCreateDTO2);
         taskService.savePostConstruct(taskCreateDTO3);
+        Task task4 = taskService.savePostConstruct(taskCreateDTO4);
+        taskService.savePostConstruct(taskCreateDTO5);
+        taskService.savePostConstruct(taskCreateDTO6);
+        taskService.savePostConstruct(taskCreateDTO7);
+
+        for (Value value : task4.getValues()) {
+            if (value.getProperty().getKind() == PropertyKind.STATUS) {
+                value.setValue(value.getProperty().getPropertyLists().get(3));
+                valueService.save(value);
+            }
+        }
+
+        for (Value value : task2.getValues()) {
+            if (value.getProperty().getKind() == PropertyKind.STATUS) {
+                value.setValue(value.getProperty().getPropertyLists().get(1));
+                valueService.save(value);
+            }
+        }
     }
 
     public byte[] setTeamImage() throws IOException {
