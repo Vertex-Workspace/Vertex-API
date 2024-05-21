@@ -376,6 +376,7 @@ public class TaskService {
                 , task.getProject().getName()
                 , fullName
                 , task.getCreator().getUser().getEmail()
+                , task.getProject().getId()
                 , task.getProject().getProjectReviewENUM());
     }
 

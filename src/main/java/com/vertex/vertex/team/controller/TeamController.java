@@ -1,9 +1,6 @@
 package com.vertex.vertex.team.controller;
 
-import com.vertex.vertex.team.model.DTO.TeamInfoDTO;
-import com.vertex.vertex.team.model.DTO.TeamProjectsDTO;
-import com.vertex.vertex.team.model.DTO.TeamSearchDTO;
-import com.vertex.vertex.team.model.DTO.TeamViewListDTO;
+import com.vertex.vertex.team.model.DTO.*;
 import com.vertex.vertex.team.service.TeamService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
@@ -28,16 +25,16 @@ public class TeamController {
         try {
             return new ResponseEntity<>(teamService.save(team), HttpStatus.CREATED);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PutMapping
-    public ResponseEntity<?> update(@RequestBody TeamViewListDTO team) {
+    public ResponseEntity<?> update(@RequestBody TeamEditBasicDTO team) {
         try {
             return new ResponseEntity<>(teamService.save(team), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -140,7 +137,7 @@ public class TeamController {
         try {
             return new ResponseEntity<>(teamService.updateImage(file, teamId), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -167,7 +164,7 @@ public class TeamController {
                             HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>
-                    (HttpStatus.CONFLICT);
+                    (HttpStatus.BAD_REQUEST);
         }
     }
 

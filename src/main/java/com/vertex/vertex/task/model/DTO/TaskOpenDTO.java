@@ -20,6 +20,6 @@ public class TaskOpenDTO {
     private String projectName;
     private String creatorFullName;
     private String email;
-
+    private Long projectId;
     private ProjectReviewENUM projectReviewENUM;
 }

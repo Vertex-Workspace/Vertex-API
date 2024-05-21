@@ -39,7 +39,7 @@ public class TaskController {
         } catch (AuthenticationCredentialsNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 

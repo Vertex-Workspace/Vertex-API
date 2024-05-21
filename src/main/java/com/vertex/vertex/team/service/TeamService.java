@@ -80,6 +80,17 @@ public class TeamService {
             throw new RuntimeException(e);
         }
     }
+    public Team save(TeamEditBasicDTO teamEditBasicDTO) {
+        try {
+            Team team = findTeamById(teamEditBasicDTO.getId());
+            //name and description
+            team.setName(teamEditBasicDTO.getName());
+            team.setDescription(teamEditBasicDTO.getDescription());
+            return teamRepository.save(team);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 
     public TeamInfoDTO findById(Long id) {

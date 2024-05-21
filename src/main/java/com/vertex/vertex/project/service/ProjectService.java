@@ -247,7 +247,7 @@ public class ProjectService {
         }
     }
 
-    public ProjectOneDTO updateProjectCollaborators(ProjectEditDTO projectEditDTO) {
+    public ProjectViewListDTO updateProjectCollaborators(ProjectEditDTO projectEditDTO) {
         Project project = findById(projectEditDTO.getId());
         ValidationUtils.loggedUserIsOnProjectAndIsCreator(project);
 
@@ -287,7 +287,7 @@ public class ProjectService {
         if(projectEditDTO.getProjectReviewENUM() == null) {
             project.setProjectReviewENUM(ProjectReviewENUM.OPTIONAL);
         }
-        return findProjectById(projectRepository.save(project).getId());
+        return new ProjectViewListDTO(projectRepository.save(project));
     }
 
     public void notificationOfUpdateCollaborators(UserTeam userTeam, Project project, Boolean bool) {
