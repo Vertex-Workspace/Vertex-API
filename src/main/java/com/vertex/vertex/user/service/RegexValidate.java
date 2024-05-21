@@ -35,10 +35,10 @@ public class RegexValidate {
 
     public boolean isPasswordSecure(ChangePasswordDTO changePasswordDTO) {
         boolean validPassword = Pattern.compile("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$")
-                .matcher(changePasswordDTO.getPassword())
+                .matcher(changePasswordDTO.getNewPassword())
                 .find();
 
-        if (changePasswordDTO.getPassword() != null && !validPassword) {
+        if (changePasswordDTO.getNewPassword() != null && !validPassword) {
             throw new UnsafePasswordException();
         }
         return validPassword;
