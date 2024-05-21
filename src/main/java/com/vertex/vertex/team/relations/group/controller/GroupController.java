@@ -68,9 +68,11 @@ public class GroupController {
     @DeleteMapping("team/group/{groupId}")
     public ResponseEntity<?> deleteGroup(@PathVariable Long groupId){
         try{
+            System.out.println(groupId);
             groupService.delete(groupId);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch(Exception e){
+            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
