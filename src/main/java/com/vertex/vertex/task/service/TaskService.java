@@ -131,15 +131,15 @@ public class TaskService {
 
         //Notifications
         for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
-            if(taskResponsable.getUserTeam().getUser().getResponsibleInProjectOrTask() != null){
-            if (taskResponsable.getUserTeam().getUser().getResponsibleInProjectOrTask() && !taskResponsable.getUserTeam().equals(task.getCreator())) {
-                notificationService.save(new Notification(
-                        project,
-                        "Você foi adicionado como responsável da tarefa " + task.getName(),
-                        "projeto/" + project.getId() + "/tarefas?taskID=" + task.getId(),
-                        taskResponsable.getUserTeam().getUser()
-                ));
-            }
+            if (taskResponsable.getUserTeam().getUser().getResponsibleInProjectOrTask() != null) {
+                if (taskResponsable.getUserTeam().getUser().getResponsibleInProjectOrTask() && !taskResponsable.getUserTeam().equals(task.getCreator())) {
+                    notificationService.save(new Notification(
+                            project,
+                            "Você foi adicionado como responsável da tarefa " + task.getName(),
+                            "projeto/" + project.getId() + "/tarefas?taskID=" + task.getId(),
+                            taskResponsable.getUserTeam().getUser()
+                    ));
+                }
             }
         }
 
@@ -538,28 +538,32 @@ public class TaskService {
             if (updateTaskResponsableDTO.getGroup() != null) {
                 task.getGroups().add(updateTaskResponsableDTO.getGroup());
             } else {
-                assert updateTaskResponsableDTO.getUser() != null;
-                task.getChat().getUserTeams().add(utS);
-                utS.getChats().add(task.getChat());
-
                 Optional<UserTeam> userTeam = task.getProject()
                         .getCollaborators()
                         .stream()
                         .filter(ut -> ut.getUser().getId().equals(updateTaskResponsableDTO.getUser().getId()))
                         .findAny();
                 userTeam.ifPresent(team -> taskResponsablesRepository.save(new TaskResponsable(team, task)));
+
+                if (task.getChat() != null) {
+                    if (updateTaskResponsableDTO.getUser() != null) {
+                        task.getChat().getUserTeams().add(utS);
+                        utS.getChats().add(task.getChat());
+                    }
+                }
             }
         }
-
 
         for (TaskResponsable taskResponsable : responsablesToDelete) {
             task.getTaskResponsables().remove(taskResponsable);
             taskResponsable.setTask(null);
             taskResponsablesRepository.delete(taskResponsable);
 
-            task.getChat().getUserTeams().remove(utS);
-            utS.getChats().remove(task.getChat());
-            userTeamService.save(utS);
+            if(task.getChat() != null) {
+                task.getChat().getUserTeams().remove(utS);
+                utS.getChats().remove(task.getChat());
+                userTeamService.save(utS);
+            }
         }
         for (Group group : groupsToDelete) {
             task.getGroups().remove(group);
