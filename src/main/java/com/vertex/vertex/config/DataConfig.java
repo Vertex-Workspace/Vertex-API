@@ -343,7 +343,7 @@ public class DataConfig {
             user2.setImage(Files.readAllBytes(Paths.get("src/main/java/com/vertex/vertex/upload/otavio.jpg")));
             userRepository.save(user2);
 
-            user3.setImage(Files.readAllBytes(Paths.get("src/main/java/com/vertex/vertex/upload/kaique.jpg")));
+            user3.setImage(Files.readAllBytes(Paths.get("src/main/java/com/vertex/vertex/upload/miguel.jpg")));
             userRepository.save(user3);
         }catch(Exception e){
             e.printStackTrace();
