@@ -139,12 +139,16 @@ public class UserTeamService {
                 .flatMap(p -> p.getTasks().stream())
                 .flatMap(task -> task.getReviews().stream())
                 .forEach(r -> {
+                    if(r.getReviewer() != null){
                         if(r.getReviewer().getUserTeam().getId().equals(userTeam.getId())){
                             r.setReviewer(null);
                         }
+                    }
+                    if(r.getUserThatSentReview() != null){
                         if(r.getUserThatSentReview().getUserTeam().getId().equals(userTeam.getId())){
                             r.setUserThatSentReview(null);
                         }
+                    }
                 });
 
         teamRepository.save(team);
