@@ -7,11 +7,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class ChangePasswordDTO implements IPasswordChange {
+public class ChangePasswordForgotDTO implements IPasswordChange {
 
-    private Long userId;
+    private String emailUser;
     private String newPassword;
-    private String oldPassword;
 
     @Override
     public String getPassword() {

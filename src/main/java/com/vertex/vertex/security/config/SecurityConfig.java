@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user/confirm-email/{email}").permitAll()
                         .requestMatchers("/forgotPassword/**").permitAll()
+                        .requestMatchers(HttpMethod.PATCH,"/user/edit-password").permitAll()
                         .requestMatchers(HttpMethod.GET, "/authenticate-user").authenticated()
                         .requestMatchers(WebSocketHttpHeaders.ALLOW, "/notifications", "/chat").permitAll()
                         .requestMatchers(HttpMethod.GET, "/swagger-ui/*").permitAll()
