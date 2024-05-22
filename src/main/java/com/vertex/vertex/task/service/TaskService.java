@@ -121,7 +121,6 @@ public class TaskService {
     public Task savePostConstruct(TaskCreateDTO taskCreateDTO) {
         Project project = projectService.findById(taskCreateDTO.getProject().getId());
 
-
         UserTeam creator = userTeamRepository.findByTeam_IdAndUser_Id(project.getTeam().getId(), taskCreateDTO.getCreator().getId()).get();
         Task task = new Task(taskCreateDTO, project, creator, indexUtils);
 
@@ -132,6 +131,7 @@ public class TaskService {
 
         //Notifications
         for (TaskResponsable taskResponsable : task.getTaskResponsables()) {
+            if(taskResponsable.getUserTeam().getUser().getResponsibleInProjectOrTask() != null){
             if (taskResponsable.getUserTeam().getUser().getResponsibleInProjectOrTask() && !taskResponsable.getUserTeam().equals(task.getCreator())) {
                 notificationService.save(new Notification(
                         project,
@@ -139,6 +139,7 @@ public class TaskService {
                         "projeto/" + project.getId() + "/tarefas?taskID=" + task.getId(),
                         taskResponsable.getUserTeam().getUser()
                 ));
+            }
             }
         }
 

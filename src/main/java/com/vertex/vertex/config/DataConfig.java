@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -263,7 +264,7 @@ public class DataConfig {
 
         taskService.savePostConstruct(taskCreateDTO);
         Task task2 = taskService.savePostConstruct(taskCreateDTO2);
-        taskService.savePostConstruct(taskCreateDTO3);
+        Task task3 = taskService.savePostConstruct(taskCreateDTO3);
         Task task4 = taskService.savePostConstruct(taskCreateDTO4);
         taskService.savePostConstruct(taskCreateDTO5);
         taskService.savePostConstruct(taskCreateDTO6);
@@ -274,11 +275,26 @@ public class DataConfig {
                 value.setValue(value.getProperty().getPropertyLists().get(3));
                 valueService.save(value);
             }
+            if (value.getProperty().getKind() == PropertyKind.DATE) {
+                ((ValueDate) value).setValue("2024-06-10T09:55:17.0568379");
+                valueService.save(value);
+            }
         }
 
         for (Value value : task2.getValues()) {
             if (value.getProperty().getKind() == PropertyKind.STATUS) {
                 value.setValue(value.getProperty().getPropertyLists().get(1));
+                valueService.save(value);
+            }
+            if (value.getProperty().getKind() == PropertyKind.DATE) {
+                ((ValueDate) value).setValue("2024-07-04T09:55:17.0568379");
+                valueService.save(value);
+            }
+        }
+
+        for (Value value : task3.getValues()) {
+            if (value.getProperty().getKind() == PropertyKind.DATE) {
+                ((ValueDate) value).setValue("2024-06-11T09:55:17.0568379");
                 valueService.save(value);
             }
         }
