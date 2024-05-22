@@ -122,6 +122,7 @@ public class GroupService {
                 }
             }
         }
+        System.out.println(group.getUserTeams());
         return teamService.save(team);
     }
 }

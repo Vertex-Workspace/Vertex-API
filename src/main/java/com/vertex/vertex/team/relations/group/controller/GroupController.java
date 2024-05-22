@@ -24,7 +24,7 @@ public class GroupController {
         try {
             return new ResponseEntity<>(groupService.findById(groupId), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
     @DeleteMapping("/team/{teamId}/group/{groupId}/user/{userId}")
@@ -33,7 +33,7 @@ public class GroupController {
             groupService.deleteUserFromGroup(userId, teamId, groupId);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -42,7 +42,7 @@ public class GroupController {
         try {
             return new ResponseEntity<>(groupService.saveGroup(groupRegisterDTO), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
