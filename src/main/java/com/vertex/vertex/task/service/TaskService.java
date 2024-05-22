@@ -210,6 +210,18 @@ public class TaskService {
                 calendarManager.delete(task);
             }
 
+            if (task.getTaskDependency() != null) {
+                task.setTaskDependency(null);
+                save(task);
+            }
+
+            for(Task taskFor : task.getProject().getTasks()){
+                if(taskFor.getTaskDependency() != null && taskFor.getTaskDependency().getId().equals(id)){
+                    taskFor.setTaskDependency(null);
+                    taskRepository.save(taskFor);
+                }
+            }
+
             taskRepository.deleteById(id);
         } catch (Exception e) {
             throw new RuntimeException();
