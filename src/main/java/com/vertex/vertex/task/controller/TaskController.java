@@ -67,7 +67,7 @@ public class TaskController {
         try {
             return new ResponseEntity<>(taskService.edit(taskEditDTO, response), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -99,7 +99,7 @@ public class TaskController {
         try {
             return new ResponseEntity<>(taskService.saveComment(commentDTO), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -108,7 +108,7 @@ public class TaskController {
         try {
             return new ResponseEntity<>(taskService.deleteComment(taskID, commentID), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -175,7 +175,7 @@ public class TaskController {
 
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>
-                    (HttpStatus.CONFLICT);
+                    (HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -190,7 +190,7 @@ public class TaskController {
 
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>
-                    (HttpStatus.CONFLICT);
+                    (HttpStatus.BAD_REQUEST);
         }
     }
 

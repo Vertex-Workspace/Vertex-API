@@ -159,7 +159,6 @@ public class ReviewService {
             Optional<Review> currentReview = task.getReviews().stream()
                     .filter(review -> review.getApproveStatus().equals(ApproveStatus.UNDERANALYSIS)).findAny();
             if (currentReview.isPresent()) {
-                System.out.println("Presente");
                 Review review = currentReview.get();
                 taskWaitingToReviewDTO.setSender(
                         new ReviewSenderDTO(
@@ -173,7 +172,6 @@ public class ReviewService {
                 tasks.add(taskWaitingToReviewDTO);
             }
         }
-        System.out.println(tasks);
         return tasks;
 
     }
