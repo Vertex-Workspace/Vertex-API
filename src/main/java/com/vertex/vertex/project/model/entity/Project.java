@@ -55,7 +55,7 @@ public class Project {
     @OneToOne(cascade = CascadeType.ALL)
     private File file;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
     @ToString.Exclude
     private List<UserTeam> collaborators = new ArrayList<>();
 

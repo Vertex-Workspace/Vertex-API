@@ -2,6 +2,7 @@ package com.vertex.vertex.team.relations.user_team.service;
 
 import com.vertex.vertex.notification.service.NotificationService;
 import com.vertex.vertex.project.model.DTO.ProjectViewListDTO;
+import com.vertex.vertex.project.model.entity.Project;
 import com.vertex.vertex.security.util.ValidationUtils;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.service.TaskService;
@@ -100,15 +101,17 @@ public class UserTeamService {
     }
 
     public void delete(Long teamID, Long userID) {
-        UserTeam userTeam = findUserTeamByComposeId(teamID, userID);
-        ValidationUtils.validateUserLogged(userTeam.getUser().getEmail());
+        UserTeam userTeam = findUserTeamByComposeIdWithoutCredentials(teamID, userID);
         if (userTeam.getUser().getNewMembersAndGroups()) {
-            notificationService.groupAndTeam("Você foi removido(a) de " + userTeam.getTeam().getName(), userTeam);
+            if(
+                    userTeam.getTeam().getCreator().getUser().getId()
+                            .equals(((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId())
+            ) {
+                notificationService.groupAndTeam("Você foi removido(a) de " + userTeam.getTeam().getName(), userTeam);
+            }
         }
         removeUserTeamDependencies(userTeam);
-
         userTeamRepository.delete(userTeam);
-
     }
 
     public void removeUserTeamDependencies(UserTeam userTeam){
@@ -117,18 +120,33 @@ public class UserTeamService {
                 group.getUserTeams().remove(userTeam);
             }
         }
-        Team team = userTeam.getTeam();
+        for (Project project : userTeam.getTeam().getProjects()){
+            userTeam.getProject().remove(project);
+            project.getCollaborators().remove(userTeam);
+        }
 
-        team.getProjects().forEach(p -> {
-            userTeam.getProject().remove(p);
-        });
-        userTeamRepository.save(userTeam);
+        Team team = userTeamRepository.save(userTeam).getTeam();
         team.getUserTeams().remove(userTeam);
         if(team.getCreator().equals(userTeam)){
             team.setCreator(null);
         }
         team.getChat().getUserTeams().remove(userTeam);
         userTeam.getChats().forEach(chat -> chat.getUserTeams().remove(userTeam));
+
+        //Remove referência de UserTeam/Task Responsible
+        team.getProjects()
+                .stream()
+                .flatMap(p -> p.getTasks().stream())
+                .flatMap(task -> task.getReviews().stream())
+                .forEach(r -> {
+                        if(r.getReviewer().getUserTeam().getId().equals(userTeam.getId())){
+                            r.setReviewer(null);
+                        }
+                        if(r.getUserThatSentReview().getUserTeam().getId().equals(userTeam.getId())){
+                            r.setUserThatSentReview(null);
+                        }
+                });
+
         teamRepository.save(team);
     }
 
