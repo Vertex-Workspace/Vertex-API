@@ -19,13 +19,20 @@ import com.vertex.vertex.task.model.DTO.TaskModeViewImageDTO;
 import com.vertex.vertex.task.model.DTO.TaskViewListImageDTO;
 import com.vertex.vertex.task.model.entity.Task;
 import com.vertex.vertex.task.relations.review.model.ENUM.ApproveStatus;
+import com.vertex.vertex.task.relations.review.repository.ReviewRepository;
+import com.vertex.vertex.task.relations.review.service.ReviewService;
 import com.vertex.vertex.task.relations.task_responsables.model.entity.TaskResponsable;
+import com.vertex.vertex.task.relations.task_responsables.repository.TaskResponsablesRepository;
+import com.vertex.vertex.task.relations.task_responsables.service.TaskResponsablesService;
 import com.vertex.vertex.task.relations.value.service.ValueService;
+import com.vertex.vertex.task.repository.TaskRepository;
+import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.relations.user_team.repository.UserTeamRepository;
 import com.vertex.vertex.team.relations.user_team.service.UserTeamService;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.utils.IndexUtils;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -48,6 +55,9 @@ public class ProjectService {
     private final NotificationService notificationService;
     private final ModelMapper mapper;
     private final IndexUtils indexUtils;
+    private final ReviewRepository reviewRepository;
+    private final TaskRepository taskRepository;
+    private final TaskResponsablesRepository taskResponsablesRepository;
 
     public ProjectViewListDTO saveWithRelationOfProject(ProjectCreateDTO projectCreateDTO, Long teamId) {
         Project project = new Project();
@@ -183,26 +193,52 @@ public class ProjectService {
                 .toList();
     }
 
+    @Transactional
     public void deleteById(Long id) {
         Project project = findById(id);
-        //Delete every value of tasks on project
-        project.getTasks().forEach(task -> task.getValues().forEach(valueService::delete));
+
+        // Validate user permissions
         ValidationUtils.loggedUserIsOnProjectAndIsCreator(project);
 
+        // Handle tasks associated with the project
+        List<Task> tasks = new ArrayList<>(project.getTasks());
+        for (Task task : tasks) {
+            // Delete all values associated with the task
+            task.getValues().forEach(valueService::delete);
+
+            // Delete all TaskResponsables associated with the task
+            task.getTaskResponsables().forEach(tr -> taskResponsablesRepository.deleteById(tr.getId()));
+
+            // Now delete the task itself
+            taskRepository.deleteById(task.getId());
+        }
+
+        // Clear the tasks list in the project
+        project.setTasks(new ArrayList<>());
+
+        // Clear project dependency if it exists
         if (project.getProjectDependency() != null) {
             project.setProjectDependency(null);
-            save(project);
+            projectRepository.save(project);
         }
 
+        // Clear dependencies in other projects
         for (Project projectFor : project.getTeam().getProjects()) {
-            if (projectFor.getProjectDependency() != null) {
-                if (projectFor.getProjectDependency().getId().equals(id)) {
-                    projectFor.setProjectDependency(null);
-                    save(projectFor);
-                }
+            if (projectFor.getProjectDependency() != null && projectFor.getProjectDependency().getId().equals(id)) {
+                projectFor.setProjectDependency(null);
+                projectRepository.save(projectFor);
             }
         }
+        List<UserTeam> collaborators = new ArrayList<>(project.getCollaborators());
+        project.getCollaborators().forEach(ut -> {
+            ut.getProject().remove(project);
+            collaborators.add(ut);
+        });
+        userTeamRepository.saveAll(collaborators);
+        project.setCollaborators(new ArrayList<>());
+        project.setCreator(null);
 
+        // Delete the project
         projectRepository.deleteById(id);
     }
 

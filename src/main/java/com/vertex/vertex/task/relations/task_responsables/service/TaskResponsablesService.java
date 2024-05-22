@@ -20,4 +20,8 @@ public class TaskResponsablesService {
     public List<TaskResponsable> findAll(){
         return taskResponsablesRepository.findAll();
     }
+
+    public void delete(List<TaskResponsable> taskResponsables){
+        taskResponsablesRepository.deleteAll(taskResponsables);
+    }
 }

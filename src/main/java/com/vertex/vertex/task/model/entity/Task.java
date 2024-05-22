@@ -74,7 +74,7 @@ public class Task implements FileSupporter {
     @OneToMany
     private List<Task> subTasks;
 
-    @OneToMany(mappedBy = "task", orphanRemoval = true)
+    @OneToMany(mappedBy = "task", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Review> reviews;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "task", orphanRemoval = true, fetch = FetchType.EAGER)
