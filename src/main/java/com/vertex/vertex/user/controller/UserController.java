@@ -1,10 +1,7 @@
 package com.vertex.vertex.user.controller;
 
 import com.vertex.vertex.notification.entity.model.Notification;
-import com.vertex.vertex.user.model.DTO.ChangePasswordDTO;
-import com.vertex.vertex.user.model.DTO.UserDTO;
-import com.vertex.vertex.user.model.DTO.UserEditionDTO;
-import com.vertex.vertex.user.model.DTO.UserLoginDTO;
+import com.vertex.vertex.user.model.DTO.*;
 import com.vertex.vertex.user.model.entity.User;
 import com.vertex.vertex.user.model.enums.UserKind;
 import com.vertex.vertex.user.model.exception.*;
@@ -51,6 +48,16 @@ public class UserController {
             return new ResponseEntity<>(userService.patchUserPassword(dto), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PatchMapping("/edit-password")
+    public ResponseEntity<?> patchPassword(@RequestBody ChangePasswordForgotDTO dto) {
+        try {
+            return new ResponseEntity<>(userService.patchUserPasswordForgot(dto), HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }
 

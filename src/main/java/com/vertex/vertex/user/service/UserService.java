@@ -72,7 +72,7 @@ public class UserService {
     }
 
     public User save(UserDTO userDTO) {
-        System.out.println(userDTO+"dto");
+        System.out.println(userDTO + "dto");
         try {
             User user = new User(userDTO);
 
@@ -85,18 +85,19 @@ public class UserService {
             } else {
                 throw new InvalidEmailException();
             }
-            if(!userDTO.isDefaultUser() && userDTO.getUserKind() != UserKind.GOOGLE){
+            if (!userDTO.isDefaultUser() && userDTO.getUserKind() != UserKind.GOOGLE) {
                 regexValidate.isPasswordSecure(user, userDTO);
                 //Example e-mail multifatorial
-                try{
+                try {
 //                    sendEmailToValidateAccount(user);
-                } catch (Exception ignored){}
+                } catch (Exception ignored) {
+                }
             }
-            User saveUser =  userRepository.save(user);
+            User saveUser = userRepository.save(user);
             userSetDefaultInformations(saveUser);
             saveUser.setDefaultSettings(false);
 
-            if(userDTO.getImage() != null){
+            if (userDTO.getImage() != null) {
                 try {
                     byte[] data = Base64.getDecoder().decode(userDTO.getImage());
                     user.setImage(data); // default user
@@ -159,7 +160,7 @@ public class UserService {
 
     public User edit(UserEditionDTO userEditionDTO) throws Exception {
         User user = findById(userEditionDTO.getId());
-        if(!Objects.equals(user.getEmail(), userEditionDTO.getEmail())){
+        if (!Objects.equals(user.getEmail(), userEditionDTO.getEmail())) {
             emailValidation(user);
         }
         user.setEmail(userEditionDTO.getEmail());
@@ -192,7 +193,7 @@ public class UserService {
         dto.setFullname(user.getFullName());
         User userLogged = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<Team> teams = userTeamService.findTeamsByUserId(user.getId());
-        if(teams.stream().flatMap(team -> team.getUserTeams().stream()).map(UserTeam::getUser).noneMatch(u -> u.getId().equals(userLogged.getId()))){
+        if (teams.stream().flatMap(team -> team.getUserTeams().stream()).map(UserTeam::getUser).noneMatch(u -> u.getId().equals(userLogged.getId()))) {
             throw new AuthenticationCredentialsNotFoundException("Usuário não compartilha nenhuma equipe com você!");
         }
         //All tasks that the user is responsible
@@ -266,7 +267,7 @@ public class UserService {
 
     public User patchUserShowCharts(Long id) {
         User user = findById(id);
-        if(user.getShowCharts() == null){
+        if (user.getShowCharts() == null) {
             user.setShowCharts(true);
         } else {
             user.setShowCharts(!user.getShowCharts());
@@ -275,13 +276,12 @@ public class UserService {
     }
 
 
-
-    public User changeLanguage(LanguageDTO languageDTO, Long userId){
+    public User changeLanguage(LanguageDTO languageDTO, Long userId) {
         User user = findById(userId);
 
         Personalization personalization = personalizationService.findById(user.getPersonalization().getId());
         ModelMapper modelMapper = new ModelMapper();
-        modelMapper.map(languageDTO,personalization);
+        modelMapper.map(languageDTO, personalization);
 
         user.setPersonalization(personalization);
         return userRepository.save(user);
@@ -298,6 +298,21 @@ public class UserService {
                 return true;
             }
             throw new RuntimeException("Senha antiga não coincide!");
+
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public User patchUserPasswordForgot(ChangePasswordForgotDTO dto) {
+        try {
+            User user = findByEmail(dto.getEmailUser());
+
+            regexValidate.isPasswordSecure(dto);
+
+            user.setPassword(dto.getPassword());
+
+            return userRepository.save(user);
 
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
@@ -333,10 +348,10 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void changePasswordPeriodically(ChangePasswordDTO changePasswordDTO){
+    public void changePasswordPeriodically(ChangePasswordDTO changePasswordDTO) {
         User user = findById(changePasswordDTO.getUserId());
-        if(!Objects.equals(user.getPassword(), changePasswordDTO.getNewPassword())){
-            if(regexValidate.isPasswordSecure(changePasswordDTO)) {
+        if (!Objects.equals(user.getPassword(), changePasswordDTO.getNewPassword())) {
+            if (regexValidate.isPasswordSecure(changePasswordDTO)) {
                 user.setPassword(new BCryptPasswordEncoder().encode(changePasswordDTO.getNewPassword()));
                 user.setRegisterDay(LocalDateTime.now());
                 save(user);
@@ -346,7 +361,7 @@ public class UserService {
         }
     }
 
-    public void sendEmailToValidateAccount(User user){
+    public void sendEmailToValidateAccount(User user) {
         try {
             Properties properties = System.getProperties();
 
@@ -377,11 +392,11 @@ public class UserService {
                 String htmlContent = "<html><body style='background-color: #f6f8fa;'>" +
                         "<div style='margin: 0 auto; max-width: 600px; padding: 20px; text-align: center;'>" +
                         "<img src='https://github.com/Vertex-Workspace/Vertex/blob/main/src/assets/vertex-logo.png?raw=true' " +
-                        "alt='VERTEX LOGO' style='margin-bottom: 20px; width: 140px; height: auto;'>"+
+                        "alt='VERTEX LOGO' style='margin-bottom: 20px; width: 140px; height: auto;'>" +
                         "<div style='background-color: #fff; border-radius: 6px; padding: 40px;'>" +
                         "<p style='font-size: 14px; color: #586069;'>" + user.getFullName() + " </p>" +
                         "<h1 style='font-size: 36px; color: #092C4C; margin-top: 10px; margin-bottom: 30px;'>  </h1>" +
-                        "<h2 style='color: #092C4C; font-weight: 500;'><a href='http://localhost:7777/user/confirm-email/" + user.getEmail() +"'>Confirmar E-mail</a></h2>" +
+                        "<h2 style='color: #092C4C; font-weight: 500;'><a href='http://localhost:7777/user/confirm-email/" + user.getEmail() + "'>Confirmar E-mail</a></h2>" +
                         "</div>" +
                         "</div>" +
                         "</body></html>";
@@ -399,7 +414,6 @@ public class UserService {
             System.out.println("Falha E-mail");
         }
     }
-
 
 
 }
