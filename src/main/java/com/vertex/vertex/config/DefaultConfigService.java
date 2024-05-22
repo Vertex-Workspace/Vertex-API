@@ -18,7 +18,9 @@ import com.vertex.vertex.team.model.entity.Team;
 import com.vertex.vertex.team.relations.user_team.model.entity.UserTeam;
 import com.vertex.vertex.team.service.TeamService;
 import com.vertex.vertex.user.model.entity.User;
+import com.vertex.vertex.user.model.enums.UserKind;
 import com.vertex.vertex.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -64,26 +66,29 @@ public class DefaultConfigService {
                 preparedStatement.executeUpdate();
             }
 
-            // Adicionar membros da equipe como colaboradores
-            try (Connection conn = DriverManager.getConnection(BANCO_URL, USERNAME, PASSSWORD)) {
-
                 for(Project project : projectService.findAllByTeam(team.getId())){
 
                     project = defaultPropertyList(project);
                     project.getCollaborators().add(team.getCreator());
-                    System.out.println("pc" + project.getCollaborators());
-                    createTasks(team.getCreator().getUser(), project);
-                }
 
+                    if(team.getCreator().getUser().getUserKind().equals(UserKind.GOOGLE)){
+                        System.out.println("google");
+                        // Inserir os projetos
+                        String insertProjectSQL2 = "INSERT INTO `project_collaborators` (`project_id`, `collaborators_id`) " +
+                                "VALUES (?, ?)";
+
+                        try (PreparedStatement preparedStatement = connection.prepareStatement(insertProjectSQL2)) {
+                            // Projeto 1
+                            preparedStatement.setLong(1, project.getId());
+                            preparedStatement.setLong(2, project.getCreator().getId());
+                            preparedStatement.executeUpdate();
+                        }
+                    }
+                    createTasks(project.getCreator().getUser(), project);
+                }
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
-
-            System.out.println("Inserções realizadas com sucesso!");
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     public List<PropertyList> defaultStatus(Property property) {
@@ -133,18 +138,8 @@ public class DefaultConfigService {
        TaskCreateDTO taskCreateDTO3 = new TaskCreateDTO("Viajar", "Sua tarefa é viajar",
                user, project);
 
-        System.out.println(taskCreateDTO);
-        Task task = taskService.savePostConstruct(taskCreateDTO);
-        Task task2 =taskService.savePostConstruct(taskCreateDTO2);
-        Task task3 =taskService.savePostConstruct(taskCreateDTO3);
-
-//        List<TaskResponsable> taskResponsables = new ArrayList<>();
-//        for(UserTeam userTeam : project.getCollaborators()){
-//            TaskResponsable taskResponsable = new TaskResponsable(userTeam, task);
-//            taskResponsables.add(taskResponsable);
-//            taskResponsablesRepository.save(taskResponsable);
-//        }
-//        task.setTaskResponsables(taskResponsables);
-//        taskService.save(task);
+        taskService.savePostConstruct(taskCreateDTO);
+        taskService.savePostConstruct(taskCreateDTO2);
+        taskService.savePostConstruct(taskCreateDTO3);
     }
 }
