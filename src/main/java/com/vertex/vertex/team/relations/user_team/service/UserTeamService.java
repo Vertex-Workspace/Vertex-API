@@ -105,10 +105,8 @@ public class UserTeamService {
         if (userTeam.getUser().getNewMembersAndGroups()) {
             notificationService.groupAndTeam("Você foi removido(a) de " + userTeam.getTeam().getName(), userTeam);
         }
-        Team team = userTeam.getTeam();
-        team.getUserTeams().remove(userTeam);
-        userTeam.getChats().forEach(chat -> chat.getUserTeams().remove(userTeam));
-        teamRepository.save(team);
+        removeUserTeamDependencies(userTeam);
+
         userTeamRepository.delete(userTeam);
 
     }
@@ -120,12 +118,18 @@ public class UserTeamService {
             }
         }
         Team team = userTeam.getTeam();
+
+        team.getProjects().forEach(p -> {
+            userTeam.getProject().remove(p);
+        });
+        userTeamRepository.save(userTeam);
         team.getUserTeams().remove(userTeam);
         if(team.getCreator().equals(userTeam)){
             team.setCreator(null);
         }
         team.getChat().getUserTeams().remove(userTeam);
         userTeam.getChats().forEach(chat -> chat.getUserTeams().remove(userTeam));
+        teamRepository.save(team);
     }
 
     public List<UserTeam> findAllByUserAndQuery(Long userId, String query) {

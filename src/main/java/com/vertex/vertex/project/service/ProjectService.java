@@ -55,7 +55,6 @@ public class ProjectService {
     private final NotificationService notificationService;
     private final ModelMapper mapper;
     private final IndexUtils indexUtils;
-    private final ReviewRepository reviewRepository;
     private final TaskRepository taskRepository;
     private final TaskResponsablesRepository taskResponsablesRepository;
 
@@ -229,7 +228,7 @@ public class ProjectService {
                 projectRepository.save(projectFor);
             }
         }
-        List<UserTeam> collaborators = new ArrayList<>(project.getCollaborators());
+        List<UserTeam> collaborators = new ArrayList<>();
         project.getCollaborators().forEach(ut -> {
             ut.getProject().remove(project);
             collaborators.add(ut);
