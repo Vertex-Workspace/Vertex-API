@@ -310,7 +310,7 @@ public class UserService {
 
             regexValidate.isPasswordSecure(dto);
 
-            user.setPassword(dto.getPassword());
+            user.setPassword(new BCryptPasswordEncoder().encode(dto.getPassword()));
 
             return userRepository.save(user);
 
