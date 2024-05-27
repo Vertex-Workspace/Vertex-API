@@ -26,7 +26,6 @@ public class DriveService {
     public List<File> getItens() throws IOException, GeneralSecurityException {
         Drive service = DriveConfig.createDrive();
 
-        // Print the names and IDs for up to 10 files.
         FileList result = service.files().list()
                 .setPageSize(10)
                 .setFields("nextPageToken, files(id, name)")
@@ -44,7 +43,6 @@ public class DriveService {
     }
 
     public String createFolderAndGetID(Drive service, String folderName) throws IOException {
-        // Check if the folder already exists
         FileList result = service.files().list()
                 .setQ("mimeType='application/vnd.google-apps.folder' and name='" + folderName + "' and trashed=false")
                 .setFields("files(id, name)")
@@ -52,11 +50,9 @@ public class DriveService {
         List<File> files = result.getFiles();
 
         if (files != null && !files.isEmpty()) {
-            // Folder already exists, return the first found folder ID
             return files.get(0).getId();
         }
 
-        // Folder doesn't exist, create it
         File fileMetadata = new File();
         fileMetadata.setName(folderName);
         fileMetadata.setMimeType("application/vnd.google-apps.folder");
@@ -77,7 +73,6 @@ public class DriveService {
             public void onFailure(GoogleJsonError e,
                                   HttpHeaders responseHeaders)
                     throws IOException {
-                // Handle error
                 System.err.println(e.getMessage());
             }
 
@@ -102,25 +97,22 @@ public class DriveService {
 
     public void uploadFilesAndGetURIs(MultipartFile fileMulti) throws IOException, GeneralSecurityException {
         Drive service = DriveConfig.createDrive();
-        /* Create a folder and get Folder Id */
+
         String folderId = createFolderAndGetID(service, "Arquivos Vertex");
 
-        /* Upload files to Google Drive */
+
         File fileMetadata = new File();
         fileMetadata.setName(fileMulti.getOriginalFilename());
         fileMetadata.setParents(Collections.singletonList(folderId));
 
-        // Convert MultipartFile to InputStreamContent
         InputStreamContent mediaContent = new InputStreamContent(fileMulti.getContentType(), fileMulti.getInputStream());
 
         File file = service.files().create(fileMetadata, mediaContent)
                 .setFields("id, name, webContentLink, webViewLink")
                 .execute();
 
-        /* Set permissions to file */
         setPermissionsToFile(service, file.getId());
 
-        /* Get file properties: Id, Name, Link */
         System.out.println("File Name: " + file.getName());
         System.out.println("File ID: " + file.getId());
         System.out.println("Download Link: " + file.getWebContentLink());
