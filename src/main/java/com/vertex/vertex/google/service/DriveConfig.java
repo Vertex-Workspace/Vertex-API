@@ -47,10 +47,10 @@ public class DriveConfig {
 
     protected static final String APPLICATION_NAME = "Vertex";
     protected static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-    protected static final String TOKENS_DIRECTORY_PATH = "tokens";
+    protected static final String TOKENS_DIRECTORY_PATH = "tokens_drive";
     protected static final List<String> SCOPES =
             Collections.singletonList(DriveScopes.DRIVE);
-    protected static final String CREDENTIALS_FILE_PATH = "src/main/resources/client_secret.json";
+    protected static final String CREDENTIALS_FILE_PATH = "src/main/resources/credentials.json";
 
 
     private final UserService userService;
@@ -82,7 +82,7 @@ public class DriveConfig {
             String url = authorizationUrl.build();
 
 
-            LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+            LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(9999).build();
             Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize(userId.toString());
 //        //returns an authorized Credential object.
             return credential;
@@ -145,6 +145,7 @@ public class DriveConfig {
 
     @GetMapping("/callback2")
     public ResponseEntity<?> callback(HttpServletResponse response, HttpServletRequest request) {
+
         String code = request.getParameter("code");
         if (code != null) {
             try {
