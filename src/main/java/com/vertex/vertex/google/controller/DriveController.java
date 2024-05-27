@@ -65,35 +65,4 @@ public class DriveController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
-
-
-//    @PostMapping("/upload/{id}")
-//    public ResponseEntity<String> uploadFileToDrive(@RequestParam("file") MultipartFile file,@PathVariable Long id) {
-//        try {
-//            // Carrega as credenciais do arquivo JSON de credenciais do Google Drive
-//            Credential credentials = DriveConfig.getCredentials(id);
-//
-//            // Inicializa o serviço do Google Drive
-//            Drive driveService = DriveConfig.createDrive();
-//
-//            // Cria o arquivo no Google Drive
-//            File fileMetadata = new File();
-//            fileMetadata.setName(file.getOriginalFilename());
-//            fileMetadata.setParents(Collections.singletonList("my-drive")); // Define a pasta onde o arquivo será enviado
-//
-//            InputStreamContent mediaContent = new InputStreamContent(file.getContentType(), file.getInputStream());
-//
-//            File uploadedFile = driveService.files().create(fileMetadata, mediaContent)
-//                    .setFields("id")
-//                    .execute();
-//
-//            // Retorna a resposta com o ID do arquivo criado no Google Drive
-//            return new ResponseEntity<>(uploadedFile.getId(), HttpStatus.OK);
-//        } catch (IOException | GeneralSecurityException e) {
-//            e.printStackTrace();
-//            return new ResponseEntity<>("Erro ao enviar o arquivo para o Google Drive", HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
-
-
 }
