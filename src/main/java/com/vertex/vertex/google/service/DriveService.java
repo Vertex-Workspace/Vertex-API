@@ -53,6 +53,7 @@ public class DriveService {
             return files.get(0).getId();
         }
 
+
         File fileMetadata = new File();
         fileMetadata.setName(folderName);
         fileMetadata.setMimeType("application/vnd.google-apps.folder");
@@ -73,6 +74,7 @@ public class DriveService {
             public void onFailure(GoogleJsonError e,
                                   HttpHeaders responseHeaders)
                     throws IOException {
+
                 System.err.println(e.getMessage());
             }
 
@@ -97,9 +99,7 @@ public class DriveService {
 
     public void uploadFilesAndGetURIs(MultipartFile fileMulti) throws IOException, GeneralSecurityException {
         Drive service = DriveConfig.createDrive();
-
         String folderId = createFolderAndGetID(service, "Arquivos Vertex");
-
 
         File fileMetadata = new File();
         fileMetadata.setName(fileMulti.getOriginalFilename());
@@ -112,6 +112,7 @@ public class DriveService {
                 .execute();
 
         setPermissionsToFile(service, file.getId());
+
 
         System.out.println("File Name: " + file.getName());
         System.out.println("File ID: " + file.getId());
