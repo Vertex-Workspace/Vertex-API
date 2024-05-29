@@ -121,7 +121,7 @@ public class TeamService {
     public TeamLinkDTO findInvitationCodeById(Long id) {
         try {
             Team team = findTeamById(id);
-            ValidationUtils.validateUserLogged(team.getCreator().getUser().getEmail());
+            ValidationUtils.validateUserLogged(((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getEmail());
             return new TeamLinkDTO(team.getInvitationCode());
         } catch (Exception e) {
             throw new TeamNotFoundException(id);
