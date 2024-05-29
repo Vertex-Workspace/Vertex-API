@@ -29,10 +29,18 @@ public class UsedWebSocketHandler extends AbstractWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         for (WebSocketSession webSocketSession : webSocketSessions) {
             if (webSocketSession != null && webSocketSession.getUri() != null && webSocketSession.getUri().getPath().contains("chat")) {
-                webSocketSession.sendMessage(message);
+                if (webSocketSession.isOpen()) { // Verifique se a sessão está aberta
+                    try {
+                        webSocketSession.sendMessage(message);
+                    } catch (Exception e) {
+                        // Log the exception and handle it as needed
+                        System.err.println("Error sending message: " + e.getMessage());
+                    }
+                }
             }
         }
     }
+
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
