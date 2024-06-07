@@ -45,7 +45,8 @@
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>itext7-core</artifactId>
-            <version>7.2.1</version> <!-- Use the latest version -->
+            <version>8.0.4</version>
+            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
@@ -129,6 +130,11 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

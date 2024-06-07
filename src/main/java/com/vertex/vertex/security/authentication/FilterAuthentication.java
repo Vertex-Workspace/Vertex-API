@@ -68,7 +68,7 @@ public class FilterAuthentication extends OncePerRequestFilter {
 
     private boolean isPublicRouter(HttpServletRequest request) {
         return ((request.getRequestURI().equals("/")) ||
-                ((request.getRequestURI().equals("/login") ||
+                ((request.getRequestURI().equals("/login") || (request.getRequestURI().equals("/kafka") ||
                         request.getRequestURI().equals("/user/register")) &&
                         (request.getMethod().equals("POST"))) ||
                 request.getRequestURI().equals("/notifications") ||
@@ -76,6 +76,6 @@ public class FilterAuthentication extends OncePerRequestFilter {
                 request.getRequestURI().equals("/chat") ||
                 request.getRequestURI().startsWith("/forgotPassword") ||
                 request.getRequestURI().contains("/user/edit-password")) ||
-                request.getRequestURI().contains("/calendar");
+                request.getRequestURI().contains("/calendar"));
     }
 }
