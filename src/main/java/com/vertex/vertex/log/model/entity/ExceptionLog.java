@@ -18,11 +18,9 @@ public class ExceptionLog {
     private Long id;
 
     private String exceptionMessage;
-    private LocalDateTime timestamp;
 
     public ExceptionLog(Exception e) {
         this.exceptionMessage = e.getMessage();
-        this.timestamp = LocalDateTime.now();
     }
 
 }

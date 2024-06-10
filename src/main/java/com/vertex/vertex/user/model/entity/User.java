@@ -86,6 +86,9 @@ public class User implements UserDetails {
     private Boolean sendToEmail;
     private LocalDateTime registerDay;
 
+    @Column(updatable = false)
+    private Boolean isAdmin;
+
     public User(String email, OAuth2User user) {
         try{
 

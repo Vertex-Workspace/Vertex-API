@@ -25,6 +25,7 @@ public class UserDTO {
     private String image;
     private UserKind userKind;
     private LocalDateTime registerDay;
+    private Boolean isAdmin = false;
 
     private boolean isDefaultUser = false;
 
@@ -46,6 +47,19 @@ public class UserDTO {
         this.isDefaultUser = true;
         this.userKind = UserKind.DEFAULT;
     }
+
+    public UserDTO(String email, String password, String firstName, String lastName, Boolean isAdmin) {
+        this.email = email;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.registerDay = LocalDateTime.now();
+        this.firstAccess = false;
+        this.isDefaultUser = true;
+        this.userKind = UserKind.DEFAULT;
+        this.isAdmin = isAdmin;
+    }
+
 
 
     public UserDTO(

@@ -23,15 +23,16 @@ public class AuthenticationController {
             @RequestBody UserLoginDTO user,
             HttpServletResponse response
     ) {
-        try {
-            return new ResponseEntity<>
-                    (authService.login(user, response),
-                            HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>
-                    ("E-mail ou senha inválidos!",
-                            HttpStatus.UNAUTHORIZED);
-        }
+        throw new RuntimeException("ABADABADU");
+//        try {
+//            return new ResponseEntity<>
+//                    (authService.login(user, response),
+//                            HttpStatus.OK);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>
+//                    ("E-mail ou senha inválidos!",
+//                            HttpStatus.UNAUTHORIZED);
+//        }
     }
 
     //Seta cookie com tempo "0" excluindo ele do navegador do usuário

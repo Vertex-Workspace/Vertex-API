@@ -68,6 +68,7 @@ public class DataConfig {
                 ("otavio@gmail.com", "@Weg123456", "Otávio", "Miguel Rocha"));
         User user3 = userService.save(new UserDTO
                 ("miguel@gmail.com", "@Weg123456", "Miguel", "Bertoldi"));
+        userService.save(new UserDTO("admin@gmail.com","@Weg123456", "is","admin",true));
         setUserImage(user1, user2, user3);
         teamRepository.deleteById(1L);
         teamRepository.deleteById(2L);
