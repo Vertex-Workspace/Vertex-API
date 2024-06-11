@@ -76,6 +76,7 @@ public class FilterAuthentication extends OncePerRequestFilter {
                 request.getRequestURI().equals("/chat") ||
                 request.getRequestURI().startsWith("/forgotPassword") ||
                 request.getRequestURI().contains("/user/edit-password")) ||
-                request.getRequestURI().contains("/calendar");
+                request.getRequestURI().contains("/calendar") ||
+                request.getRequestURI().contains("/logs");
     }
 }
