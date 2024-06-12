@@ -23,7 +23,7 @@ public class AuthenticationController {
             @RequestBody UserLoginDTO user,
             HttpServletResponse response
     ) {
-        throw new RuntimeException("ABADABADU");
+        throw new RuntimeException("ERROR 404!");
 //        try {
 //            return new ResponseEntity<>
 //                    (authService.login(user, response),

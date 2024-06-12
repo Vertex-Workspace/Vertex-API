@@ -16,4 +16,9 @@ public class GlobalExceptionHandler {
         exceptionLogger.logException(exception);
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public void handleException(RuntimeException exception) {
+        exceptionLogger.logException(exception);
+    }
+
 }

@@ -48,24 +48,24 @@ public class KafkaService {
         properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,StringDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "vertex");
-        properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"latest");
+        properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest");
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties);
 
         consumer.subscribe(List.of(topic));
 
-        ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(10000 ));
-//        ArrayList<ExceptionLog> logs = new ArrayList<>();
+        ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(60000 ));
+        ArrayList<ExceptionLog> logs = new ArrayList<>();
         for( ConsumerRecord<String, String > record : records){
             System.out.println( record.value()
             );
-//            ExceptionLog exceptionLog = new Gson().fromJson(record.value(), ExceptionLog.class);
-//            System.out.println(exceptionLog);
-//            logs.add(exceptionLog);
+            ExceptionLog exceptionLog = new Gson().fromJson(record.value(), ExceptionLog.class);
+            System.out.println(exceptionLog);
+            logs.add(exceptionLog);
         }
-//        consumer.close();
-//        System.out.println(logs);
-//        return logs;
-        return null;
+        consumer.close();
+        System.out.println(logs);
+        return logs;
+//        return null;
     }
 }
