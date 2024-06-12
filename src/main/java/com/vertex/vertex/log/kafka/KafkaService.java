@@ -30,7 +30,7 @@ public class KafkaService {
 
 
     private static ArrayList<ExceptionLog> logs;
-    private static final String topic = "error_log";
+    private static final String topic = "error_logs";
 
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
@@ -54,15 +54,18 @@ public class KafkaService {
 
         consumer.subscribe(List.of(topic));
 
-        ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
-        ArrayList<ExceptionLog> logs = new ArrayList<>();
+        ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(10000 ));
+//        ArrayList<ExceptionLog> logs = new ArrayList<>();
         for( ConsumerRecord<String, String > record : records){
-            System.out.println(record.value()
+            System.out.println( record.value()
             );
-            logs.add(new ObjectMapper().readValue(record.value(), ExceptionLog.class));
+//            ExceptionLog exceptionLog = new Gson().fromJson(record.value(), ExceptionLog.class);
+//            System.out.println(exceptionLog);
+//            logs.add(exceptionLog);
         }
-        System.out.println(logs);
-        consumer.close();
-        return logs;
+//        consumer.close();
+//        System.out.println(logs);
+//        return logs;
+        return null;
     }
 }
