@@ -45,6 +45,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/authenticate-user").authenticated()
                         .requestMatchers(WebSocketHttpHeaders.ALLOW, "/notifications", "/chat").permitAll()
                         .requestMatchers(HttpMethod.GET, "/swagger-ui/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/*").permitAll()
                         .anyRequest().authenticated()
         )
         .oauth2Login(httpOauth2 -> httpOauth2.successHandler(authService::initExternalServiceLogin));
